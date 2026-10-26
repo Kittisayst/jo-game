@@ -7,10 +7,14 @@ const HEIGHT = 48;
 
 const MOVE_SPEED = 220;
 const JUMP_SPEED = 420;
+const SPRING_JUMP_SPEED = 560;
 
 export class Player extends Physics.Arcade.Sprite
 {
     isInvincible = false;
+    hasStarPower = false;
+    hasSpringPower = false;
+    private jumpSpeed = JUMP_SPEED;
     private isKnockedBack = false;
     private wasInAir = false;
 
@@ -66,7 +70,7 @@ export class Player extends Physics.Arcade.Sprite
 
     triggerDamage (sourceX: number): void
     {
-        if (this.isInvincible) return;
+        if (this.isInvincible || this.hasStarPower) return;
 
         this.isInvincible = true;
         this.isKnockedBack = true;
@@ -92,6 +96,52 @@ export class Player extends Physics.Arcade.Sprite
                 this.alpha = 1;
                 this.isInvincible = false;
             },
+        });
+    }
+
+    activateStar (durationMs = 8000): void
+    {
+        this.hasStarPower = true;
+
+        const tints = [0xff0000, 0xf97316, 0xfacc15, 0x10b981, 0x06b6d4, 0x8b5cf6, 0xec4899];
+        let tintIndex = 0;
+
+        const rainbowTimer = this.scene.time.addEvent({
+            delay: 90,
+            repeat: Math.floor(durationMs / 90),
+            callback: () =>
+            {
+                this.setTint(tints[tintIndex % tints.length]);
+                tintIndex++;
+            },
+        });
+
+        this.scene.time.delayedCall(durationMs, () =>
+        {
+            this.hasStarPower = false;
+            this.clearTint();
+            rainbowTimer.remove();
+        });
+    }
+
+    activateSpring (durationMs = 10000): void
+    {
+        this.hasSpringPower = true;
+        this.jumpSpeed = SPRING_JUMP_SPEED;
+
+        if (!this.hasStarPower)
+        {
+            this.setTint(0x38bdf8);
+        }
+
+        this.scene.time.delayedCall(durationMs, () =>
+        {
+            this.hasSpringPower = false;
+            this.jumpSpeed = JUMP_SPEED;
+            if (!this.hasStarPower)
+            {
+                this.clearTint();
+            }
         });
     }
 
@@ -138,7 +188,7 @@ export class Player extends Physics.Arcade.Sprite
         // Jump action
         if (cursors.up.isDown && onGround)
         {
-            this.setVelocityY(-JUMP_SPEED);
+            this.setVelocityY(-this.jumpSpeed);
             soundManager.playJump();
             this.onJump?.(this.x, this.y + HEIGHT / 2);
 

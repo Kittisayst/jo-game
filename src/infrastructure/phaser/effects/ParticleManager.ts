@@ -136,4 +136,20 @@ export class ParticleManager
             this.celebrationEmitter.explode(24, x + (Math.random() * 40 - 20), y - 30);
         });
     }
+
+    emitPowerUpBurst (x: number, y: number, type: 'heart' | 'star' | 'spring'): void
+    {
+        if (type === 'heart')
+        {
+            this.celebrationEmitter.explode(18, x, y);
+        }
+        else if (type === 'star')
+        {
+            this.celebrationEmitter.explode(28, x, y);
+        }
+        else
+        {
+            this.stompEmitter.explode(18, x, y);
+        }
+    }
 }

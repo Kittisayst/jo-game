@@ -5,15 +5,18 @@ import { Platform } from '../objects/Platform';
 import { Coin } from '../objects/Coin';
 import { GoalFlag } from '../objects/GoalFlag';
 import { Enemy } from '../objects/Enemy';
+import { PowerUp } from '../objects/PowerUp';
 import { ParticleManager } from '../effects/ParticleManager';
 import { Level } from '../Level';
 import { LevelProgress } from '../../../domain/entities/LevelProgress';
 import { Score } from '../../../domain/entities/Score';
 import { Lives } from '../../../domain/entities/Lives';
+import { PowerUpState } from '../../../domain/entities/PowerUp';
 import { completeLevelUseCase } from '../../../application/CompleteLevelUseCase';
 import { collectCoinUseCase } from '../../../application/CollectCoinUseCase';
 import { defeatEnemyUseCase } from '../../../application/DefeatEnemyUseCase';
 import { playerTakeDamageUseCase } from '../../../application/PlayerTakeDamageUseCase';
+import { collectPowerUpUseCase } from '../../../application/CollectPowerUpUseCase';
 
 const WORLD_HEIGHT = 720;
 const GROUND_HEIGHT = 64;
@@ -26,6 +29,7 @@ export class Game extends Scene
     ground: Phaser.Physics.Arcade.StaticGroup;
     platforms: Phaser.Physics.Arcade.StaticGroup;
     coins: Phaser.Physics.Arcade.StaticGroup;
+    powerUps: Phaser.Physics.Arcade.StaticGroup;
     enemies: Phaser.Physics.Arcade.Group;
     goalFlag: GoalFlag;
     particleManager: ParticleManager;
@@ -34,6 +38,7 @@ export class Game extends Scene
     levelProgress: LevelProgress;
     score: Score;
     lives: Lives;
+    powerUpState: PowerUpState;
     currentLevelKey = 'level-1';
     initialScoreValue = 0;
     initialLivesValue = 3;
@@ -83,7 +88,9 @@ export class Game extends Scene
         this.ground = this.createGround();
         this.platforms = this.createPlatforms();
         this.coins = this.createCoins();
+        this.powerUps = this.createPowerUps();
         this.enemies = this.createEnemies();
+        this.powerUpState = new PowerUpState();
 
         this.particleManager = new ParticleManager(this);
 
@@ -109,6 +116,11 @@ export class Game extends Scene
             coin.collect();
             this.particleManager.emitCoinSparkle(coin.x, coin.y);
             collectCoinUseCase(this.score, 10);
+        });
+
+        this.physics.add.overlap(this.player, this.powerUps, (_player, powerUpObj) =>
+        {
+            this.handleCollectPowerUp(powerUpObj as PowerUp);
         });
 
         this.physics.add.overlap(this.player, this.enemies, (playerObj, enemyObj) =>
@@ -150,6 +162,16 @@ export class Game extends Scene
     private handlePlayerEnemyCollision (player: Player, enemy: Enemy)
     {
         if (enemy.entity.isDefeated) return;
+
+        // Invincible star power knocks out enemies on contact
+        if (player.hasStarPower)
+        {
+            player.setVelocityY(-260);
+            this.particleManager.emitStompBurst(enemy.x, enemy.y);
+            defeatEnemyUseCase(enemy.entity, this.score);
+            enemy.squashAndDefeat();
+            return;
+        }
 
         const playerBody = player.body as Phaser.Physics.Arcade.Body;
         const isFalling = playerBody.velocity.y > 0;
@@ -280,5 +302,42 @@ export class Game extends Scene
         }
 
         return enemies;
+    }
+
+    private handleCollectPowerUp (powerUp: PowerUp)
+    {
+        const type = powerUp.powerUpType;
+        powerUp.collect();
+        this.particleManager.emitPowerUpBurst(powerUp.x, powerUp.y, type);
+
+        if (type === 'heart')
+        {
+            collectPowerUpUseCase(type, this.lives, this.powerUpState);
+        }
+        else if (type === 'star')
+        {
+            this.player.activateStar(8000);
+            collectPowerUpUseCase(type, this.lives, this.powerUpState);
+        }
+        else if (type === 'spring')
+        {
+            this.player.activateSpring(10000);
+            collectPowerUpUseCase(type, this.lives, this.powerUpState);
+        }
+    }
+
+    private createPowerUps ()
+    {
+        const powerUps = this.physics.add.staticGroup();
+
+        if (this.level.powerUps)
+        {
+            for (const item of this.level.powerUps)
+            {
+                powerUps.add(new PowerUp(this, item.x, item.y, item.type));
+            }
+        }
+
+        return powerUps;
     }
 }

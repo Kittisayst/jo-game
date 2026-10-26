@@ -18,6 +18,10 @@ import {
     GAME_OVER_EVENT,
     PlayerDamagedPayload,
 } from '../../application/PlayerTakeDamageUseCase';
+import {
+    POWERUP_COLLECTED_EVENT,
+    PowerUpCollectedPayload,
+} from '../../application/CollectPowerUpUseCase';
 import { soundManager } from '../audio/SoundManager';
 
 function App()
@@ -31,6 +35,8 @@ function App()
     const [coinsCount, setCoinsCount] = useState(0);
     const [lives, setLives] = useState(3);
     const [isMuted, setIsMuted] = useState(soundManager.isMuted);
+    const [starTimer, setStarTimer] = useState(0);
+    const [springTimer, setSpringTimer] = useState(0);
     const maxLives = 3;
 
     useEffect(() =>
@@ -62,6 +68,22 @@ function App()
             setGameOver(true);
         };
 
+        const onPowerUpCollected = (payload: PowerUpCollectedPayload) =>
+        {
+            if (payload.type === 'heart' && typeof payload.currentLives === 'number')
+            {
+                setLives(payload.currentLives);
+            }
+            else if (payload.type === 'star')
+            {
+                setStarTimer(Math.floor((payload.durationMs || 8000) / 1000));
+            }
+            else if (payload.type === 'spring')
+            {
+                setSpringTimer(Math.floor((payload.durationMs || 10000) / 1000));
+            }
+        };
+
         const handleKeyDown = (e: KeyboardEvent) =>
         {
             if (e.key === 'm' || e.key === 'M')
@@ -75,6 +97,7 @@ function App()
         DomainEvents.on<EnemyDefeatedPayload>(ENEMY_DEFEATED_EVENT, onEnemyDefeated);
         DomainEvents.on<PlayerDamagedPayload>(PLAYER_DAMAGED_EVENT, onPlayerDamaged);
         DomainEvents.on(GAME_OVER_EVENT, onGameOver);
+        DomainEvents.on<PowerUpCollectedPayload>(POWERUP_COLLECTED_EVENT, onPowerUpCollected);
         window.addEventListener('keydown', handleKeyDown);
 
         return () =>
@@ -84,9 +107,24 @@ function App()
             DomainEvents.off<EnemyDefeatedPayload>(ENEMY_DEFEATED_EVENT, onEnemyDefeated);
             DomainEvents.off<PlayerDamagedPayload>(PLAYER_DAMAGED_EVENT, onPlayerDamaged);
             DomainEvents.off(GAME_OVER_EVENT, onGameOver);
+            DomainEvents.off<PowerUpCollectedPayload>(POWERUP_COLLECTED_EVENT, onPowerUpCollected);
             window.removeEventListener('keydown', handleKeyDown);
         };
     }, []);
+
+    // Countdown interval for power-up timers
+    useEffect(() =>
+    {
+        if (starTimer <= 0 && springTimer <= 0) return;
+
+        const interval = setInterval(() =>
+        {
+            setStarTimer(prev => Math.max(0, prev - 1));
+            setSpringTimer(prev => Math.max(0, prev - 1));
+        }, 1000);
+
+        return () => clearInterval(interval);
+    }, [starTimer, springTimer]);
 
     const handleToggleMute = () =>
     {
@@ -101,6 +139,8 @@ function App()
         setCurrentLevel(target);
         setLevelComplete(false);
         setNextLevel(null);
+        setStarTimer(0);
+        setSpringTimer(0);
 
         phaserRef.current?.scene?.scene.restart({
             levelKey: target,
@@ -124,6 +164,8 @@ function App()
         setLevelComplete(false);
         setGameOver(false);
         setNextLevel(null);
+        setStarTimer(0);
+        setSpringTimer(0);
 
         phaserRef.current?.scene?.scene.restart({
             levelKey: target,
@@ -156,6 +198,23 @@ function App()
                     <span className="badge-label">Score</span>
                     <span className="badge-value">{score}</span>
                 </div>
+
+                {starTimer > 0 && (
+                    <div className="hud-badge star-power-badge">
+                        <span className="badge-icon">⭐</span>
+                        <span className="badge-label">Star</span>
+                        <span className="badge-value">{starTimer}s</span>
+                    </div>
+                )}
+
+                {springTimer > 0 && (
+                    <div className="hud-badge spring-power-badge">
+                        <span className="badge-icon">⚡</span>
+                        <span className="badge-label">Jump+</span>
+                        <span className="badge-value">{springTimer}s</span>
+                    </div>
+                )}
+
                 <button
                     className={`hud-badge sound-toggle-btn ${isMuted ? 'muted' : ''}`}
                     onClick={handleToggleMute}

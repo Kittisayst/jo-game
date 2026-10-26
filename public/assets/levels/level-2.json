@@ -37,5 +37,10 @@
         { "x": 1400, "y": 620, "patrolDistance": 220, "speed": 85 },
         { "x": 1800, "y": 340, "patrolDistance": 90, "speed": 60 },
         { "x": 2150, "y": 620, "patrolDistance": 200, "speed": 90 }
+    ],
+    "powerUps": [
+        { "x": 800, "y": 360, "type": "star" },
+        { "x": 1250, "y": 620, "type": "spring" },
+        { "x": 1550, "y": 410, "type": "heart" }
     ]
 }

@@ -178,6 +178,35 @@ body {
     color: #9ca3af;
 }
 
+.star-power-badge {
+    border-color: #ffd700;
+    background: rgba(245, 158, 11, 0.35);
+    box-shadow: 0 0 16px rgba(255, 215, 0, 0.4);
+    animation: pulseGlow 1s infinite alternate;
+}
+
+.star-power-badge .badge-label,
+.star-power-badge .badge-value {
+    color: #fef08a;
+}
+
+.spring-power-badge {
+    border-color: #38bdf8;
+    background: rgba(6, 182, 212, 0.35);
+    box-shadow: 0 0 16px rgba(56, 189, 248, 0.4);
+    animation: pulseGlow 1s infinite alternate;
+}
+
+.spring-power-badge .badge-label,
+.spring-power-badge .badge-value {
+    color: #bae6fd;
+}
+
+@keyframes pulseGlow {
+    from { transform: scale(1); filter: brightness(1); }
+    to { transform: scale(1.04); filter: brightness(1.2); }
+}
+
 .modal-actions {
     display: flex;
     flex-direction: column;

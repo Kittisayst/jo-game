@@ -6,6 +6,7 @@ import {
     PLAYER_DAMAGED_EVENT,
     GAME_OVER_EVENT,
 } from '../../application/PlayerTakeDamageUseCase';
+import { POWERUP_COLLECTED_EVENT } from '../../application/CollectPowerUpUseCase';
 
 /**
  * Procedural retro sound manager built on the browser's Web Audio API.
@@ -69,6 +70,7 @@ export class SoundManager
         DomainEvents.on(PLAYER_DAMAGED_EVENT, () => this.playHurt());
         DomainEvents.on(GAME_OVER_EVENT, () => this.playGameOver());
         DomainEvents.on(LEVEL_COMPLETE_EVENT, () => this.playLevelComplete());
+        DomainEvents.on(POWERUP_COLLECTED_EVENT, () => this.playPowerUp());
     }
 
     get isMuted (): boolean
@@ -85,6 +87,40 @@ export class SoundManager
     setMuted (muted: boolean): void
     {
         this._isMuted = muted;
+    }
+
+    /**
+     * Power-Up Sound: cheerful 3-tone arpeggio (G5 -> C6 -> E6)
+     */
+    playPowerUp (): void
+    {
+        if (this._isMuted) return;
+        this.initContext();
+        if (!this.ctx) return;
+
+        const now = this.ctx.currentTime;
+        const notes = [783.99, 1046.50, 1318.51];
+        const step = 0.08;
+
+        notes.forEach((freq, idx) =>
+        {
+            if (!this.ctx) return;
+            const startTime = now + idx * step;
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, startTime);
+
+            gain.gain.setValueAtTime(0.16, startTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.18);
+
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+
+            osc.start(startTime);
+            osc.stop(startTime + 0.18);
+        });
     }
 
     /**

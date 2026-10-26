@@ -15,6 +15,13 @@ export interface EnemySpawnData
     speed?: number;
 }
 
+export interface PowerUpSpawnData
+{
+    x: number;
+    y: number;
+    type: 'heart' | 'star' | 'spring';
+}
+
 export interface Level
 {
     worldWidth: number;
@@ -23,5 +30,6 @@ export interface Level
     platforms: { x: number; y: number }[];
     coins?: { x: number; y: number }[];
     enemies?: EnemySpawnData[];
+    powerUps?: PowerUpSpawnData[];
     nextLevel?: string | null;
 }
