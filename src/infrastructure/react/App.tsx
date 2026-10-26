@@ -31,6 +31,8 @@ import {
 import { GameStats } from '../../domain/entities/GameStats';
 import { recordGameResultUseCase } from '../../application/SaveGameStatsUseCase';
 import { localStorageGameStatsRepository } from '../storage/LocalStorageGameStatsRepository';
+import { SkinManager, AVAILABLE_SKINS } from '../../domain/entities/Skin';
+import { selectSkinUseCase } from '../../application/SelectSkinUseCase';
 import { soundManager } from '../audio/SoundManager';
 
 function App()
@@ -54,6 +56,13 @@ function App()
         const data = localStorageGameStatsRepository.load();
         return new GameStats(data.highScore, data.bestTimeSeconds);
     });
+    const [skinManager] = useState(() =>
+    {
+        const saved = typeof window !== 'undefined' ? localStorage.getItem('jo_active_skin') : null;
+        return new SkinManager(saved || 'cyber-blue');
+    });
+    const [activeSkinId, setActiveSkinId] = useState(skinManager.activeSkinId);
+    const [isSkinModalOpen, setIsSkinModalOpen] = useState(false);
     const [highScore, setHighScore] = useState(gameStats.highScore);
     const [bestTime, setBestTime] = useState<number | null>(gameStats.bestTimeSeconds);
     const [elapsedSeconds, setElapsedSeconds] = useState(0);
@@ -246,6 +255,7 @@ function App()
             levelKey: target,
             score,
             lives,
+            skinId: activeSkinId,
         });
     };
 
@@ -275,7 +285,22 @@ function App()
             levelKey: target,
             score: resetToStart ? 0 : score,
             lives: resetToStart ? maxLives : lives,
+            skinId: activeSkinId,
         });
+    };
+
+    const handleEquipSkin = (skinId: string) =>
+    {
+        const playerBestScore = Math.max(score, highScore);
+        const success = selectSkinUseCase(skinManager, skinId, playerBestScore);
+        if (success)
+        {
+            setActiveSkinId(skinId);
+            if (typeof window !== 'undefined')
+            {
+                localStorage.setItem('jo_active_skin', skinId);
+            }
+        }
     };
 
     return (
@@ -346,6 +371,16 @@ function App()
                 >
                     <span className="badge-icon">{isMusicMuted ? '🔇' : '🎵'}</span>
                     <span className="badge-label">{isMusicMuted ? 'BGM Off' : 'BGM'}</span>
+                </button>
+
+                <button
+                    className="hud-badge skin-selector-btn"
+                    onClick={() => setIsSkinModalOpen(true)}
+                    title="Change Character Skin"
+                    type="button"
+                >
+                    <span className="badge-icon">🥋</span>
+                    <span className="badge-label">Skin</span>
                 </button>
             </div>
 
@@ -453,6 +488,70 @@ function App()
                                     Play Again from Start 🔄
                                 </button>
                             )}
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {isSkinModalOpen && (
+                <div className="skin-modal-overlay" onClick={() => setIsSkinModalOpen(false)}>
+                    <div className="skin-modal-card" onClick={e => e.stopPropagation()}>
+                        <div className="skin-modal-header">
+                            <h2>🥋 Character Skins & Costumes</h2>
+                            <button
+                                className="skin-close-btn"
+                                onClick={() => setIsSkinModalOpen(false)}
+                                type="button"
+                            >
+                                ✕
+                            </button>
+                        </div>
+                        <div className="skin-grid">
+                            {AVAILABLE_SKINS.map(skin => {
+                                const playerBestScore = Math.max(score, highScore);
+                                const isUnlocked = skinManager.isSkinUnlocked(skin.id, playerBestScore);
+                                const isEquipped = activeSkinId === skin.id;
+
+                                return (
+                                    <div
+                                        key={skin.id}
+                                        className={`skin-card ${isEquipped ? 'active' : ''} ${!isUnlocked ? 'locked' : ''}`}
+                                    >
+                                        <div className="skin-card-header">
+                                            <div
+                                                className="skin-swatch"
+                                                style={{ background: skin.colorHex }}
+                                            />
+                                            <div className="skin-title-wrap">
+                                                <span className="skin-name">{skin.name}</span>
+                                                <span className="skin-desc">{skin.description}</span>
+                                            </div>
+                                        </div>
+                                        <div className="skin-footer">
+                                            <span className={`skin-unlock-info ${isUnlocked ? 'unlocked' : 'locked'}`}>
+                                                {isUnlocked ? '✅ Unlocked' : `🔒 Needs ${skin.unlockScore} pts`}
+                                            </span>
+                                            {isEquipped ? (
+                                                <button className="skin-btn equipped" disabled type="button">
+                                                    Equipped
+                                                </button>
+                                            ) : isUnlocked ? (
+                                                <button
+                                                    className="skin-btn equip"
+                                                    onClick={() => handleEquipSkin(skin.id)}
+                                                    type="button"
+                                                >
+                                                    Equip
+                                                </button>
+                                            ) : (
+                                                <button className="skin-btn locked" disabled type="button">
+                                                    Locked
+                                                </button>
+                                            )}
+                                        </div>
+                                    </div>
+                                );
+                            })}
                         </div>
                     </div>
                 </div>

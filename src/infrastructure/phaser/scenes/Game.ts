@@ -13,6 +13,7 @@ import { ParticleManager } from '../effects/ParticleManager';
 import { soundManager } from '../../audio/SoundManager';
 import { Level } from '../Level';
 import { LevelProgress } from '../../../domain/entities/LevelProgress';
+import { DomainEvents } from '../../../domain/DomainEvents';
 import { Score } from '../../../domain/entities/Score';
 import { Lives } from '../../../domain/entities/Lives';
 import { PowerUpState } from '../../../domain/entities/PowerUp';
@@ -21,6 +22,10 @@ import { collectCoinUseCase } from '../../../application/CollectCoinUseCase';
 import { defeatEnemyUseCase } from '../../../application/DefeatEnemyUseCase';
 import { playerTakeDamageUseCase } from '../../../application/PlayerTakeDamageUseCase';
 import { collectPowerUpUseCase } from '../../../application/CollectPowerUpUseCase';
+import {
+    SKIN_CHANGED_EVENT,
+    SkinChangedPayload,
+} from '../../../application/SelectSkinUseCase';
 
 const WORLD_HEIGHT = 720;
 const GROUND_HEIGHT = 64;
@@ -47,6 +52,7 @@ export class Game extends Scene
     lives: Lives;
     powerUpState: PowerUpState;
     currentLevelKey = 'level-1';
+    currentSkinId = 'cyber-blue';
     initialScoreValue = 0;
     initialLivesValue = 3;
 
@@ -55,7 +61,7 @@ export class Game extends Scene
         super('Game');
     }
 
-    init (data?: { levelKey?: string; score?: number; lives?: number })
+    init (data?: { levelKey?: string; score?: number; lives?: number; skinId?: string })
     {
         if (data?.levelKey)
         {
@@ -68,6 +74,10 @@ export class Game extends Scene
         if (typeof data?.lives === 'number')
         {
             this.initialLivesValue = data.lives;
+        }
+        if (data?.skinId)
+        {
+            this.currentSkinId = data.skinId;
         }
     }
 
@@ -108,7 +118,7 @@ export class Game extends Scene
         const flagY = WORLD_HEIGHT - GROUND_HEIGHT - 70;
         this.goalFlag = new GoalFlag(this, this.level.finishX, flagY);
 
-        this.player = new Player(this, this.level.spawn.x, this.level.spawn.y);
+        this.player = new Player(this, this.level.spawn.x, this.level.spawn.y, this.currentSkinId);
         this.player.onJump = (x, y) => this.particleManager.emitJumpDust(x, y);
         this.player.onLand = (x, y) => this.particleManager.emitLandingDust(x, y);
 
@@ -184,8 +194,17 @@ export class Game extends Scene
         const isBossStage = this.currentLevelKey === 'level-3' || Boolean(this.level.boss);
         soundManager.startBgm(isBossStage ? 'boss' : 'adventure');
 
+        const onSkinChanged = (payload: SkinChangedPayload) =>
+        {
+            this.currentSkinId = payload.skinId;
+            this.player.setSkin(payload.skinId);
+            this.particleManager.emitCelebration(this.player.x, this.player.y);
+        };
+        DomainEvents.on<SkinChangedPayload>(SKIN_CHANGED_EVENT, onSkinChanged);
+
         this.events.on('shutdown', () =>
         {
+            DomainEvents.off<SkinChangedPayload>(SKIN_CHANGED_EVENT, onSkinChanged);
             soundManager.stopBgm();
         });
 

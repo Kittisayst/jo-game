@@ -1,9 +1,9 @@
 import { Physics, Scene } from 'phaser';
 import { soundManager } from '../../audio/SoundManager';
 
-const TEXTURE_KEY = 'player-placeholder';
 const WIDTH = 32;
 const HEIGHT = 48;
+
 
 const MOVE_SPEED = 220;
 const JUMP_SPEED = 420;
@@ -21,11 +21,11 @@ export class Player extends Physics.Arcade.Sprite
     onJump?: (x: number, y: number) => void;
     onLand?: (x: number, y: number) => void;
 
-    constructor (scene: Scene, x: number, y: number)
+    constructor (scene: Scene, x: number, y: number, skinId = 'cyber-blue')
     {
-        Player.ensureTexture(scene);
+        Player.ensureSkinTexture(scene, skinId);
 
-        super(scene, x, y, TEXTURE_KEY);
+        super(scene, x, y, `player-skin-${skinId}`);
 
         scene.add.existing(this);
         scene.physics.add.existing(this);
@@ -33,40 +33,83 @@ export class Player extends Physics.Arcade.Sprite
         this.setCollideWorldBounds(true);
     }
 
-    private static ensureTexture (scene: Scene)
+    setSkin (skinId: string): void
     {
-        if (scene.textures.exists(TEXTURE_KEY)) return;
+        Player.ensureSkinTexture(this.scene, skinId);
+        this.setTexture(`player-skin-${skinId}`);
+    }
+
+    private static ensureSkinTexture (scene: Scene, skinId: string)
+    {
+        const textureKey = `player-skin-${skinId}`;
+        if (scene.textures.exists(textureKey)) return;
 
         const graphics = scene.make.graphics({ x: 0, y: 0 });
 
-        // Body suit (vibrant cyan-blue)
-        graphics.fillStyle(0x0284c7, 1);
+        let bodyColor = 0x0284c7;
+        let helmColor = 0x0f172a;
+        let visorColor = 0x38bdf8;
+        let coreColor = 0xf59e0b;
+        let beltColor = 0x1e293b;
+        let bootsColor = 0x0369a1;
+
+        if (skinId === 'neon-ninja')
+        {
+            bodyColor = 0x0f172a;
+            helmColor = 0x064e3b;
+            visorColor = 0x10b981;
+            coreColor = 0xef4444;
+            beltColor = 0xdc2626;
+            bootsColor = 0x1e293b;
+        }
+        else if (skinId === 'cyber-knight')
+        {
+            bodyColor = 0x64748b;
+            helmColor = 0x334155;
+            visorColor = 0xef4444;
+            coreColor = 0xfbbf24;
+            beltColor = 0x1e293b;
+            bootsColor = 0x475569;
+        }
+        else if (skinId === 'golden-runner')
+        {
+            bodyColor = 0xf59e0b;
+            helmColor = 0x78350f;
+            visorColor = 0x22d3ee;
+            coreColor = 0xffffff;
+            beltColor = 0xd97706;
+            bootsColor = 0xb45309;
+        }
+
+        // Body suit
+        graphics.fillStyle(bodyColor, 1);
         graphics.fillRoundedRect(0, 0, WIDTH, HEIGHT, 6);
 
-        // Head/Helmet visor band (dark navy)
-        graphics.fillStyle(0x0f172a, 1);
+        // Head/Helmet visor band
+        graphics.fillStyle(helmColor, 1);
         graphics.fillRect(4, 8, WIDTH - 8, 12);
 
-        // Glowing visor eye (bright electric cyan)
-        graphics.fillStyle(0x38bdf8, 1);
+        // Glowing visor eye
+        graphics.fillStyle(visorColor, 1);
         graphics.fillRect(8, 11, WIDTH - 16, 6);
 
-        // Chest core / badge (amber gold)
-        graphics.fillStyle(0xf59e0b, 1);
+        // Chest core / badge
+        graphics.fillStyle(coreColor, 1);
         graphics.fillCircle(WIDTH / 2, 28, 4);
 
-        // Belt (dark slate)
-        graphics.fillStyle(0x1e293b, 1);
+        // Belt
+        graphics.fillStyle(beltColor, 1);
         graphics.fillRect(2, 34, WIDTH - 4, 4);
 
-        // Boots (dark blue)
-        graphics.fillStyle(0x0369a1, 1);
+        // Boots
+        graphics.fillStyle(bootsColor, 1);
         graphics.fillRect(2, HEIGHT - 8, 12, 8);
         graphics.fillRect(WIDTH - 14, HEIGHT - 8, 12, 8);
 
-        graphics.generateTexture(TEXTURE_KEY, WIDTH, HEIGHT);
+        graphics.generateTexture(textureKey, WIDTH, HEIGHT);
         graphics.destroy();
     }
+
 
     triggerDamage (sourceX: number): void
     {
