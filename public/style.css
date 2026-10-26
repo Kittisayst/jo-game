@@ -178,6 +178,16 @@ body {
     color: #9ca3af;
 }
 
+.music-btn {
+    border-color: rgba(168, 85, 247, 0.4);
+}
+
+.music-btn:hover {
+    border-color: rgba(192, 132, 252, 0.6);
+    background: rgba(88, 28, 135, 0.5);
+}
+
+
 .star-power-badge {
     border-color: #ffd700;
     background: rgba(245, 158, 11, 0.35);

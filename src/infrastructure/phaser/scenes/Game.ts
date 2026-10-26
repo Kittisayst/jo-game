@@ -10,6 +10,7 @@ import { Spike } from '../objects/Spike';
 import { MovingPlatform } from '../objects/MovingPlatform';
 import { Boss } from '../objects/Boss';
 import { ParticleManager } from '../effects/ParticleManager';
+import { soundManager } from '../../audio/SoundManager';
 import { Level } from '../Level';
 import { LevelProgress } from '../../../domain/entities/LevelProgress';
 import { Score } from '../../../domain/entities/Score';
@@ -178,6 +179,15 @@ export class Game extends Scene
         this.camera.startFollow(this.player, true, 0.1, 0.1);
 
         this.cursors = this.input.keyboard!.createCursorKeys();
+
+        // Start BGM (boss theme for level-3, adventure theme for levels 1 & 2)
+        const isBossStage = this.currentLevelKey === 'level-3' || Boolean(this.level.boss);
+        soundManager.startBgm(isBossStage ? 'boss' : 'adventure');
+
+        this.events.on('shutdown', () =>
+        {
+            soundManager.stopBgm();
+        });
 
         EventBus.emit('current-scene-ready', this);
     }

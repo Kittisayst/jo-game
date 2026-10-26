@@ -44,6 +44,7 @@ function App()
     const [coinsCount, setCoinsCount] = useState(0);
     const [lives, setLives] = useState(3);
     const [isMuted, setIsMuted] = useState(soundManager.isMuted);
+    const [isMusicMuted, setIsMusicMuted] = useState(soundManager.isMusicMuted);
     const [starTimer, setStarTimer] = useState(0);
     const [springTimer, setSpringTimer] = useState(0);
     const [bossHp, setBossHp] = useState<number | null>(null);
@@ -153,6 +154,10 @@ function App()
             {
                 setIsMuted(soundManager.toggleMute());
             }
+            else if (e.key === 'b' || e.key === 'B')
+            {
+                setIsMusicMuted(soundManager.toggleMusicMute());
+            }
         };
 
         DomainEvents.on<LevelCompletePayload>(LEVEL_COMPLETE_EVENT, onLevelComplete);
@@ -218,6 +223,11 @@ function App()
     const handleToggleMute = () =>
     {
         setIsMuted(soundManager.toggleMute());
+    };
+
+    const handleToggleMusic = () =>
+    {
+        setIsMusicMuted(soundManager.toggleMusicMute());
     };
 
     const handleNextLevel = () =>
@@ -326,6 +336,16 @@ function App()
                 >
                     <span className="badge-icon">{isMuted ? '🔇' : '🔊'}</span>
                     <span className="badge-label">{isMuted ? 'Muted' : 'Sound'}</span>
+                </button>
+
+                <button
+                    className={`hud-badge sound-toggle-btn music-btn ${isMusicMuted ? 'muted' : ''}`}
+                    onClick={handleToggleMusic}
+                    title="Toggle Background Music (B)"
+                    type="button"
+                >
+                    <span className="badge-icon">{isMusicMuted ? '🔇' : '🎵'}</span>
+                    <span className="badge-label">{isMusicMuted ? 'BGM Off' : 'BGM'}</span>
                 </button>
             </div>
 

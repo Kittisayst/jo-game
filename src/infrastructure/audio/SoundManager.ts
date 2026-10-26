@@ -12,16 +12,57 @@ import {
     BOSS_DEFEATED_EVENT,
 } from '../../application/DamageBossUseCase';
 
+// Adventure melody notes (C major energetic 8-bit chiptune)
+const ADVENTURE_MELODY = [
+    523.25, 0, 659.25, 0, 783.99, 880.00, 783.99, 0,
+    659.25, 0, 587.33, 0, 523.25, 659.25, 783.99, 0,
+    880.00, 0, 783.99, 0, 659.25, 587.33, 523.25, 0,
+    587.33, 0, 659.25, 0, 523.25, 0, 0, 0,
+];
+
+// Adventure bassline (driving groove)
+const ADVENTURE_BASS = [
+    130.81, 130.81, 164.81, 164.81, 196.00, 196.00, 220.00, 196.00,
+    174.61, 174.61, 196.00, 196.00, 130.81, 130.81, 196.00, 130.81,
+    220.00, 220.00, 196.00, 196.00, 174.61, 174.61, 130.81, 130.81,
+    146.83, 146.83, 196.00, 196.00, 130.81, 196.00, 130.81, 0,
+];
+
+// Boss Battle melody (D minor syncopated intense battle chiptune)
+const BOSS_MELODY = [
+    587.33, 698.46, 880.00, 1174.66, 1108.73, 1174.66, 880.00, 698.46,
+    830.61, 880.00, 698.46, 587.33, 659.25, 698.46, 659.25, 554.37,
+    587.33, 0, 880.00, 0, 1174.66, 0, 1108.73, 0,
+    880.00, 830.61, 880.00, 698.46, 587.33, 554.37, 587.33, 0,
+];
+
+// Boss Battle driving bass (relentless pulse)
+const BOSS_BASS = [
+    73.42, 146.83, 73.42, 146.83, 87.31, 174.61, 87.31, 174.61,
+    103.83, 207.65, 103.83, 207.65, 110.00, 220.00, 69.30, 138.59,
+    73.42, 73.42, 146.83, 146.83, 87.31, 87.31, 174.61, 174.61,
+    110.00, 110.00, 103.83, 103.83, 73.42, 146.83, 73.42, 0,
+];
+
 /**
  * Procedural retro sound manager built on the browser's Web Audio API.
- * Synthesizes arcade sound effects at runtime without any external sound assets.
+ * Synthesizes arcade sound effects and 8-bit chiptune background music at runtime.
  * Lives in the infrastructure layer — see CONTEXT.md.
  */
 export class SoundManager
 {
     private ctx: AudioContext | null = null;
+    private masterGain: GainNode | null = null;
+    private bgmGain: GainNode | null = null;
     private _isMuted = false;
+    private _isMusicMuted = false;
     private initialized = false;
+
+    private bgmIntervalId: number | null = null;
+    private nextNoteTime = 0;
+    private currentStep = 0;
+    private currentTheme: 'adventure' | 'boss' = 'adventure';
+    private isBgmRunning = false;
 
     constructor ()
     {
@@ -34,6 +75,10 @@ export class SoundManager
             const unlock = () =>
             {
                 this.initContext();
+                if (this.isBgmRunning)
+                {
+                    this.startBgmLoop();
+                }
                 window.removeEventListener('pointerdown', unlock);
                 window.removeEventListener('keydown', unlock);
             };
@@ -61,6 +106,25 @@ export class SoundManager
         if (AudioContextClass)
         {
             this.ctx = new AudioContextClass();
+            this.masterGain = this.ctx.createGain();
+            this.masterGain.gain.setValueAtTime(this._isMuted ? 0 : 1, this.ctx.currentTime);
+            this.masterGain.connect(this.ctx.destination);
+
+            this.bgmGain = this.ctx.createGain();
+            this.bgmGain.gain.setValueAtTime(this._isMusicMuted ? 0 : 0.045, this.ctx.currentTime);
+            this.bgmGain.connect(this.masterGain);
+        }
+    }
+
+    private connectOutput (node: AudioNode): void
+    {
+        if (this.masterGain)
+        {
+            node.connect(this.masterGain);
+        }
+        else if (this.ctx)
+        {
+            node.connect(this.ctx.destination);
         }
     }
 
@@ -72,11 +136,143 @@ export class SoundManager
         DomainEvents.on(COIN_COLLECTED_EVENT, () => this.playCoin());
         DomainEvents.on(ENEMY_DEFEATED_EVENT, () => this.playStomp());
         DomainEvents.on(PLAYER_DAMAGED_EVENT, () => this.playHurt());
-        DomainEvents.on(GAME_OVER_EVENT, () => this.playGameOver());
-        DomainEvents.on(LEVEL_COMPLETE_EVENT, () => this.playLevelComplete());
+        DomainEvents.on(GAME_OVER_EVENT, () =>
+        {
+            this.stopBgm();
+            this.playGameOver();
+        });
+        DomainEvents.on(LEVEL_COMPLETE_EVENT, () =>
+        {
+            this.stopBgm();
+            this.playLevelComplete();
+        });
         DomainEvents.on(POWERUP_COLLECTED_EVENT, () => this.playPowerUp());
         DomainEvents.on(BOSS_DAMAGED_EVENT, () => this.playBossHit());
-        DomainEvents.on(BOSS_DEFEATED_EVENT, () => this.playBossDefeat());
+        DomainEvents.on(BOSS_DEFEATED_EVENT, () =>
+        {
+            this.stopBgm();
+            this.playBossDefeat();
+        });
+    }
+
+    // --- BGM Engine ---
+
+    startBgm (theme: 'adventure' | 'boss' = 'adventure'): void
+    {
+        this.currentTheme = theme;
+        this.isBgmRunning = true;
+        this.initContext();
+
+        if (this.ctx && this.ctx.state === 'running')
+        {
+            this.startBgmLoop();
+        }
+    }
+
+    stopBgm (): void
+    {
+        this.isBgmRunning = false;
+        if (this.bgmIntervalId !== null)
+        {
+            window.clearInterval(this.bgmIntervalId);
+            this.bgmIntervalId = null;
+        }
+    }
+
+    private startBgmLoop (): void
+    {
+        if (!this.ctx) return;
+        if (this.bgmIntervalId !== null)
+        {
+            window.clearInterval(this.bgmIntervalId);
+            this.bgmIntervalId = null;
+        }
+
+        this.nextNoteTime = this.ctx.currentTime + 0.05;
+        this.currentStep = 0;
+
+        this.bgmIntervalId = window.setInterval(() =>
+        {
+            if (!this.ctx || !this.isBgmRunning) return;
+
+            const isBoss = this.currentTheme === 'boss';
+            const tempo = isBoss ? 165 : 138;
+            const secondsPerBeat = 60 / tempo;
+            const stepDuration = secondsPerBeat / 4; // 16th notes
+
+            while (this.nextNoteTime < this.ctx.currentTime + 0.18)
+            {
+                this.playStep(this.currentStep, this.nextNoteTime, this.currentTheme);
+                this.nextNoteTime += stepDuration;
+                const totalSteps = isBoss ? BOSS_MELODY.length : ADVENTURE_MELODY.length;
+                this.currentStep = (this.currentStep + 1) % totalSteps;
+            }
+        }, 35);
+    }
+
+    private playStep (step: number, time: number, theme: 'adventure' | 'boss'): void
+    {
+        if (!this.ctx || !this.bgmGain) return;
+
+        const isBoss = theme === 'boss';
+        const melodyTrack = isBoss ? BOSS_MELODY : ADVENTURE_MELODY;
+        const bassTrack = isBoss ? BOSS_BASS : ADVENTURE_BASS;
+        const noteDuration = isBoss ? 0.09 : 0.11;
+
+        // Play melody note if not rest (0)
+        const melodyFreq = melodyTrack[step % melodyTrack.length];
+        if (melodyFreq > 0)
+        {
+            const osc = this.ctx.createOscillator();
+            const noteGain = this.ctx.createGain();
+
+            osc.type = isBoss ? 'sawtooth' : 'square';
+            osc.frequency.setValueAtTime(melodyFreq, time);
+
+            noteGain.gain.setValueAtTime(0.35, time);
+            noteGain.gain.exponentialRampToValueAtTime(0.01, time + noteDuration);
+
+            osc.connect(noteGain);
+            noteGain.connect(this.bgmGain);
+
+            osc.start(time);
+            osc.stop(time + noteDuration);
+        }
+
+        // Play bass note
+        const bassFreq = bassTrack[step % bassTrack.length];
+        if (bassFreq > 0)
+        {
+            const bassOsc = this.ctx.createOscillator();
+            const bassGain = this.ctx.createGain();
+
+            bassOsc.type = 'triangle';
+            bassOsc.frequency.setValueAtTime(bassFreq, time);
+
+            bassGain.gain.setValueAtTime(0.5, time);
+            bassGain.gain.exponentialRampToValueAtTime(0.01, time + noteDuration * 0.9);
+
+            bassOsc.connect(bassGain);
+            bassGain.connect(this.bgmGain);
+
+            bassOsc.start(time);
+            bassOsc.stop(time + noteDuration * 0.9);
+        }
+    }
+
+    get isMusicMuted (): boolean
+    {
+        return this._isMusicMuted;
+    }
+
+    toggleMusicMute (): boolean
+    {
+        this._isMusicMuted = !this._isMusicMuted;
+        if (this.bgmGain && this.ctx)
+        {
+            this.bgmGain.gain.setValueAtTime(this._isMusicMuted ? 0 : 0.045, this.ctx.currentTime);
+        }
+        return this._isMusicMuted;
     }
 
     get isMuted (): boolean
@@ -87,13 +283,23 @@ export class SoundManager
     toggleMute (): boolean
     {
         this._isMuted = !this._isMuted;
+        if (this.masterGain && this.ctx)
+        {
+            this.masterGain.gain.setValueAtTime(this._isMuted ? 0 : 1, this.ctx.currentTime);
+        }
         return this._isMuted;
     }
 
     setMuted (muted: boolean): void
     {
         this._isMuted = muted;
+        if (this.masterGain && this.ctx)
+        {
+            this.masterGain.gain.setValueAtTime(this._isMuted ? 0 : 1, this.ctx.currentTime);
+        }
     }
+
+    // --- SFX Synthesizers ---
 
     /**
      * Power-Up Sound: cheerful 3-tone arpeggio (G5 -> C6 -> E6)
@@ -122,7 +328,7 @@ export class SoundManager
             gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.18);
 
             osc.connect(gain);
-            gain.connect(this.ctx.destination);
+            this.connectOutput(gain);
 
             osc.start(startTime);
             osc.stop(startTime + 0.18);
@@ -144,21 +350,20 @@ export class SoundManager
 
         osc.type = 'square';
         osc.frequency.setValueAtTime(150, now);
-        osc.frequency.exponentialRampToValueAtTime(460, now + 0.12);
+        osc.frequency.exponentialRampToValueAtTime(400, now + 0.12);
 
-        gain.gain.setValueAtTime(0.08, now);
-        gain.gain.linearRampToValueAtTime(0.01, now + 0.11);
-        gain.gain.linearRampToValueAtTime(0.0001, now + 0.12);
+        gain.gain.setValueAtTime(0.12, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
 
         osc.connect(gain);
-        gain.connect(this.ctx.destination);
+        this.connectOutput(gain);
 
         osc.start(now);
         osc.stop(now + 0.12);
     }
 
     /**
-     * Coin Collect Sound: bright two-tone bell chime (B5 -> E6)
+     * Coin Sound: classic 2-tone ping (B5 -> E6)
      */
     playCoin (): void
     {
@@ -167,38 +372,25 @@ export class SoundManager
         if (!this.ctx) return;
 
         const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
 
-        // Note 1 (B5: 987.77 Hz)
-        const osc1 = this.ctx.createOscillator();
-        const gain1 = this.ctx.createGain();
-        osc1.type = 'sine';
-        osc1.frequency.setValueAtTime(987.77, now);
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(987.77, now);
+        osc.frequency.setValueAtTime(1318.51, now + 0.08);
 
-        gain1.gain.setValueAtTime(0.12, now);
-        gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+        gain.gain.setValueAtTime(0.15, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
 
-        osc1.connect(gain1);
-        gain1.connect(this.ctx.destination);
-        osc1.start(now);
-        osc1.stop(now + 0.12);
+        osc.connect(gain);
+        this.connectOutput(gain);
 
-        // Note 2 (E6: 1318.51 Hz)
-        const osc2 = this.ctx.createOscillator();
-        const gain2 = this.ctx.createGain();
-        osc2.type = 'sine';
-        osc2.frequency.setValueAtTime(1318.51, now + 0.08);
-
-        gain2.gain.setValueAtTime(0.15, now + 0.08);
-        gain2.gain.exponentialRampToValueAtTime(0.0001, now + 0.28);
-
-        osc2.connect(gain2);
-        gain2.connect(this.ctx.destination);
-        osc2.start(now + 0.08);
-        osc2.stop(now + 0.28);
+        osc.start(now);
+        osc.stop(now + 0.35);
     }
 
     /**
-     * Stomp Sound: punchy downward pop/crunch
+     * Stomp Sound: descending crunch punch (280Hz -> 80Hz)
      */
     playStomp (): void
     {
@@ -211,21 +403,21 @@ export class SoundManager
         const gain = this.ctx.createGain();
 
         osc.type = 'triangle';
-        osc.frequency.setValueAtTime(360, now);
-        osc.frequency.exponentialRampToValueAtTime(70, now + 0.14);
+        osc.frequency.setValueAtTime(280, now);
+        osc.frequency.exponentialRampToValueAtTime(70, now + 0.16);
 
-        gain.gain.setValueAtTime(0.2, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.14);
+        gain.gain.setValueAtTime(0.25, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.16);
 
         osc.connect(gain);
-        gain.connect(this.ctx.destination);
+        this.connectOutput(gain);
 
         osc.start(now);
-        osc.stop(now + 0.14);
+        osc.stop(now + 0.16);
     }
 
     /**
-     * Hurt Sound: crunchy buzz down
+     * Hurt Sound: low distorted impact
      */
     playHurt (): void
     {
@@ -238,21 +430,21 @@ export class SoundManager
         const gain = this.ctx.createGain();
 
         osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(220, now);
-        osc.frequency.linearRampToValueAtTime(80, now + 0.18);
+        osc.frequency.setValueAtTime(180, now);
+        osc.frequency.exponentialRampToValueAtTime(60, now + 0.2);
 
-        gain.gain.setValueAtTime(0.15, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
 
         osc.connect(gain);
-        gain.connect(this.ctx.destination);
+        this.connectOutput(gain);
 
         osc.start(now);
-        osc.stop(now + 0.18);
+        osc.stop(now + 0.2);
     }
 
     /**
-     * Level Complete Fanfare: triumphant ascending arpeggio (C5 -> E5 -> G5 -> C6)
+     * Level Complete Sound: triumphant retro fanfare (C5 -> E5 -> G5 -> C6)
      */
     playLevelComplete (): void
     {
@@ -261,14 +453,14 @@ export class SoundManager
         if (!this.ctx) return;
 
         const notes = [523.25, 659.25, 783.99, 1046.50];
-        const step = 0.1;
+        const step = 0.12;
         const now = this.ctx.currentTime;
 
         notes.forEach((freq, idx) =>
         {
             if (!this.ctx) return;
             const startTime = now + idx * step;
-            const duration = idx === notes.length - 1 ? 0.35 : 0.12;
+            const duration = idx === notes.length - 1 ? 0.45 : 0.15;
 
             const osc = this.ctx.createOscillator();
             const gain = this.ctx.createGain();
@@ -280,7 +472,7 @@ export class SoundManager
             gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
 
             osc.connect(gain);
-            gain.connect(this.ctx.destination);
+            this.connectOutput(gain);
 
             osc.start(startTime);
             osc.stop(startTime + duration);
@@ -316,7 +508,7 @@ export class SoundManager
             gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
 
             osc.connect(gain);
-            gain.connect(this.ctx.destination);
+            this.connectOutput(gain);
 
             osc.start(startTime);
             osc.stop(startTime + duration);
@@ -344,7 +536,7 @@ export class SoundManager
         gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
 
         osc.connect(gain);
-        gain.connect(this.ctx.destination);
+        this.connectOutput(gain);
 
         osc.start(now);
         osc.stop(now + 0.25);
@@ -379,7 +571,7 @@ export class SoundManager
             gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
 
             osc.connect(gain);
-            gain.connect(this.ctx.destination);
+            this.connectOutput(gain);
 
             osc.start(startTime);
             osc.stop(startTime + duration);
