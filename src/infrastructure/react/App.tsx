@@ -33,6 +33,7 @@ import { recordGameResultUseCase } from '../../application/SaveGameStatsUseCase'
 import { localStorageGameStatsRepository } from '../storage/LocalStorageGameStatsRepository';
 import { SkinManager, AVAILABLE_SKINS } from '../../domain/entities/Skin';
 import { selectSkinUseCase } from '../../application/SelectSkinUseCase';
+import { Settings } from '../../domain/entities/Settings';
 import { soundManager } from '../audio/SoundManager';
 
 function App()
@@ -63,12 +64,17 @@ function App()
     });
     const [activeSkinId, setActiveSkinId] = useState(skinManager.activeSkinId);
     const [isSkinModalOpen, setIsSkinModalOpen] = useState(false);
+    const [isMainMenuOpen, setIsMainMenuOpen] = useState(true);
+    const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+    const [isStageSelectOpen, setIsStageSelectOpen] = useState(false);
     const [highScore, setHighScore] = useState(gameStats.highScore);
     const [bestTime, setBestTime] = useState<number | null>(gameStats.bestTimeSeconds);
     const [elapsedSeconds, setElapsedSeconds] = useState(0);
     const [isNewHighScore, setIsNewHighScore] = useState(false);
     const [isNewBestTime, setIsNewBestTime] = useState(false);
     const maxLives = 3;
+
+    const [settings] = useState(() => new Settings(soundManager.isMuted, soundManager.isMusicMuted));
 
     const scoreRef = useRef(score);
     scoreRef.current = score;
@@ -210,7 +216,7 @@ function App()
     // Speedrun elapsed timer
     useEffect(() =>
     {
-        if (levelComplete || gameOver) return;
+        if (isMainMenuOpen || levelComplete || gameOver) return;
 
         const timer = setInterval(() =>
         {
@@ -218,7 +224,7 @@ function App()
         }, 100);
 
         return () => clearInterval(timer);
-    }, [levelComplete, gameOver]);
+    }, [isMainMenuOpen, levelComplete, gameOver]);
 
     const formatTime = (seconds: number | null): string =>
     {
@@ -231,12 +237,68 @@ function App()
 
     const handleToggleMute = () =>
     {
-        setIsMuted(soundManager.toggleMute());
+        const muted = soundManager.toggleMute();
+        settings.setSoundMuted(muted);
+        setIsMuted(muted);
     };
 
     const handleToggleMusic = () =>
     {
-        setIsMusicMuted(soundManager.toggleMusicMute());
+        const musicMuted = soundManager.toggleMusicMute();
+        settings.setMusicMuted(musicMuted);
+        setIsMusicMuted(musicMuted);
+    };
+
+    const handleStartGame = (stageKey = 'level-1') =>
+    {
+        setIsMainMenuOpen(false);
+        setIsStageSelectOpen(false);
+        setIsSettingsOpen(false);
+        setLevelComplete(false);
+        setGameOver(false);
+        setScore(0);
+        setCoinsCount(0);
+        setLives(maxLives);
+        setElapsedSeconds(0);
+        setCurrentLevel(stageKey);
+        setNextLevel(null);
+        setStarTimer(0);
+        setSpringTimer(0);
+        setBossHp(null);
+        setIsNewHighScore(false);
+        setIsNewBestTime(false);
+
+        phaserRef.current?.scene?.scene.restart({
+            levelKey: stageKey,
+            score: 0,
+            lives: maxLives,
+            skinId: activeSkinId,
+        });
+    };
+
+    const handleOpenMainMenu = () =>
+    {
+        setIsMainMenuOpen(true);
+        setIsSettingsOpen(false);
+        setIsSkinModalOpen(false);
+        setIsStageSelectOpen(false);
+        soundManager.stopBgm();
+    };
+
+    const handleClearAllData = () =>
+    {
+        if (typeof window !== 'undefined' && window.confirm('Are you sure you want to reset all High Scores and saved data?'))
+        {
+            localStorage.clear();
+            gameStats.reset();
+            skinManager.forceEquip('cyber-blue');
+            setHighScore(0);
+            setBestTime(null);
+            setActiveSkinId('cyber-blue');
+            setIsNewHighScore(false);
+            setIsNewBestTime(false);
+            soundManager.playCoin();
+        }
     };
 
     const handleNextLevel = () =>
@@ -381,6 +443,26 @@ function App()
                 >
                     <span className="badge-icon">🥋</span>
                     <span className="badge-label">Skin</span>
+                </button>
+
+                <button
+                    className="hud-badge sound-toggle-btn"
+                    onClick={() => setIsSettingsOpen(true)}
+                    title="Game Settings"
+                    type="button"
+                >
+                    <span className="badge-icon">⚙️</span>
+                    <span className="badge-label">Settings</span>
+                </button>
+
+                <button
+                    className="hud-badge sound-toggle-btn"
+                    onClick={handleOpenMainMenu}
+                    title="Main Menu"
+                    type="button"
+                >
+                    <span className="badge-icon">🏠</span>
+                    <span className="badge-label">Menu</span>
                 </button>
             </div>
 
@@ -552,6 +634,203 @@ function App()
                                     </div>
                                 );
                             })}
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Main Menu Screen */}
+            {isMainMenuOpen && (
+                <div className="main-menu-overlay">
+                    <div className="main-menu-card">
+                        <h1 className="main-menu-title">⚡ JO RUNNER ⚡</h1>
+                        <p className="main-menu-subtitle">Cyberpunk Slime Invasion</p>
+
+                        <div className="menu-stats-bar">
+                            <div className="menu-stat">
+                                <span className="menu-stat-label">🏆 High Score</span>
+                                <span className="menu-stat-val">{highScore}</span>
+                            </div>
+                            <div className="menu-stat">
+                                <span className="menu-stat-label">⏱️ Best Time</span>
+                                <span className="menu-stat-val">{formatTime(bestTime)}</span>
+                            </div>
+                            <div className="menu-stat">
+                                <span className="menu-stat-label">🥋 Skin</span>
+                                <span className="menu-stat-val">
+                                    {AVAILABLE_SKINS.find(s => s.id === activeSkinId)?.name.split(' ')[0] || 'Cyber'}
+                                </span>
+                            </div>
+                        </div>
+
+                        <div className="menu-buttons-list">
+                            <button
+                                className="menu-action-btn primary"
+                                onClick={() => handleStartGame('level-1')}
+                                type="button"
+                            >
+                                ▶️ ເຂົ້າເກມ (Play Game)
+                            </button>
+                            <button
+                                className="menu-action-btn secondary"
+                                onClick={() => setIsStageSelectOpen(true)}
+                                type="button"
+                            >
+                                🚩 ເລືອກດ່ານ (Select Stage)
+                            </button>
+                            <button
+                                className="menu-action-btn secondary"
+                                onClick={() => setIsSkinModalOpen(true)}
+                                type="button"
+                            >
+                                🥋 ເລືອກຊຸດ (Skins & Costumes)
+                            </button>
+                            <button
+                                className="menu-action-btn secondary"
+                                onClick={() => setIsSettingsOpen(true)}
+                                type="button"
+                            >
+                                ⚙️ ຕັ້ງຄ່າ (Settings)
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Settings Modal */}
+            {isSettingsOpen && (
+                <div className="skin-modal-overlay" onClick={() => setIsSettingsOpen(false)}>
+                    <div className="settings-modal-card" onClick={e => e.stopPropagation()}>
+                        <div className="skin-modal-header">
+                            <h2>⚙️ ຕັ້ງຄ່າ (Game Settings)</h2>
+                            <button
+                                className="skin-close-btn"
+                                onClick={() => setIsSettingsOpen(false)}
+                                type="button"
+                            >
+                                ✕
+                            </button>
+                        </div>
+
+                        <div className="settings-section">
+                            <div className="settings-section-title">🔊 Audio Preferences</div>
+                            <div className="settings-toggle-row">
+                                <span className="settings-row-label">
+                                    {isMuted ? '🔇' : '🔊'} Master Sound (SFX)
+                                </span>
+                                <button
+                                    className={`settings-switch-btn ${isMuted ? 'off' : 'on'}`}
+                                    onClick={handleToggleMute}
+                                    type="button"
+                                >
+                                    {isMuted ? 'OFF' : 'ON'}
+                                </button>
+                            </div>
+                            <div className="settings-toggle-row">
+                                <span className="settings-row-label">
+                                    {isMusicMuted ? '🔇' : '🎵'} 8-Bit Chiptune Music (BGM)
+                                </span>
+                                <button
+                                    className={`settings-switch-btn ${isMusicMuted ? 'off' : 'on'}`}
+                                    onClick={handleToggleMusic}
+                                    type="button"
+                                >
+                                    {isMusicMuted ? 'OFF' : 'ON'}
+                                </button>
+                            </div>
+                        </div>
+
+                        <div className="settings-section">
+                            <div className="settings-section-title">🎮 Controls Guide</div>
+                            <div className="controls-guide-grid">
+                                <div className="control-item">
+                                    <span className="control-key">⬅️ ➡️ / A D</span>
+                                    <span>Move Left/Right</span>
+                                </div>
+                                <div className="control-item">
+                                    <span className="control-key">⬆️ / W / Space</span>
+                                    <span>Jump / Double Jump</span>
+                                </div>
+                                <div className="control-item">
+                                    <span className="control-key">M</span>
+                                    <span>Mute Audio</span>
+                                </div>
+                                <div className="control-item">
+                                    <span className="control-key">B</span>
+                                    <span>Toggle BGM</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="settings-section">
+                            <div className="settings-section-title">⚠️ Data Management</div>
+                            <button
+                                className="menu-action-btn secondary"
+                                onClick={handleClearAllData}
+                                style={{ width: '100%', borderColor: 'rgba(239, 68, 68, 0.4)', color: '#f87171' }}
+                                type="button"
+                            >
+                                🗑️ ລ້າງຄະແນນ & ຂໍ້ມູນທັງໝົດ (Reset Saved Data)
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Stage Select Modal */}
+            {isStageSelectOpen && (
+                <div className="skin-modal-overlay" onClick={() => setIsStageSelectOpen(false)}>
+                    <div className="settings-modal-card" onClick={e => e.stopPropagation()}>
+                        <div className="skin-modal-header">
+                            <h2>🚩 ເລືອກດ່ານ (Select Stage)</h2>
+                            <button
+                                className="skin-close-btn"
+                                onClick={() => setIsStageSelectOpen(false)}
+                                type="button"
+                            >
+                                ✕
+                            </button>
+                        </div>
+
+                        <div className="stage-select-grid">
+                            <div
+                                className={`stage-select-card ${currentLevel === 'level-1' ? 'active-stage' : ''}`}
+                                onClick={() => handleStartGame('level-1')}
+                            >
+                                <div>
+                                    <strong>ດ່ານ 1: Green Plains</strong>
+                                    <div style={{ fontSize: '0.8rem', color: 'rgba(255, 255, 255, 0.7)' }}>
+                                        ທົ່ງຫຍ້າຂຽວ, ເກັບຫຼຽນ, ຢຽບ Slime
+                                    </div>
+                                </div>
+                                <span>▶️ ຫຼິ້ນ</span>
+                            </div>
+
+                            <div
+                                className={`stage-select-card ${currentLevel === 'level-2' ? 'active-stage' : ''}`}
+                                onClick={() => handleStartGame('level-2')}
+                            >
+                                <div>
+                                    <strong>ດ່ານ 2: Sky Islands</strong>
+                                    <div style={{ fontSize: '0.8rem', color: 'rgba(255, 255, 255, 0.7)' }}>
+                                        ພື້ນເລື່ອນ Hover, ດົງໜາມ Spikes, Power-ups
+                                    </div>
+                                </div>
+                                <span>▶️ ຫຼິ້ນ</span>
+                            </div>
+
+                            <div
+                                className={`stage-select-card ${currentLevel === 'level-3' ? 'active-stage' : ''}`}
+                                onClick={() => handleStartGame('level-3')}
+                            >
+                                <div>
+                                    <strong>ດ່ານ 3: King Slime Boss Arena 👑</strong>
+                                    <div style={{ fontSize: '0.8rem', color: 'rgba(255, 255, 255, 0.7)' }}>
+                                        ສູ້ Boss ຍັກ King Slime, ແຖບເລືອດ Boss HP
+                                    </div>
+                                </div>
+                                <span>▶️ ຫຼິ້ນ</span>
+                            </div>
                         </div>
                     </div>
                 </div>
