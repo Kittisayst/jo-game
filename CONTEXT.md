@@ -1,0 +1,46 @@
+# jo-game
+
+A side-scrolling Phaser platformer, architected as three layers (domain, application, infrastructure) so game rules stay testable and independent of Phaser/React as the game grows (enemies, score, levels, save/load, UI).
+
+## Language
+
+**Domain layer**:
+Framework-agnostic core holding entities and business rules — health, score, facing direction, level progress. Never imports Phaser or the browser; never holds x/y coordinates or any spatial data.
+_Avoid_: core, engine, model layer
+
+**Entity** (domain):
+A plain TypeScript object with identity and non-spatial state — e.g. an Enemy's health/facingDirection/isDead, a Score, a LevelProgress. Position, velocity, and collision belong to the infrastructure layer's Phaser sprites, never to the entity.
+_Avoid_: model, game object
+
+**Application layer**:
+Use cases that orchestrate domain entities in reaction to something the infrastructure layer detected (a collision, an overlap, a button press) — e.g. DefeatEnemyUseCase, CompleteLevelUseCase, SaveGameUseCase. Called directly by infrastructure code; never calls back into infrastructure itself.
+_Avoid_: services, business logic layer, managers
+
+**Infrastructure layer**:
+The outer layer holding everything framework-specific: Phaser scenes/sprites (physics, rendering, input) and React components (score/health/menu UI). Both call into application use cases and both implement domain ports. This is the only layer allowed to know about pixels, coordinates, `localStorage`, or DOM/canvas.
+_Avoid_: phaser layer, presentation layer (it covers React too, not just Phaser)
+
+**Port**:
+An interface declared in the domain layer for a capability the domain needs from the outside world — e.g. `SaveRepository`. The infrastructure layer supplies the concrete implementation (e.g. a `localStorage`-backed repository); the domain never knows which one.
+_Avoid_: repository (reserve "repository" for the concrete infrastructure implementation, "port" for the interface)
+
+**Domain event**:
+A notification emitted through a small custom emitter that lives in the domain layer (not `Phaser.Events.EventEmitter`), so both the Phaser scene and the React UI can react to the same state change without either depending on the other's framework.
+_Avoid_: EventBus (that name is reserved for the existing Phaser↔React bridge in `src/game/EventBus.ts`, which is a separate, infrastructure-only concern)
+
+**Spatial ownership**:
+Only infrastructure (Phaser Arcade Physics sprites) ever tracks x/y position or performs collision/overlap detection. When physics detects something meaningful (wall hit, overlap with a goal zone), infrastructure translates that into a use-case call — the domain is told *what happened*, never *where*.
+
+**Sprite-entity pairing**:
+Every infrastructure Phaser sprite that represents something with domain rules (Enemy, Player) holds a direct reference to its paired domain Entity — e.g. an `EnemySprite` has an `entity: Enemy` field. Infrastructure passes that entity straight into a use case (`defeatEnemyUseCase(sprite.entity)`); there is no ID or lookup registry in between. A registry/ID is only introduced where infrastructure has no live object to hold a reference across — e.g. save/load, where the `SaveRepository` port necessarily deals in IDs and serialized data instead of live entities.
+_Avoid_: entity ID, entity registry/lookup (for gameplay entities — reserve ID-based lookup for the persistence port only)
+
+**Pairing is optional, not automatic**:
+Not every infrastructure game object needs a paired domain Entity. A pairing exists only when there's an actual rule or piece of state for the domain to own — health, AI decisions, scoring, and the like. A game object that is pure geometry with no rules (e.g. a static floating platform — just a position and a collision box) stays entirely inside infrastructure, with nothing in `domain/` or `application/` for it at all. Don't create an Entity speculatively "because this is a game object" — wait until a real rule shows up.
+
+**Level**:
+The infrastructure-owned data describing one playable layout — spawn point, platform positions, world width, and the finish line x-coordinate. Pure spatial data with no rules of its own, so it has no domain Entity (see "Pairing is optional, not automatic"); it's loaded from a JSON file, not hand-written as a paired object.
+_Avoid_: stage, map (this project says "level")
+
+**LevelProgress**:
+The domain Entity that tracks whether the current level has been completed. Holds no coordinates — infrastructure alone knows the finish line's x-coordinate and detects when the player has reached it, then calls `CompleteLevelUseCase` to mark the `LevelProgress` complete and emit the `level-complete` domain event. `Level` (the layout data) and `LevelProgress` (the domain state) are deliberately separate: one is infrastructure config, the other is the one piece of state this feature actually needed a domain Entity for.

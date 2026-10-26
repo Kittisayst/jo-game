@@ -1,0 +1,9 @@
+# Clean Architecture layering for the game
+
+We're about to grow the game from a single Scene + Player into a full platformer (enemies, score, levels, save/load, UI), and want game rules to stay testable and swappable without dragging Phaser or the browser along. We adopted a simplified 3-layer Clean Architecture — `domain/` (entities and rules, zero framework imports, zero spatial data), `application/` (use cases that orchestrate the domain, invoked directly by infrastructure), `infrastructure/` (Phaser scenes/sprites *and* React UI, both of which own physics/rendering/DOM and call into application use cases) — rather than the textbook 4-layer version (Entities/Use Cases/Interface Adapters/Frameworks), because a solo, incrementally-scaled project doesn't need a separate Interface Adapters layer to earn its keep.
+
+## Considered options
+
+- **Full framework-agnostic core (reimplement physics/collision in pure TS)** — rejected: too heavy for this project's scale; we keep Phaser Arcade Physics for movement/collision and only pull business rules (score, AI decisions, level progress, save/load) into the domain/application layers.
+- **Domain layer tracks entity x/y position** — rejected: infrastructure (Phaser) owns all spatial data and collision detection; it translates physics events into use-case calls (e.g. `enemy.onWallHit()`), so the domain is told *what happened*, never *where*. Reversing this later would mean re-threading position data through every existing entity.
+- **Reuse `Phaser.Events.EventEmitter` for domain/application state-change notifications** — rejected in favor of a small custom emitter local to the domain layer, so the domain/application code has zero compile-time dependency on the `phaser` package and can be used/tested without it.
