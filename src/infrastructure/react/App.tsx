@@ -28,6 +28,9 @@ import {
     BossDamagedPayload,
     BossDefeatedPayload,
 } from '../../application/DamageBossUseCase';
+import { GameStats } from '../../domain/entities/GameStats';
+import { recordGameResultUseCase } from '../../application/SaveGameStatsUseCase';
+import { localStorageGameStatsRepository } from '../storage/LocalStorageGameStatsRepository';
 import { soundManager } from '../audio/SoundManager';
 
 function App()
@@ -45,7 +48,24 @@ function App()
     const [springTimer, setSpringTimer] = useState(0);
     const [bossHp, setBossHp] = useState<number | null>(null);
     const [bossMaxHp, setBossMaxHp] = useState(5);
+    const [gameStats] = useState(() =>
+    {
+        const data = localStorageGameStatsRepository.load();
+        return new GameStats(data.highScore, data.bestTimeSeconds);
+    });
+    const [highScore, setHighScore] = useState(gameStats.highScore);
+    const [bestTime, setBestTime] = useState<number | null>(gameStats.bestTimeSeconds);
+    const [elapsedSeconds, setElapsedSeconds] = useState(0);
+    const [isNewHighScore, setIsNewHighScore] = useState(false);
+    const [isNewBestTime, setIsNewBestTime] = useState(false);
     const maxLives = 3;
+
+    const scoreRef = useRef(score);
+    scoreRef.current = score;
+    const elapsedSecondsRef = useRef(elapsedSeconds);
+    elapsedSecondsRef.current = elapsedSeconds;
+    const gameStatsRef = useRef(gameStats);
+    gameStatsRef.current = gameStats;
 
     useEffect(() =>
     {
@@ -53,6 +73,21 @@ function App()
         {
             setLevelComplete(true);
             setNextLevel(payload.nextLevel);
+
+            const result = recordGameResultUseCase(
+                gameStatsRef.current,
+                localStorageGameStatsRepository,
+                scoreRef.current,
+                !payload.nextLevel ? elapsedSecondsRef.current : undefined
+            );
+
+            setHighScore(result.highScore);
+            if (result.bestTimeSeconds !== null)
+            {
+                setBestTime(result.bestTimeSeconds);
+            }
+            setIsNewHighScore(result.isNewHighScore);
+            setIsNewBestTime(result.isNewBestTime);
         };
 
         const onCoinCollected = (payload: CoinCollectedPayload) =>
@@ -74,7 +109,15 @@ function App()
         const onGameOver = () =>
         {
             setGameOver(true);
+            const result = recordGameResultUseCase(
+                gameStatsRef.current,
+                localStorageGameStatsRepository,
+                scoreRef.current
+            );
+            setHighScore(result.highScore);
+            setIsNewHighScore(result.isNewHighScore);
         };
+
 
         const onPowerUpCollected = (payload: PowerUpCollectedPayload) =>
         {
@@ -150,6 +193,28 @@ function App()
         return () => clearInterval(interval);
     }, [starTimer, springTimer]);
 
+    // Speedrun elapsed timer
+    useEffect(() =>
+    {
+        if (levelComplete || gameOver) return;
+
+        const timer = setInterval(() =>
+        {
+            setElapsedSeconds(prev => +(prev + 0.1).toFixed(1));
+        }, 100);
+
+        return () => clearInterval(timer);
+    }, [levelComplete, gameOver]);
+
+    const formatTime = (seconds: number | null): string =>
+    {
+        if (seconds === null || seconds <= 0) return '--:--.-';
+        const mins = Math.floor(seconds / 60);
+        const secs = Math.floor(seconds % 60);
+        const tenths = Math.floor((seconds * 10) % 10);
+        return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}.${tenths}`;
+    };
+
     const handleToggleMute = () =>
     {
         setIsMuted(soundManager.toggleMute());
@@ -183,6 +248,9 @@ function App()
             setScore(0);
             setCoinsCount(0);
             setLives(maxLives);
+            setElapsedSeconds(0);
+            setIsNewHighScore(false);
+            setIsNewBestTime(false);
         }
 
         setCurrentLevel(target);
@@ -223,6 +291,15 @@ function App()
                     <span className="badge-icon">⭐</span>
                     <span className="badge-label">Score</span>
                     <span className="badge-value">{score}</span>
+                </div>
+                <div className="hud-badge timer-badge">
+                    <span className="badge-icon">⏱️</span>
+                    <span className="badge-value">{formatTime(elapsedSeconds)}</span>
+                </div>
+                <div className="hud-badge high-score-badge">
+                    <span className="badge-icon">🏆</span>
+                    <span className="badge-label">Best</span>
+                    <span className="badge-value">{highScore}</span>
                 </div>
 
                 {starTimer > 0 && (
@@ -287,6 +364,14 @@ function App()
                                 <span className="stat-label">⭐ Final Score:</span>
                                 <strong className="stat-val">{score}</strong>
                             </div>
+                            <div className="stat-item">
+                                <span className="stat-label">⏱️ Time Elapsed:</span>
+                                <strong className="stat-val">{formatTime(elapsedSeconds)}</strong>
+                            </div>
+                            <div className="stat-item">
+                                <span className="stat-label">🏆 Best Score:</span>
+                                <strong className="stat-val">{highScore}</strong>
+                            </div>
                         </div>
 
                         <div className="modal-actions">
@@ -313,8 +398,24 @@ function App()
                             </div>
                             <div className="stat-item">
                                 <span className="stat-label">⭐ Total Score:</span>
-                                <strong className="stat-val">{score}</strong>
+                                <strong className="stat-val">
+                                    {score}
+                                    {isNewHighScore && <span className="record-pill">🎉 Record!</span>}
+                                </strong>
                             </div>
+                            <div className="stat-item">
+                                <span className="stat-label">⏱️ Speedrun Time:</span>
+                                <strong className="stat-val">
+                                    {formatTime(elapsedSeconds)}
+                                    {isNewBestTime && <span className="record-pill">🔥 Best!</span>}
+                                </strong>
+                            </div>
+                            {bestTime !== null && (
+                                <div className="stat-item">
+                                    <span className="stat-label">🏆 Best Time:</span>
+                                    <strong className="stat-val">{formatTime(bestTime)}</strong>
+                                </div>
+                            )}
                         </div>
 
                         <div className="modal-actions">
