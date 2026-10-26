@@ -8,6 +8,7 @@ import { Enemy } from '../objects/Enemy';
 import { PowerUp } from '../objects/PowerUp';
 import { Spike } from '../objects/Spike';
 import { MovingPlatform } from '../objects/MovingPlatform';
+import { Boss } from '../objects/Boss';
 import { ParticleManager } from '../effects/ParticleManager';
 import { Level } from '../Level';
 import { LevelProgress } from '../../../domain/entities/LevelProgress';
@@ -35,6 +36,7 @@ export class Game extends Scene
     coins: Phaser.Physics.Arcade.StaticGroup;
     powerUps: Phaser.Physics.Arcade.StaticGroup;
     enemies: Phaser.Physics.Arcade.Group;
+    boss?: Boss;
     goalFlag: GoalFlag;
     particleManager: ParticleManager;
     cursors: Phaser.Types.Input.Keyboard.CursorKeys;
@@ -72,6 +74,7 @@ export class Game extends Scene
     {
         this.load.json('level-1', 'assets/levels/level-1.json');
         this.load.json('level-2', 'assets/levels/level-2.json');
+        this.load.json('level-3', 'assets/levels/level-3.json');
     }
 
     create ()
@@ -142,8 +145,35 @@ export class Game extends Scene
 
         this.physics.add.overlap(this.player, this.goalFlag, () =>
         {
-            this.handleGoalReached();
+            if (!this.boss || this.boss.entity.isDefeated)
+            {
+                this.handleGoalReached();
+            }
         });
+
+        // Spawn Boss if defined for this level
+        if (this.level.boss)
+        {
+            this.boss = new Boss(this, this.level.boss.x, this.level.boss.y, this.level.boss.hp ?? 5);
+            this.boss.onLanding = (x, y) => this.particleManager.emitLandingDust(x, y);
+            this.boss.onDefeated = (x, y) =>
+            {
+                this.particleManager.emitCelebration(x, y);
+                this.time.delayedCall(1200, () =>
+                {
+                    this.handleGoalReached();
+                });
+            };
+
+            this.physics.add.collider(this.boss, this.ground);
+            this.physics.add.collider(this.boss, this.platforms);
+            this.physics.add.collider(this.boss, this.movingPlatforms);
+
+            this.physics.add.overlap(this.player, this.boss, (playerObj, bossObj) =>
+            {
+                this.handlePlayerBossCollision(playerObj as Player, bossObj as Boss);
+            });
+        }
 
         this.camera.startFollow(this.player, true, 0.1, 0.1);
 
@@ -174,9 +204,17 @@ export class Game extends Scene
             }
         }
 
+        if (this.boss && this.boss.active)
+        {
+            this.boss.update(this.player.x);
+        }
+
         if (this.player.x >= this.level.finishX)
         {
-            this.handleGoalReached();
+            if (!this.boss || this.boss.entity.isDefeated)
+            {
+                this.handleGoalReached();
+            }
         }
     }
 
@@ -224,6 +262,41 @@ export class Game extends Scene
         this.player.triggerDamage(spike.x);
         this.particleManager.emitSpikeHit(spike.x, spike.y);
         playerTakeDamageUseCase(this.lives);
+    }
+
+    private handlePlayerBossCollision (player: Player, boss: Boss)
+    {
+        if (boss.entity.isDefeated) return;
+
+        // Invincible star power hurts boss
+        if (player.hasStarPower)
+        {
+            player.setVelocityY(-360);
+            this.particleManager.emitStompBurst(boss.x, boss.y);
+            boss.takeDamage(this.score);
+            return;
+        }
+
+        const playerBody = player.body as Phaser.Physics.Arcade.Body;
+        const isFalling = playerBody.velocity.y > 0;
+        const isAbove = player.y < boss.y - 8;
+
+        if (isFalling && isAbove && !boss.isInvulnerable)
+        {
+            // High bounce when stomping boss
+            player.setVelocityY(-420);
+            this.particleManager.emitStompBurst(boss.x, boss.y);
+            boss.takeDamage(this.score);
+        }
+        else
+        {
+            // Player hit by boss
+            if (!player.isInvincible)
+            {
+                player.triggerDamage(boss.x);
+                playerTakeDamageUseCase(this.lives);
+            }
+        }
     }
 
     private handleGoalReached ()

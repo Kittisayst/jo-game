@@ -7,6 +7,10 @@ import {
     GAME_OVER_EVENT,
 } from '../../application/PlayerTakeDamageUseCase';
 import { POWERUP_COLLECTED_EVENT } from '../../application/CollectPowerUpUseCase';
+import {
+    BOSS_DAMAGED_EVENT,
+    BOSS_DEFEATED_EVENT,
+} from '../../application/DamageBossUseCase';
 
 /**
  * Procedural retro sound manager built on the browser's Web Audio API.
@@ -71,6 +75,8 @@ export class SoundManager
         DomainEvents.on(GAME_OVER_EVENT, () => this.playGameOver());
         DomainEvents.on(LEVEL_COMPLETE_EVENT, () => this.playLevelComplete());
         DomainEvents.on(POWERUP_COLLECTED_EVENT, () => this.playPowerUp());
+        DomainEvents.on(BOSS_DAMAGED_EVENT, () => this.playBossHit());
+        DomainEvents.on(BOSS_DEFEATED_EVENT, () => this.playBossDefeat());
     }
 
     get isMuted (): boolean
@@ -307,6 +313,69 @@ export class SoundManager
             osc.frequency.setValueAtTime(freq, startTime);
 
             gain.gain.setValueAtTime(0.14, startTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+
+            osc.start(startTime);
+            osc.stop(startTime + duration);
+        });
+    }
+
+    /**
+     * Boss Hit Sound: heavy bass rumble impact
+     */
+    playBossHit (): void
+    {
+        if (this._isMuted) return;
+        this.initContext();
+        if (!this.ctx) return;
+
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(140, now);
+        osc.frequency.exponentialRampToValueAtTime(45, now + 0.25);
+
+        gain.gain.setValueAtTime(0.25, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+
+        osc.start(now);
+        osc.stop(now + 0.25);
+    }
+
+    /**
+     * Boss Defeat Sound: grand victory explosion and fanfare
+     */
+    playBossDefeat (): void
+    {
+        if (this._isMuted) return;
+        this.initContext();
+        if (!this.ctx) return;
+
+        const now = this.ctx.currentTime;
+        const notes = [261.63, 329.63, 392.00, 523.25, 659.25, 783.99];
+        const step = 0.1;
+
+        notes.forEach((freq, idx) =>
+        {
+            if (!this.ctx) return;
+            const startTime = now + idx * step;
+            const duration = idx === notes.length - 1 ? 0.6 : 0.16;
+
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(freq, startTime);
+
+            gain.gain.setValueAtTime(0.2, startTime);
             gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
 
             osc.connect(gain);

@@ -22,6 +22,12 @@ import {
     POWERUP_COLLECTED_EVENT,
     PowerUpCollectedPayload,
 } from '../../application/CollectPowerUpUseCase';
+import {
+    BOSS_DAMAGED_EVENT,
+    BOSS_DEFEATED_EVENT,
+    BossDamagedPayload,
+    BossDefeatedPayload,
+} from '../../application/DamageBossUseCase';
 import { soundManager } from '../audio/SoundManager';
 
 function App()
@@ -37,6 +43,8 @@ function App()
     const [isMuted, setIsMuted] = useState(soundManager.isMuted);
     const [starTimer, setStarTimer] = useState(0);
     const [springTimer, setSpringTimer] = useState(0);
+    const [bossHp, setBossHp] = useState<number | null>(null);
+    const [bossMaxHp, setBossMaxHp] = useState(5);
     const maxLives = 3;
 
     useEffect(() =>
@@ -84,6 +92,18 @@ function App()
             }
         };
 
+        const onBossDamaged = (payload: BossDamagedPayload) =>
+        {
+            setBossHp(payload.currentHp);
+            setBossMaxHp(payload.maxHp);
+        };
+
+        const onBossDefeated = (payload: BossDefeatedPayload) =>
+        {
+            setBossHp(0);
+            setScore(payload.totalScore);
+        };
+
         const handleKeyDown = (e: KeyboardEvent) =>
         {
             if (e.key === 'm' || e.key === 'M')
@@ -98,6 +118,8 @@ function App()
         DomainEvents.on<PlayerDamagedPayload>(PLAYER_DAMAGED_EVENT, onPlayerDamaged);
         DomainEvents.on(GAME_OVER_EVENT, onGameOver);
         DomainEvents.on<PowerUpCollectedPayload>(POWERUP_COLLECTED_EVENT, onPowerUpCollected);
+        DomainEvents.on<BossDamagedPayload>(BOSS_DAMAGED_EVENT, onBossDamaged);
+        DomainEvents.on<BossDefeatedPayload>(BOSS_DEFEATED_EVENT, onBossDefeated);
         window.addEventListener('keydown', handleKeyDown);
 
         return () =>
@@ -108,6 +130,8 @@ function App()
             DomainEvents.off<PlayerDamagedPayload>(PLAYER_DAMAGED_EVENT, onPlayerDamaged);
             DomainEvents.off(GAME_OVER_EVENT, onGameOver);
             DomainEvents.off<PowerUpCollectedPayload>(POWERUP_COLLECTED_EVENT, onPowerUpCollected);
+            DomainEvents.off<BossDamagedPayload>(BOSS_DAMAGED_EVENT, onBossDamaged);
+            DomainEvents.off<BossDefeatedPayload>(BOSS_DEFEATED_EVENT, onBossDefeated);
             window.removeEventListener('keydown', handleKeyDown);
         };
     }, []);
@@ -141,6 +165,7 @@ function App()
         setNextLevel(null);
         setStarTimer(0);
         setSpringTimer(0);
+        setBossHp(null);
 
         phaserRef.current?.scene?.scene.restart({
             levelKey: target,
@@ -166,6 +191,7 @@ function App()
         setNextLevel(null);
         setStarTimer(0);
         setSpringTimer(0);
+        setBossHp(null);
 
         phaserRef.current?.scene?.scene.restart({
             levelKey: target,
@@ -180,7 +206,7 @@ function App()
                 <div className="hud-badge level-badge">
                     <span className="badge-icon">🚩</span>
                     <span className="badge-label">
-                        {currentLevel === 'level-1' ? 'Level 1' : 'Level 2'}
+                        {currentLevel === 'level-1' ? 'Level 1' : currentLevel === 'level-2' ? 'Level 2' : 'Level 3 (👑 Boss)'}
                     </span>
                 </div>
                 <div className="hud-badge lives-badge">
@@ -226,6 +252,21 @@ function App()
                 </button>
             </div>
 
+            {(currentLevel === 'level-3' || bossHp !== null) && (
+                <div className="boss-hud-container">
+                    <div className="boss-hud-header">
+                        <span className="boss-title">👑 KING SLIME</span>
+                        <span className="boss-hp-number">{(bossHp ?? 5)} / {bossMaxHp} HP</span>
+                    </div>
+                    <div className="boss-hp-bar">
+                        <div
+                            className="boss-hp-fill"
+                            style={{ width: `${Math.max(0, ((bossHp ?? 5) / bossMaxHp) * 100)}%` }}
+                        />
+                    </div>
+                </div>
+            )}
+
             <PhaserGame ref={phaserRef} />
 
             {gameOver && (
@@ -260,7 +301,7 @@ function App()
             {levelComplete && (
                 <div className="level-complete-overlay">
                     <div className="level-complete-card">
-                        <h2>{nextLevel ? '🎉 Level Complete!' : '🏆 Game Completed!'}</h2>
+                        <h2>{nextLevel ? '🎉 Level Complete!' : (currentLevel === 'level-3' ? '👑 VICTORY! KING SLIME DEFEATED!' : '🏆 Game Completed!')}</h2>
                         <div className="complete-stats">
                             <div className="stat-item">
                                 <span className="stat-label">🚩 Stage:</span>

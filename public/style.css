@@ -326,3 +326,59 @@ body {
         transform: scale(1);
     }
 }
+
+/* Boss Health Bar HUD */
+.boss-hud-container {
+    position: absolute;
+    top: 68px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(420px, 90vw);
+    background: rgba(15, 23, 42, 0.88);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(168, 85, 247, 0.5);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6), 0 0 16px rgba(168, 85, 247, 0.3);
+    border-radius: 12px;
+    padding: 8px 16px 12px;
+    z-index: 100;
+    pointer-events: none;
+    animation: fadeIn 0.4s ease-out;
+}
+
+.boss-hud-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+}
+
+.boss-title {
+    font-size: 0.95rem;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    color: #e9d5ff;
+    text-shadow: 0 0 8px rgba(168, 85, 247, 0.6);
+}
+
+.boss-hp-number {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #f472b6;
+}
+
+.boss-hp-bar {
+    width: 100%;
+    height: 12px;
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.boss-hp-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #ec4899, #8b5cf6, #a855f7);
+    border-radius: 6px;
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 0 10px rgba(236, 72, 153, 0.8);
+}

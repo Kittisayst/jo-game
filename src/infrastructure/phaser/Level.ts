@@ -37,6 +37,13 @@ export interface MovingPlatformSpawnData
     speed?: number;
 }
 
+export interface BossSpawnData
+{
+    x: number;
+    y: number;
+    hp?: number;
+}
+
 export interface Level
 {
     worldWidth: number;
@@ -48,6 +55,8 @@ export interface Level
     powerUps?: PowerUpSpawnData[];
     spikes?: SpikeSpawnData[];
     movingPlatforms?: MovingPlatformSpawnData[];
+    boss?: BossSpawnData;
     nextLevel?: string | null;
 }
+
 
