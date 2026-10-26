@@ -6,6 +6,8 @@ import { Coin } from '../objects/Coin';
 import { GoalFlag } from '../objects/GoalFlag';
 import { Enemy } from '../objects/Enemy';
 import { PowerUp } from '../objects/PowerUp';
+import { Spike } from '../objects/Spike';
+import { MovingPlatform } from '../objects/MovingPlatform';
 import { ParticleManager } from '../effects/ParticleManager';
 import { Level } from '../Level';
 import { LevelProgress } from '../../../domain/entities/LevelProgress';
@@ -28,6 +30,8 @@ export class Game extends Scene
     player: Player;
     ground: Phaser.Physics.Arcade.StaticGroup;
     platforms: Phaser.Physics.Arcade.StaticGroup;
+    movingPlatforms: Phaser.Physics.Arcade.Group;
+    spikes: Phaser.Physics.Arcade.StaticGroup;
     coins: Phaser.Physics.Arcade.StaticGroup;
     powerUps: Phaser.Physics.Arcade.StaticGroup;
     enemies: Phaser.Physics.Arcade.Group;
@@ -87,6 +91,8 @@ export class Game extends Scene
 
         this.ground = this.createGround();
         this.platforms = this.createPlatforms();
+        this.movingPlatforms = this.createMovingPlatforms();
+        this.spikes = this.createSpikes();
         this.coins = this.createCoins();
         this.powerUps = this.createPowerUps();
         this.enemies = this.createEnemies();
@@ -104,12 +110,18 @@ export class Game extends Scene
 
         this.physics.add.collider(this.player, this.ground);
         this.physics.add.collider(this.player, this.platforms);
+        this.physics.add.collider(this.player, this.movingPlatforms);
 
         // Colliders for enemies
         this.physics.add.collider(this.enemies, this.ground);
         this.physics.add.collider(this.enemies, this.platforms);
+        this.physics.add.collider(this.enemies, this.movingPlatforms);
 
         // Overlaps
+        this.physics.add.overlap(this.player, this.spikes, (_player, spikeObj) =>
+        {
+            this.handlePlayerSpikeCollision(spikeObj as Spike);
+        });
         this.physics.add.overlap(this.player, this.coins, (_player, coinObj) =>
         {
             const coin = coinObj as Coin;
@@ -150,6 +162,15 @@ export class Game extends Scene
             if (enemy.active)
             {
                 enemy.update();
+            }
+        }
+
+        for (const child of this.movingPlatforms.getChildren())
+        {
+            const mp = child as MovingPlatform;
+            if (mp.active)
+            {
+                mp.update();
             }
         }
 
@@ -194,6 +215,15 @@ export class Game extends Scene
                 playerTakeDamageUseCase(this.lives);
             }
         }
+    }
+
+    private handlePlayerSpikeCollision (spike: Spike)
+    {
+        if (this.player.isInvincible || this.player.hasStarPower) return;
+
+        this.player.triggerDamage(spike.x);
+        this.particleManager.emitSpikeHit(spike.x, spike.y);
+        playerTakeDamageUseCase(this.lives);
     }
 
     private handleGoalReached ()
@@ -339,5 +369,40 @@ export class Game extends Scene
         }
 
         return powerUps;
+    }
+
+    private createSpikes ()
+    {
+        const spikes = this.physics.add.staticGroup();
+
+        if (this.level.spikes)
+        {
+            for (const item of this.level.spikes)
+            {
+                spikes.add(new Spike(this, item.x, item.y));
+            }
+        }
+
+        return spikes;
+    }
+
+    private createMovingPlatforms ()
+    {
+        const movingPlatforms = this.physics.add.group();
+
+        if (this.level.movingPlatforms)
+        {
+            for (const item of this.level.movingPlatforms)
+            {
+                const mp = new MovingPlatform(this, item.x, item.y, {
+                    distanceX: item.distanceX,
+                    distanceY: item.distanceY,
+                    speed: item.speed,
+                });
+                movingPlatforms.add(mp);
+            }
+        }
+
+        return movingPlatforms;
     }
 }

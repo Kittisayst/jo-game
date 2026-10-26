@@ -22,6 +22,21 @@ export interface PowerUpSpawnData
     type: 'heart' | 'star' | 'spring';
 }
 
+export interface SpikeSpawnData
+{
+    x: number;
+    y: number;
+}
+
+export interface MovingPlatformSpawnData
+{
+    x: number;
+    y: number;
+    distanceX?: number;
+    distanceY?: number;
+    speed?: number;
+}
+
 export interface Level
 {
     worldWidth: number;
@@ -31,5 +46,8 @@ export interface Level
     coins?: { x: number; y: number }[];
     enemies?: EnemySpawnData[];
     powerUps?: PowerUpSpawnData[];
+    spikes?: SpikeSpawnData[];
+    movingPlatforms?: MovingPlatformSpawnData[];
     nextLevel?: string | null;
 }
+

@@ -152,4 +152,10 @@ export class ParticleManager
             this.stompEmitter.explode(18, x, y);
         }
     }
+
+    emitSpikeHit (x: number, y: number): void
+    {
+        this.stompEmitter.explode(14, x, y);
+    }
 }
+

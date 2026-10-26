@@ -32,5 +32,13 @@
     "powerUps": [
         { "x": 650, "y": 450, "type": "spring" },
         { "x": 1150, "y": 410, "type": "heart" }
+    ],
+    "spikes": [
+        { "x": 650, "y": 644 },
+        { "x": 1300, "y": 644 }
+    ],
+    "movingPlatforms": [
+        { "x": 730, "y": 520, "distanceX": 100, "speed": 65 },
+        { "x": 1650, "y": 470, "distanceY": 80, "speed": 55 }
     ]
 }
