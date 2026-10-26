@@ -3,6 +3,12 @@ import { LevelProgress } from '../domain/entities/LevelProgress';
 
 export const LEVEL_COMPLETE_EVENT = 'level-complete';
 
+export interface LevelCompletePayload
+{
+    levelId: string;
+    nextLevel: string | null;
+}
+
 /**
  * Marks the level complete and emits the domain event, exactly once.
  * Infrastructure calls this after detecting (spatially) that the player
@@ -14,5 +20,8 @@ export function completeLevelUseCase (progress: LevelProgress)
 
     progress.complete();
 
-    DomainEvents.emit(LEVEL_COMPLETE_EVENT, {});
+    DomainEvents.emit<LevelCompletePayload>(LEVEL_COMPLETE_EVENT, {
+        levelId: progress.levelId,
+        nextLevel: progress.nextLevel,
+    });
 }

@@ -6,13 +6,31 @@
 export class LevelProgress
 {
     private _isComplete = false;
+    private _levelId: string;
+    private _nextLevel: string | null;
 
-    get isComplete ()
+    constructor (levelId = 'level-1', nextLevel: string | null = null)
+    {
+        this._levelId = levelId;
+        this._nextLevel = nextLevel;
+    }
+
+    get levelId (): string
+    {
+        return this._levelId;
+    }
+
+    get nextLevel (): string | null
+    {
+        return this._nextLevel;
+    }
+
+    get isComplete (): boolean
     {
         return this._isComplete;
     }
 
-    complete ()
+    complete (): void
     {
         this._isComplete = true;
     }

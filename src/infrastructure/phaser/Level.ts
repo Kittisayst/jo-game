@@ -6,10 +6,22 @@
  * Nothing here is verified against this shape at runtime — a malformed level
  * JSON file will fail in whatever way reading a missing/wrong-typed field fails.
  */
+
+export interface EnemySpawnData
+{
+    x: number;
+    y: number;
+    patrolDistance?: number;
+    speed?: number;
+}
+
 export interface Level
 {
     worldWidth: number;
     finishX: number;
     spawn: { x: number; y: number };
     platforms: { x: number; y: number }[];
+    coins?: { x: number; y: number }[];
+    enemies?: EnemySpawnData[];
+    nextLevel?: string | null;
 }

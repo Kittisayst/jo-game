@@ -7,6 +7,7 @@ type Listener<T> = (payload: T) => void;
  */
 export class DomainEventEmitter
 {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     private listeners = new Map<string, Set<Listener<any>>>();
 
     on<T> (event: string, listener: Listener<T>)

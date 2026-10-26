@@ -15,7 +15,7 @@ npm run dev-nolog      # dev server, no ping — prefer this one
 npm run build          # production build to dist/ (with ping)
 npm run build-nolog    # production build to dist/, no ping
 npx tsc --noEmit -p tsconfig.json   # typecheck (no dedicated npm script exists)
-npx eslint .                         # lint (no dedicated npm script exists)
+npm run lint           # lint (runs eslint .)
 npm run test          # run domain/application unit tests once (Vitest)
 npm run test:watch     # same, in watch mode
 ```
