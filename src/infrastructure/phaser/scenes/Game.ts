@@ -154,6 +154,10 @@ export class Game extends Scene
 
         this.particleManager = new ParticleManager(this);
 
+        this.player = new Player(this, this.level.spawn.x, this.level.spawn.y, this.currentSkinId);
+        this.player.onJump = (x, y) => this.particleManager.emitJumpDust(x, y);
+        this.player.onLand = (x, y) => this.particleManager.emitLandingDust(x, y);
+
         if (this.level.scenery === 'village')
         {
             this.createVillageScenery();
@@ -180,10 +184,6 @@ export class Game extends Scene
                 }
             });
         }
-
-        this.player = new Player(this, this.level.spawn.x, this.level.spawn.y, this.currentSkinId);
-        this.player.onJump = (x, y) => this.particleManager.emitJumpDust(x, y);
-        this.player.onLand = (x, y) => this.particleManager.emitLandingDust(x, y);
 
         this.physics.add.collider(this.player, this.ground);
         this.physics.add.collider(this.player, this.platforms);
