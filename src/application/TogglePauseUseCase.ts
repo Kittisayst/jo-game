@@ -1,8 +1,8 @@
 import { DomainEvents } from '../domain/DomainEvents';
 import { GamePauseState } from '../domain/entities/GamePauseState';
 
-export const GAME_PAUSED_EVENT = 'game:paused';
-export const GAME_RESUMED_EVENT = 'game:resumed';
+export const GAME_PAUSED_EVENT = 'game-paused';
+export const GAME_RESUMED_EVENT = 'game-resumed';
 
 export interface GamePausePayload
 {

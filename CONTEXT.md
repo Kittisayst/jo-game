@@ -44,3 +44,6 @@ _Avoid_: stage, map (this project says "level")
 
 **LevelProgress**:
 The domain Entity that tracks whether the current level has been completed. Holds no coordinates — infrastructure alone knows the finish line's x-coordinate and detects when the player has reached it, then calls `CompleteLevelUseCase` to mark the `LevelProgress` complete and emit the `level-complete` domain event. `Level` (the layout data) and `LevelProgress` (the domain state) are deliberately separate: one is infrastructure config, the other is the one piece of state this feature actually needed a domain Entity for.
+
+**GameSession**:
+The domain Aggregate Root entity that consolidates active gameplay state — `Score`, `Lives`, `PowerUpState`, coins collected, active level ID, and speedrun elapsed time. Advanced through `tickSessionUseCase(session, deltaMs)` in the Phaser engine's `update()` loop, ensuring that game speed, power-up timers, and HUD countdowns are driven by a single source of truth that pauses automatically when the game engine pauses.

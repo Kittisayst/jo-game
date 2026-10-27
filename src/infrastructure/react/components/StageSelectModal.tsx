@@ -1,3 +1,5 @@
+import { LEVEL_CATALOG } from '../../phaser/levelCatalog';
+
 export interface StageSelectModalProps
 {
     currentLevel: string;
@@ -26,44 +28,25 @@ export function StageSelectModal ({
                 </div>
 
                 <div className="stage-select-grid">
-                    <div
-                        className={`stage-select-card ${currentLevel === 'level-1' ? 'active-stage' : ''}`}
-                        onClick={() => onSelectStage('level-1')}
-                    >
-                        <div>
-                            <strong>ດ່ານ 1: Green Plains</strong>
-                            <div style={{ fontSize: '0.8rem', color: 'rgba(255, 255, 255, 0.7)' }}>
-                                ທົ່ງຫຍ້າຂຽວ, ເກັບຫຼຽນ, ຢຽບ Slime
+                    {LEVEL_CATALOG.map(level =>
+                    {
+                        const isActive = currentLevel === level.key;
+                        return (
+                            <div
+                                key={level.key}
+                                className={`stage-select-card ${isActive ? 'active-stage' : ''}`}
+                                onClick={() => onSelectStage(level.key)}
+                            >
+                                <div>
+                                    <strong>{level.name}</strong>
+                                    <div style={{ fontSize: '0.8rem', color: 'rgba(255, 255, 255, 0.7)' }}>
+                                        {level.description}
+                                    </div>
+                                </div>
+                                <span>▶️ ຫຼິ້ນ</span>
                             </div>
-                        </div>
-                        <span>▶️ ຫຼິ້ນ</span>
-                    </div>
-
-                    <div
-                        className={`stage-select-card ${currentLevel === 'level-2' ? 'active-stage' : ''}`}
-                        onClick={() => onSelectStage('level-2')}
-                    >
-                        <div>
-                            <strong>ດ່ານ 2: Sky Islands</strong>
-                            <div style={{ fontSize: '0.8rem', color: 'rgba(255, 255, 255, 0.7)' }}>
-                                ພື້ນເລື່ອນ Hover, ດົງໜາມ Spikes, Power-ups
-                            </div>
-                        </div>
-                        <span>▶️ ຫຼິ້ນ</span>
-                    </div>
-
-                    <div
-                        className={`stage-select-card ${currentLevel === 'level-3' ? 'active-stage' : ''}`}
-                        onClick={() => onSelectStage('level-3')}
-                    >
-                        <div>
-                            <strong>ດ່ານ 3: King Slime Boss Arena 👑</strong>
-                            <div style={{ fontSize: '0.8rem', color: 'rgba(255, 255, 255, 0.7)' }}>
-                                ສູ້ Boss ຍັກ King Slime, ແຖບເລືອດ Boss HP
-                            </div>
-                        </div>
-                        <span>▶️ ຫຼິ້ນ</span>
-                    </div>
+                        );
+                    })}
                 </div>
             </div>
         </div>

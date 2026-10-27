@@ -12,6 +12,7 @@ import { Boss } from '../objects/Boss';
 import { ParticleManager } from '../effects/ParticleManager';
 import { soundManager } from '../../audio/SoundManager';
 import { Level } from '../Level';
+import { LEVEL_CATALOG } from '../levelCatalog';
 import { LevelProgress } from '../../../domain/entities/LevelProgress';
 import { DomainEvents } from '../../../domain/DomainEvents';
 import { GameSession } from '../../../domain/entities/GameSession';
@@ -111,9 +112,10 @@ export class Game extends Scene
 
     preload ()
     {
-        this.load.json('level-1', 'assets/levels/level-1.json');
-        this.load.json('level-2', 'assets/levels/level-2.json');
-        this.load.json('level-3', 'assets/levels/level-3.json');
+        for (const item of LEVEL_CATALOG)
+        {
+            this.load.json(item.key, item.assetPath);
+        }
     }
 
     create ()

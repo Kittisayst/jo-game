@@ -1,4 +1,5 @@
 import { formatTime } from '../utils/formatTime';
+import { getLevelItem } from '../../phaser/levelCatalog';
 
 export interface HudProps
 {
@@ -33,12 +34,7 @@ export function Hud ({
     onTogglePause,
 }: HudProps)
 {
-    const levelLabel =
-        currentLevel === 'level-1'
-            ? 'Level 1'
-            : currentLevel === 'level-2'
-                ? 'Level 2'
-                : 'Level 3 (👑 Boss)';
+    const levelLabel = getLevelItem(currentLevel)?.hudLabel || currentLevel;
 
     return (
         <>

@@ -1,9 +1,18 @@
+@font-face {
+    font-family: 'Noto Sans Lao';
+    src: url('/fonts/noto-sans-lao/NotoSansLao-VariableFont_wdth,wght.ttf') format('truetype-variations'),
+         url('/fonts/noto-sans-lao/static/NotoSansLao-Regular.ttf') format('truetype');
+    font-weight: 100 900;
+    font-style: normal;
+    font-display: swap;
+}
+
 body {
     margin: 0;
     padding: 0;
     color: rgba(255, 255, 255, 0.95);
     background-color: #0b0f19;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    font-family: 'Noto Sans Lao', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     user-select: none;
 }
 
