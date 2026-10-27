@@ -545,7 +545,7 @@ export class Game extends Scene
 
         // Welcome Signpost at spawn
         const welcomeSign = this.add.text(120, baseY - 80, '🏡 ໝູ່ບ້ານ JO RUNNER\n(ຍິນດີຕ້ອນຮັບ!)', {
-            fontFamily: 'Noto Sans Lao, sans-serif',
+            fontFamily: '"Noto Sans Lao", sans-serif',
             fontSize: '14px',
             color: '#fef08a',
             stroke: '#0f172a',
@@ -557,7 +557,7 @@ export class Game extends Scene
 
         // Signpost pointing to Level 1 Door
         const doorSign = this.add.text(1380, baseY - 85, '🚪 ປະຕູສູ່ Level 1 ➡️\n(Green Plains)', {
-            fontFamily: 'Noto Sans Lao, sans-serif',
+            fontFamily: '"Noto Sans Lao", sans-serif',
             fontSize: '15px',
             color: '#38bdf8',
             stroke: '#0284c7',

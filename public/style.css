@@ -1,10 +1,66 @@
 @font-face {
     font-family: 'Noto Sans Lao';
-    src: url('/fonts/noto-sans-lao/NotoSansLao-VariableFont_wdth,wght.ttf') format('truetype-variations'),
-         url('/fonts/noto-sans-lao/static/NotoSansLao-Regular.ttf') format('truetype');
+    src: url('/fonts/noto-sans-lao/static/NotoSansLao-Regular.ttf') format('truetype');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Noto Sans Lao';
+    src: url('/fonts/noto-sans-lao/static/NotoSansLao-Medium.ttf') format('truetype');
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Noto Sans Lao';
+    src: url('/fonts/noto-sans-lao/static/NotoSansLao-SemiBold.ttf') format('truetype');
+    font-weight: 600;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Noto Sans Lao';
+    src: url('/fonts/noto-sans-lao/static/NotoSansLao-Bold.ttf') format('truetype');
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Noto Sans Lao';
+    src: url('/fonts/noto-sans-lao/static/NotoSansLao-ExtraBold.ttf') format('truetype');
+    font-weight: 800;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Noto Sans Lao';
+    src: url('/fonts/noto-sans-lao/NotoSansLao-VariableFont_wdth,wght.ttf') format('truetype-variations');
     font-weight: 100 900;
     font-style: normal;
     font-display: swap;
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    font-family: 'Noto Sans Lao', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+html,
+body,
+button,
+input,
+select,
+textarea,
+optgroup {
+    font-family: 'Noto Sans Lao', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important;
 }
 
 body {
@@ -12,7 +68,6 @@ body {
     padding: 0;
     color: rgba(255, 255, 255, 0.95);
     background-color: #0b0f19;
-    font-family: 'Noto Sans Lao', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     user-select: none;
 }
 
@@ -735,8 +790,9 @@ button.hud-badge,
     justify-content: center;
     gap: 10px;
     padding: 14px 24px;
-    font-size: 1.1rem;
+    font-size: 1.05rem;
     font-weight: 700;
+    font-family: 'Noto Sans Lao', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
     border-radius: 12px;
     border: none;
     cursor: pointer;
@@ -747,6 +803,7 @@ button.hud-badge,
 .menu-action-btn.primary {
     background: linear-gradient(135deg, #059669, #10b981);
     box-shadow: 0 4px 16px rgba(16, 185, 129, 0.4);
+    color: #ffffff;
 }
 
 .menu-action-btn.primary:hover {
@@ -757,12 +814,27 @@ button.hud-badge,
 .menu-action-btn.secondary {
     background: rgba(255, 255, 255, 0.08);
     border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #ffffff;
 }
 
 .menu-action-btn.secondary:hover {
     transform: translateY(-2px);
     background: rgba(255, 255, 255, 0.16);
     border-color: rgba(255, 255, 255, 0.3);
+}
+
+.menu-action-btn.danger {
+    background: rgba(239, 68, 68, 0.18);
+    border: 1px solid rgba(239, 68, 68, 0.4);
+    color: #fca5a5;
+}
+
+.menu-action-btn.danger:hover {
+    transform: translateY(-2px);
+    background: rgba(239, 68, 68, 0.35);
+    border-color: #ef4444;
+    color: #ffffff;
+    box-shadow: 0 6px 18px rgba(239, 68, 68, 0.4);
 }
 
 /* Settings Modal */
