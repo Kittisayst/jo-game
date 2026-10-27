@@ -36,6 +36,8 @@ export function Hud ({
 {
     const levelLabel = getLevelItem(currentLevel)?.hudLabel || currentLevel;
 
+    const isVillage = currentLevel === 'village';
+
     return (
         <>
             <div className="game-hud">
@@ -48,25 +50,30 @@ export function Hud ({
                         {'❤️'.repeat(Math.max(0, lives)) + '🖤'.repeat(Math.max(0, maxLives - lives))}
                     </span>
                 </div>
-                <div className="hud-badge coin-badge">
-                    <span className="badge-icon">🪙</span>
-                    <span className="badge-label">Coins</span>
-                    <span className="badge-value">{coinsCount}</span>
-                </div>
-                <div className="hud-badge score-badge">
-                    <span className="badge-icon">⭐</span>
-                    <span className="badge-label">Score</span>
-                    <span className="badge-value">{score}</span>
-                </div>
-                <div className="hud-badge timer-badge">
-                    <span className="badge-icon">⏱️</span>
-                    <span className="badge-value">{formatTime(elapsedSeconds)}</span>
-                </div>
-                <div className="hud-badge high-score-badge">
-                    <span className="badge-icon">🏆</span>
-                    <span className="badge-label">Best</span>
-                    <span className="badge-value">{highScore}</span>
-                </div>
+
+                {!isVillage && (
+                    <>
+                        <div className="hud-badge coin-badge">
+                            <span className="badge-icon">🪙</span>
+                            <span className="badge-label">Coins</span>
+                            <span className="badge-value">{coinsCount}</span>
+                        </div>
+                        <div className="hud-badge score-badge">
+                            <span className="badge-icon">⭐</span>
+                            <span className="badge-label">Score</span>
+                            <span className="badge-value">{score}</span>
+                        </div>
+                        <div className="hud-badge timer-badge">
+                            <span className="badge-icon">⏱️</span>
+                            <span className="badge-value">{formatTime(elapsedSeconds)}</span>
+                        </div>
+                        <div className="hud-badge high-score-badge">
+                            <span className="badge-icon">🏆</span>
+                            <span className="badge-label">Best</span>
+                            <span className="badge-value">{highScore}</span>
+                        </div>
+                    </>
+                )}
 
                 {starTimer > 0 && (
                     <div className="hud-badge star-power-badge">

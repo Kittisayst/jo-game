@@ -59,6 +59,7 @@ export interface Level
     finishType?: 'flag' | 'door';
     scenery?: 'village' | 'default';
     nextLevel?: string | null;
+    trackTime?: boolean;
 }
 
 

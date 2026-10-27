@@ -38,7 +38,8 @@ export class GameSession
         initialScore = 0,
         initialLives = 3,
         initialCoins = 0,
-        initialElapsedMs = 0
+        initialElapsedMs = 0,
+        readonly trackTime = true
     )
     {
         this._levelId = initialLevelId;
@@ -94,7 +95,7 @@ export class GameSession
         springExpired: boolean;
     }
     {
-        if (deltaMs > 0 && !this.isGameOver)
+        if (deltaMs > 0 && !this.isGameOver && this.trackTime)
         {
             this._elapsedMs += deltaMs;
         }

@@ -391,13 +391,20 @@ function App ()
         setSpringTimer(0);
         setBossHp(null);
 
+        const isFromVillage = currentLevel === 'village';
+        const nextElapsedMs = isFromVillage ? 0 : Math.round(elapsedSeconds * 1000);
+        if (isFromVillage)
+        {
+            setElapsedSeconds(0);
+        }
+
         phaserRef.current?.scene?.scene.restart({
             levelKey: target,
             score,
             lives,
             skinId: activeSkinId,
             coins: coinsCount,
-            elapsedMs: Math.round(elapsedSeconds * 1000),
+            elapsedMs: nextElapsedMs,
         });
     };
 

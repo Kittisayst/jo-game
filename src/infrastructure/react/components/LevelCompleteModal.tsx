@@ -41,36 +41,49 @@ export function LevelCompleteModal ({
         <div className="level-complete-overlay">
             <div className="level-complete-card">
                 <h2>{heading}</h2>
-                <div className="complete-stats">
-                    <div className="stat-item">
-                        <span className="stat-label">🚩 Stage:</span>
-                        <strong className="stat-val">{currentLevel.toUpperCase()}</strong>
-                    </div>
-                    <div className="stat-item">
-                        <span className="stat-label">🪙 Coins:</span>
-                        <strong className="stat-val">{coinsCount}</strong>
-                    </div>
-                    <div className="stat-item">
-                        <span className="stat-label">⭐ Total Score:</span>
-                        <strong className="stat-val">
-                            {score}
-                            {isNewHighScore && <span className="record-pill">🎉 Record!</span>}
-                        </strong>
-                    </div>
-                    <div className="stat-item">
-                        <span className="stat-label">⏱️ Speedrun Time:</span>
-                        <strong className="stat-val">
-                            {formatTime(elapsedSeconds)}
-                            {isNewBestTime && <span className="record-pill">🔥 Best!</span>}
-                        </strong>
-                    </div>
-                    {bestTime !== null && (
+                {currentLevel === 'village' ? (
+                    <div className="complete-stats">
                         <div className="stat-item">
-                            <span className="stat-label">🏆 Best Time:</span>
-                            <strong className="stat-val">{formatTime(bestTime)}</strong>
+                            <span className="stat-label">🏡 ສະຖານທີ່:</span>
+                            <strong className="stat-val">ໝູ່ບ້ານເລີ່ມຕົ້ນ (Village)</strong>
                         </div>
-                    )}
-                </div>
+                        <div className="stat-item">
+                            <span className="stat-label">🚪 ປະຕູສູ່ Level 1:</span>
+                            <strong className="stat-val">ເປີດພ້ອມອອກຜະຈົນໄພແລ້ວ!</strong>
+                        </div>
+                    </div>
+                ) : (
+                    <div className="complete-stats">
+                        <div className="stat-item">
+                            <span className="stat-label">🚩 Stage:</span>
+                            <strong className="stat-val">{currentLevel.toUpperCase()}</strong>
+                        </div>
+                        <div className="stat-item">
+                            <span className="stat-label">🪙 Coins:</span>
+                            <strong className="stat-val">{coinsCount}</strong>
+                        </div>
+                        <div className="stat-item">
+                            <span className="stat-label">⭐ Total Score:</span>
+                            <strong className="stat-val">
+                                {score}
+                                {isNewHighScore && <span className="record-pill">🎉 Record!</span>}
+                            </strong>
+                        </div>
+                        <div className="stat-item">
+                            <span className="stat-label">⏱️ Speedrun Time:</span>
+                            <strong className="stat-val">
+                                {formatTime(elapsedSeconds)}
+                                {isNewBestTime && <span className="record-pill">🔥 Best!</span>}
+                            </strong>
+                        </div>
+                        {bestTime !== null && (
+                            <div className="stat-item">
+                                <span className="stat-label">🏆 Best Time:</span>
+                                <strong className="stat-val">{formatTime(bestTime)}</strong>
+                            </div>
+                        )}
+                    </div>
+                )}
 
                 <div className="modal-actions">
                     {nextLevel ? (

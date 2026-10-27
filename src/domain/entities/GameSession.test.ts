@@ -105,4 +105,12 @@ describe('GameSession entity', () =>
             springSeconds: 0,
         });
     });
+
+    it('does not increment elapsed time when trackTime is false', () =>
+    {
+        const session = new GameSession('village', 0, 3, 0, 0, false);
+        session.tick(1000);
+        expect(session.elapsedMs).toBe(0);
+        expect(session.elapsedSeconds).toBe(0);
+    });
 });

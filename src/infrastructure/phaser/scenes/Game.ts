@@ -64,7 +64,7 @@ export class Game extends Scene
     score: Score;
     lives: Lives;
     powerUpState: PowerUpState;
-    currentLevelKey = 'level-1';
+    currentLevelKey = 'village';
     currentSkinId = 'cyber-blue';
     initialScoreValue = 0;
     initialLivesValue = 3;
@@ -124,12 +124,14 @@ export class Game extends Scene
     {
         this.level = this.cache.json.get(this.currentLevelKey) as Level;
         this.levelProgress = new LevelProgress(this.currentLevelKey, this.level.nextLevel || null);
+        const trackTime = this.level.trackTime ?? (this.currentLevelKey !== 'village');
         this.session = new GameSession(
             this.currentLevelKey,
             this.initialScoreValue,
             this.initialLivesValue,
             this.initialCoinsValue,
-            this.initialElapsedMs
+            this.initialElapsedMs,
+            trackTime
         );
         this.score = this.session.score;
         this.lives = this.session.lives;
@@ -438,14 +440,27 @@ export class Game extends Scene
     private createVillageScenery ()
     {
         const housePositions = [
-            { x: 360, width: 140, height: 160, roofColor: 0xd97706, bodyColor: 0x334155 },
-            { x: 620, width: 150, height: 140, roofColor: 0x0284c7, bodyColor: 0x1e293b },
-            { x: 880, width: 180, height: 200, roofColor: 0xb91c1c, bodyColor: 0x334155 },
-            { x: 1140, width: 150, height: 150, roofColor: 0x15803d, bodyColor: 0x1e293b },
-            { x: 1360, width: 160, height: 170, roofColor: 0x7c3aed, bodyColor: 0x334155 },
+            { x: 340, width: 140, height: 160, roofColor: 0xd97706, bodyColor: 0x334155 },
+            { x: 580, width: 150, height: 140, roofColor: 0x0284c7, bodyColor: 0x1e293b },
+            { x: 820, width: 170, height: 190, roofColor: 0xb91c1c, bodyColor: 0x334155 },
+            { x: 1060, width: 150, height: 150, roofColor: 0x15803d, bodyColor: 0x1e293b },
+            { x: 1260, width: 140, height: 160, roofColor: 0x7c3aed, bodyColor: 0x334155 },
         ];
 
         const baseY = WORLD_HEIGHT - GROUND_HEIGHT;
+
+        // Village background trees & shrubs
+        const treeXPositions = [220, 460, 700, 940, 1160];
+        for (const tx of treeXPositions)
+        {
+            const tree = this.add.graphics();
+            tree.fillStyle(0x78350f, 1);
+            tree.fillRect(tx - 6, baseY - 50, 12, 50);
+            tree.fillStyle(0x15803d, 0.95);
+            tree.fillCircle(tx, baseY - 70, 26);
+            tree.fillStyle(0x22c55e, 0.9);
+            tree.fillCircle(tx - 6, baseY - 76, 18);
+        }
 
         for (const house of housePositions)
         {
@@ -484,7 +499,7 @@ export class Game extends Scene
         }
 
         // Fences and Lanterns along the pathway
-        const lanternXPositions = [260, 500, 760, 1020, 1260, 1530];
+        const lanternXPositions = [280, 520, 760, 1000, 1200, 1370];
         for (const lx of lanternXPositions)
         {
             const post = this.add.graphics();
@@ -510,7 +525,7 @@ export class Game extends Scene
         welcomeSign.setOrigin(0.5, 0.5);
 
         // Signpost pointing to Level 1 Door
-        const doorSign = this.add.text(1520, baseY - 85, '🚪 ປະຕູສູ່ Level 1 ➡️\n(Green Plains)', {
+        const doorSign = this.add.text(1380, baseY - 85, '🚪 ປະຕູສູ່ Level 1 ➡️\n(Green Plains)', {
             fontFamily: 'Noto Sans Lao, sans-serif',
             fontSize: '15px',
             color: '#38bdf8',
