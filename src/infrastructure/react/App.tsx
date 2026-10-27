@@ -35,6 +35,14 @@ import { SkinManager, AVAILABLE_SKINS } from '../../domain/entities/Skin';
 import { selectSkinUseCase } from '../../application/SelectSkinUseCase';
 import { Settings } from '../../domain/entities/Settings';
 import { soundManager } from '../audio/SoundManager';
+import { GamePauseState } from '../../domain/entities/GamePauseState';
+import {
+    GAME_PAUSED_EVENT,
+    GAME_RESUMED_EVENT,
+    pauseGameUseCase,
+    resumeGameUseCase,
+    togglePauseUseCase,
+} from '../../application/TogglePauseUseCase';
 
 function App()
 {
@@ -67,6 +75,8 @@ function App()
     const [isMainMenuOpen, setIsMainMenuOpen] = useState(true);
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
     const [isStageSelectOpen, setIsStageSelectOpen] = useState(false);
+    const [pauseState] = useState(() => new GamePauseState(false));
+    const [isGamePaused, setIsGamePaused] = useState(false);
     const [highScore, setHighScore] = useState(gameStats.highScore);
     const [bestTime, setBestTime] = useState<number | null>(gameStats.bestTimeSeconds);
     const [elapsedSeconds, setElapsedSeconds] = useState(0);
@@ -82,6 +92,22 @@ function App()
     elapsedSecondsRef.current = elapsedSeconds;
     const gameStatsRef = useRef(gameStats);
     gameStatsRef.current = gameStats;
+    const pauseStateRef = useRef(pauseState);
+    pauseStateRef.current = pauseState;
+    const isGamePausedRef = useRef(isGamePaused);
+    isGamePausedRef.current = isGamePaused;
+    const isMainMenuOpenRef = useRef(isMainMenuOpen);
+    isMainMenuOpenRef.current = isMainMenuOpen;
+    const levelCompleteRef = useRef(levelComplete);
+    levelCompleteRef.current = levelComplete;
+    const gameOverRef = useRef(gameOver);
+    gameOverRef.current = gameOver;
+    const isSkinModalOpenRef = useRef(isSkinModalOpen);
+    isSkinModalOpenRef.current = isSkinModalOpen;
+    const isSettingsOpenRef = useRef(isSettingsOpen);
+    isSettingsOpenRef.current = isSettingsOpen;
+    const isStageSelectOpenRef = useRef(isStageSelectOpen);
+    isStageSelectOpenRef.current = isStageSelectOpen;
 
     useEffect(() =>
     {
@@ -163,6 +189,16 @@ function App()
             setScore(payload.totalScore);
         };
 
+        const onGamePaused = () =>
+        {
+            setIsGamePaused(true);
+        };
+
+        const onGameResumed = () =>
+        {
+            setIsGamePaused(false);
+        };
+
         const handleKeyDown = (e: KeyboardEvent) =>
         {
             if (e.key === 'm' || e.key === 'M')
@@ -172,6 +208,28 @@ function App()
             else if (e.key === 'b' || e.key === 'B')
             {
                 setIsMusicMuted(soundManager.toggleMusicMute());
+            }
+            else if (e.key === 'Escape' || e.key === 'p' || e.key === 'P')
+            {
+                if (isMainMenuOpenRef.current || levelCompleteRef.current || gameOverRef.current) return;
+
+                if (isSkinModalOpenRef.current)
+                {
+                    setIsSkinModalOpen(false);
+                    return;
+                }
+                if (isSettingsOpenRef.current)
+                {
+                    setIsSettingsOpen(false);
+                    return;
+                }
+                if (isStageSelectOpenRef.current)
+                {
+                    setIsStageSelectOpen(false);
+                    return;
+                }
+
+                togglePauseUseCase(pauseStateRef.current);
             }
         };
 
@@ -183,6 +241,8 @@ function App()
         DomainEvents.on<PowerUpCollectedPayload>(POWERUP_COLLECTED_EVENT, onPowerUpCollected);
         DomainEvents.on<BossDamagedPayload>(BOSS_DAMAGED_EVENT, onBossDamaged);
         DomainEvents.on<BossDefeatedPayload>(BOSS_DEFEATED_EVENT, onBossDefeated);
+        DomainEvents.on(GAME_PAUSED_EVENT, onGamePaused);
+        DomainEvents.on(GAME_RESUMED_EVENT, onGameResumed);
         window.addEventListener('keydown', handleKeyDown);
 
         return () =>
@@ -195,6 +255,8 @@ function App()
             DomainEvents.off<PowerUpCollectedPayload>(POWERUP_COLLECTED_EVENT, onPowerUpCollected);
             DomainEvents.off<BossDamagedPayload>(BOSS_DAMAGED_EVENT, onBossDamaged);
             DomainEvents.off<BossDefeatedPayload>(BOSS_DEFEATED_EVENT, onBossDefeated);
+            DomainEvents.off(GAME_PAUSED_EVENT, onGamePaused);
+            DomainEvents.off(GAME_RESUMED_EVENT, onGameResumed);
             window.removeEventListener('keydown', handleKeyDown);
         };
     }, []);
@@ -213,10 +275,10 @@ function App()
         return () => clearInterval(interval);
     }, [starTimer, springTimer]);
 
-    // Speedrun elapsed timer
+    // Speedrun elapsed timer (pauses when game is paused)
     useEffect(() =>
     {
-        if (isMainMenuOpen || levelComplete || gameOver) return;
+        if (isMainMenuOpen || levelComplete || gameOver || isGamePaused) return;
 
         const timer = setInterval(() =>
         {
@@ -224,7 +286,7 @@ function App()
         }, 100);
 
         return () => clearInterval(timer);
-    }, [isMainMenuOpen, levelComplete, gameOver]);
+    }, [isMainMenuOpen, levelComplete, gameOver, isGamePaused]);
 
     const formatTime = (seconds: number | null): string =>
     {
@@ -249,8 +311,21 @@ function App()
         setIsMusicMuted(musicMuted);
     };
 
+    const handlePauseGame = () =>
+    {
+        if (isMainMenuOpen || levelComplete || gameOver) return;
+        pauseGameUseCase(pauseState);
+    };
+
+    const handleResumeGame = () =>
+    {
+        resumeGameUseCase(pauseState);
+    };
+
     const handleStartGame = (stageKey = 'level-1') =>
     {
+        resumeGameUseCase(pauseState);
+        setIsGamePaused(false);
         setIsMainMenuOpen(false);
         setIsStageSelectOpen(false);
         setIsSettingsOpen(false);
@@ -278,6 +353,8 @@ function App()
 
     const handleOpenMainMenu = () =>
     {
+        resumeGameUseCase(pauseState);
+        setIsGamePaused(false);
         setIsMainMenuOpen(true);
         setIsSettingsOpen(false);
         setIsSkinModalOpen(false);
@@ -305,6 +382,8 @@ function App()
     {
         if (!nextLevel) return;
 
+        resumeGameUseCase(pauseState);
+        setIsGamePaused(false);
         const target = nextLevel;
         setCurrentLevel(target);
         setLevelComplete(false);
@@ -323,6 +402,8 @@ function App()
 
     const handleRestart = (resetToStart = false) =>
     {
+        resumeGameUseCase(pauseState);
+        setIsGamePaused(false);
         const target = resetToStart ? 'level-1' : currentLevel;
 
         if (resetToStart)
@@ -416,53 +497,13 @@ function App()
                 )}
 
                 <button
-                    className={`hud-badge sound-toggle-btn ${isMuted ? 'muted' : ''}`}
-                    onClick={handleToggleMute}
-                    title="Toggle Sound (M)"
+                    className={`hud-badge hud-menu-btn ${isGamePaused ? 'paused-active' : ''}`}
+                    onClick={isGamePaused ? handleResumeGame : handlePauseGame}
+                    title="In-Game Menu & Pause (Esc / P)"
                     type="button"
                 >
-                    <span className="badge-icon">{isMuted ? '🔇' : '🔊'}</span>
-                    <span className="badge-label">{isMuted ? 'Muted' : 'Sound'}</span>
-                </button>
-
-                <button
-                    className={`hud-badge sound-toggle-btn music-btn ${isMusicMuted ? 'muted' : ''}`}
-                    onClick={handleToggleMusic}
-                    title="Toggle Background Music (B)"
-                    type="button"
-                >
-                    <span className="badge-icon">{isMusicMuted ? '🔇' : '🎵'}</span>
-                    <span className="badge-label">{isMusicMuted ? 'BGM Off' : 'BGM'}</span>
-                </button>
-
-                <button
-                    className="hud-badge skin-selector-btn"
-                    onClick={() => setIsSkinModalOpen(true)}
-                    title="Change Character Skin"
-                    type="button"
-                >
-                    <span className="badge-icon">🥋</span>
-                    <span className="badge-label">Skin</span>
-                </button>
-
-                <button
-                    className="hud-badge sound-toggle-btn"
-                    onClick={() => setIsSettingsOpen(true)}
-                    title="Game Settings"
-                    type="button"
-                >
-                    <span className="badge-icon">⚙️</span>
-                    <span className="badge-label">Settings</span>
-                </button>
-
-                <button
-                    className="hud-badge sound-toggle-btn"
-                    onClick={handleOpenMainMenu}
-                    title="Main Menu"
-                    type="button"
-                >
-                    <span className="badge-icon">🏠</span>
-                    <span className="badge-label">Menu</span>
+                    <span className="badge-icon">{isGamePaused ? '▶️' : '⏸️'}</span>
+                    <span className="badge-label">{isGamePaused ? 'ສືບຕໍ່' : 'ເມນູ (Menu)'}</span>
                 </button>
             </div>
 
@@ -570,6 +611,123 @@ function App()
                                     Play Again from Start 🔄
                                 </button>
                             )}
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Dedicated In-Game Pause Menu */}
+            {isGamePaused && !isMainMenuOpen && !levelComplete && !gameOver && (
+                <div className="pause-menu-overlay" onClick={handleResumeGame}>
+                    <div className="pause-menu-card" onClick={e => e.stopPropagation()}>
+                        <div className="pause-header">
+                            <div>
+                                <h2 className="pause-title">⏸️ ຢຸດເກມຊົ່ວຄາວ</h2>
+                                <span className="pause-subtitle">PAUSE MENU • ກົດ Esc / P ເພື່ອສືບຕໍ່</span>
+                            </div>
+                            <button
+                                className="skin-close-btn"
+                                onClick={handleResumeGame}
+                                title="Close & Resume Game (Esc)"
+                                type="button"
+                            >
+                                ✕
+                            </button>
+                        </div>
+
+                        <div className="pause-stats-banner">
+                            <div className="pause-stat-item">
+                                <span className="pause-stat-label">🚩 ດ່ານ</span>
+                                <span className="pause-stat-val">
+                                    {currentLevel === 'level-1' ? 'Level 1' : currentLevel === 'level-2' ? 'Level 2' : 'Level 3 👑'}
+                                </span>
+                            </div>
+                            <div className="pause-stat-item">
+                                <span className="pause-stat-label">⭐ ຄະແນນ</span>
+                                <span className="pause-stat-val">{score}</span>
+                            </div>
+                            <div className="pause-stat-item">
+                                <span className="pause-stat-label">🪙 ຫຼຽນ</span>
+                                <span className="pause-stat-val">{coinsCount}</span>
+                            </div>
+                            <div className="pause-stat-item">
+                                <span className="pause-stat-label">⏱️ ເວລາ</span>
+                                <span className="pause-stat-val">{formatTime(elapsedSeconds)}</span>
+                            </div>
+                        </div>
+
+                        {/* Quick Sound & Music Settings inside Pause Menu */}
+                        <div className="pause-audio-box">
+                            <div className="pause-audio-row">
+                                <div className="pause-audio-info">
+                                    <span className="pause-audio-icon">{isMuted ? '🔇' : '🔊'}</span>
+                                    <span className="pause-audio-name">ສຽງ Effect (SFX)</span>
+                                </div>
+                                <button
+                                    className={`settings-switch-btn ${isMuted ? 'off' : 'on'}`}
+                                    onClick={handleToggleMute}
+                                    type="button"
+                                >
+                                    {isMuted ? 'OFF' : 'ON'}
+                                </button>
+                            </div>
+
+                            <div className="pause-audio-row">
+                                <div className="pause-audio-info">
+                                    <span className="pause-audio-icon">{isMusicMuted ? '🔇' : '🎵'}</span>
+                                    <span className="pause-audio-name">ເພງ BGM Chiptune</span>
+                                </div>
+                                <button
+                                    className={`settings-switch-btn ${isMusicMuted ? 'off' : 'on'}`}
+                                    onClick={handleToggleMusic}
+                                    type="button"
+                                >
+                                    {isMusicMuted ? 'OFF' : 'ON'}
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Menu Actions */}
+                        <div className="pause-buttons-list">
+                            <button
+                                className="menu-action-btn primary pulse"
+                                onClick={handleResumeGame}
+                                type="button"
+                            >
+                                ▶️ ສືບຕໍ່ຫຼິ້ນ (Resume Game)
+                            </button>
+
+                            <button
+                                className="menu-action-btn secondary"
+                                onClick={() => setIsSkinModalOpen(true)}
+                                type="button"
+                            >
+                                🥋 ປ່ຽນຊຸດຕົວລະຄອນ ({AVAILABLE_SKINS.find(s => s.id === activeSkinId)?.name.split(' ')[0]})
+                            </button>
+
+                            <button
+                                className="menu-action-btn secondary"
+                                onClick={() => setIsSettingsOpen(true)}
+                                type="button"
+                            >
+                                ⚙️ ຕັ້ງຄ່າ & ຄູ່ມືບັງຄັບ (Settings & Guide)
+                            </button>
+
+                            <button
+                                className="menu-action-btn secondary"
+                                onClick={() => handleRestart(false)}
+                                type="button"
+                            >
+                                🔄 ເລີ່ມດ່ານນີ້ໃໝ່ (Restart Level)
+                            </button>
+
+                            <button
+                                className="menu-action-btn danger"
+                                onClick={handleOpenMainMenu}
+                                type="button"
+                            >
+                                🏠 ກັບໄປໜ້າຫຼັກ (Exit to Main Menu)
+                            </button>
                         </div>
                     </div>
                 </div>

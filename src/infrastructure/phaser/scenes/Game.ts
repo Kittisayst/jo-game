@@ -26,6 +26,10 @@ import {
     SKIN_CHANGED_EVENT,
     SkinChangedPayload,
 } from '../../../application/SelectSkinUseCase';
+import {
+    GAME_PAUSED_EVENT,
+    GAME_RESUMED_EVENT,
+} from '../../../application/TogglePauseUseCase';
 
 const WORLD_HEIGHT = 720;
 const GROUND_HEIGHT = 64;
@@ -202,9 +206,31 @@ export class Game extends Scene
         };
         DomainEvents.on<SkinChangedPayload>(SKIN_CHANGED_EVENT, onSkinChanged);
 
+        const onGamePaused = () =>
+        {
+            if (this.scene.isActive())
+            {
+                this.physics.pause();
+                this.scene.pause();
+            }
+        };
+        DomainEvents.on(GAME_PAUSED_EVENT, onGamePaused);
+
+        const onGameResumed = () =>
+        {
+            if (this.scene.isPaused())
+            {
+                this.scene.resume();
+                this.physics.resume();
+            }
+        };
+        DomainEvents.on(GAME_RESUMED_EVENT, onGameResumed);
+
         this.events.on('shutdown', () =>
         {
             DomainEvents.off<SkinChangedPayload>(SKIN_CHANGED_EVENT, onSkinChanged);
+            DomainEvents.off(GAME_PAUSED_EVENT, onGamePaused);
+            DomainEvents.off(GAME_RESUMED_EVENT, onGameResumed);
             soundManager.stopBgm();
         });
 
