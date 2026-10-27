@@ -1,64 +1,34 @@
-import {
-    IGameStatsRepository,
-    GameStatsData,
-} from '../../application/SaveGameStatsUseCase';
+import { GameStatsData, GameStatsPort } from '../../domain/ports';
+import { readJson, removeKey, writeJson } from './safeStorage';
 
 const STORAGE_KEY = 'jo_game_stats_v1';
 
 /**
- * Browser LocalStorage implementation of IGameStatsRepository.
- * Handles graceful fallbacks in non-browser or storage-restricted environments.
+ * Browser LocalStorage implementation of GameStatsPort.
  * Lives in infrastructure layer — see CONTEXT.md.
  */
-export class LocalStorageGameStatsRepository implements IGameStatsRepository
+export class LocalStorageGameStatsRepository implements GameStatsPort
 {
     load (): GameStatsData
     {
-        const defaultData: GameStatsData = {
-            highScore: 0,
-            bestTimeSeconds: null,
+        const parsed = readJson<Partial<GameStatsData>>(STORAGE_KEY);
+        return {
+            highScore: typeof parsed?.highScore === 'number' ? Math.max(0, parsed.highScore) : 0,
+            bestTimeSeconds:
+                typeof parsed?.bestTimeSeconds === 'number' && parsed.bestTimeSeconds > 0
+                    ? parsed.bestTimeSeconds
+                    : null,
         };
-
-        if (typeof window === 'undefined' || !window.localStorage)
-        {
-            return defaultData;
-        }
-
-        try
-        {
-            const raw = window.localStorage.getItem(STORAGE_KEY);
-            if (!raw) return defaultData;
-
-            const parsed = JSON.parse(raw);
-            return {
-                highScore: typeof parsed.highScore === 'number' ? Math.max(0, parsed.highScore) : 0,
-                bestTimeSeconds:
-                    typeof parsed.bestTimeSeconds === 'number' && parsed.bestTimeSeconds > 0
-                        ? parsed.bestTimeSeconds
-                        : null,
-            };
-        }
-        catch
-        {
-            return defaultData;
-        }
     }
 
     save (data: GameStatsData): void
     {
-        if (typeof window === 'undefined' || !window.localStorage)
-        {
-            return;
-        }
+        writeJson(STORAGE_KEY, data);
+    }
 
-        try
-        {
-            window.localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-        }
-        catch
-        {
-            // Ignore quota or private-browsing storage errors gracefully
-        }
+    clear (): void
+    {
+        removeKey(STORAGE_KEY);
     }
 }
 

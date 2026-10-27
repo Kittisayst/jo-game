@@ -22,6 +22,11 @@ class MockGameStatsRepository implements IGameStatsRepository
     {
         this.savedData = { ...data };
     }
+
+    clear (): void
+    {
+        this.savedData = { highScore: 0, bestTimeSeconds: null };
+    }
 }
 
 describe('recordGameResultUseCase', () =>

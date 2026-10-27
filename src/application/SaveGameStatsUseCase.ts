@@ -1,17 +1,11 @@
 import { DomainEvents } from '../domain/DomainEvents';
 import { GameStats } from '../domain/entities/GameStats';
+import { GameStatsData, GameStatsPort } from '../domain/ports';
 
-export interface GameStatsData
-{
-    highScore: number;
-    bestTimeSeconds: number | null;
-}
-
-export interface IGameStatsRepository
-{
-    load(): GameStatsData;
-    save(data: GameStatsData): void;
-}
+/** @deprecated Import from `domain/ports` instead. Kept as aliases for existing callers. */
+export type { GameStatsData };
+/** @deprecated Use `GameStatsPort` from `domain/ports`. */
+export type IGameStatsRepository = GameStatsPort;
 
 export const GAME_STATS_UPDATED_EVENT = 'game-stats-updated';
 
@@ -30,7 +24,7 @@ export interface GameStatsUpdatedPayload
  */
 export function recordGameResultUseCase (
     gameStats: GameStats,
-    repository: IGameStatsRepository,
+    repository: GameStatsPort,
     currentScore: number,
     currentTimeSeconds?: number
 ): GameStatsUpdatedPayload

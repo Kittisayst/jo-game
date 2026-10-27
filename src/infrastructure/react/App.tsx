@@ -28,14 +28,12 @@ import {
     BossDamagedPayload,
     BossDefeatedPayload,
 } from '../../application/DamageBossUseCase';
-import { GameStats } from '../../domain/entities/GameStats';
 import { recordGameResultUseCase } from '../../application/SaveGameStatsUseCase';
-import { localStorageGameStatsRepository } from '../storage/LocalStorageGameStatsRepository';
-import { SkinManager, AVAILABLE_SKINS } from '../../domain/entities/Skin';
-import { selectSkinUseCase } from '../../application/SelectSkinUseCase';
-import { Settings } from '../../domain/entities/Settings';
+import { AVAILABLE_SKINS } from '../../domain/entities/Skin';
+import { selectSkinUseCase, skinUnlockScore } from '../../application/SelectSkinUseCase';
+import { toggleSoundUseCase, toggleMusicUseCase } from '../../application/UpdateSettingsUseCase';
+import { resetSaveDataUseCase } from '../../application/ResetSaveDataUseCase';
 import { soundManager } from '../audio/SoundManager';
-import { GamePauseState } from '../../domain/entities/GamePauseState';
 import {
     GAME_PAUSED_EVENT,
     GAME_RESUMED_EVENT,
@@ -43,6 +41,7 @@ import {
     resumeGameUseCase,
     togglePauseUseCase,
 } from '../../application/TogglePauseUseCase';
+import { entities, repositories } from '../composition';
 
 function App()
 {
@@ -54,28 +53,21 @@ function App()
     const [score, setScore] = useState(0);
     const [coinsCount, setCoinsCount] = useState(0);
     const [lives, setLives] = useState(3);
-    const [isMuted, setIsMuted] = useState(soundManager.isMuted);
-    const [isMusicMuted, setIsMusicMuted] = useState(soundManager.isMusicMuted);
+    const [gameStats] = useState(() => entities.gameStats);
+    const [skinManager] = useState(() => entities.skinManager);
+    const [settings] = useState(() => entities.settings);
+    const [pauseState] = useState(() => entities.pauseState);
+    const [isMuted, setIsMuted] = useState(entities.settings.isSoundMuted);
+    const [isMusicMuted, setIsMusicMuted] = useState(entities.settings.isMusicMuted);
     const [starTimer, setStarTimer] = useState(0);
     const [springTimer, setSpringTimer] = useState(0);
     const [bossHp, setBossHp] = useState<number | null>(null);
     const [bossMaxHp, setBossMaxHp] = useState(5);
-    const [gameStats] = useState(() =>
-    {
-        const data = localStorageGameStatsRepository.load();
-        return new GameStats(data.highScore, data.bestTimeSeconds);
-    });
-    const [skinManager] = useState(() =>
-    {
-        const saved = typeof window !== 'undefined' ? localStorage.getItem('jo_active_skin') : null;
-        return new SkinManager(saved || 'cyber-blue');
-    });
-    const [activeSkinId, setActiveSkinId] = useState(skinManager.activeSkinId);
+    const [activeSkinId, setActiveSkinId] = useState(entities.skinManager.activeSkinId);
     const [isSkinModalOpen, setIsSkinModalOpen] = useState(false);
     const [isMainMenuOpen, setIsMainMenuOpen] = useState(true);
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
     const [isStageSelectOpen, setIsStageSelectOpen] = useState(false);
-    const [pauseState] = useState(() => new GamePauseState(false));
     const [isGamePaused, setIsGamePaused] = useState(false);
     const [highScore, setHighScore] = useState(gameStats.highScore);
     const [bestTime, setBestTime] = useState<number | null>(gameStats.bestTimeSeconds);
@@ -83,8 +75,6 @@ function App()
     const [isNewHighScore, setIsNewHighScore] = useState(false);
     const [isNewBestTime, setIsNewBestTime] = useState(false);
     const maxLives = 3;
-
-    const [settings] = useState(() => new Settings(soundManager.isMuted, soundManager.isMusicMuted));
 
     const scoreRef = useRef(score);
     scoreRef.current = score;
@@ -118,7 +108,7 @@ function App()
 
             const result = recordGameResultUseCase(
                 gameStatsRef.current,
-                localStorageGameStatsRepository,
+                repositories.gameStats,
                 scoreRef.current,
                 !payload.nextLevel ? elapsedSecondsRef.current : undefined
             );
@@ -153,7 +143,7 @@ function App()
             setGameOver(true);
             const result = recordGameResultUseCase(
                 gameStatsRef.current,
-                localStorageGameStatsRepository,
+                repositories.gameStats,
                 scoreRef.current
             );
             setHighScore(result.highScore);
@@ -203,11 +193,11 @@ function App()
         {
             if (e.key === 'm' || e.key === 'M')
             {
-                setIsMuted(soundManager.toggleMute());
+                setIsMuted(toggleSoundUseCase(entities.settings, repositories.settings).soundMuted);
             }
             else if (e.key === 'b' || e.key === 'B')
             {
-                setIsMusicMuted(soundManager.toggleMusicMute());
+                setIsMusicMuted(toggleMusicUseCase(entities.settings, repositories.settings).musicMuted);
             }
             else if (e.key === 'Escape' || e.key === 'p' || e.key === 'P')
             {
@@ -261,10 +251,10 @@ function App()
         };
     }, []);
 
-    // Countdown interval for power-up timers
+    // Countdown interval for power-up timers (pauses when game is paused or in main menu)
     useEffect(() =>
     {
-        if (starTimer <= 0 && springTimer <= 0) return;
+        if (isMainMenuOpen || isGamePaused || (starTimer <= 0 && springTimer <= 0)) return;
 
         const interval = setInterval(() =>
         {
@@ -273,7 +263,7 @@ function App()
         }, 1000);
 
         return () => clearInterval(interval);
-    }, [starTimer, springTimer]);
+    }, [isMainMenuOpen, isGamePaused, starTimer, springTimer]);
 
     // Speedrun elapsed timer (pauses when game is paused)
     useEffect(() =>
@@ -299,16 +289,14 @@ function App()
 
     const handleToggleMute = () =>
     {
-        const muted = soundManager.toggleMute();
-        settings.setSoundMuted(muted);
-        setIsMuted(muted);
+        const payload = toggleSoundUseCase(settings, repositories.settings);
+        setIsMuted(payload.soundMuted);
     };
 
     const handleToggleMusic = () =>
     {
-        const musicMuted = soundManager.toggleMusicMute();
-        settings.setMusicMuted(musicMuted);
-        setIsMusicMuted(musicMuted);
+        const payload = toggleMusicUseCase(settings, repositories.settings);
+        setIsMusicMuted(payload.musicMuted);
     };
 
     const handlePauseGame = () =>
@@ -368,12 +356,15 @@ function App()
     {
         if (typeof window !== 'undefined' && window.confirm('Are you sure you want to reset all High Scores and saved data?'))
         {
-            localStorage.clear();
-            gameStats.reset();
-            skinManager.forceEquip('cyber-blue');
+            resetSaveDataUseCase(
+                { gameStats, skinManager, settings },
+                repositories
+            );
             setHighScore(0);
             setBestTime(null);
             setActiveSkinId('cyber-blue');
+            setIsMuted(settings.isSoundMuted);
+            setIsMusicMuted(settings.isMusicMuted);
             setIsNewHighScore(false);
             setIsNewBestTime(false);
             soundManager.playCoin();
@@ -436,15 +427,10 @@ function App()
 
     const handleEquipSkin = (skinId: string) =>
     {
-        const playerBestScore = Math.max(score, highScore);
-        const success = selectSkinUseCase(skinManager, skinId, playerBestScore);
+        const success = selectSkinUseCase(skinManager, skinId, score, highScore, repositories.skin);
         if (success)
         {
             setActiveSkinId(skinId);
-            if (typeof window !== 'undefined')
-            {
-                localStorage.setItem('jo_active_skin', skinId);
-            }
         }
     };
 
@@ -765,7 +751,7 @@ function App()
                         </div>
                         <div className="skin-grid">
                             {AVAILABLE_SKINS.map(skin => {
-                                const playerBestScore = Math.max(score, highScore);
+                                const playerBestScore = skinUnlockScore(score, highScore);
                                 const isUnlocked = skinManager.isSkinUnlocked(skin.id, playerBestScore);
                                 const isEquipped = activeSkinId === skin.id;
 

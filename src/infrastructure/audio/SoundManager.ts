@@ -15,6 +15,10 @@ import {
     GAME_PAUSED_EVENT,
     GAME_RESUMED_EVENT,
 } from '../../application/TogglePauseUseCase';
+import {
+    SETTINGS_CHANGED_EVENT,
+    SettingsChangedPayload,
+} from '../../application/UpdateSettingsUseCase';
 
 // Adventure melody notes (C major energetic 8-bit chiptune)
 const ADVENTURE_MELODY = [
@@ -167,6 +171,11 @@ export class SoundManager
             this.resumeBgm();
             this.playResume();
         });
+        DomainEvents.on<SettingsChangedPayload>(SETTINGS_CHANGED_EVENT, ({ soundMuted, musicMuted }) =>
+        {
+            this.setMuted(soundMuted);
+            this.setMusicMuted(musicMuted);
+        });
     }
 
     // --- BGM Engine ---
@@ -298,31 +307,22 @@ export class SoundManager
         return this._isMusicMuted;
     }
 
-    toggleMusicMute (): boolean
-    {
-        this._isMusicMuted = !this._isMusicMuted;
-        if (this.bgmGain && this.ctx)
-        {
-            this.bgmGain.gain.setValueAtTime(this._isMusicMuted ? 0 : 0.045, this.ctx.currentTime);
-        }
-        return this._isMusicMuted;
-    }
-
     get isMuted (): boolean
     {
         return this._isMuted;
     }
 
-    toggleMute (): boolean
+    /** Applied from SETTINGS_CHANGED_EVENT — `Settings` (domain) is the source of truth. */
+    setMusicMuted (muted: boolean): void
     {
-        this._isMuted = !this._isMuted;
-        if (this.masterGain && this.ctx)
+        this._isMusicMuted = muted;
+        if (this.bgmGain && this.ctx)
         {
-            this.masterGain.gain.setValueAtTime(this._isMuted ? 0 : 1, this.ctx.currentTime);
+            this.bgmGain.gain.setValueAtTime(this._isMusicMuted ? 0 : 0.045, this.ctx.currentTime);
         }
-        return this._isMuted;
     }
 
+    /** Applied from SETTINGS_CHANGED_EVENT — `Settings` (domain) is the source of truth. */
     setMuted (muted: boolean): void
     {
         this._isMuted = muted;
