@@ -56,6 +56,8 @@ export interface Level
     spikes?: SpikeSpawnData[];
     movingPlatforms?: MovingPlatformSpawnData[];
     boss?: BossSpawnData;
+    finishType?: 'flag' | 'door';
+    scenery?: 'village' | 'default';
     nextLevel?: string | null;
 }
 

@@ -62,7 +62,7 @@ function App ()
     const phaserRef = useRef<IRefPhaserGame | null>(null);
     const [levelComplete, setLevelComplete] = useState(false);
     const [gameOver, setGameOver] = useState(false);
-    const [currentLevel, setCurrentLevel] = useState('level-1');
+    const [currentLevel, setCurrentLevel] = useState('village');
     const [nextLevel, setNextLevel] = useState<string | null>(null);
     const [score, setScore] = useState(0);
     const [coinsCount, setCoinsCount] = useState(0);
@@ -316,7 +316,7 @@ function App ()
         }
     };
 
-    const handleStartGame = (stageKey = 'level-1') =>
+    const handleStartGame = (stageKey = 'village') =>
     {
         resumeGameUseCase(pauseState);
         setIsGamePaused(false);
@@ -405,7 +405,7 @@ function App ()
     {
         resumeGameUseCase(pauseState);
         setIsGamePaused(false);
-        const target = resetToStart ? 'level-1' : currentLevel;
+        const target = resetToStart ? 'village' : currentLevel;
 
         if (resetToStart)
         {

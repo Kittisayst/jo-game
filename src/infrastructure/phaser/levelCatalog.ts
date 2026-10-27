@@ -11,6 +11,15 @@ export interface LevelCatalogItem
 
 export const LEVEL_CATALOG: LevelCatalogItem[] = [
     {
+        key: 'village',
+        name: '🏡 ໝູ່ບ້ານເລີ່ມຕົ້ນ (Starter Village)',
+        shortTitle: 'Village 🏡',
+        hudLabel: 'ໝູ່ບ້ານ (Village)',
+        description: 'ໝູ່ບ້ານສະຫງົບສຸກ, ເກັບຫຼຽນ, ຊອກຫາປະຕູໄປ Level 1',
+        assetPath: 'assets/levels/village.json',
+        isBoss: false,
+    },
+    {
         key: 'level-1',
         name: 'ດ່ານ 1: Green Plains',
         shortTitle: 'Level 1',

@@ -681,6 +681,7 @@ button.hud-badge,
     letter-spacing: -0.02em;
     background: linear-gradient(135deg, #38bdf8, #818cf8, #c084fc);
     -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
     filter: drop-shadow(0 0 14px rgba(56, 189, 248, 0.5));
 }

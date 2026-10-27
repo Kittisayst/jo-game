@@ -45,7 +45,7 @@ export function MainMenuModal ({
                 <div className="menu-buttons-list">
                     <button
                         className="menu-action-btn primary"
-                        onClick={() => onStartGame('level-1')}
+                        onClick={() => onStartGame('village')}
                         type="button"
                     >
                         ▶️ ເຂົ້າເກມ (Play Game)

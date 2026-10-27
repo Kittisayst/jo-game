@@ -29,11 +29,13 @@ export function LevelCompleteModal ({
     onPlayAgainFromStart,
 }: LevelCompleteModalProps)
 {
-    const heading = nextLevel
-        ? '🎉 Level Complete!'
-        : currentLevel === 'level-3'
-            ? '👑 VICTORY! KING SLIME DEFEATED!'
-            : '🏆 Game Completed!';
+    const heading = currentLevel === 'village'
+        ? '🚪 ຜ່ານປະຕູໝູ່ບ້ານແລ້ວ! (Village Gate Opened!)'
+        : nextLevel
+            ? '🎉 Level Complete!'
+            : currentLevel === 'level-3'
+                ? '👑 VICTORY! KING SLIME DEFEATED!'
+                : '🏆 Game Completed!';
 
     return (
         <div className="level-complete-overlay">
@@ -78,7 +80,7 @@ export function LevelCompleteModal ({
                                 onClick={onNextLevel}
                                 type="button"
                             >
-                                Next Level ➡️
+                                {currentLevel === 'village' ? 'ເຂົ້າສູ່ Level 1 ➡️' : 'Next Level ➡️'}
                             </button>
                             <button
                                 className="secondary-button"

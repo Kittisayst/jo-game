@@ -4,6 +4,7 @@ import { Player } from '../objects/Player';
 import { Platform } from '../objects/Platform';
 import { Coin } from '../objects/Coin';
 import { GoalFlag } from '../objects/GoalFlag';
+import { Door } from '../objects/Door';
 import { Enemy } from '../objects/Enemy';
 import { PowerUp } from '../objects/PowerUp';
 import { Spike } from '../objects/Spike';
@@ -53,7 +54,8 @@ export class Game extends Scene
     powerUps: Phaser.Physics.Arcade.StaticGroup;
     enemies: Phaser.Physics.Arcade.Group;
     boss?: Boss;
-    goalFlag: GoalFlag;
+    goalFlag?: GoalFlag;
+    door?: Door;
     particleManager: ParticleManager;
     cursors: Phaser.Types.Input.Keyboard.CursorKeys;
     level: Level;
@@ -149,13 +151,35 @@ export class Game extends Scene
         this.coins = this.createCoins();
         this.powerUps = this.createPowerUps();
         this.enemies = this.createEnemies();
-        this.powerUpState = new PowerUpState();
 
         this.particleManager = new ParticleManager(this);
 
-        // Place GoalFlag at finish line
-        const flagY = WORLD_HEIGHT - GROUND_HEIGHT - 70;
-        this.goalFlag = new GoalFlag(this, this.level.finishX, flagY);
+        if (this.level.scenery === 'village')
+        {
+            this.createVillageScenery();
+        }
+
+        // Place GoalFlag or Door at finish line
+        const finishY = WORLD_HEIGHT - GROUND_HEIGHT - 70;
+        if (this.level.finishType === 'door')
+        {
+            this.door = new Door(this, this.level.finishX, finishY);
+            this.physics.add.overlap(this.player, this.door, () =>
+            {
+                this.handleGoalReached();
+            });
+        }
+        else
+        {
+            this.goalFlag = new GoalFlag(this, this.level.finishX, finishY);
+            this.physics.add.overlap(this.player, this.goalFlag, () =>
+            {
+                if (!this.boss || this.boss.entity.isDefeated)
+                {
+                    this.handleGoalReached();
+                }
+            });
+        }
 
         this.player = new Player(this, this.level.spawn.x, this.level.spawn.y, this.currentSkinId);
         this.player.onJump = (x, y) => this.particleManager.emitJumpDust(x, y);
@@ -192,14 +216,6 @@ export class Game extends Scene
         this.physics.add.overlap(this.player, this.enemies, (playerObj, enemyObj) =>
         {
             this.handlePlayerEnemyCollision(playerObj as Player, enemyObj as Enemy);
-        });
-
-        this.physics.add.overlap(this.player, this.goalFlag, () =>
-        {
-            if (!this.boss || this.boss.entity.isDefeated)
-            {
-                this.handleGoalReached();
-            }
         });
 
         // Spawn Boss if defined for this level
@@ -405,9 +421,114 @@ export class Game extends Scene
     {
         if (this.levelProgress.isComplete) return;
 
-        this.goalFlag.celebrate();
-        this.particleManager.emitCelebration(this.goalFlag.x, this.goalFlag.y - 30);
+        if (this.door)
+        {
+            this.door.celebrate();
+            this.particleManager.emitCelebration(this.door.x, this.door.y - 30);
+        }
+        else if (this.goalFlag)
+        {
+            this.goalFlag.celebrate();
+            this.particleManager.emitCelebration(this.goalFlag.x, this.goalFlag.y - 30);
+        }
+
         completeLevelUseCase(this.levelProgress);
+    }
+
+    private createVillageScenery ()
+    {
+        const housePositions = [
+            { x: 360, width: 140, height: 160, roofColor: 0xd97706, bodyColor: 0x334155 },
+            { x: 620, width: 150, height: 140, roofColor: 0x0284c7, bodyColor: 0x1e293b },
+            { x: 880, width: 180, height: 200, roofColor: 0xb91c1c, bodyColor: 0x334155 },
+            { x: 1140, width: 150, height: 150, roofColor: 0x15803d, bodyColor: 0x1e293b },
+            { x: 1360, width: 160, height: 170, roofColor: 0x7c3aed, bodyColor: 0x334155 },
+        ];
+
+        const baseY = WORLD_HEIGHT - GROUND_HEIGHT;
+
+        for (const house of housePositions)
+        {
+            const graphics = this.add.graphics();
+
+            // House body
+            graphics.fillStyle(house.bodyColor, 0.9);
+            graphics.fillRect(house.x - house.width / 2, baseY - house.height, house.width, house.height);
+
+            // Roof
+            graphics.fillStyle(house.roofColor, 1);
+            graphics.beginPath();
+            graphics.moveTo(house.x - house.width / 2 - 16, baseY - house.height);
+            graphics.lineTo(house.x, baseY - house.height - 45);
+            graphics.lineTo(house.x + house.width / 2 + 16, baseY - house.height);
+            graphics.closePath();
+            graphics.fillPath();
+
+            // Chimney
+            graphics.fillStyle(0x475569, 1);
+            graphics.fillRect(house.x + house.width / 4, baseY - house.height - 35, 18, 25);
+
+            // Windows with warm amber light
+            graphics.fillStyle(0xfef08a, 0.95);
+            graphics.fillRect(house.x - house.width / 3, baseY - house.height + 30, 24, 24);
+            graphics.fillRect(house.x + house.width / 3 - 24, baseY - house.height + 30, 24, 24);
+
+            // Window frames
+            graphics.lineStyle(2, 0x78350f, 1);
+            graphics.strokeRect(house.x - house.width / 3, baseY - house.height + 30, 24, 24);
+            graphics.strokeRect(house.x + house.width / 3 - 24, baseY - house.height + 30, 24, 24);
+
+            // Wooden door
+            graphics.fillStyle(0x78350f, 1);
+            graphics.fillRoundedRect(house.x - 14, baseY - 48, 28, 48, 4);
+        }
+
+        // Fences and Lanterns along the pathway
+        const lanternXPositions = [260, 500, 760, 1020, 1260, 1530];
+        for (const lx of lanternXPositions)
+        {
+            const post = this.add.graphics();
+            // Iron pole
+            post.fillStyle(0x1e293b, 1);
+            post.fillRect(lx - 2, baseY - 50, 4, 50);
+            // Lantern head
+            post.fillStyle(0xf59e0b, 1);
+            post.fillCircle(lx, baseY - 54, 7);
+            post.fillStyle(0xfef08a, 0.9);
+            post.fillCircle(lx, baseY - 54, 3);
+        }
+
+        // Welcome Signpost at spawn
+        const welcomeSign = this.add.text(120, baseY - 80, '🏡 ໝູ່ບ້ານ JO RUNNER\n(ຍິນດີຕ້ອນຮັບ!)', {
+            fontFamily: 'Noto Sans Lao, sans-serif',
+            fontSize: '14px',
+            color: '#fef08a',
+            stroke: '#0f172a',
+            strokeThickness: 3,
+            align: 'center',
+        });
+        welcomeSign.setOrigin(0.5, 0.5);
+
+        // Signpost pointing to Level 1 Door
+        const doorSign = this.add.text(1520, baseY - 85, '🚪 ປະຕູສູ່ Level 1 ➡️\n(Green Plains)', {
+            fontFamily: 'Noto Sans Lao, sans-serif',
+            fontSize: '15px',
+            color: '#38bdf8',
+            stroke: '#0284c7',
+            strokeThickness: 3,
+            align: 'center',
+        });
+        doorSign.setOrigin(0.5, 0.5);
+
+        // Floating pulse on door sign
+        this.tweens.add({
+            targets: doorSign,
+            y: baseY - 92,
+            duration: 800,
+            yoyo: true,
+            repeat: -1,
+            ease: 'Sine.easeInOut',
+        });
     }
 
     private createSky ()
