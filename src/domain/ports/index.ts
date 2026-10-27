@@ -36,3 +36,17 @@ export interface SettingsPort
     save(data: SettingsData): void;
     clear(): void;
 }
+
+export interface StageProgressionData
+{
+    unlockedStages: string[];
+    completedStages: string[];
+}
+
+export interface StageProgressionPort
+{
+    load(): StageProgressionData;
+    save(data: StageProgressionData): void;
+    clear(): void;
+}
+

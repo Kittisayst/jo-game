@@ -171,9 +171,16 @@ export class Game extends Scene
         if (this.level.finishType === 'door')
         {
             this.door = new Door(this, this.level.finishX, finishY);
+            let doorDebounce = false;
             this.physics.add.overlap(this.player, this.door, () =>
             {
-                this.handleGoalReached();
+                if (doorDebounce) return;
+                doorDebounce = true;
+                this.time.delayedCall(1200, () =>
+                {
+                    doorDebounce = false;
+                });
+                this.handleDoorReached();
             });
         }
         else
@@ -417,6 +424,25 @@ export class Game extends Scene
                 player.triggerDamage(boss.x);
                 playerTakeDamageUseCase(this.lives);
             }
+        }
+    }
+
+    private handleDoorReached ()
+    {
+        if (this.door)
+        {
+            this.door.celebrate();
+            this.particleManager.emitCelebration(this.door.x, this.door.y - 30);
+            soundManager.playCoin();
+        }
+
+        if (this.currentLevelKey === 'village')
+        {
+            EventBus.emit('open-stage-map');
+        }
+        else
+        {
+            this.handleGoalReached();
         }
     }
 

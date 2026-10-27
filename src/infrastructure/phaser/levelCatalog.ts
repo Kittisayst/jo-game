@@ -7,6 +7,10 @@ export interface LevelCatalogItem
     description: string;
     assetPath: string;
     isBoss: boolean;
+    order: number;
+    prerequisite?: string;
+    badgeIcon: string;
+    tag: string;
 }
 
 export const LEVEL_CATALOG: LevelCatalogItem[] = [
@@ -15,9 +19,12 @@ export const LEVEL_CATALOG: LevelCatalogItem[] = [
         name: '🏡 ໝູ່ບ້ານເລີ່ມຕົ້ນ (Starter Village)',
         shortTitle: 'Village 🏡',
         hudLabel: 'ໝູ່ບ້ານ (Village)',
-        description: 'ໝູ່ບ້ານສະຫງົບສຸກ, ເກັບຫຼຽນ, ຊອກຫາປະຕູໄປ Level 1',
+        description: 'ໝູ່ບ້ານສະຫງົບສຸກ, ຍ່າງໄປຫາປະຕູ portal ເພື່ອເລືອກດ່ານ',
         assetPath: 'assets/levels/village.json',
         isBoss: false,
+        order: 0,
+        badgeIcon: '🏡',
+        tag: 'Peaceful Hub',
     },
     {
         key: 'level-1',
@@ -27,6 +34,9 @@ export const LEVEL_CATALOG: LevelCatalogItem[] = [
         description: 'ທົ່ງຫຍ້າຂຽວ, ເກັບຫຼຽນ, ຢຽບ Slime',
         assetPath: 'assets/levels/level-1.json',
         isBoss: false,
+        order: 1,
+        badgeIcon: '🌿',
+        tag: 'Stage 1',
     },
     {
         key: 'level-2',
@@ -36,6 +46,10 @@ export const LEVEL_CATALOG: LevelCatalogItem[] = [
         description: 'ພື້ນເລື່ອນ Hover, ດົງໜາມ Spikes, Power-ups',
         assetPath: 'assets/levels/level-2.json',
         isBoss: false,
+        order: 2,
+        prerequisite: 'level-1',
+        badgeIcon: '☁️',
+        tag: 'Stage 2',
     },
     {
         key: 'level-3',
@@ -45,6 +59,10 @@ export const LEVEL_CATALOG: LevelCatalogItem[] = [
         description: 'ສູ້ Boss ຍັກ King Slime, ແຖບເລືອດ Boss HP',
         assetPath: 'assets/levels/level-3.json',
         isBoss: true,
+        order: 3,
+        prerequisite: 'level-2',
+        badgeIcon: '👑',
+        tag: 'Boss Fight',
     },
 ];
 

@@ -1070,3 +1070,345 @@ button.hud-badge,
         box-shadow: 0 0 24px rgba(56, 189, 248, 0.8), 0 0 36px rgba(16, 185, 129, 0.5);
     }
 }
+
+/* ==========================================================================
+   STAGE MAP MODAL (WORLD MAP LEVEL SYSTEM)
+   ========================================================================== */
+
+.stage-map-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(2, 6, 23, 0.85);
+    backdrop-filter: blur(12px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    animation: fadeIn 0.25s ease-out;
+    padding: 20px;
+}
+
+.stage-map-card {
+    background: linear-gradient(135deg, rgba(15, 23, 42, 0.96) 0%, rgba(30, 41, 59, 0.94) 100%);
+    border: 1px solid rgba(56, 189, 248, 0.35);
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.7), 0 0 40px rgba(14, 165, 233, 0.25);
+    border-radius: 24px;
+    width: 100%;
+    max-width: 1040px;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.stage-map-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px 28px 18px 28px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.stage-map-title-group {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.stage-map-icon {
+    font-size: 2.2rem;
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.4));
+}
+
+.stage-map-title-group h2 {
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: #ffffff;
+    margin: 0;
+    letter-spacing: -0.01em;
+}
+
+.stage-map-subtitle {
+    margin: 4px 0 0 0;
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.65);
+}
+
+.stage-map-roadmap {
+    display: flex;
+    align-items: stretch;
+    gap: 12px;
+    padding: 30px 28px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(56, 189, 248, 0.4) transparent;
+}
+
+.stage-map-step {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+    min-width: 210px;
+}
+
+.stage-map-node {
+    background: rgba(30, 41, 59, 0.7);
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    border-radius: 18px;
+    padding: 18px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    width: 100%;
+    transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+    user-select: none;
+}
+
+.stage-map-node.node-unlocked {
+    cursor: pointer;
+    background: linear-gradient(180deg, rgba(30, 41, 59, 0.85) 0%, rgba(15, 23, 42, 0.9) 100%);
+    border-color: rgba(56, 189, 248, 0.35);
+}
+
+.stage-map-node.node-unlocked:hover {
+    transform: translateY(-4px);
+    border-color: #38bdf8;
+    box-shadow: 0 12px 28px rgba(14, 165, 233, 0.35);
+}
+
+.stage-map-node.node-completed {
+    border-color: rgba(16, 185, 129, 0.45);
+}
+
+.stage-map-node.node-completed:hover {
+    border-color: #10b981;
+    box-shadow: 0 12px 28px rgba(16, 185, 129, 0.35);
+}
+
+.stage-map-node.node-current {
+    border-color: #f59e0b;
+    box-shadow: 0 0 20px rgba(245, 158, 11, 0.4);
+}
+
+.stage-map-node.node-locked {
+    opacity: 0.55;
+    background: rgba(15, 23, 42, 0.6);
+    border-style: dashed;
+    cursor: not-allowed;
+    filter: grayscale(0.4);
+}
+
+.stage-node-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.stage-tag {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.6);
+    letter-spacing: 0.05em;
+}
+
+.stage-badge {
+    font-size: 0.76rem;
+    font-weight: 700;
+    padding: 3px 9px;
+    border-radius: 9999px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.stage-badge.status-completed {
+    background: rgba(16, 185, 129, 0.2);
+    color: #34d399;
+    border: 1px solid rgba(16, 185, 129, 0.4);
+}
+
+.stage-badge.status-unlocked {
+    background: rgba(14, 165, 233, 0.2);
+    color: #38bdf8;
+    border: 1px solid rgba(14, 165, 233, 0.4);
+    animation: pulseBadge 2s infinite ease-in-out;
+}
+
+@keyframes pulseBadge {
+    0%, 100% {
+        box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.4);
+    }
+    50% {
+        box-shadow: 0 0 10px 2px rgba(56, 189, 248, 0.6);
+    }
+}
+
+.stage-badge.status-locked {
+    background: rgba(100, 116, 139, 0.2);
+    color: #94a3b8;
+    border: 1px solid rgba(100, 116, 139, 0.3);
+}
+
+.stage-node-icon-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 0;
+}
+
+.stage-large-icon {
+    font-size: 2.8rem;
+    filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.4));
+}
+
+.stage-current-pin {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #fef08a;
+    background: rgba(245, 158, 11, 0.25);
+    border: 1px solid rgba(245, 158, 11, 0.6);
+    padding: 2px 8px;
+    border-radius: 6px;
+}
+
+.stage-node-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-height: 60px;
+}
+
+.stage-node-name {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin: 0;
+}
+
+.stage-node-desc {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.65);
+    margin: 0;
+    line-height: 1.35;
+}
+
+.stage-node-actions {
+    margin-top: auto;
+}
+
+.stage-action-btn {
+    width: 100%;
+    padding: 10px 14px;
+    font-size: 0.88rem;
+    font-weight: 700;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    font-family: inherit;
+}
+
+.stage-action-btn.btn-enter {
+    background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+    color: #ffffff;
+    box-shadow: 0 4px 14px rgba(2, 132, 199, 0.4);
+}
+
+.stage-action-btn.btn-enter:hover {
+    background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(2, 132, 199, 0.6);
+}
+
+.stage-action-btn.btn-replay {
+    background: rgba(16, 185, 129, 0.18);
+    color: #34d399;
+    border: 1px solid rgba(16, 185, 129, 0.4);
+}
+
+.stage-action-btn.btn-replay:hover {
+    background: rgba(16, 185, 129, 0.3);
+    color: #ffffff;
+}
+
+.stage-action-btn.btn-current {
+    background: rgba(245, 158, 11, 0.2);
+    color: #fef08a;
+    border: 1px solid rgba(245, 158, 11, 0.5);
+}
+
+.stage-action-btn.btn-locked {
+    background: rgba(30, 41, 59, 0.5);
+    color: #64748b;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    cursor: not-allowed;
+    font-size: 0.78rem;
+}
+
+.stage-connector {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255, 255, 255, 0.2);
+    font-size: 1.3rem;
+    font-weight: 800;
+    flex-shrink: 0;
+    transition: color 0.3s ease;
+}
+
+.stage-connector.connector-active {
+    color: #38bdf8;
+    filter: drop-shadow(0 0 6px rgba(56, 189, 248, 0.6));
+}
+
+.connector-arrow {
+    display: inline-block;
+    animation: nudgeArrow 1.5s infinite ease-in-out;
+}
+
+@keyframes nudgeArrow {
+    0%, 100% {
+        transform: translateX(0);
+    }
+    50% {
+        transform: translateX(4px);
+    }
+}
+
+.stage-map-footer {
+    padding: 16px 28px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(15, 23, 42, 0.4);
+    font-size: 0.84rem;
+    color: rgba(255, 255, 255, 0.7);
+    text-align: center;
+}
+
+@media (max-width: 820px) {
+    .stage-map-roadmap {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .stage-map-step {
+        width: 100%;
+        flex-direction: column;
+    }
+
+    .stage-connector {
+        transform: rotate(90deg);
+        padding: 6px 0;
+    }
+}

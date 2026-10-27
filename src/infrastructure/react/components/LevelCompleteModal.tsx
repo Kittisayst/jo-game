@@ -13,6 +13,7 @@ export interface LevelCompleteModalProps
     onNextLevel: () => void;
     onRestartLevel: () => void;
     onPlayAgainFromStart: () => void;
+    onOpenWorldMap?: () => void;
 }
 
 export function LevelCompleteModal ({
@@ -27,6 +28,7 @@ export function LevelCompleteModal ({
     onNextLevel,
     onRestartLevel,
     onPlayAgainFromStart,
+    onOpenWorldMap,
 }: LevelCompleteModalProps)
 {
     const heading = currentLevel === 'village'
@@ -102,15 +104,35 @@ export function LevelCompleteModal ({
                             >
                                 Replay Level 🔄
                             </button>
+                            {onOpenWorldMap && (
+                                <button
+                                    className="secondary-button"
+                                    onClick={onOpenWorldMap}
+                                    type="button"
+                                >
+                                    🗺️ ແຜນທີ່ດ່ານ (World Map)
+                                </button>
+                            )}
                         </>
                     ) : (
-                        <button
-                            className="primary-button"
-                            onClick={onPlayAgainFromStart}
-                            type="button"
-                        >
-                            Play Again from Start 🔄
-                        </button>
+                        <>
+                            <button
+                                className="primary-button"
+                                onClick={onPlayAgainFromStart}
+                                type="button"
+                            >
+                                Play Again from Start 🔄
+                            </button>
+                            {onOpenWorldMap && (
+                                <button
+                                    className="secondary-button"
+                                    onClick={onOpenWorldMap}
+                                    type="button"
+                                >
+                                    🗺️ ແຜນທີ່ດ່ານ (World Map)
+                                </button>
+                            )}
+                        </>
                     )}
                 </div>
             </div>

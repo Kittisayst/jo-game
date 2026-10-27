@@ -47,6 +47,7 @@ import {
     SESSION_TICK_EVENT,
     SessionTickPayload,
 } from '../../application/TickSessionUseCase';
+import { EventBus } from '../EventBus';
 import { entities, repositories } from '../composition';
 import { Hud } from './components/Hud';
 import { GameOverModal } from './components/GameOverModal';
@@ -55,7 +56,9 @@ import { PauseMenuModal } from './components/PauseMenuModal';
 import { SkinModal } from './components/SkinModal';
 import { MainMenuModal } from './components/MainMenuModal';
 import { SettingsModal } from './components/SettingsModal';
-import { StageSelectModal } from './components/StageSelectModal';
+import { StageMapModal } from './components/StageMapModal';
+import { completeStageUseCase } from '../../application/CompleteStageUseCase';
+import { selectStageUseCase } from '../../application/SelectStageUseCase';
 
 function App ()
 {
@@ -70,6 +73,7 @@ function App ()
     const [gameStats] = useState(() => entities.gameStats);
     const [skinManager] = useState(() => entities.skinManager);
     const [settings] = useState(() => entities.settings);
+    const [stageProgression] = useState(() => entities.stageProgression);
     const [pauseState] = useState(() => entities.pauseState);
     const [isMuted, setIsMuted] = useState(entities.settings.isSoundMuted);
     const [isMusicMuted, setIsMusicMuted] = useState(entities.settings.isMusicMuted);
@@ -82,6 +86,7 @@ function App ()
     const [isMainMenuOpen, setIsMainMenuOpen] = useState(true);
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
     const [isStageSelectOpen, setIsStageSelectOpen] = useState(false);
+    const [isStageMapOpen, setIsStageMapOpen] = useState(false);
     const [isGamePaused, setIsGamePaused] = useState(false);
     const [highScore, setHighScore] = useState(gameStats.highScore);
     const [bestTime, setBestTime] = useState<number | null>(gameStats.bestTimeSeconds);
@@ -110,6 +115,10 @@ function App ()
     isSettingsOpenRef.current = isSettingsOpen;
     const isStageSelectOpenRef = useRef(isStageSelectOpen);
     isStageSelectOpenRef.current = isStageSelectOpen;
+    const isStageMapOpenRef = useRef(isStageMapOpen);
+    isStageMapOpenRef.current = isStageMapOpen;
+    const stageProgressionRef = useRef(stageProgression);
+    stageProgressionRef.current = stageProgression;
 
     useEffect(() =>
     {
@@ -117,6 +126,13 @@ function App ()
         {
             setLevelComplete(true);
             setNextLevel(payload.nextLevel);
+
+            completeStageUseCase(
+                stageProgressionRef.current,
+                repositories.stageProgression,
+                payload.levelId,
+                payload.nextLevel
+            );
 
             const result = recordGameResultUseCase(
                 gameStatsRef.current,
@@ -242,11 +258,22 @@ function App ()
                     setIsStageSelectOpen(false);
                     return;
                 }
+                if (isStageMapOpenRef.current)
+                {
+                    setIsStageMapOpen(false);
+                    return;
+                }
 
                 togglePauseUseCase(pauseStateRef.current);
             }
         };
 
+        const onOpenStageMap = () =>
+        {
+            setIsStageMapOpen(true);
+        };
+
+        EventBus.on('open-stage-map', onOpenStageMap);
         DomainEvents.on<LevelCompletePayload>(LEVEL_COMPLETE_EVENT, onLevelComplete);
         DomainEvents.on<CoinCollectedPayload>(COIN_COLLECTED_EVENT, onCoinCollected);
         DomainEvents.on<EnemyDefeatedPayload>(ENEMY_DEFEATED_EVENT, onEnemyDefeated);
@@ -263,6 +290,7 @@ function App ()
 
         return () =>
         {
+            EventBus.removeListener('open-stage-map', onOpenStageMap);
             DomainEvents.off<LevelCompletePayload>(LEVEL_COMPLETE_EVENT, onLevelComplete);
             DomainEvents.off<CoinCollectedPayload>(COIN_COLLECTED_EVENT, onCoinCollected);
             DomainEvents.off<EnemyDefeatedPayload>(ENEMY_DEFEATED_EVENT, onEnemyDefeated);
@@ -318,10 +346,14 @@ function App ()
 
     const handleStartGame = (stageKey = 'village') =>
     {
+        const success = selectStageUseCase(stageProgression, stageKey);
+        if (!success) return;
+
         resumeGameUseCase(pauseState);
         setIsGamePaused(false);
         setIsMainMenuOpen(false);
         setIsStageSelectOpen(false);
+        setIsStageMapOpen(false);
         setIsSettingsOpen(false);
         setLevelComplete(false);
         setGameOver(false);
@@ -355,6 +387,7 @@ function App ()
         setIsSettingsOpen(false);
         setIsSkinModalOpen(false);
         setIsStageSelectOpen(false);
+        setIsStageMapOpen(false);
         soundManager.stopBgm();
     };
 
@@ -363,7 +396,7 @@ function App ()
         if (typeof window !== 'undefined' && window.confirm('Are you sure you want to reset all High Scores and saved data?'))
         {
             resetSaveDataUseCase(
-                { gameStats, skinManager, settings },
+                { gameStats, skinManager, settings, stageProgression },
                 repositories
             );
             setHighScore(0);
@@ -497,6 +530,11 @@ function App ()
                     isNewHighScore={isNewHighScore}
                     nextLevel={nextLevel}
                     onNextLevel={handleNextLevel}
+                    onOpenWorldMap={() =>
+                    {
+                        setLevelComplete(false);
+                        setIsStageMapOpen(true);
+                    }}
                     onPlayAgainFromStart={() => handleRestart(true)}
                     onRestartLevel={() => handleRestart(false)}
                     score={score}
@@ -540,7 +578,7 @@ function App ()
                     highScore={highScore}
                     onOpenSettings={() => setIsSettingsOpen(true)}
                     onOpenSkinModal={() => setIsSkinModalOpen(true)}
-                    onOpenStageSelect={() => setIsStageSelectOpen(true)}
+                    onOpenStageSelect={() => setIsStageMapOpen(true)}
                     onStartGame={handleStartGame}
                 />
             )}
@@ -556,11 +594,16 @@ function App ()
                 />
             )}
 
-            {isStageSelectOpen && (
-                <StageSelectModal
+            {(isStageMapOpen || isStageSelectOpen) && (
+                <StageMapModal
                     currentLevel={currentLevel}
-                    onClose={() => setIsStageSelectOpen(false)}
+                    onClose={() =>
+                    {
+                        setIsStageMapOpen(false);
+                        setIsStageSelectOpen(false);
+                    }}
                     onSelectStage={handleStartGame}
+                    stageProgression={stageProgression}
                 />
             )}
         </div>
