@@ -1,0 +1,158 @@
+import { formatTime } from '../utils/formatTime';
+
+export interface PauseMenuModalProps
+{
+    currentLevel: string;
+    score: number;
+    coinsCount: number;
+    elapsedSeconds: number;
+    isMuted: boolean;
+    isMusicMuted: boolean;
+    activeSkinName: string;
+    onResume: () => void;
+    onToggleMute: () => void;
+    onToggleMusic: () => void;
+    onOpenSkinModal: () => void;
+    onOpenSettings: () => void;
+    onRestartLevel: () => void;
+    onExitToMainMenu: () => void;
+}
+
+export function PauseMenuModal ({
+    currentLevel,
+    score,
+    coinsCount,
+    elapsedSeconds,
+    isMuted,
+    isMusicMuted,
+    activeSkinName,
+    onResume,
+    onToggleMute,
+    onToggleMusic,
+    onOpenSkinModal,
+    onOpenSettings,
+    onRestartLevel,
+    onExitToMainMenu,
+}: PauseMenuModalProps)
+{
+    const levelLabel =
+        currentLevel === 'level-1'
+            ? 'Level 1'
+            : currentLevel === 'level-2'
+                ? 'Level 2'
+                : 'Level 3 👑';
+
+    return (
+        <div className="pause-menu-overlay" onClick={onResume}>
+            <div className="pause-menu-card" onClick={e => e.stopPropagation()}>
+                <div className="pause-header">
+                    <div>
+                        <h2 className="pause-title">⏸️ ຢຸດເກມຊົ່ວຄາວ</h2>
+                        <span className="pause-subtitle">PAUSE MENU • ກົດ Esc / P ເພື່ອສືບຕໍ່</span>
+                    </div>
+                    <button
+                        className="skin-close-btn"
+                        onClick={onResume}
+                        title="Close & Resume Game (Esc)"
+                        type="button"
+                    >
+                        ✕
+                    </button>
+                </div>
+
+                <div className="pause-stats-banner">
+                    <div className="pause-stat-item">
+                        <span className="pause-stat-label">🚩 ດ່ານ</span>
+                        <span className="pause-stat-val">{levelLabel}</span>
+                    </div>
+                    <div className="pause-stat-item">
+                        <span className="pause-stat-label">⭐ ຄະແນນ</span>
+                        <span className="pause-stat-val">{score}</span>
+                    </div>
+                    <div className="pause-stat-item">
+                        <span className="pause-stat-label">🪙 ຫຼຽນ</span>
+                        <span className="pause-stat-val">{coinsCount}</span>
+                    </div>
+                    <div className="pause-stat-item">
+                        <span className="pause-stat-label">⏱️ ເວລາ</span>
+                        <span className="pause-stat-val">{formatTime(elapsedSeconds)}</span>
+                    </div>
+                </div>
+
+                {/* Quick Sound & Music Settings inside Pause Menu */}
+                <div className="pause-audio-box">
+                    <div className="pause-audio-row">
+                        <div className="pause-audio-info">
+                            <span className="pause-audio-icon">{isMuted ? '🔇' : '🔊'}</span>
+                            <span className="pause-audio-name">ສຽງ Effect (SFX)</span>
+                        </div>
+                        <button
+                            className={`settings-switch-btn ${isMuted ? 'off' : 'on'}`}
+                            onClick={onToggleMute}
+                            type="button"
+                        >
+                            {isMuted ? 'OFF' : 'ON'}
+                        </button>
+                    </div>
+
+                    <div className="pause-audio-row">
+                        <div className="pause-audio-info">
+                            <span className="pause-audio-icon">{isMusicMuted ? '🔇' : '🎵'}</span>
+                            <span className="pause-audio-name">ເພງ BGM Chiptune</span>
+                        </div>
+                        <button
+                            className={`settings-switch-btn ${isMusicMuted ? 'off' : 'on'}`}
+                            onClick={onToggleMusic}
+                            type="button"
+                        >
+                            {isMusicMuted ? 'OFF' : 'ON'}
+                        </button>
+                    </div>
+                </div>
+
+                {/* Menu Actions */}
+                <div className="pause-buttons-list">
+                    <button
+                        className="menu-action-btn primary pulse"
+                        onClick={onResume}
+                        type="button"
+                    >
+                        ▶️ ສືບຕໍ່ຫຼິ້ນ (Resume Game)
+                    </button>
+
+                    <button
+                        className="menu-action-btn secondary"
+                        onClick={onOpenSkinModal}
+                        type="button"
+                    >
+                        🥋 ປ່ຽນຊຸດຕົວລະຄອນ ({activeSkinName})
+                    </button>
+
+                    <button
+                        className="menu-action-btn secondary"
+                        onClick={onOpenSettings}
+                        type="button"
+                    >
+                        ⚙️ ຕັ້ງຄ່າ & ຄູ່ມືບັງຄັບ (Settings & Guide)
+                    </button>
+
+                    <button
+                        className="menu-action-btn secondary"
+                        onClick={onRestartLevel}
+                        type="button"
+                    >
+                        🔄 ເລີ່ມດ່ານນີ້ໃໝ່ (Restart Level)
+                    </button>
+
+                    <button
+                        className="menu-action-btn danger"
+                        onClick={onExitToMainMenu}
+                        type="button"
+                    >
+                        🏠 ກັບໄປໜ້າຫຼັກ (Exit to Main Menu)
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+}

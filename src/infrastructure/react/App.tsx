@@ -30,7 +30,7 @@ import {
 } from '../../application/DamageBossUseCase';
 import { recordGameResultUseCase } from '../../application/SaveGameStatsUseCase';
 import { AVAILABLE_SKINS } from '../../domain/entities/Skin';
-import { selectSkinUseCase, skinUnlockScore } from '../../application/SelectSkinUseCase';
+import { selectSkinUseCase } from '../../application/SelectSkinUseCase';
 import { toggleSoundUseCase, toggleMusicUseCase } from '../../application/UpdateSettingsUseCase';
 import { resetSaveDataUseCase } from '../../application/ResetSaveDataUseCase';
 import { soundManager } from '../audio/SoundManager';
@@ -48,8 +48,16 @@ import {
     SessionTickPayload,
 } from '../../application/TickSessionUseCase';
 import { entities, repositories } from '../composition';
+import { Hud } from './components/Hud';
+import { GameOverModal } from './components/GameOverModal';
+import { LevelCompleteModal } from './components/LevelCompleteModal';
+import { PauseMenuModal } from './components/PauseMenuModal';
+import { SkinModal } from './components/SkinModal';
+import { MainMenuModal } from './components/MainMenuModal';
+import { SettingsModal } from './components/SettingsModal';
+import { StageSelectModal } from './components/StageSelectModal';
 
-function App()
+function App ()
 {
     const phaserRef = useRef<IRefPhaserGame | null>(null);
     const [levelComplete, setLevelComplete] = useState(false);
@@ -90,8 +98,6 @@ function App()
     gameStatsRef.current = gameStats;
     const pauseStateRef = useRef(pauseState);
     pauseStateRef.current = pauseState;
-    const isGamePausedRef = useRef(isGamePaused);
-    isGamePausedRef.current = isGamePaused;
     const isMainMenuOpenRef = useRef(isMainMenuOpen);
     isMainMenuOpenRef.current = isMainMenuOpen;
     const levelCompleteRef = useRef(levelComplete);
@@ -155,7 +161,6 @@ function App()
             setHighScore(result.highScore);
             setIsNewHighScore(result.isNewHighScore);
         };
-
 
         const onPowerUpCollected = (payload: PowerUpCollectedPayload) =>
         {
@@ -274,17 +279,6 @@ function App()
         };
     }, []);
 
-    // Timers are driven directly by Phaser game loop via SESSION_TICK_EVENT
-
-    const formatTime = (seconds: number | null): string =>
-    {
-        if (seconds === null || seconds <= 0) return '--:--.-';
-        const mins = Math.floor(seconds / 60);
-        const secs = Math.floor(seconds % 60);
-        const tenths = Math.floor((seconds * 10) % 10);
-        return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}.${tenths}`;
-    };
-
     const handleToggleMute = () =>
     {
         const payload = toggleSoundUseCase(settings, repositories.settings);
@@ -308,6 +302,18 @@ function App()
     {
         resumeGameUseCase(pauseState);
         setIsGamePaused(false);
+    };
+
+    const handleTogglePause = () =>
+    {
+        if (isGamePaused)
+        {
+            handleResumeGame();
+        }
+        else
+        {
+            handlePauseGame();
+        }
     };
 
     const handleStartGame = (stageKey = 'level-1') =>
@@ -438,567 +444,117 @@ function App()
         }
     };
 
+    const activeSkinName =
+        AVAILABLE_SKINS.find(s => s.id === activeSkinId)?.name.split(' ')[0] || 'Cyber';
+
     return (
         <div id="app">
             {!isMainMenuOpen && (
-                <div className="game-hud">
-                    <div className="hud-badge level-badge">
-                        <span className="badge-icon">🚩</span>
-                        <span className="badge-label">
-                            {currentLevel === 'level-1' ? 'Level 1' : currentLevel === 'level-2' ? 'Level 2' : 'Level 3 (👑 Boss)'}
-                        </span>
-                    </div>
-                    <div className="hud-badge lives-badge">
-                        <span className="badge-icon">
-                            {'❤️'.repeat(Math.max(0, lives)) + '🖤'.repeat(Math.max(0, maxLives - lives))}
-                        </span>
-                    </div>
-                    <div className="hud-badge coin-badge">
-                        <span className="badge-icon">🪙</span>
-                        <span className="badge-label">Coins</span>
-                        <span className="badge-value">{coinsCount}</span>
-                    </div>
-                    <div className="hud-badge score-badge">
-                        <span className="badge-icon">⭐</span>
-                        <span className="badge-label">Score</span>
-                        <span className="badge-value">{score}</span>
-                    </div>
-                    <div className="hud-badge timer-badge">
-                        <span className="badge-icon">⏱️</span>
-                        <span className="badge-value">{formatTime(elapsedSeconds)}</span>
-                    </div>
-                    <div className="hud-badge high-score-badge">
-                        <span className="badge-icon">🏆</span>
-                        <span className="badge-label">Best</span>
-                        <span className="badge-value">{highScore}</span>
-                    </div>
-
-                    {starTimer > 0 && (
-                        <div className="hud-badge star-power-badge">
-                            <span className="badge-icon">⭐</span>
-                            <span className="badge-label">Star</span>
-                            <span className="badge-value">{starTimer}s</span>
-                        </div>
-                    )}
-
-                    {springTimer > 0 && (
-                        <div className="hud-badge spring-power-badge">
-                            <span className="badge-icon">⚡</span>
-                            <span className="badge-label">Jump+</span>
-                            <span className="badge-value">{springTimer}s</span>
-                        </div>
-                    )}
-
-                    <button
-                        id="hud-menu-btn"
-                        className={`hud-badge hud-menu-btn ${isGamePaused ? 'paused-active' : ''}`}
-                        onClick={(e) =>
-                        {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            if (isGamePaused)
-                            {
-                                handleResumeGame();
-                            }
-                            else
-                            {
-                                handlePauseGame();
-                            }
-                        }}
-                        title="In-Game Menu & Pause (Esc / P)"
-                        type="button"
-                    >
-                        <span className="badge-icon">{isGamePaused ? '▶️' : '⏸️'}</span>
-                        <span className="badge-label">{isGamePaused ? 'ສືບຕໍ່' : 'ເມນູ (Menu)'}</span>
-                    </button>
-                </div>
-            )}
-
-            {(currentLevel === 'level-3' || bossHp !== null) && (
-                <div className="boss-hud-container">
-                    <div className="boss-hud-header">
-                        <span className="boss-title">👑 KING SLIME</span>
-                        <span className="boss-hp-number">{(bossHp ?? 5)} / {bossMaxHp} HP</span>
-                    </div>
-                    <div className="boss-hp-bar">
-                        <div
-                            className="boss-hp-fill"
-                            style={{ width: `${Math.max(0, ((bossHp ?? 5) / bossMaxHp) * 100)}%` }}
-                        />
-                    </div>
-                </div>
+                <Hud
+                    bossHp={bossHp}
+                    bossMaxHp={bossMaxHp}
+                    coinsCount={coinsCount}
+                    currentLevel={currentLevel}
+                    elapsedSeconds={elapsedSeconds}
+                    highScore={highScore}
+                    isGamePaused={isGamePaused}
+                    lives={lives}
+                    maxLives={maxLives}
+                    onTogglePause={handleTogglePause}
+                    score={score}
+                    springTimer={springTimer}
+                    starTimer={starTimer}
+                />
             )}
 
             <PhaserGame ref={phaserRef} />
 
             {gameOver && (
-                <div className="game-over-overlay">
-                    <div className="game-over-card">
-                        <h2>💀 Game Over</h2>
-                        <p className="overlay-subtitle">You ran out of lives!</p>
-                        <div className="complete-stats">
-                            <div className="stat-item">
-                                <span className="stat-label">🚩 Reached:</span>
-                                <strong className="stat-val">{currentLevel.toUpperCase()}</strong>
-                            </div>
-                            <div className="stat-item">
-                                <span className="stat-label">🪙 Coins:</span>
-                                <strong className="stat-val">{coinsCount}</strong>
-                            </div>
-                            <div className="stat-item">
-                                <span className="stat-label">⭐ Final Score:</span>
-                                <strong className="stat-val">{score}</strong>
-                            </div>
-                            <div className="stat-item">
-                                <span className="stat-label">⏱️ Time Elapsed:</span>
-                                <strong className="stat-val">{formatTime(elapsedSeconds)}</strong>
-                            </div>
-                            <div className="stat-item">
-                                <span className="stat-label">🏆 Best Score:</span>
-                                <strong className="stat-val">{highScore}</strong>
-                            </div>
-                        </div>
-
-                        <div className="modal-actions">
-                            <button className="primary-button danger" onClick={() => handleRestart(true)}>
-                                🔄 Try Again
-                            </button>
-                        </div>
-                    </div>
-                </div>
+                <GameOverModal
+                    coinsCount={coinsCount}
+                    currentLevel={currentLevel}
+                    elapsedSeconds={elapsedSeconds}
+                    highScore={highScore}
+                    onRestart={() => handleRestart(true)}
+                    score={score}
+                />
             )}
 
             {levelComplete && (
-                <div className="level-complete-overlay">
-                    <div className="level-complete-card">
-                        <h2>{nextLevel ? '🎉 Level Complete!' : (currentLevel === 'level-3' ? '👑 VICTORY! KING SLIME DEFEATED!' : '🏆 Game Completed!')}</h2>
-                        <div className="complete-stats">
-                            <div className="stat-item">
-                                <span className="stat-label">🚩 Stage:</span>
-                                <strong className="stat-val">{currentLevel.toUpperCase()}</strong>
-                            </div>
-                            <div className="stat-item">
-                                <span className="stat-label">🪙 Coins:</span>
-                                <strong className="stat-val">{coinsCount}</strong>
-                            </div>
-                            <div className="stat-item">
-                                <span className="stat-label">⭐ Total Score:</span>
-                                <strong className="stat-val">
-                                    {score}
-                                    {isNewHighScore && <span className="record-pill">🎉 Record!</span>}
-                                </strong>
-                            </div>
-                            <div className="stat-item">
-                                <span className="stat-label">⏱️ Speedrun Time:</span>
-                                <strong className="stat-val">
-                                    {formatTime(elapsedSeconds)}
-                                    {isNewBestTime && <span className="record-pill">🔥 Best!</span>}
-                                </strong>
-                            </div>
-                            {bestTime !== null && (
-                                <div className="stat-item">
-                                    <span className="stat-label">🏆 Best Time:</span>
-                                    <strong className="stat-val">{formatTime(bestTime)}</strong>
-                                </div>
-                            )}
-                        </div>
-
-                        <div className="modal-actions">
-                            {nextLevel ? (
-                                <>
-                                    <button className="primary-button" onClick={handleNextLevel}>
-                                        Next Level ➡️
-                                    </button>
-                                    <button className="secondary-button" onClick={() => handleRestart(false)}>
-                                        Replay Level 🔄
-                                    </button>
-                                </>
-                            ) : (
-                                <button className="primary-button" onClick={() => handleRestart(true)}>
-                                    Play Again from Start 🔄
-                                </button>
-                            )}
-                        </div>
-                    </div>
-                </div>
+                <LevelCompleteModal
+                    bestTime={bestTime}
+                    coinsCount={coinsCount}
+                    currentLevel={currentLevel}
+                    elapsedSeconds={elapsedSeconds}
+                    isNewBestTime={isNewBestTime}
+                    isNewHighScore={isNewHighScore}
+                    nextLevel={nextLevel}
+                    onNextLevel={handleNextLevel}
+                    onPlayAgainFromStart={() => handleRestart(true)}
+                    onRestartLevel={() => handleRestart(false)}
+                    score={score}
+                />
             )}
 
-            {/* Dedicated In-Game Pause Menu */}
             {isGamePaused && !isMainMenuOpen && !levelComplete && !gameOver && (
-                <div className="pause-menu-overlay" onClick={handleResumeGame}>
-                    <div className="pause-menu-card" onClick={e => e.stopPropagation()}>
-                        <div className="pause-header">
-                            <div>
-                                <h2 className="pause-title">⏸️ ຢຸດເກມຊົ່ວຄາວ</h2>
-                                <span className="pause-subtitle">PAUSE MENU • ກົດ Esc / P ເພື່ອສືບຕໍ່</span>
-                            </div>
-                            <button
-                                className="skin-close-btn"
-                                onClick={handleResumeGame}
-                                title="Close & Resume Game (Esc)"
-                                type="button"
-                            >
-                                ✕
-                            </button>
-                        </div>
-
-                        <div className="pause-stats-banner">
-                            <div className="pause-stat-item">
-                                <span className="pause-stat-label">🚩 ດ່ານ</span>
-                                <span className="pause-stat-val">
-                                    {currentLevel === 'level-1' ? 'Level 1' : currentLevel === 'level-2' ? 'Level 2' : 'Level 3 👑'}
-                                </span>
-                            </div>
-                            <div className="pause-stat-item">
-                                <span className="pause-stat-label">⭐ ຄະແນນ</span>
-                                <span className="pause-stat-val">{score}</span>
-                            </div>
-                            <div className="pause-stat-item">
-                                <span className="pause-stat-label">🪙 ຫຼຽນ</span>
-                                <span className="pause-stat-val">{coinsCount}</span>
-                            </div>
-                            <div className="pause-stat-item">
-                                <span className="pause-stat-label">⏱️ ເວລາ</span>
-                                <span className="pause-stat-val">{formatTime(elapsedSeconds)}</span>
-                            </div>
-                        </div>
-
-                        {/* Quick Sound & Music Settings inside Pause Menu */}
-                        <div className="pause-audio-box">
-                            <div className="pause-audio-row">
-                                <div className="pause-audio-info">
-                                    <span className="pause-audio-icon">{isMuted ? '🔇' : '🔊'}</span>
-                                    <span className="pause-audio-name">ສຽງ Effect (SFX)</span>
-                                </div>
-                                <button
-                                    className={`settings-switch-btn ${isMuted ? 'off' : 'on'}`}
-                                    onClick={handleToggleMute}
-                                    type="button"
-                                >
-                                    {isMuted ? 'OFF' : 'ON'}
-                                </button>
-                            </div>
-
-                            <div className="pause-audio-row">
-                                <div className="pause-audio-info">
-                                    <span className="pause-audio-icon">{isMusicMuted ? '🔇' : '🎵'}</span>
-                                    <span className="pause-audio-name">ເພງ BGM Chiptune</span>
-                                </div>
-                                <button
-                                    className={`settings-switch-btn ${isMusicMuted ? 'off' : 'on'}`}
-                                    onClick={handleToggleMusic}
-                                    type="button"
-                                >
-                                    {isMusicMuted ? 'OFF' : 'ON'}
-                                </button>
-                            </div>
-                        </div>
-
-                        {/* Menu Actions */}
-                        <div className="pause-buttons-list">
-                            <button
-                                className="menu-action-btn primary pulse"
-                                onClick={handleResumeGame}
-                                type="button"
-                            >
-                                ▶️ ສືບຕໍ່ຫຼິ້ນ (Resume Game)
-                            </button>
-
-                            <button
-                                className="menu-action-btn secondary"
-                                onClick={() => setIsSkinModalOpen(true)}
-                                type="button"
-                            >
-                                🥋 ປ່ຽນຊຸດຕົວລະຄອນ ({AVAILABLE_SKINS.find(s => s.id === activeSkinId)?.name.split(' ')[0]})
-                            </button>
-
-                            <button
-                                className="menu-action-btn secondary"
-                                onClick={() => setIsSettingsOpen(true)}
-                                type="button"
-                            >
-                                ⚙️ ຕັ້ງຄ່າ & ຄູ່ມືບັງຄັບ (Settings & Guide)
-                            </button>
-
-                            <button
-                                className="menu-action-btn secondary"
-                                onClick={() => handleRestart(false)}
-                                type="button"
-                            >
-                                🔄 ເລີ່ມດ່ານນີ້ໃໝ່ (Restart Level)
-                            </button>
-
-                            <button
-                                className="menu-action-btn danger"
-                                onClick={handleOpenMainMenu}
-                                type="button"
-                            >
-                                🏠 ກັບໄປໜ້າຫຼັກ (Exit to Main Menu)
-                            </button>
-                        </div>
-                    </div>
-                </div>
+                <PauseMenuModal
+                    activeSkinName={activeSkinName}
+                    coinsCount={coinsCount}
+                    currentLevel={currentLevel}
+                    elapsedSeconds={elapsedSeconds}
+                    isMusicMuted={isMusicMuted}
+                    isMuted={isMuted}
+                    onExitToMainMenu={handleOpenMainMenu}
+                    onOpenSettings={() => setIsSettingsOpen(true)}
+                    onOpenSkinModal={() => setIsSkinModalOpen(true)}
+                    onRestartLevel={() => handleRestart(false)}
+                    onResume={handleResumeGame}
+                    onToggleMusic={handleToggleMusic}
+                    onToggleMute={handleToggleMute}
+                    score={score}
+                />
             )}
 
             {isSkinModalOpen && (
-                <div className="skin-modal-overlay" onClick={() => setIsSkinModalOpen(false)}>
-                    <div className="skin-modal-card" onClick={e => e.stopPropagation()}>
-                        <div className="skin-modal-header">
-                            <h2>🥋 Character Skins & Costumes</h2>
-                            <button
-                                className="skin-close-btn"
-                                onClick={() => setIsSkinModalOpen(false)}
-                                type="button"
-                            >
-                                ✕
-                            </button>
-                        </div>
-                        <div className="skin-grid">
-                            {AVAILABLE_SKINS.map(skin => {
-                                const playerBestScore = skinUnlockScore(score, highScore);
-                                const isUnlocked = skinManager.isSkinUnlocked(skin.id, playerBestScore);
-                                const isEquipped = activeSkinId === skin.id;
-
-                                return (
-                                    <div
-                                        key={skin.id}
-                                        className={`skin-card ${isEquipped ? 'active' : ''} ${!isUnlocked ? 'locked' : ''}`}
-                                    >
-                                        <div className="skin-card-header">
-                                            <div
-                                                className="skin-swatch"
-                                                style={{ background: skin.colorHex }}
-                                            />
-                                            <div className="skin-title-wrap">
-                                                <span className="skin-name">{skin.name}</span>
-                                                <span className="skin-desc">{skin.description}</span>
-                                            </div>
-                                        </div>
-                                        <div className="skin-footer">
-                                            <span className={`skin-unlock-info ${isUnlocked ? 'unlocked' : 'locked'}`}>
-                                                {isUnlocked ? '✅ Unlocked' : `🔒 Needs ${skin.unlockScore} pts`}
-                                            </span>
-                                            {isEquipped ? (
-                                                <button className="skin-btn equipped" disabled type="button">
-                                                    Equipped
-                                                </button>
-                                            ) : isUnlocked ? (
-                                                <button
-                                                    className="skin-btn equip"
-                                                    onClick={() => handleEquipSkin(skin.id)}
-                                                    type="button"
-                                                >
-                                                    Equip
-                                                </button>
-                                            ) : (
-                                                <button className="skin-btn locked" disabled type="button">
-                                                    Locked
-                                                </button>
-                                            )}
-                                        </div>
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    </div>
-                </div>
+                <SkinModal
+                    activeSkinId={activeSkinId}
+                    highScore={highScore}
+                    onClose={() => setIsSkinModalOpen(false)}
+                    onEquipSkin={handleEquipSkin}
+                    score={score}
+                    skinManager={skinManager}
+                />
             )}
 
-            {/* Main Menu Screen */}
             {isMainMenuOpen && (
-                <div className="main-menu-overlay">
-                    <div className="main-menu-card">
-                        <h1 className="main-menu-title">⚡ JO RUNNER ⚡</h1>
-                        <p className="main-menu-subtitle">Cyberpunk Slime Invasion</p>
-
-                        <div className="menu-stats-bar">
-                            <div className="menu-stat">
-                                <span className="menu-stat-label">🏆 High Score</span>
-                                <span className="menu-stat-val">{highScore}</span>
-                            </div>
-                            <div className="menu-stat">
-                                <span className="menu-stat-label">⏱️ Best Time</span>
-                                <span className="menu-stat-val">{formatTime(bestTime)}</span>
-                            </div>
-                            <div className="menu-stat">
-                                <span className="menu-stat-label">🥋 Skin</span>
-                                <span className="menu-stat-val">
-                                    {AVAILABLE_SKINS.find(s => s.id === activeSkinId)?.name.split(' ')[0] || 'Cyber'}
-                                </span>
-                            </div>
-                        </div>
-
-                        <div className="menu-buttons-list">
-                            <button
-                                className="menu-action-btn primary"
-                                onClick={() => handleStartGame('level-1')}
-                                type="button"
-                            >
-                                ▶️ ເຂົ້າເກມ (Play Game)
-                            </button>
-                            <button
-                                className="menu-action-btn secondary"
-                                onClick={() => setIsStageSelectOpen(true)}
-                                type="button"
-                            >
-                                🚩 ເລືອກດ່ານ (Select Stage)
-                            </button>
-                            <button
-                                className="menu-action-btn secondary"
-                                onClick={() => setIsSkinModalOpen(true)}
-                                type="button"
-                            >
-                                🥋 ເລືອກຊຸດ (Skins & Costumes)
-                            </button>
-                            <button
-                                className="menu-action-btn secondary"
-                                onClick={() => setIsSettingsOpen(true)}
-                                type="button"
-                            >
-                                ⚙️ ຕັ້ງຄ່າ (Settings)
-                            </button>
-                        </div>
-                    </div>
-                </div>
+                <MainMenuModal
+                    activeSkinName={activeSkinName}
+                    bestTime={bestTime}
+                    highScore={highScore}
+                    onOpenSettings={() => setIsSettingsOpen(true)}
+                    onOpenSkinModal={() => setIsSkinModalOpen(true)}
+                    onOpenStageSelect={() => setIsStageSelectOpen(true)}
+                    onStartGame={handleStartGame}
+                />
             )}
 
-            {/* Settings Modal */}
             {isSettingsOpen && (
-                <div className="skin-modal-overlay" onClick={() => setIsSettingsOpen(false)}>
-                    <div className="settings-modal-card" onClick={e => e.stopPropagation()}>
-                        <div className="skin-modal-header">
-                            <h2>⚙️ ຕັ້ງຄ່າ (Game Settings)</h2>
-                            <button
-                                className="skin-close-btn"
-                                onClick={() => setIsSettingsOpen(false)}
-                                type="button"
-                            >
-                                ✕
-                            </button>
-                        </div>
-
-                        <div className="settings-section">
-                            <div className="settings-section-title">🔊 Audio Preferences</div>
-                            <div className="settings-toggle-row">
-                                <span className="settings-row-label">
-                                    {isMuted ? '🔇' : '🔊'} Master Sound (SFX)
-                                </span>
-                                <button
-                                    className={`settings-switch-btn ${isMuted ? 'off' : 'on'}`}
-                                    onClick={handleToggleMute}
-                                    type="button"
-                                >
-                                    {isMuted ? 'OFF' : 'ON'}
-                                </button>
-                            </div>
-                            <div className="settings-toggle-row">
-                                <span className="settings-row-label">
-                                    {isMusicMuted ? '🔇' : '🎵'} 8-Bit Chiptune Music (BGM)
-                                </span>
-                                <button
-                                    className={`settings-switch-btn ${isMusicMuted ? 'off' : 'on'}`}
-                                    onClick={handleToggleMusic}
-                                    type="button"
-                                >
-                                    {isMusicMuted ? 'OFF' : 'ON'}
-                                </button>
-                            </div>
-                        </div>
-
-                        <div className="settings-section">
-                            <div className="settings-section-title">🎮 Controls Guide</div>
-                            <div className="controls-guide-grid">
-                                <div className="control-item">
-                                    <span className="control-key">⬅️ ➡️ / A D</span>
-                                    <span>Move Left/Right</span>
-                                </div>
-                                <div className="control-item">
-                                    <span className="control-key">⬆️ / W / Space</span>
-                                    <span>Jump / Double Jump</span>
-                                </div>
-                                <div className="control-item">
-                                    <span className="control-key">M</span>
-                                    <span>Mute Audio</span>
-                                </div>
-                                <div className="control-item">
-                                    <span className="control-key">B</span>
-                                    <span>Toggle BGM</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="settings-section">
-                            <div className="settings-section-title">⚠️ Data Management</div>
-                            <button
-                                className="menu-action-btn secondary"
-                                onClick={handleClearAllData}
-                                style={{ width: '100%', borderColor: 'rgba(239, 68, 68, 0.4)', color: '#f87171' }}
-                                type="button"
-                            >
-                                🗑️ ລ້າງຄະແນນ & ຂໍ້ມູນທັງໝົດ (Reset Saved Data)
-                            </button>
-                        </div>
-                    </div>
-                </div>
+                <SettingsModal
+                    isMusicMuted={isMusicMuted}
+                    isMuted={isMuted}
+                    onClearAllData={handleClearAllData}
+                    onClose={() => setIsSettingsOpen(false)}
+                    onToggleMusic={handleToggleMusic}
+                    onToggleMute={handleToggleMute}
+                />
             )}
 
-            {/* Stage Select Modal */}
             {isStageSelectOpen && (
-                <div className="skin-modal-overlay" onClick={() => setIsStageSelectOpen(false)}>
-                    <div className="settings-modal-card" onClick={e => e.stopPropagation()}>
-                        <div className="skin-modal-header">
-                            <h2>🚩 ເລືອກດ່ານ (Select Stage)</h2>
-                            <button
-                                className="skin-close-btn"
-                                onClick={() => setIsStageSelectOpen(false)}
-                                type="button"
-                            >
-                                ✕
-                            </button>
-                        </div>
-
-                        <div className="stage-select-grid">
-                            <div
-                                className={`stage-select-card ${currentLevel === 'level-1' ? 'active-stage' : ''}`}
-                                onClick={() => handleStartGame('level-1')}
-                            >
-                                <div>
-                                    <strong>ດ່ານ 1: Green Plains</strong>
-                                    <div style={{ fontSize: '0.8rem', color: 'rgba(255, 255, 255, 0.7)' }}>
-                                        ທົ່ງຫຍ້າຂຽວ, ເກັບຫຼຽນ, ຢຽບ Slime
-                                    </div>
-                                </div>
-                                <span>▶️ ຫຼິ້ນ</span>
-                            </div>
-
-                            <div
-                                className={`stage-select-card ${currentLevel === 'level-2' ? 'active-stage' : ''}`}
-                                onClick={() => handleStartGame('level-2')}
-                            >
-                                <div>
-                                    <strong>ດ່ານ 2: Sky Islands</strong>
-                                    <div style={{ fontSize: '0.8rem', color: 'rgba(255, 255, 255, 0.7)' }}>
-                                        ພື້ນເລື່ອນ Hover, ດົງໜາມ Spikes, Power-ups
-                                    </div>
-                                </div>
-                                <span>▶️ ຫຼິ້ນ</span>
-                            </div>
-
-                            <div
-                                className={`stage-select-card ${currentLevel === 'level-3' ? 'active-stage' : ''}`}
-                                onClick={() => handleStartGame('level-3')}
-                            >
-                                <div>
-                                    <strong>ດ່ານ 3: King Slime Boss Arena 👑</strong>
-                                    <div style={{ fontSize: '0.8rem', color: 'rgba(255, 255, 255, 0.7)' }}>
-                                        ສູ້ Boss ຍັກ King Slime, ແຖບເລືອດ Boss HP
-                                    </div>
-                                </div>
-                                <span>▶️ ຫຼິ້ນ</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <StageSelectModal
+                    currentLevel={currentLevel}
+                    onClose={() => setIsStageSelectOpen(false)}
+                    onSelectStage={handleStartGame}
+                />
             )}
         </div>
     );
