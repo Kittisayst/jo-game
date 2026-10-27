@@ -104,6 +104,11 @@ export class ParticleManager
             tint: [0x10b981, 0xfbbf24, 0x38bdf8, 0xf43f5e, 0xa855f7],
             gravityY: 180,
         });
+
+        this.coinEmitter.setDepth(20);
+        this.dustEmitter.setDepth(20);
+        this.stompEmitter.setDepth(20);
+        this.celebrationEmitter.setDepth(20);
     }
 
     emitCoinSparkle (x: number, y: number): void

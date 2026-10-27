@@ -24,6 +24,7 @@ export class Door extends Physics.Arcade.Sprite
         const body = this.body as Phaser.Physics.Arcade.StaticBody;
         body.setSize(WIDTH, HEIGHT);
         body.setOffset(0, 0);
+        this.setDepth(3);
 
         // Gentle portal breathing / glow tween
         scene.tweens.add({

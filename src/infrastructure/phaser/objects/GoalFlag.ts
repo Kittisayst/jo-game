@@ -26,6 +26,7 @@ export class GoalFlag extends Physics.Arcade.Sprite
         const body = this.body as Phaser.Physics.Arcade.StaticBody;
         body.setSize(WIDTH, HEIGHT);
         body.setOffset(0, 0);
+        this.setDepth(3);
 
         // Gentle pole shimmer/glow animation
         scene.tweens.add({

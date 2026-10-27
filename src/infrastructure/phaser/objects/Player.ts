@@ -31,6 +31,7 @@ export class Player extends Physics.Arcade.Sprite
         scene.physics.add.existing(this);
 
         this.setCollideWorldBounds(true);
+        this.setDepth(10);
     }
 
     setSkin (skinId: string): void

@@ -156,14 +156,15 @@ export class Game extends Scene
 
         this.particleManager = new ParticleManager(this);
 
-        this.player = new Player(this, this.level.spawn.x, this.level.spawn.y, this.currentSkinId);
-        this.player.onJump = (x, y) => this.particleManager.emitJumpDust(x, y);
-        this.player.onLand = (x, y) => this.particleManager.emitLandingDust(x, y);
-
         if (this.level.scenery === 'village')
         {
             this.createVillageScenery();
         }
+
+        this.player = new Player(this, this.level.spawn.x, this.level.spawn.y, this.currentSkinId);
+        this.player.setDepth(10);
+        this.player.onJump = (x, y) => this.particleManager.emitJumpDust(x, y);
+        this.player.onLand = (x, y) => this.particleManager.emitLandingDust(x, y);
 
         // Place GoalFlag or Door at finish line
         const finishY = WORLD_HEIGHT - GROUND_HEIGHT - 70;
@@ -454,6 +455,7 @@ export class Game extends Scene
         for (const tx of treeXPositions)
         {
             const tree = this.add.graphics();
+            tree.setDepth(1);
             tree.fillStyle(0x78350f, 1);
             tree.fillRect(tx - 6, baseY - 50, 12, 50);
             tree.fillStyle(0x15803d, 0.95);
@@ -465,6 +467,7 @@ export class Game extends Scene
         for (const house of housePositions)
         {
             const graphics = this.add.graphics();
+            graphics.setDepth(1);
 
             // House body
             graphics.fillStyle(house.bodyColor, 0.9);
@@ -503,6 +506,7 @@ export class Game extends Scene
         for (const lx of lanternXPositions)
         {
             const post = this.add.graphics();
+            post.setDepth(2);
             // Iron pole
             post.fillStyle(0x1e293b, 1);
             post.fillRect(lx - 2, baseY - 50, 4, 50);
@@ -523,6 +527,7 @@ export class Game extends Scene
             align: 'center',
         });
         welcomeSign.setOrigin(0.5, 0.5);
+        welcomeSign.setDepth(2);
 
         // Signpost pointing to Level 1 Door
         const doorSign = this.add.text(1380, baseY - 85, '🚪 ປະຕູສູ່ Level 1 ➡️\n(Green Plains)', {
@@ -534,6 +539,7 @@ export class Game extends Scene
             align: 'center',
         });
         doorSign.setOrigin(0.5, 0.5);
+        doorSign.setDepth(2);
 
         // Floating pulse on door sign
         this.tweens.add({
@@ -585,6 +591,7 @@ export class Game extends Scene
 
         const groundY = WORLD_HEIGHT - GROUND_HEIGHT / 2;
         const tileSprite = this.add.tileSprite(this.level.worldWidth / 2, groundY, this.level.worldWidth, GROUND_HEIGHT, textureKey);
+        tileSprite.setDepth(4);
 
         this.physics.add.existing(tileSprite, true);
 
