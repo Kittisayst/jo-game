@@ -29,6 +29,11 @@ export class DomainEventEmitter
     {
         this.listeners.get(event)?.forEach(listener => listener(payload));
     }
+
+    clear ()
+    {
+        this.listeners.clear();
+    }
 }
 
 export const DomainEvents = new DomainEventEmitter();

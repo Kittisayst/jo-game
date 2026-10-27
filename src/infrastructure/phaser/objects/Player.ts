@@ -142,50 +142,92 @@ export class Player extends Physics.Arcade.Sprite
         });
     }
 
+    private rainbowTimer?: Phaser.Time.TimerEvent;
+
+    setStarPower (active: boolean): void
+    {
+        this.hasStarPower = active;
+
+        if (active)
+        {
+            if (this.rainbowTimer)
+            {
+                this.rainbowTimer.remove();
+            }
+
+            const tints = [0xff0000, 0xf97316, 0xfacc15, 0x10b981, 0x06b6d4, 0x8b5cf6, 0xec4899];
+            let tintIndex = 0;
+
+            this.rainbowTimer = this.scene.time.addEvent({
+                delay: 90,
+                loop: true,
+                callback: () =>
+                {
+                    this.setTint(tints[tintIndex % tints.length]);
+                    tintIndex++;
+                },
+            });
+        }
+        else
+        {
+            if (this.rainbowTimer)
+            {
+                this.rainbowTimer.remove();
+                this.rainbowTimer = undefined;
+            }
+            if (this.hasSpringPower)
+            {
+                this.setTint(0x38bdf8);
+            }
+            else
+            {
+                this.clearTint();
+            }
+        }
+    }
+
+    setSpringPower (active: boolean): void
+    {
+        this.hasSpringPower = active;
+        this.jumpSpeed = active ? SPRING_JUMP_SPEED : JUMP_SPEED;
+
+        if (!this.hasStarPower)
+        {
+            if (active)
+            {
+                this.setTint(0x38bdf8);
+            }
+            else
+            {
+                this.clearTint();
+            }
+        }
+    }
+
     activateStar (durationMs = 8000): void
     {
-        this.hasStarPower = true;
-
-        const tints = [0xff0000, 0xf97316, 0xfacc15, 0x10b981, 0x06b6d4, 0x8b5cf6, 0xec4899];
-        let tintIndex = 0;
-
-        const rainbowTimer = this.scene.time.addEvent({
-            delay: 90,
-            repeat: Math.floor(durationMs / 90),
-            callback: () =>
-            {
-                this.setTint(tints[tintIndex % tints.length]);
-                tintIndex++;
-            },
-        });
-
-        this.scene.time.delayedCall(durationMs, () =>
+        this.setStarPower(true);
+        if (durationMs > 0)
         {
-            this.hasStarPower = false;
-            this.clearTint();
-            rainbowTimer.remove();
-        });
+            this.scene.time.delayedCall(durationMs, () =>
+            {
+                if (!this.scene || !this.active) return;
+                this.setStarPower(false);
+            });
+        }
     }
 
     activateSpring (durationMs = 10000): void
     {
-        this.hasSpringPower = true;
-        this.jumpSpeed = SPRING_JUMP_SPEED;
-
-        if (!this.hasStarPower)
+        this.setSpringPower(true);
+        if (durationMs > 0)
         {
-            this.setTint(0x38bdf8);
-        }
-
-        this.scene.time.delayedCall(durationMs, () =>
-        {
-            this.hasSpringPower = false;
-            this.jumpSpeed = JUMP_SPEED;
-            if (!this.hasStarPower)
+            this.scene.time.delayedCall(durationMs, () =>
             {
-                this.clearTint();
-            }
-        });
+                if (!this.scene || !this.active) return;
+                this.setSpringPower(false);
+            });
+        }
     }
 
     update (cursors: Phaser.Types.Input.Keyboard.CursorKeys)

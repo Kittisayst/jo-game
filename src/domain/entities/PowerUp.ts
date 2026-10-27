@@ -1,47 +1,102 @@
 export type PowerUpType = 'heart' | 'star' | 'spring';
 
+export const DEFAULT_STAR_DURATION_MS = 8000;
+export const DEFAULT_SPRING_DURATION_MS = 10000;
+
 /**
  * Domain entity representing temporary active player power-up status.
- * Pure non-spatial state and business rules — see "Domain layer" in CONTEXT.md.
+ * Owns duration countdown and business rules — pure non-spatial logic (no Phaser, no DOM).
+ * See "Domain layer" in CONTEXT.md.
  */
 export class PowerUpState
 {
-    private _starActive = false;
-    private _springActive = false;
+    private _starRemainingMs = 0;
+    private _springRemainingMs = 0;
 
     get isStarActive (): boolean
     {
-        return this._starActive;
+        return this._starRemainingMs > 0;
     }
 
     get isSpringActive (): boolean
     {
-        return this._springActive;
+        return this._springRemainingMs > 0;
     }
 
-    activateStar (): void
+    get starRemainingMs (): number
     {
-        this._starActive = true;
+        return this._starRemainingMs;
+    }
+
+    get springRemainingMs (): number
+    {
+        return this._springRemainingMs;
+    }
+
+    get starRemainingSeconds (): number
+    {
+        return Math.ceil(this._starRemainingMs / 1000);
+    }
+
+    get springRemainingSeconds (): number
+    {
+        return Math.ceil(this._springRemainingMs / 1000);
+    }
+
+    activateStar (durationMs = DEFAULT_STAR_DURATION_MS): void
+    {
+        this._starRemainingMs = Math.max(0, durationMs);
     }
 
     deactivateStar (): void
     {
-        this._starActive = false;
+        this._starRemainingMs = 0;
     }
 
-    activateSpring (): void
+    activateSpring (durationMs = DEFAULT_SPRING_DURATION_MS): void
     {
-        this._springActive = true;
+        this._springRemainingMs = Math.max(0, durationMs);
     }
 
     deactivateSpring (): void
     {
-        this._springActive = false;
+        this._springRemainingMs = 0;
+    }
+
+    tick (deltaMs: number): { starExpired: boolean; springExpired: boolean }
+    {
+        let starExpired = false;
+        let springExpired = false;
+
+        if (deltaMs <= 0)
+        {
+            return { starExpired: false, springExpired: false };
+        }
+
+        if (this._starRemainingMs > 0)
+        {
+            this._starRemainingMs = Math.max(0, this._starRemainingMs - deltaMs);
+            if (this._starRemainingMs === 0)
+            {
+                starExpired = true;
+            }
+        }
+
+        if (this._springRemainingMs > 0)
+        {
+            this._springRemainingMs = Math.max(0, this._springRemainingMs - deltaMs);
+            if (this._springRemainingMs === 0)
+            {
+                springExpired = true;
+            }
+        }
+
+        return { starExpired, springExpired };
     }
 
     reset (): void
     {
-        this._starActive = false;
-        this._springActive = false;
+        this._starRemainingMs = 0;
+        this._springRemainingMs = 0;
     }
 }

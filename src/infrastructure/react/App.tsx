@@ -41,6 +41,12 @@ import {
     resumeGameUseCase,
     togglePauseUseCase,
 } from '../../application/TogglePauseUseCase';
+import {
+    POWERUP_EXPIRED_EVENT,
+    PowerUpExpiredPayload,
+    SESSION_TICK_EVENT,
+    SessionTickPayload,
+} from '../../application/TickSessionUseCase';
 import { entities, repositories } from '../composition';
 
 function App()
@@ -189,6 +195,19 @@ function App()
             setIsGamePaused(false);
         };
 
+        const onSessionTick = (payload: SessionTickPayload) =>
+        {
+            setElapsedSeconds(payload.elapsedSeconds);
+            setStarTimer(payload.starTimer);
+            setSpringTimer(payload.springTimer);
+        };
+
+        const onPowerUpExpired = (payload: PowerUpExpiredPayload) =>
+        {
+            if (payload.type === 'star') setStarTimer(0);
+            if (payload.type === 'spring') setSpringTimer(0);
+        };
+
         const handleKeyDown = (e: KeyboardEvent) =>
         {
             if (e.key === 'm' || e.key === 'M')
@@ -233,6 +252,8 @@ function App()
         DomainEvents.on<BossDefeatedPayload>(BOSS_DEFEATED_EVENT, onBossDefeated);
         DomainEvents.on(GAME_PAUSED_EVENT, onGamePaused);
         DomainEvents.on(GAME_RESUMED_EVENT, onGameResumed);
+        DomainEvents.on<SessionTickPayload>(SESSION_TICK_EVENT, onSessionTick);
+        DomainEvents.on<PowerUpExpiredPayload>(POWERUP_EXPIRED_EVENT, onPowerUpExpired);
         window.addEventListener('keydown', handleKeyDown);
 
         return () =>
@@ -247,36 +268,13 @@ function App()
             DomainEvents.off<BossDefeatedPayload>(BOSS_DEFEATED_EVENT, onBossDefeated);
             DomainEvents.off(GAME_PAUSED_EVENT, onGamePaused);
             DomainEvents.off(GAME_RESUMED_EVENT, onGameResumed);
+            DomainEvents.off<SessionTickPayload>(SESSION_TICK_EVENT, onSessionTick);
+            DomainEvents.off<PowerUpExpiredPayload>(POWERUP_EXPIRED_EVENT, onPowerUpExpired);
             window.removeEventListener('keydown', handleKeyDown);
         };
     }, []);
 
-    // Countdown interval for power-up timers (pauses when game is paused or in main menu)
-    useEffect(() =>
-    {
-        if (isMainMenuOpen || isGamePaused || (starTimer <= 0 && springTimer <= 0)) return;
-
-        const interval = setInterval(() =>
-        {
-            setStarTimer(prev => Math.max(0, prev - 1));
-            setSpringTimer(prev => Math.max(0, prev - 1));
-        }, 1000);
-
-        return () => clearInterval(interval);
-    }, [isMainMenuOpen, isGamePaused, starTimer, springTimer]);
-
-    // Speedrun elapsed timer (pauses when game is paused)
-    useEffect(() =>
-    {
-        if (isMainMenuOpen || levelComplete || gameOver || isGamePaused) return;
-
-        const timer = setInterval(() =>
-        {
-            setElapsedSeconds(prev => +(prev + 0.1).toFixed(1));
-        }, 100);
-
-        return () => clearInterval(timer);
-    }, [isMainMenuOpen, levelComplete, gameOver, isGamePaused]);
+    // Timers are driven directly by Phaser game loop via SESSION_TICK_EVENT
 
     const formatTime = (seconds: number | null): string =>
     {
@@ -338,6 +336,8 @@ function App()
             score: 0,
             lives: maxLives,
             skinId: activeSkinId,
+            coins: 0,
+            elapsedMs: 0,
         });
     };
 
@@ -390,6 +390,8 @@ function App()
             score,
             lives,
             skinId: activeSkinId,
+            coins: coinsCount,
+            elapsedMs: Math.round(elapsedSeconds * 1000),
         });
     };
 
@@ -422,6 +424,8 @@ function App()
             score: resetToStart ? 0 : score,
             lives: resetToStart ? maxLives : lives,
             skinId: activeSkinId,
+            coins: resetToStart ? 0 : coinsCount,
+            elapsedMs: resetToStart ? 0 : Math.round(elapsedSeconds * 1000),
         });
     };
 

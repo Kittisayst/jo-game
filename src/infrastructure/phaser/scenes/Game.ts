@@ -14,6 +14,7 @@ import { soundManager } from '../../audio/SoundManager';
 import { Level } from '../Level';
 import { LevelProgress } from '../../../domain/entities/LevelProgress';
 import { DomainEvents } from '../../../domain/DomainEvents';
+import { GameSession } from '../../../domain/entities/GameSession';
 import { Score } from '../../../domain/entities/Score';
 import { Lives } from '../../../domain/entities/Lives';
 import { PowerUpState } from '../../../domain/entities/PowerUp';
@@ -22,6 +23,10 @@ import { collectCoinUseCase } from '../../../application/CollectCoinUseCase';
 import { defeatEnemyUseCase } from '../../../application/DefeatEnemyUseCase';
 import { playerTakeDamageUseCase } from '../../../application/PlayerTakeDamageUseCase';
 import { collectPowerUpUseCase } from '../../../application/CollectPowerUpUseCase';
+import {
+    createTickEmitterCache,
+    tickSessionUseCase,
+} from '../../../application/TickSessionUseCase';
 import {
     SKIN_CHANGED_EVENT,
     SkinChangedPayload,
@@ -52,6 +57,7 @@ export class Game extends Scene
     cursors: Phaser.Types.Input.Keyboard.CursorKeys;
     level: Level;
     levelProgress: LevelProgress;
+    session: GameSession;
     score: Score;
     lives: Lives;
     powerUpState: PowerUpState;
@@ -59,13 +65,23 @@ export class Game extends Scene
     currentSkinId = 'cyber-blue';
     initialScoreValue = 0;
     initialLivesValue = 3;
+    initialCoinsValue = 0;
+    initialElapsedMs = 0;
+    private tickCache = createTickEmitterCache();
 
     constructor ()
     {
         super('Game');
     }
 
-    init (data?: { levelKey?: string; score?: number; lives?: number; skinId?: string })
+    init (data?: {
+        levelKey?: string;
+        score?: number;
+        lives?: number;
+        skinId?: string;
+        coins?: number;
+        elapsedMs?: number;
+    })
     {
         if (data?.levelKey)
         {
@@ -83,6 +99,14 @@ export class Game extends Scene
         {
             this.currentSkinId = data.skinId;
         }
+        if (typeof data?.coins === 'number')
+        {
+            this.initialCoinsValue = data.coins;
+        }
+        if (typeof data?.elapsedMs === 'number')
+        {
+            this.initialElapsedMs = data.elapsedMs;
+        }
     }
 
     preload ()
@@ -96,8 +120,17 @@ export class Game extends Scene
     {
         this.level = this.cache.json.get(this.currentLevelKey) as Level;
         this.levelProgress = new LevelProgress(this.currentLevelKey, this.level.nextLevel || null);
-        this.score = new Score(this.initialScoreValue);
-        this.lives = new Lives(this.initialLivesValue);
+        this.session = new GameSession(
+            this.currentLevelKey,
+            this.initialScoreValue,
+            this.initialLivesValue,
+            this.initialCoinsValue,
+            this.initialElapsedMs
+        );
+        this.score = this.session.score;
+        this.lives = this.session.lives;
+        this.powerUpState = this.session.powerUps;
+        this.tickCache = createTickEmitterCache();
 
         this.physics.world.setBounds(0, 0, this.level.worldWidth, WORLD_HEIGHT);
 
@@ -145,6 +178,7 @@ export class Game extends Scene
             const coin = coinObj as Coin;
             coin.collect();
             this.particleManager.emitCoinSparkle(coin.x, coin.y);
+            this.session.addCoin(1);
             collectCoinUseCase(this.score, 10);
         });
 
@@ -237,8 +271,19 @@ export class Game extends Scene
         EventBus.emit('current-scene-ready', this);
     }
 
-    update ()
+    update (_time: number, delta: number)
     {
+        const tickResult = tickSessionUseCase(this.session, delta, this.tickCache);
+
+        if (tickResult.starExpired)
+        {
+            this.player.setStarPower(false);
+        }
+        if (tickResult.springExpired)
+        {
+            this.player.setSpringPower(false);
+        }
+
         this.player.update(this.cursors);
 
         for (const child of this.enemies.getChildren())
@@ -474,12 +519,12 @@ export class Game extends Scene
         }
         else if (type === 'star')
         {
-            this.player.activateStar(8000);
+            this.player.setStarPower(true);
             collectPowerUpUseCase(type, this.lives, this.powerUpState);
         }
         else if (type === 'spring')
         {
-            this.player.activateSpring(10000);
+            this.player.setSpringPower(true);
             collectPowerUpUseCase(type, this.lives, this.powerUpState);
         }
     }
