@@ -315,11 +315,13 @@ function App()
     {
         if (isMainMenuOpen || levelComplete || gameOver) return;
         pauseGameUseCase(pauseState);
+        setIsGamePaused(true);
     };
 
     const handleResumeGame = () =>
     {
         resumeGameUseCase(pauseState);
+        setIsGamePaused(false);
     };
 
     const handleStartGame = (stageKey = 'level-1') =>
@@ -448,64 +450,79 @@ function App()
 
     return (
         <div id="app">
-            <div className="game-hud">
-                <div className="hud-badge level-badge">
-                    <span className="badge-icon">🚩</span>
-                    <span className="badge-label">
-                        {currentLevel === 'level-1' ? 'Level 1' : currentLevel === 'level-2' ? 'Level 2' : 'Level 3 (👑 Boss)'}
-                    </span>
-                </div>
-                <div className="hud-badge lives-badge">
-                    <span className="badge-icon">
-                        {'❤️'.repeat(Math.max(0, lives)) + '🖤'.repeat(Math.max(0, maxLives - lives))}
-                    </span>
-                </div>
-                <div className="hud-badge coin-badge">
-                    <span className="badge-icon">🪙</span>
-                    <span className="badge-label">Coins</span>
-                    <span className="badge-value">{coinsCount}</span>
-                </div>
-                <div className="hud-badge score-badge">
-                    <span className="badge-icon">⭐</span>
-                    <span className="badge-label">Score</span>
-                    <span className="badge-value">{score}</span>
-                </div>
-                <div className="hud-badge timer-badge">
-                    <span className="badge-icon">⏱️</span>
-                    <span className="badge-value">{formatTime(elapsedSeconds)}</span>
-                </div>
-                <div className="hud-badge high-score-badge">
-                    <span className="badge-icon">🏆</span>
-                    <span className="badge-label">Best</span>
-                    <span className="badge-value">{highScore}</span>
-                </div>
-
-                {starTimer > 0 && (
-                    <div className="hud-badge star-power-badge">
+            {!isMainMenuOpen && (
+                <div className="game-hud">
+                    <div className="hud-badge level-badge">
+                        <span className="badge-icon">🚩</span>
+                        <span className="badge-label">
+                            {currentLevel === 'level-1' ? 'Level 1' : currentLevel === 'level-2' ? 'Level 2' : 'Level 3 (👑 Boss)'}
+                        </span>
+                    </div>
+                    <div className="hud-badge lives-badge">
+                        <span className="badge-icon">
+                            {'❤️'.repeat(Math.max(0, lives)) + '🖤'.repeat(Math.max(0, maxLives - lives))}
+                        </span>
+                    </div>
+                    <div className="hud-badge coin-badge">
+                        <span className="badge-icon">🪙</span>
+                        <span className="badge-label">Coins</span>
+                        <span className="badge-value">{coinsCount}</span>
+                    </div>
+                    <div className="hud-badge score-badge">
                         <span className="badge-icon">⭐</span>
-                        <span className="badge-label">Star</span>
-                        <span className="badge-value">{starTimer}s</span>
+                        <span className="badge-label">Score</span>
+                        <span className="badge-value">{score}</span>
                     </div>
-                )}
-
-                {springTimer > 0 && (
-                    <div className="hud-badge spring-power-badge">
-                        <span className="badge-icon">⚡</span>
-                        <span className="badge-label">Jump+</span>
-                        <span className="badge-value">{springTimer}s</span>
+                    <div className="hud-badge timer-badge">
+                        <span className="badge-icon">⏱️</span>
+                        <span className="badge-value">{formatTime(elapsedSeconds)}</span>
                     </div>
-                )}
+                    <div className="hud-badge high-score-badge">
+                        <span className="badge-icon">🏆</span>
+                        <span className="badge-label">Best</span>
+                        <span className="badge-value">{highScore}</span>
+                    </div>
 
-                <button
-                    className={`hud-badge hud-menu-btn ${isGamePaused ? 'paused-active' : ''}`}
-                    onClick={isGamePaused ? handleResumeGame : handlePauseGame}
-                    title="In-Game Menu & Pause (Esc / P)"
-                    type="button"
-                >
-                    <span className="badge-icon">{isGamePaused ? '▶️' : '⏸️'}</span>
-                    <span className="badge-label">{isGamePaused ? 'ສືບຕໍ່' : 'ເມນູ (Menu)'}</span>
-                </button>
-            </div>
+                    {starTimer > 0 && (
+                        <div className="hud-badge star-power-badge">
+                            <span className="badge-icon">⭐</span>
+                            <span className="badge-label">Star</span>
+                            <span className="badge-value">{starTimer}s</span>
+                        </div>
+                    )}
+
+                    {springTimer > 0 && (
+                        <div className="hud-badge spring-power-badge">
+                            <span className="badge-icon">⚡</span>
+                            <span className="badge-label">Jump+</span>
+                            <span className="badge-value">{springTimer}s</span>
+                        </div>
+                    )}
+
+                    <button
+                        id="hud-menu-btn"
+                        className={`hud-badge hud-menu-btn ${isGamePaused ? 'paused-active' : ''}`}
+                        onClick={(e) =>
+                        {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            if (isGamePaused)
+                            {
+                                handleResumeGame();
+                            }
+                            else
+                            {
+                                handlePauseGame();
+                            }
+                        }}
+                        title="In-Game Menu & Pause (Esc / P)"
+                        type="button"
+                    >
+                        <span className="badge-icon">{isGamePaused ? '▶️' : '⏸️'}</span>
+                        <span className="badge-label">{isGamePaused ? 'ສືບຕໍ່' : 'ເມນູ (Menu)'}</span>
+                    </button>
+                </div>
+            )}
 
             {(currentLevel === 'level-3' || bossHp !== null) && (
                 <div className="boss-hud-container">
