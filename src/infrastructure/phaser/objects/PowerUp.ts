@@ -70,15 +70,16 @@ export class PowerUp extends Physics.Arcade.Sprite
             const cy = 14;
             const outerR = 12;
             const innerR = 5;
-            const points: Phaser.Math.Vector2[] = [];
+            const points: { x: number; y: number }[] = [];
 
             for (let i = 0; i < 10; i++)
             {
                 const r = i % 2 === 0 ? outerR : innerR;
                 const angle = (i * Math.PI) / 5 - Math.PI / 2;
-                points.push(new Phaser.Math.Vector2(cx + Math.cos(angle) * r, cy + Math.sin(angle) * r));
+                points.push({ x: cx + Math.cos(angle) * r, y: cy + Math.sin(angle) * r });
             }
 
+            graphics.lineStyle(1.5, 0xf59e0b, 1);
             graphics.beginPath();
             graphics.moveTo(points[0].x, points[0].y);
             for (let i = 1; i < points.length; i++)
@@ -87,10 +88,7 @@ export class PowerUp extends Physics.Arcade.Sprite
             }
             graphics.closePath();
             graphics.fillPath();
-
-            // Star border
-            graphics.lineStyle(1.5, 0xf59e0b, 1);
-            graphics.strokePoints(points, true);
+            graphics.strokePath();
 
             // Center gleam
             graphics.fillStyle(0xffffff, 0.85);
