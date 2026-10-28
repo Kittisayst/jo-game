@@ -4,6 +4,9 @@ import { ItemData, loadItemsData } from '../../dataLoader';
 import { entities } from '../../composition';
 import { soundManager } from '../../audio/SoundManager';
 import { EventBus } from '../../EventBus';
+import { consumeItemUseCase } from '../../../application/ConsumeItemUseCase';
+import { equipWeaponUseCase } from '../../../application/EquipWeaponUseCase';
+import { discardItemUseCase } from '../../../application/DiscardItemUseCase';
 
 interface BackpackModalProps
 {
@@ -21,6 +24,7 @@ export const BackpackModal: React.FC<BackpackModalProps> = ({ isOpen, onClose, o
     const [selectedSlotIndex, setSelectedSlotIndex] = useState<number>(0);
     const [activeFilter, setActiveFilter] = useState<FilterCategory>('all');
     const [showDiscardConfirm, setShowDiscardConfirm] = useState(false);
+    const [notice, setNotice] = useState<string | null>(null);
     const [, setRevision] = useState(0);
 
     useEffect(() =>
@@ -30,6 +34,11 @@ export const BackpackModal: React.FC<BackpackModalProps> = ({ isOpen, onClose, o
 
     const allSlots = entities.backpack.getAllSlots();
     const getItem = useCallback((id: string) => items.find(i => i.id === id), [items]);
+
+    useEffect(() =>
+    {
+        setNotice(null);
+    }, [selectedSlotIndex, isOpen]);
 
     // Auto-select first non-empty slot on open
     useEffect(() =>
@@ -70,21 +79,35 @@ export const BackpackModal: React.FC<BackpackModalProps> = ({ isOpen, onClose, o
     const handleUseSelectedItem = useCallback(() =>
     {
         if (!selectedSlot || !selectedItemDef) return;
+        setNotice(null);
 
         if (selectedItemDef.category === 'consumable')
         {
-            entities.backpack.removeItem(selectedSlot.itemId, 1);
-            soundManager.playPowerUp();
-            if (onUseItem)
+            const result = consumeItemUseCase(entities.backpack, entities.health, selectedSlot.itemId, {
+                healAmount: selectedItemDef.healAmount,
+            });
+
+            if (!result.success)
             {
-                onUseItem(selectedSlot.itemId);
+                soundManager.playHurt();
+                setNotice(
+                    result.reason === 'already_full' ? '❤️ ຫົວໃຈເຕັມແລ້ວ ບໍ່ຈຳເປັນຕ້ອງໃຊ້'
+                        : result.reason === 'no_effect' ? 'ສິ່ງນີ້ໃຊ້ຕອນສ້ອມປະຕູ ບໍ່ແມ່ນດື່ມ'
+                            : 'ໃຊ້ບໍ່ໄດ້ຕອນນີ້'
+                );
+                return;
             }
+
+            soundManager.playPowerUp();
+            onUseItem?.(selectedSlot.itemId);
             EventBus.emit('backpack-item-used', selectedSlot.itemId);
             setRevision(r => r + 1);
         }
         else if (selectedItemDef.category === 'weapon')
         {
-            entities.equipment.equipWeapon(selectedSlot.itemId);
+            const result = equipWeaponUseCase(entities.equipment, entities.backpack, selectedSlot.itemId);
+            if (!result.success) return;
+
             EventBus.emit('weapon-changed', selectedSlot.itemId);
             soundManager.playSelect();
             setRevision(r => r + 1);
@@ -95,20 +118,13 @@ export const BackpackModal: React.FC<BackpackModalProps> = ({ isOpen, onClose, o
     {
         if (!selectedSlot || !selectedItemDef) return;
 
-        // Never discard tools or weapons
-        if (selectedItemDef.category === 'tool' || selectedItemDef.category === 'weapon')
-        {
-            return;
-        }
-
-        if (discardAll || selectedSlot.count <= 1)
-        {
-            entities.backpack.removeSlot(selectedSlot.slotIndex);
-        }
-        else
-        {
-            selectedSlot.count -= 1;
-        }
+        const result = discardItemUseCase(
+            entities.backpack,
+            selectedSlot.slotIndex,
+            selectedItemDef.category,
+            discardAll ? 'all' : 1
+        );
+        if (!result.success) return;
 
         soundManager.playSelect();
         setShowDiscardConfirm(false);
@@ -507,6 +523,9 @@ export const BackpackModal: React.FC<BackpackModalProps> = ({ isOpen, onClose, o
 
                                 {/* Action Buttons */}
                                 <div className="space-y-2 pt-2">
+                                    {notice && (
+                                        <p role="status" className="text-xs text-amber-300 text-center">{notice}</p>
+                                    )}
                                     {selectedItemDef.category === 'consumable' && (
                                         <button
                                             onClick={handleUseSelectedItem}

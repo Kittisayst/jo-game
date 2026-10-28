@@ -49,7 +49,6 @@ export class Enemy extends Physics.Arcade.Sprite
         y: number,
         patrolDistance = 160,
         speed?: number,
-        points?: number,
         type: EnemyType = 'slime',
         definition?: EnemyDefinition
     )
@@ -61,7 +60,7 @@ export class Enemy extends Physics.Arcade.Sprite
         super(scene, x, y, texKey);
 
         this.enemyType = type;
-        this.entity = definition ? EnemyEntity.fromDefinition(definition, type) : new EnemyEntity(type, points);
+        this.entity = definition ? EnemyEntity.fromDefinition(definition, type) : new EnemyEntity(type);
 
         scene.add.existing(this);
         scene.physics.add.existing(this);

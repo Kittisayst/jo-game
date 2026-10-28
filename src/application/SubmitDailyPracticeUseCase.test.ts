@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { submitDailyPracticeUseCase } from './SubmitDailyPracticeUseCase';
+import { canAccessDailyPractice, submitDailyPracticeUseCase } from './SubmitDailyPracticeUseCase';
 import { SpacedRepetitionSystem } from '../domain/entities/Quiz';
 import { Wallet } from '../domain/entities/Wallet';
 
@@ -48,3 +48,23 @@ describe('SubmitDailyPracticeUseCase', () =>
     });
 });
 
+describe('canAccessDailyPractice', () =>
+{
+    it('is open when the player owns a Textbook', () =>
+    {
+        expect(canAccessDailyPractice(1, 0)).toBe(true);
+        expect(canAccessDailyPractice(2, 500)).toBe(true);
+    });
+
+    it('is open for a player who owns nothing and cannot afford the first Textbook', () =>
+    {
+        expect(canAccessDailyPractice(0, 0)).toBe(true);
+        expect(canAccessDailyPractice(0, 19)).toBe(true);
+    });
+
+    it('is closed while the first Textbook is affordable but not bought', () =>
+    {
+        expect(canAccessDailyPractice(0, 20)).toBe(false);
+        expect(canAccessDailyPractice(0, 60)).toBe(false);
+    });
+});

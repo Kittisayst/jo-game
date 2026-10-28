@@ -75,10 +75,10 @@
     "id": "herb-potion",
     "name": "ຢາຟື້ນຟູພະລັງຊີວິດ",
     "nameEn": "Health Potion",
-    "description": "ດື່ມເພື່ອຟື້ນຟູພະລັງຊີວິດທັນທີ 40 HP",
+    "description": "ດື່ມເພື່ອຟື້ນຟູ 1 ຫົວໃຈທັນທີ",
     "category": "consumable",
     "maxStack": 20,
-    "healAmount": 40,
+    "healAmount": 1,
     "icon": "🧪"
   },
   {

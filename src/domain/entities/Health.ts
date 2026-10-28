@@ -1,3 +1,5 @@
+export const DEFAULT_MAX_HEALTH = 3;
+
 /**
  * Domain entity representing the player's hit points (hearts).
  * Pure non-spatial state and business rules — see "Domain layer" in CONTEXT.md.
@@ -7,7 +9,7 @@ export class Health
     private _current: number;
     private readonly _max: number;
 
-    constructor (initial = 3, max = 3)
+    constructor (initial = DEFAULT_MAX_HEALTH, max = DEFAULT_MAX_HEALTH)
     {
         this._max = Math.max(1, max);
         this._current = Math.min(this._max, Math.max(0, initial));

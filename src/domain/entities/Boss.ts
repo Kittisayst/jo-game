@@ -1,5 +1,14 @@
 export type BossPhase = 1 | 2 | 3;
 
+/** Share of max HP the Boss recovers when the finisher question is answered wrongly. */
+export const FINISHER_FAIL_HEAL_RATIO = 0.15;
+
+/** Story Materials handed over once the finisher question is answered correctly. */
+export const BOSS_FINISHER_REWARD: ReadonlyArray<{ itemId: string; count: number }> = [
+    { itemId: 'boss-core', count: 1 },
+    { itemId: 'crystal', count: 3 },
+];
+
 /**
  * Domain entity representing the King Slime Boss.
  * Pure non-spatial state and business rules — see "Domain layer" in CONTEXT.md.
@@ -9,13 +18,11 @@ export class Boss
     private _currentHp: number;
     private readonly _maxHp: number;
     private _isDefeated = false;
-    private readonly _points: number;
 
-    constructor (maxHp = 5, points = 1000)
+    constructor (maxHp = 5)
     {
         this._maxHp = Math.max(1, maxHp);
         this._currentHp = this._maxHp;
-        this._points = Math.max(0, points);
     }
 
     get currentHp (): number
@@ -31,11 +38,6 @@ export class Boss
     get isDefeated (): boolean
     {
         return this._isDefeated;
-    }
-
-    get points (): number
-    {
-        return this._points;
     }
 
     /**
@@ -98,6 +100,14 @@ export class Boss
             this._isDefeated = false;
         }
         return this._currentHp;
+    }
+
+    /** Recovers part of the Boss's HP after a wrong finisher answer; returns the HP restored. */
+    healAfterFailedFinisher (): number
+    {
+        const amount = Math.ceil(this._maxHp * FINISHER_FAIL_HEAL_RATIO);
+        this.heal(amount);
+        return amount;
     }
 
     reset (): void

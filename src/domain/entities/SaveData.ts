@@ -1,5 +1,4 @@
 import { SettingsData, StageProgressionData } from '../ports';
-import { AchievementProgress } from './Achievement';
 import { BookProgressSnapshot } from './Book';
 import { BackpackSlotSnapshot } from './Backpack';
 import { EquipmentSnapshot, WEAPON_CONFIGS } from './EquipmentState';
@@ -28,7 +27,6 @@ export interface SaveGameSnapshot
     wallet: {
         balance: number;
     };
-    achievements?: Record<string, AchievementProgress>;
     books: Record<string, BookProgressSnapshot>;
     backpack: BackpackSlotSnapshot[];
     equipment: EquipmentSnapshot;
@@ -57,7 +55,6 @@ export function createDefaultSaveSnapshot (slotId = 'slot_1'): SaveGameSnapshot
         wallet: {
             balance: STARTER_BOOK_CREDIT_RESERVE,
         },
-        achievements: {},
         books: {
             'book-ch1': {
                 bookId: 'book-ch1',
@@ -144,22 +141,6 @@ export function migrateSaveSnapshot (raw: unknown, fallbackSlotId = 'slot_1'): S
     const unlockedStages = Array.from(new Set([...ALWAYS_UNLOCKED_STAGES, ...stageList(rawProg.unlockedStages)]));
     const completedStages = Array.from(new Set(stageList(rawProg.completedStages)));
 
-    // Achievements (hidden for now, kept so they can return as learning achievements)
-    const achievements: Record<string, AchievementProgress> = {};
-    for (const [key, val] of Object.entries(asRecord(data.achievements)))
-    {
-        if (val && typeof val === 'object')
-        {
-            const a = val as Record<string, unknown>;
-            achievements[key] = {
-                progress: wholeNumber(a.progress),
-                unlocked: Boolean(a.unlocked),
-                claimed: Boolean(a.claimed),
-                unlockedAt: typeof a.unlockedAt === 'number' ? a.unlockedAt : null,
-            };
-        }
-    }
-
     // Books
     const books: Record<string, BookProgressSnapshot> = {
         'book-ch1': createDefaultSaveSnapshot().books['book-ch1'],
@@ -241,7 +222,6 @@ export function migrateSaveSnapshot (raw: unknown, fallbackSlotId = 'slot_1'): S
         settings,
         stageProgression: { unlockedStages, completedStages },
         wallet: { balance },
-        achievements,
         books,
         backpack,
         equipment: { equippedWeaponId, upgradeLevels },

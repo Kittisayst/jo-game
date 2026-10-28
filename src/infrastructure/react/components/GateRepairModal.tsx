@@ -2,7 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { QuestionData } from '../../../domain/entities/Quiz';
 import { loadQuestionsData } from '../../dataLoader';
 import { entities } from '../../composition';
-import { repairBrokenGateUseCase, RepairGateResult } from '../../../application/RepairBrokenGateUseCase';
+import {
+    checkGateRequirements,
+    DEFAULT_GATE_REQUIREMENTS,
+    GateRequirements,
+    repairBrokenGateUseCase,
+    RepairGateResult,
+} from '../../../application/RepairBrokenGateUseCase';
 import { soundManager } from '../../audio/SoundManager';
 import { EventBus } from '../../EventBus';
 
@@ -11,6 +17,8 @@ interface GateRepairModalProps
     isOpen: boolean;
     onClose: () => void;
     gateId?: string;
+    /** Tool and item the gate asks for, from `stages.json`. */
+    requirements?: GateRequirements;
     onGateRepaired?: () => void;
 }
 
@@ -18,9 +26,11 @@ export const GateRepairModal: React.FC<GateRepairModalProps> = ({
     isOpen,
     onClose,
     gateId = 'gate-ch1',
+    requirements,
     onGateRepaired,
 }) =>
 {
+    const gateRequirements = requirements ?? DEFAULT_GATE_REQUIREMENTS;
     const [questions, setQuestions] = useState<QuestionData[]>([]);
     const [currentQuestion, setCurrentQuestion] = useState<QuestionData | null>(null);
     const [selectedOption, setSelectedOption] = useState<number | null>(null);
@@ -42,8 +52,7 @@ export const GateRepairModal: React.FC<GateRepairModalProps> = ({
 
     if (!isOpen) return null;
 
-    const hasHammer = entities.backpack.getAllSlots().some(s => s && s.itemId.startsWith('hammer'));
-    const hasRepairKit = entities.backpack.getItemCount('repair-kit') >= 1;
+    const { hasTool: hasHammer, hasItem: hasRepairKit } = checkGateRequirements(entities.backpack, gateRequirements);
     const canAttempt = hasHammer && hasRepairKit && currentQuestion !== null;
 
     const handleRepair = () =>
@@ -55,7 +64,8 @@ export const GateRepairModal: React.FC<GateRepairModalProps> = ({
             entities.repairedGates,
             entities.backpack,
             currentQuestion,
-            selectedOption
+            selectedOption,
+            gateRequirements
         );
 
         setResult(res);
@@ -114,7 +124,7 @@ export const GateRepairModal: React.FC<GateRepairModalProps> = ({
                                 <span>ຊຸດສ້ອມແປງ (Repair Kit)</span>
                             </span>
                             <span className={hasRepairKit ? 'text-emerald-400 font-bold' : 'text-rose-400 font-bold'}>
-                                {hasRepairKit ? `✓ ມີແລ້ວ (${entities.backpack.getItemCount('repair-kit')})` : '✗ ຂາດຊຸດສ້ອມແປງ (ສ້າງທີ່ໂຮງຊ່າງ)'}
+                                {hasRepairKit ? `✓ ມີແລ້ວ (${entities.backpack.getItemCount(gateRequirements.requiredItem)})` : '✗ ຂາດຊຸດສ້ອມແປງ (ສ້າງທີ່ໂຮງຊ່າງ)'}
                             </span>
                         </div>
                     </div>

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { repairBrokenGateUseCase } from './RepairBrokenGateUseCase';
+import { checkGateRequirements, repairBrokenGateUseCase } from './RepairBrokenGateUseCase';
 import { Backpack } from '../domain/entities/Backpack';
 import { QuestionData } from '../domain/entities/Quiz';
 
@@ -67,5 +67,22 @@ describe('RepairBrokenGateUseCase', () =>
         expect(backpack.getItemCount('repair-kit')).toBe(0);
         expect(gates.has('gate-1')).toBe(true);
     });
-});
 
+    it('reads the required tool and item from the gate requirements', () =>
+    {
+        const backpack = new Backpack();
+        backpack.addItem('pickaxe-t1', 1);
+        backpack.addItem('crystal', 2);
+        const requirements = { requiredTool: 'pickaxe', requiredItem: 'crystal' };
+        const gates = new Set<string>();
+
+        expect(checkGateRequirements(backpack, requirements)).toEqual({ hasTool: true, hasItem: true });
+        expect(checkGateRequirements(backpack, { requiredTool: 'hammer', requiredItem: 'crystal' }))
+            .toEqual({ hasTool: false, hasItem: true });
+
+        const result = repairBrokenGateUseCase('gate-2', gates, backpack, question, 1, requirements);
+        expect(result.success).toBe(true);
+        expect(backpack.getItemCount('crystal')).toBe(1);
+        expect(gates.has('gate-2')).toBe(true);
+    });
+});

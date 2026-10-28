@@ -3,24 +3,22 @@ import { Boss } from './Boss';
 
 describe('Boss entity', () =>
 {
-    it('initializes with default maxHp and points', () =>
+    it('initializes with default maxHp', () =>
     {
         const boss = new Boss();
         expect(boss.maxHp).toBe(5);
         expect(boss.currentHp).toBe(5);
         expect(boss.isDefeated).toBe(false);
-        expect(boss.points).toBe(1000);
         expect(boss.phase).toBe(1);
         expect(boss.isEnraged).toBe(false);
         expect(boss.isBerserk).toBe(false);
     });
 
-    it('initializes with custom maxHp and points', () =>
+    it('initializes with custom maxHp', () =>
     {
-        const boss = new Boss(3, 500);
+        const boss = new Boss(3);
         expect(boss.maxHp).toBe(3);
         expect(boss.currentHp).toBe(3);
-        expect(boss.points).toBe(500);
     });
 
     it('takes damage and reduces currentHp', () =>
@@ -115,5 +113,18 @@ describe('Boss entity', () =>
         boss.takeDamage(120); // 60/300 = 20%
         expect(boss.phase).toBe(3);
         expect(boss.isBerserk).toBe(true);
+    });
+});
+
+describe('Boss.healAfterFailedFinisher', () =>
+{
+    it('recovers 15% of max HP rounded up and clears the defeated flag', () =>
+    {
+        const boss = new Boss(300);
+        boss.takeDamage(300);
+
+        expect(boss.healAfterFailedFinisher()).toBe(45);
+        expect(boss.currentHp).toBe(45);
+        expect(boss.isDefeated).toBe(false);
     });
 });

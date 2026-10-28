@@ -1,3 +1,4 @@
+import type { GateRequirements } from '../../../application/RepairBrokenGateUseCase';
 import type {
     ResourceNodeType,
     StageDefinition,
@@ -117,6 +118,7 @@ function addWaypoint (scene: Phaser.Scene, wp: StageWaypoint, baseY: number): Wa
 export class BrokenGate
 {
     readonly gateId: string;
+    readonly requirements: GateRequirements;
     readonly x: number;
     readonly y: number;
     wall?: Phaser.Physics.Arcade.StaticGroup;
@@ -127,6 +129,7 @@ export class BrokenGate
     constructor (private readonly scene: Phaser.Scene, definition: StageGate, private readonly baseY: number)
     {
         this.gateId = definition.id;
+        this.requirements = { requiredTool: definition.requiredTool, requiredItem: definition.requiredItem };
         this.x = definition.x;
         this.y = baseY - 70;
 

@@ -44,7 +44,7 @@ import { performAttackUseCase } from '../../../application/PerformAttackUseCase'
 import { cycleEquippedWeaponUseCase } from '../../../application/CycleEquippedWeaponUseCase';
 import { collectEnemyDropsUseCase } from '../../../application/CollectEnemyDropsUseCase';
 import { EnemyDefinition } from '../../../domain/entities/Enemy';
-import { trackAchievementUseCase } from '../../../application/TrackAchievementUseCase';
+import { awardBossRewardUseCase, reviveBossAfterFailedFinisherUseCase } from '../../../application/AwardBossRewardUseCase';
 import { harvestResourceNodeUseCase } from '../../../application/HarvestResourceNodeUseCase';
 
 const WORLD_HEIGHT = 720;
@@ -52,7 +52,6 @@ const GROUND_HEIGHT = 64;
 /** Top of the ground: where buildings, trees and nodes stand. */
 const GROUND_Y = WORLD_HEIGHT - GROUND_HEIGHT;
 const GROUND_TILE_SIZE = 64;
-const MAX_HEALTH = 3;
 
 export class Game extends Scene
 {
@@ -217,7 +216,9 @@ export class Game extends Scene
         this.level = this.cache.json.get(this.currentLevelKey) as Level;
         this.stage = getStageDefinition(parseStageDefinitions(this.cache.json.get('stages')), this.currentLevelKey);
         this.isStageCleared = false;
-        this.health = new Health(MAX_HEALTH, MAX_HEALTH);
+        // One Health for the whole session so the backpack UI can heal the same hearts the scene damages
+        this.health = entities.health;
+        this.health.reset();
 
         this.physics.world.setBounds(0, 0, this.level.worldWidth, WORLD_HEIGHT);
 
@@ -363,7 +364,7 @@ export class Game extends Scene
             {
                 if (this.enemies.countActive(true) < 3)
                 {
-                    const minion = new Enemy(this, x, y, 140, 85, 50);
+                    const minion = new Enemy(this, x, y, 140, 85);
                     minion.setScale(0.75);
                     this.enemies.add(minion);
                     this.particleManager.emitCelebration(x, y);
@@ -459,11 +460,10 @@ export class Game extends Scene
         const onQuizFinisherPassed = () =>
         {
             this.boss?.playDefeatTween();
-            entities.backpack.addItem('boss-core', 1);
-            entities.backpack.addItem('crystal', 3);
+            const reward = awardBossRewardUseCase(entities.backpack);
             EventBus.emit('backpack-changed');
-            this.showLootNotification(this.player.x, this.player.y - 40, '+1 🔮 Boss Core & +3 💎 Crystal!', '#a855f7');
-            trackAchievementUseCase(entities.achievementManager, 'boss-slayer', 1);
+            const rewardText = reward.collected.map(d => `+${d.count} ${this.getItemEmoji(d.itemId)} ${d.itemId}`).join(' & ');
+            this.showLootNotification(this.player.x, this.player.y - 40, reward.overflow.length > 0 ? `${rewardText} 🎒 ກະເປົາເຕັມ!` : rewardText, '#a855f7');
             this.particleManager.emitCelebration(this.player.x, this.player.y);
             this.cameras.main.shake(450, 0.018);
             this.cameras.main.flash(200, 255, 255, 255, true);
@@ -477,8 +477,8 @@ export class Game extends Scene
         {
             if (this.boss)
             {
-                const healAmount = Math.ceil(this.boss.entity.maxHp * 0.15);
-                this.boss.reviveAfterFailedFinisher(healAmount);
+                const healAmount = reviveBossAfterFailedFinisherUseCase(this.boss.entity);
+                this.boss.reviveAfterFailedFinisher();
                 this.particleManager.emitSpikeHit(this.boss.x, this.boss.y);
                 this.showLootNotification(this.boss.x, this.boss.y - 30, `⚠️ Boss ຟື້ນຟູ ${healAmount} HP!`, '#ef4444');
                 soundManager.playPowerUp();
@@ -696,7 +696,6 @@ export class Game extends Scene
             {
                 spit.destroy();
                 this.particleManager.emitStompBurst(spit.x, spit.y);
-                trackAchievementUseCase(entities.achievementManager, 'spit-deflector', 1);
             }
         }
 
@@ -932,7 +931,7 @@ export class Game extends Scene
                 this.interactionPromptText.setText('🚪 [E] ສ້ອມແປງປະຕູໃຫຍ່ (Repair Gate)');
                 this.interactionPromptText.setPosition(this.brokenGate.x, py - 40);
                 this.interactionPromptText.setVisible(true);
-                this.activeInteraction = () => EventBus.emit('open-gate-repair', this.brokenGate!.gateId);
+                this.activeInteraction = () => EventBus.emit('open-gate-repair', this.brokenGate!.gateId, this.brokenGate!.requirements);
                 return;
             }
         }
@@ -1117,18 +1116,6 @@ export class Game extends Scene
     {
         soundManager.playStomp();
 
-        // Track achievements
-        trackAchievementUseCase(entities.achievementManager, 'first-blood', 1);
-        trackAchievementUseCase(entities.achievementManager, 'slime-slayer', 1);
-        if (enemy.enemyType === 'slime-flying')
-        {
-            trackAchievementUseCase(entities.achievementManager, 'flying-ace', 1);
-        }
-        else if (enemy.enemyType === 'slime-armored')
-        {
-            trackAchievementUseCase(entities.achievementManager, 'tank-breaker', 1);
-        }
-
         // Materials from the enemy's drop table go straight into the backpack
         const drops = collectEnemyDropsUseCase(enemy.entity, entities.backpack);
         if (drops.collected.length > 0 || drops.overflow.length > 0)
@@ -1178,7 +1165,6 @@ export class Game extends Scene
                 spawn.y,
                 spawn.patrolDistance,
                 spawn.speed,
-                undefined,
                 spawn.type ?? 'slime',
                 this.getEnemyDefinition(spawn.enemyId)
             );

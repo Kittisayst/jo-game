@@ -254,7 +254,7 @@ MVP = Chapter 1 ຫຼິ້ນໄດ້ຄົບ loop ຕັ້ງແຕ່ຕ�
 
 **ສະຖານະຕົວຈິງ (ອັບເດດ 28 ຕ.ລ. 2026):** loop ຫຼັກຂອງ Chapter 1 ຫຼິ້ນໄດ້ຄົບໃນໂຄດ: ຊື້ປຶ້ມ (20 Credit) → ອ່ານທຸກໜ້າ (ໜ້າລະ ≥ 5 ວິ) → ສອບ → ສ້າງເຄື່ອງມື → ສຳຫຼວດ 4 ເຂດ → ສ້ອມປະຕູ (ຕອບຄຳຖາມ) → Boss + ຄຳຖາມປິດ → ໄດ້ Credit +60 ແລະກັບໝູ່ບ້ານ. ມີປຶ້ມ Ch.1–Ch.2 (Ch.2 ຖືກລັອກຈົນຊະນະ Boss ບົດ 1), ຄຳຖາມ 25 ຂໍ້, ສັດຕູ forest-slime / rock-golem, Mini-boss cave-guardian, Boss 3 phase, Skin 4 ແບບ (ຊື້ດ້ວຍ Credit). Save v6 ໃນ localStorage 3 slot + autosave.
 
-**ຍັງຄ້າງ:** playtest ກັບນັກຮຽນ (ຂໍ້ 9), ສຽງ/sprite/animation ແທນຮູບສີ່ຫຼ່ຽມ (ຂໍ້ 10), ຄຳຖາມ Ch.2 ≥ 15 ຂໍ້ ກ່ອນເປີດໃຫ້ນັກຮຽນ, Cave Guardian ຍັງບໍ່ມີ 2 ທ່າໂຈມຕີ, ຕົວເລກລາຄາ Skin (40/80/120) ແລະ balance ຍັງເປັນຄ່າຊົ່ວຄາວ, Achievement ຍັງບໍ່ມີ UI.
+**ຍັງຄ້າງ:** playtest ກັບນັກຮຽນ (ຂໍ້ 9), ສຽງ/sprite/animation ແທນຮູບສີ່ຫຼ່ຽມ (ຂໍ້ 10), ຄຳຖາມ Ch.2 ≥ 15 ຂໍ້ ກ່ອນເປີດໃຫ້ນັກຮຽນ, Cave Guardian ຍັງບໍ່ມີ 2 ທ່າໂຈມຕີ, ຕົວເລກລາຄາ Skin (40/80/120) ແລະ balance ຍັງເປັນຄ່າຊົ່ວຄາວ.
 
 **ລຳດັບການສ້າງ (ຕາມໂຄດຕົວຈິງ ໃຊ້ Phaser 4 + React; ບໍ່ແຍກເປັນ BootScene/StageScene/HubScene/UIScene — ເບິ່ງຕາຕະລາງ Scene ຂ້າງເທິງ):**
 

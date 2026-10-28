@@ -147,7 +147,7 @@ export function Hud ({
 
                 </div>
 
-                {/* Right Cluster: Utility Controls (Achievements, Shop & Pause) */}
+                {/* Right Cluster: Utility Controls (Pause) */}
                 <div className="hud-cluster-right">
                     <button
                         id="hud-menu-btn"

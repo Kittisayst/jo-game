@@ -42,7 +42,6 @@ export function createCurrentSnapshot (slotId?: SaveSlotId): SaveGameSnapshot
         wallet: {
             balance: entities.wallet.balance,
         },
-        achievements: entities.achievementManager.serialize(),
         books,
         backpack: entities.backpack.toSnapshot(),
         equipment: entities.equipment.toSnapshot(),
@@ -71,10 +70,6 @@ export function restoreEntitiesFromSnapshot (snap: SaveGameSnapshot): void
     if (snap.wallet)
     {
         entities.wallet.setBalance(snap.wallet.balance);
-    }
-    if (snap.achievements)
-    {
-        entities.achievementManager.loadFrom(snap.achievements);
     }
 
     for (const existingKey of Object.keys(entities.books))
@@ -126,6 +121,5 @@ export function resetEntitiesToNewGame (): void
         repositories
     );
     saveManager.clearSlot(saveManager.getActiveSlot());
-    entities.achievementManager.reset();
     restoreEntitiesFromSnapshot(createDefaultSaveSnapshot(saveManager.getActiveSlot()));
 }

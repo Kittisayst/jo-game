@@ -37,7 +37,7 @@ export class Boss extends Physics.Arcade.Sprite
 
         super(scene, x, y, TEXTURE_KEY);
 
-        this.entity = new BossEntity(maxHp, 1000);
+        this.entity = new BossEntity(maxHp);
         this.previousPhase = this.entity.phase;
 
         scene.add.existing(this);
@@ -477,9 +477,9 @@ export class Boss extends Physics.Arcade.Sprite
     }
 
     /** Brings a boss frozen at 0 HP back into the fight after a wrong finisher answer. */
-    reviveAfterFailedFinisher (healAmount: number): void
+    /** Brings the sprite back; the Boss's HP was already restored by the use case. */
+    reviveAfterFailedFinisher (): void
     {
-        this.entity.heal(healAmount);
         const body = this.body as Phaser.Physics.Arcade.Body;
         if (body)
         {

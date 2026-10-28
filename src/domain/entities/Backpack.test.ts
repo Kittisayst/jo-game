@@ -143,3 +143,28 @@ describe('Backpack Entity', () =>
     });
 });
 
+describe('Backpack.removeFromSlot', () =>
+{
+    it('removes part of a stack and empties the slot at zero', () =>
+    {
+        const backpack = new Backpack();
+        backpack.addItem('wood', 5);
+
+        expect(backpack.removeFromSlot(0, 2)).toBe(true);
+        expect(backpack.getItemCount('wood')).toBe(3);
+        expect(backpack.removeFromSlot(0, 3)).toBe(true);
+        expect(backpack.getSlot(0)).toBeNull();
+    });
+
+    it('rejects an empty slot, a bad index or more than the slot holds', () =>
+    {
+        const backpack = new Backpack();
+        backpack.addItem('wood', 2);
+
+        expect(backpack.removeFromSlot(5, 1)).toBe(false);
+        expect(backpack.removeFromSlot(-1, 1)).toBe(false);
+        expect(backpack.removeFromSlot(0, 3)).toBe(false);
+        expect(backpack.removeFromSlot(0, 0)).toBe(false);
+        expect(backpack.getItemCount('wood')).toBe(2);
+    });
+});

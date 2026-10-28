@@ -6,6 +6,8 @@ import {
     PLAYER_DIED_EVENT,
     PlayerDamagedPayload,
 } from '../../application/PlayerTakeDamageUseCase';
+import { PLAYER_HEALED_EVENT, PlayerHealedPayload } from '../../application/ConsumeItemUseCase';
+import { GateRequirements } from '../../application/RepairBrokenGateUseCase';
 import {
     BOSS_DAMAGED_EVENT,
     BOSS_DEFEATED_EVENT,
@@ -66,7 +68,7 @@ function App ()
     const shouldResumeInGame = initialSession !== null && initialSession !== 'title';
 
     const [currentLevel, setCurrentLevel] = useState(() => (shouldResumeInGame ? initialSession : 'village'));
-    const [health, setHealth] = useState(3);
+    const [health, setHealth] = useState(() => entities.health.current);
     const [walletBalance, setWalletBalance] = useState(() => entities.wallet.balance);
     const [equippedWeaponId, setEquippedWeaponId] = useState(() => entities.equipment.equippedWeaponId);
     const [skinManager] = useState(() => entities.skinManager);
@@ -87,7 +89,7 @@ function App ()
             ? '🏡 ຍິນດີຕ້ອນຮັບສູ່ ໝູ່ບ້ານ Cyber Village! (ລົມກັບຫົວໜ້າໝູ່ບ້ານ ແລະ NPC Mina)'
             : null
     );
-    const maxHealth = 3;
+    const maxHealth = entities.health.max;
 
     useEffect(() =>
     {
@@ -146,6 +148,7 @@ function App ()
     const [isBackpackOpen, setIsBackpackOpen] = useState(false);
     const [isGateRepairOpen, setIsGateRepairOpen] = useState(false);
     const [activeGateId, setActiveGateId] = useState('gate-ch1');
+    const [activeGateRequirements, setActiveGateRequirements] = useState<GateRequirements | undefined>(undefined);
     const [isWaypointOpen, setIsWaypointOpen] = useState(false);
     const [waypointName, setWaypointName] = useState('ຈຸດວາບປອດໄພ');
     const [isQuizFinisherOpen, setIsQuizFinisherOpen] = useState(false);
@@ -196,7 +199,7 @@ function App ()
             setTimeout(() => setVillageWelcomeToast(`🏆 ຊະນະ Boss ບົດທີ 1!${bonusText} ກັບມາໝູ່ບ້ານເພື່ອຮຽນ ແລະ ສ້າງອາວຸດຕໍ່ໄປ`), 300);
         };
 
-        const onPlayerDamaged = (payload: PlayerDamagedPayload) =>
+        const onPlayerHealthChanged = (payload: PlayerDamagedPayload | PlayerHealedPayload) =>
         {
             setHealth(payload.currentHealth);
         };
@@ -362,9 +365,10 @@ function App ()
         const onOpenWorkshop = () => setIsWorkshopOpen(true);
         const onOpenForge = () => setIsForgeOpen(true);
         const onOpenBackpack = () => setIsBackpackOpen(true);
-        const onOpenGateRepair = (gateId?: string) =>
+        const onOpenGateRepair = (gateId?: string, requirements?: GateRequirements) =>
         {
             if (gateId) setActiveGateId(gateId);
+            setActiveGateRequirements(requirements);
             setIsGateRepairOpen(true);
         };
         const onOpenWaypoint = (name?: string) =>
@@ -408,7 +412,8 @@ function App ()
         EventBus.on('backpack-item-used', onBackpackItemUsed);
         EventBus.on('backpack-changed', onBackpackChanged);
         EventBus.on('stage-cleared', onStageCleared);
-        DomainEvents.on<PlayerDamagedPayload>(PLAYER_DAMAGED_EVENT, onPlayerDamaged);
+        DomainEvents.on<PlayerDamagedPayload>(PLAYER_DAMAGED_EVENT, onPlayerHealthChanged);
+        DomainEvents.on<PlayerHealedPayload>(PLAYER_HEALED_EVENT, onPlayerHealthChanged);
         DomainEvents.on(PLAYER_DIED_EVENT, onGameOver);
         DomainEvents.on<BossDamagedPayload>(BOSS_DAMAGED_EVENT, onBossDamaged);
         DomainEvents.on<BossDefeatedPayload>(BOSS_DEFEATED_EVENT, onBossDefeated);
@@ -434,7 +439,8 @@ function App ()
             EventBus.removeListener('backpack-item-used', onBackpackItemUsed);
             EventBus.removeListener('backpack-changed', onBackpackChanged);
             EventBus.removeListener('stage-cleared', onStageCleared);
-            DomainEvents.off<PlayerDamagedPayload>(PLAYER_DAMAGED_EVENT, onPlayerDamaged);
+            DomainEvents.off<PlayerDamagedPayload>(PLAYER_DAMAGED_EVENT, onPlayerHealthChanged);
+            DomainEvents.off<PlayerHealedPayload>(PLAYER_HEALED_EVENT, onPlayerHealthChanged);
             DomainEvents.off(PLAYER_DIED_EVENT, onGameOver);
             DomainEvents.off<BossDamagedPayload>(BOSS_DAMAGED_EVENT, onBossDamaged);
             DomainEvents.off<BossDefeatedPayload>(BOSS_DEFEATED_EVENT, onBossDefeated);
@@ -900,12 +906,8 @@ function App ()
                     setTextbookModalMode('reader');
                     setIsLibraryOpen(true);
                 }}
-                onUseItem={(itemId) =>
+                onUseItem={() =>
                 {
-                    if (itemId === 'herb-potion')
-                    {
-                        setHealth(prev => Math.min(maxHealth, prev + 1));
-                    }
                     setBackpackRevision(r => r + 1);
                     saveManager.autoSave(createCurrentSnapshot());
                 }}
@@ -914,6 +916,7 @@ function App ()
             <GateRepairModal
                 isOpen={isGateRepairOpen}
                 gateId={activeGateId}
+                requirements={activeGateRequirements}
                 onClose={() => setIsGateRepairOpen(false)}
                 onGateRepaired={() =>
                 {

@@ -1,8 +1,18 @@
 import { SpacedRepetitionSystem } from '../domain/entities/Quiz';
 import { Wallet } from '../domain/entities/Wallet';
+import { STARTER_BOOK_CREDIT_RESERVE } from '../domain/entities/SaveData';
 import { DomainEvents } from '../domain/DomainEvents';
 
 export const DAILY_PRACTICE_COMPLETED_EVENT = 'daily-practice-completed';
+
+/**
+ * Daily Practice opens once the player owns a Textbook. A player who owns none and cannot yet
+ * afford the first one may still practice, so there is always a way to earn Credit.
+ */
+export function canAccessDailyPractice (ownedBookCount: number, creditBalance: number): boolean
+{
+    return ownedBookCount > 0 || creditBalance < STARTER_BOOK_CREDIT_RESERVE;
+}
 
 export interface PracticeAnswerInput
 {

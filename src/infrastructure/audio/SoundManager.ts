@@ -15,7 +15,6 @@ import {
     SETTINGS_CHANGED_EVENT,
     SettingsChangedPayload,
 } from '../../application/UpdateSettingsUseCase';
-import { ACHIEVEMENT_UNLOCKED_EVENT } from '../../domain/entities/Achievement';
 import { EventBus } from '../EventBus';
 
 // Adventure melody notes (C major energetic 8-bit chiptune)
@@ -184,7 +183,6 @@ export class SoundManager
             this.setMuted(soundMuted);
             this.setMusicMuted(musicMuted);
         });
-        DomainEvents.on(ACHIEVEMENT_UNLOCKED_EVENT, () => this.playAchievementFanfare());
         EventBus.on('dialogue-open-state', (isActive: boolean) => this.setDucked(isActive));
     }
 
@@ -1027,44 +1025,6 @@ export class SoundManager
 
         osc.start(now);
         osc.stop(now + 0.10);
-    }
-
-    /**
-     * Achievement Unlocked Fanfare: celestial 4-chord ascending triumphant fanfare
-     */
-    playAchievementFanfare (): void
-    {
-        if (this._isMuted) return;
-        this.initContext();
-        if (!this.ctx) return;
-
-        const now = this.ctx.currentTime;
-        // C5, E5, G5, C6 triumphant fanfare
-        const notes = [523.25, 659.25, 783.99, 1046.50];
-        const step = 0.09;
-
-        notes.forEach((freq, idx) =>
-        {
-            if (!this.ctx) return;
-            const startTime = now + idx * step;
-            const isLast = idx === notes.length - 1;
-            const duration = isLast ? 0.45 : 0.2;
-
-            const osc = this.ctx.createOscillator();
-            const gain = this.ctx.createGain();
-
-            osc.type = isLast ? 'triangle' : 'sine';
-            osc.frequency.setValueAtTime(freq, startTime);
-
-            gain.gain.setValueAtTime(isLast ? 0.25 : 0.18, startTime);
-            gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
-
-            osc.connect(gain);
-            this.connectOutput(gain);
-
-            osc.start(startTime);
-            osc.stop(startTime + duration);
-        });
     }
 }
 

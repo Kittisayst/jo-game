@@ -3,20 +3,18 @@ import { Enemy, EnemyDefinition } from './Enemy';
 
 describe('Enemy entity', () =>
 {
-    it('initializes as not defeated with default points and patrol state', () =>
+    it('initializes as not defeated with the patrol state', () =>
     {
         const enemy = new Enemy();
         expect(enemy.isDefeated).toBe(false);
-        expect(enemy.points).toBe(100);
         expect(enemy.state).toBe('patrol');
         expect(enemy.maxHp).toBe(1);
         expect(enemy.currentHp).toBe(1);
     });
 
-    it('accepts custom points and custom maxHp', () =>
+    it('accepts a custom maxHp', () =>
     {
-        const enemy = new Enemy(250, 3);
-        expect(enemy.points).toBe(250);
+        const enemy = new Enemy('slime', 3);
         expect(enemy.maxHp).toBe(3);
         expect(enemy.currentHp).toBe(3);
     });
@@ -31,7 +29,7 @@ describe('Enemy entity', () =>
 
     it('takes damage step by step until defeated', () =>
     {
-        const enemy = new Enemy(200, 2);
+        const enemy = new Enemy('slime', 2);
         const hit1 = enemy.takeDamage(1);
         expect(hit1.defeated).toBe(false);
         expect(hit1.currentHp).toBe(1);
@@ -62,7 +60,6 @@ describe('Enemy entity', () =>
     {
         const flying = new Enemy('slime-flying');
         expect(flying.type).toBe('slime-flying');
-        expect(flying.points).toBe(150);
         expect(flying.maxHp).toBe(1);
         expect(flying.canStomp).toBe(true);
     });
@@ -71,7 +68,6 @@ describe('Enemy entity', () =>
     {
         const armored = new Enemy('slime-armored');
         expect(armored.type).toBe('slime-armored');
-        expect(armored.points).toBe(250);
         expect(armored.maxHp).toBe(3);
         expect(armored.currentHp).toBe(3);
         expect(armored.canStomp).toBe(false);
@@ -86,7 +82,6 @@ describe('Enemy entity', () =>
     {
         const spitter = new Enemy('slime-spitter');
         expect(spitter.type).toBe('slime-spitter');
-        expect(spitter.points).toBe(200);
         expect(spitter.maxHp).toBe(2);
         expect(spitter.canStomp).toBe(true);
     });

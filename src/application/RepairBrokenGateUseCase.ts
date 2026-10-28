@@ -10,6 +10,30 @@ export interface BrokenGateRepairedPayload
     questionId: string;
 }
 
+/** What the player must carry to repair a gate; comes from the gate in `stages.json`. */
+export interface GateRequirements
+{
+    requiredTool: string;
+    requiredItem: string;
+}
+
+export const DEFAULT_GATE_REQUIREMENTS: GateRequirements = { requiredTool: 'hammer', requiredItem: 'repair-kit' };
+
+export interface GateRequirementStatus
+{
+    hasTool: boolean;
+    hasItem: boolean;
+}
+
+/** Tool ids start with the tool name (`hammer-t1`), so any tier of the tool counts. */
+export function checkGateRequirements (backpack: Backpack, requirements: GateRequirements): GateRequirementStatus
+{
+    return {
+        hasTool: backpack.getAllSlots().some(s => s && s.itemId.startsWith(requirements.requiredTool)),
+        hasItem: backpack.getItemCount(requirements.requiredItem) >= 1,
+    };
+}
+
 export interface RepairGateResult
 {
     success: boolean;
@@ -23,7 +47,8 @@ export function repairBrokenGateUseCase (
     repairedGates: Set<string>,
     backpack: Backpack,
     question: QuestionData,
-    selectedOption: number
+    selectedOption: number,
+    requirements: GateRequirements = DEFAULT_GATE_REQUIREMENTS
 ): RepairGateResult
 {
     if (repairedGates.has(gateId))
@@ -35,9 +60,9 @@ export function repairBrokenGateUseCase (
         };
     }
 
-    // 1. Check for Hammer in backpack
-    const hasHammer = backpack.getAllSlots().some(s => s && s.itemId.startsWith('hammer'));
-    if (!hasHammer)
+    // 1. Check for the required tool in backpack
+    const { hasTool, hasItem } = checkGateRequirements(backpack, requirements);
+    if (!hasTool)
     {
         return {
             success: false,
@@ -46,8 +71,8 @@ export function repairBrokenGateUseCase (
         };
     }
 
-    // 2. Check for Repair Kit in backpack
-    if (backpack.getItemCount('repair-kit') < 1)
+    // 2. Check for the required item in backpack
+    if (!hasItem)
     {
         return {
             success: false,
@@ -69,7 +94,7 @@ export function repairBrokenGateUseCase (
     }
 
     // 4. Consume repair kit & repair gate
-    backpack.removeItem('repair-kit', 1);
+    backpack.removeItem(requirements.requiredItem, 1);
     repairedGates.add(gateId);
 
     DomainEvents.emit<BrokenGateRepairedPayload>(BROKEN_GATE_REPAIRED_EVENT, {

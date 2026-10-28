@@ -4,8 +4,8 @@ import { SkinManager } from '../domain/entities/Skin';
 import { StageProgression } from '../domain/entities/StageProgression';
 import { GamePauseState } from '../domain/entities/GamePauseState';
 import { Wallet } from '../domain/entities/Wallet';
+import { Health } from '../domain/entities/Health';
 import { AttackCooldown } from '../domain/entities/Combat';
-import { AchievementManager } from '../domain/entities/Achievement';
 import { BookProgress } from '../domain/entities/Book';
 import { Backpack } from '../domain/entities/Backpack';
 import { EquipmentState } from '../domain/entities/EquipmentState';
@@ -46,8 +46,8 @@ export const entities = {
     pauseState: new GamePauseState(false),
     dialogueState: new DialogueState(),
     wallet: new Wallet(initialSave.wallet.balance),
+    health: new Health(),
     attackCooldown: new AttackCooldown(),
-    achievementManager: new AchievementManager(initialSave.achievements),
 
     // Version 4 Knowledge Quest entities
     backpack: new Backpack(initialSave.backpack || []),

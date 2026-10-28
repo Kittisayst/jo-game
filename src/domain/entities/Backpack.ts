@@ -293,6 +293,26 @@ export class Backpack
         return true;
     }
 
+    /** Removes `count` items from one slot; the slot empties when it reaches zero. */
+    removeFromSlot (index: number, count: number): boolean
+    {
+        const slot = index >= 0 && index < BACKPACK_MAX_SLOTS ? this._slots[index] : null;
+        if (!slot || count <= 0 || count > slot.count)
+        {
+            return false;
+        }
+
+        if (count === slot.count)
+        {
+            this._slots[index] = null;
+        }
+        else
+        {
+            slot.count -= count;
+        }
+        return true;
+    }
+
     sortSlots (): void
     {
         const occupied = this._slots.filter((s): s is BackpackSlot => s !== null);

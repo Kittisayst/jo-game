@@ -4,7 +4,11 @@ import { QuestionData, QuizExamSession } from '../../../domain/entities/Quiz';
 import { loadBooksData, loadQuestionsData } from '../../dataLoader';
 import { entities } from '../../composition';
 import { submitBookExamUseCase, SubmitBookExamResult } from '../../../application/SubmitBookExamUseCase';
-import { submitDailyPracticeUseCase, SubmitDailyPracticeResult } from '../../../application/SubmitDailyPracticeUseCase';
+import {
+    canAccessDailyPractice as canAccessDailyPracticeRule,
+    submitDailyPracticeUseCase,
+    SubmitDailyPracticeResult,
+} from '../../../application/SubmitDailyPracticeUseCase';
 import { soundManager } from '../../audio/SoundManager';
 import { EventBus } from '../../EventBus';
 
@@ -81,8 +85,10 @@ export const AcademyModal: React.FC<AcademyModalProps> = ({
     const canStartCurrentExam = Boolean(
         currentBook && bookProgress && bookProgress.canTakeExam(currentBook.pages.length)
     );
-    const hasAnyOwnedBook = books.some(b => entities.books[b.id]?.isUnlocked);
-    const canAccessDailyPractice = hasAnyOwnedBook || entities.wallet.balance < 20;
+    const canAccessDailyPractice = canAccessDailyPracticeRule(
+        books.filter(b => entities.books[b.id]?.isUnlocked).length,
+        entities.wallet.balance
+    );
 
     // --- Start Exam ---
     const handleStartExam = () =>
