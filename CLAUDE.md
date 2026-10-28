@@ -23,7 +23,7 @@ npm run test:e2e     # Playwright specs in e2e/ (starts the dev server itself)
 
 `npm run lint` enforces the dependency rule: files in `domain/` and `application/` fail lint if they import `phaser`, `react`, `infrastructure/` (or, for domain, `application/`) or touch `window`/`localStorage`. Game rules belong in a use case, not in a modal or scene: the UI calls the use case and reacts to its result or event.
 
-Vitest ([vitest.config.ts](vitest.config.ts)) picks up `src/domain/**/*.test.ts`, `src/application/**/*.test.ts` and the pure data-validator tests in `src/infrastructure/content/`; infrastructure is checked by typecheck, the Playwright specs and playing the game, see [docs/adr/0002-testing-strategy.md](docs/adr/0002-testing-strategy.md). Run e2e on its own — running it while `build` is going starves the CPU and makes specs flaky.
+Vitest ([vitest.config.ts](vitest.config.ts)) picks up `src/domain/**/*.test.ts`, `src/application/**/*.test.ts` and the pure data-validator tests in `src/infrastructure/content/`; infrastructure is checked by typecheck, the Playwright specs and playing the game, see [docs/adr/0002-testing-strategy.md](docs/adr/0002-testing-strategy.md). `e2e/playthrough.spec.ts` is an opt-in experimental bot (`PLAYTHROUGH=1`) that plays with real keys; see its header for what it can and cannot do. Run e2e on its own — running it while `build` is going starves the CPU and makes specs flaky.
 
 The dev server's configured port is 8080 ([vite/config.dev.mjs](vite/config.dev.mjs)); Vite moves to the next free port if it is taken. [.claude/launch.json](.claude/launch.json) holds the preview config. Build config is split across `vite/config.dev.mjs` and `vite/config.prod.mjs`.
 
