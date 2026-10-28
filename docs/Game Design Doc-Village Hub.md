@@ -252,19 +252,21 @@ MVP = Chapter 1 ຫຼິ້ນໄດ້ຄົບ loop ຕັ້ງແຕ່ຕ�
 
 **ນອກ MVP:** Quest Board, Storage, ອຸປະກອນເສີມ, ສັດຕູ Elite, ຄຳຖາມແບບຖືກ/ຜິດ-ຈັບຄູ່-ຈັດລຳດັບ, Laravel API + dashboard ຄູ.
 
-**ສະຖານະຕົວຈິງ (ອັບເດດ 28 ຕ.ລ. 2026):** Chapter 1 ມີຄົບ loop ໃນໂຄດ — ມີປຶ້ມ Ch.1–Ch.2, ຄຳຖາມ 25 ຂໍ້ (ເກີນເປົ້າ 15–20), recipe/upgrade ຄົບ, ສັດຕູທຳມະດາ 2 ແບບ (forest-slime, rock-golem) + Mini-boss (cave-guardian) + Boss 3 phase. ຍັງຄ້າງ: ຂໍ້ 9 (playtest) ແລະ ຂໍ້ 10 (sprite/ສຽງ) ໃນລຳດັບການສ້າງ, ແລະ Repair Kit ທີ່ບໍ່ໃຊ້ຜລຶກ (ເບິ່ງໝາຍເຫດໃນ Crafting).
+**ສະຖານະຕົວຈິງ (ອັບເດດ 28 ຕ.ລ. 2026):** loop ຫຼັກຂອງ Chapter 1 ຫຼິ້ນໄດ້ຄົບໃນໂຄດ: ຊື້ປຶ້ມ (20 Credit) → ອ່ານທຸກໜ້າ (ໜ້າລະ ≥ 5 ວິ) → ສອບ → ສ້າງເຄື່ອງມື → ສຳຫຼວດ 4 ເຂດ → ສ້ອມປະຕູ (ຕອບຄຳຖາມ) → Boss + ຄຳຖາມປິດ → ໄດ້ Credit +60 ແລະກັບໝູ່ບ້ານ. ມີປຶ້ມ Ch.1–Ch.2 (Ch.2 ຖືກລັອກຈົນຊະນະ Boss ບົດ 1), ຄຳຖາມ 25 ຂໍ້, ສັດຕູ forest-slime / rock-golem, Mini-boss cave-guardian, Boss 3 phase, Skin 4 ແບບ (ຊື້ດ້ວຍ Credit). Save v6 ໃນ localStorage 3 slot + autosave.
 
-**ລຳດັບການສ້າງ (ແຕ່ລະຂໍ້ = 1 prompt ໃຫຍ່ ໃຫ້ Claude Code):**
+**ຍັງຄ້າງ:** playtest ກັບນັກຮຽນ (ຂໍ້ 9), ສຽງ/sprite/animation ແທນຮູບສີ່ຫຼ່ຽມ (ຂໍ້ 10), ຄຳຖາມ Ch.2 ≥ 15 ຂໍ້ ກ່ອນເປີດໃຫ້ນັກຮຽນ, Cave Guardian ຍັງບໍ່ມີ 2 ທ່າໂຈມຕີ, ຕົວເລກລາຄາ Skin (40/80/120) ແລະ balance ຍັງເປັນຄ່າຊົ່ວຄາວ, Achievement ຍັງບໍ່ມີ UI.
 
-- [ ] 1\. ຕັ້ງ project Vite + Phaser 3 + TypeScript, ສ້າງ BootScene/PreloadScene ແລະ ໄຟລ໌ JSON ຕົວຢ່າງ
-- [ ] 2\. StageScene: ຕົວລະຄອນຍ່າງ, ໂດດ, ໂຈມຕີ, ກ້ອງຕາມ (ໃຊ້ຮູບສີ່ຫຼ່ຽມແທນ sprite ກ່ອນ)
-- [ ] 3\. ເກັບຊັບພະຍາກອນ + inventory + UIScene (HUD)
-- [ ] 4\. ສັດຕູ AI ງ່າຍໆ + drop table
-- [ ] 5\. QuizScene ອ່ານຈາກ questions.json
-- [ ] 6\. HubScene + BuildingScene: Library, Academy, Workshop, Forge
-- [ ] 7\. ປະຕູພັງ + Mini-boss + Boss (phase)
-- [ ] 8\. GameState + save/load ດ້ວຍ localStorage
+**ລຳດັບການສ້າງ (ຕາມໂຄດຕົວຈິງ ໃຊ້ Phaser 4 + React; ບໍ່ແຍກເປັນ BootScene/StageScene/HubScene/UIScene — ເບິ່ງຕາຕະລາງ Scene ຂ້າງເທິງ):**
+
+- [x] 1\. ຕັ້ງ project Vite + Phaser + TypeScript ແລະ ໄຟລ໌ JSON ໃນ `public/data/`
+- [x] 2\. ຕົວລະຄອນຍ່າງ, ໂດດ, ໂຈມຕີ, ກ້ອງຕາມ (scene `Game`)
+- [x] 3\. ເກັບຊັບພະຍາກອນ + ກະເປົາ + HUD (React)
+- [x] 4\. ສັດຕູ AI ງ່າຍໆ + drop table (`enemies.json`)
+- [x] 5\. ຄຳຖາມຈາກ `questions.json` (ສອບ, ຝຶກປະຈຳວັນ, ປະຕູ, Boss)
+- [x] 6\. ໝູ່ບ້ານ + Library, Academy, Workshop, Forge (React modal)
+- [x] 7\. ປະຕູພັງ + Mini-boss + Boss (3 phase)
+- [x] 8\. Save/load ດ້ວຍ localStorage (v6, 3 slot + autosave)
 - [ ] 9\. Playtest ກັບນັກຮຽນ 5–10 ຄົນ, ປັບຕົວເລກ balance
-- [ ] 10\. ໃສ່ sprite, ສຽງ, animation ແທນຮູບສີ່ຫຼ່ຽມ
+- [ ] 10\. ໃສ່ sprite, ສຽງ, animation ແທນຮູບສີ່ຫຼ່ຽມ (ມີ sprite ຂອງຕົວລະຄອນ/ສັດຕູ/Boss ແລ້ວ ສ່ວນສາກ ແລະ node ຍັງເປັນຮູບຮ່າງງ່າຍໆທີ່ແຕ້ມດ້ວຍໂຄດ)
 
 **ຄຳແນະນຳໃນການສັ່ງ Claude Code:** ສົ່ງເອກະສານນີ້ໃຫ້ອ່ານກ່ອນ, ແລ້ວສັ່ງເທື່ອລະຂໍ້. ຫຼັງແຕ່ລະຂໍ້ ໃຫ້ Claude ສະຫຼຸບລາຍຊື່ໄຟລ໌ທີ່ສ້າງ/ແກ້ໄຂ ເພື່ອບໍ່ລືມວ່າໄຟລ໌ໃດຢູ່ໃສ.

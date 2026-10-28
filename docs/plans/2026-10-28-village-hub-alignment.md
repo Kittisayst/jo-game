@@ -1,7 +1,7 @@
 # ປັບ code base ໃຫ້ຕົງກັບ GDD Village Hub (ຕັດຂອງເກົ່າ + loop ທີ່ຕັດສິນໃຈແລ້ວ)
 
 - **Date:** 2026-10-28
-- **Status:** planned
+- **Status:** done (code) — playtest ກັບນັກຮຽນ ແລະ ເນື້ອຫາ Ch.2 ຍັງຄ້າງ
 - **Project:** jo-game (ພະຈົນໄພຄວາມຮູ້ / Knowledge Quest)
 
 ## ເປົ້າໝາຍ (Goal)
@@ -115,6 +115,8 @@
 32. ອັບເດດ GDD: ລຶບໝາຍເຫດ "ຍັງບໍ່ມີໃນໂຄດ" ເມື່ອແຕ່ລະຂໍ້ສຳເລັດ; ກວດ checkbox "ລຳດັບການສ້າງ" ໃຫ້ຕົງກັບຄວາມຈິງ.
 33. `CONTEXT.md`: ກວດວ່າຄຳສັບທີ່ລຶບແລ້ວ (Level, LevelProgress, GameSession ເກົ່າ) ຖືກອັບເດດ.
 34. (ທາງເລືອກ) ADR: "Wallet ເກັບ Credit ເທົ່ານັ້ນ — ບໍ່ມີຫຼຽນ" ເພາະຍ້ອນກັບຍາກ, ບໍ່ຊັດເຈນຖ້າບໍ່ມີບໍລິບົດ, ແລະມີທາງເລືອກ (ສະກຸນເງິນຄູ່) ທີ່ຖືກປະຕິເສດ.
+
+**ສະຖານະ Phase 7 (ເຮັດແລ້ວ):** `CLAUDE.md` ຂຽນໃໝ່ຕາມສະຖາປັດຕະຍະກຳຈິງ (ສອງ scene + `Game` ໃຊ້ທັງໝູ່ບ້ານ/ດ່ານ, ໂຄງສ້າງໂຟນເດີ, event ຂອງ EventBus, ໄຟລ໌ data, save v6); `CONTEXT.md` ແກ້ຕົວຢ່າງເກົ່າ ແລະເພີ່ມ Skin/Wallet/Backpack/Broken Gate; ADR 0005 "Wallet ເກັບ Credit ເທົ່ານັ້ນ" ເພີ່ມໃໝ່, ADR 0004 ໝາຍ superseded, ADR 0003 ເພີ່ມໝາຍເຫດ validation; GDD ອັບເດດສະຖານະ + checklist ລຳດັບການສ້າງ (1–8 ແລ້ວ, 9–10 ຄ້າງ).
 
 ## Files ທີ່ຈະຖືກກະທົບ
 

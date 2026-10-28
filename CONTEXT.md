@@ -1,11 +1,11 @@
 # jo-game
 
-A side-scrolling Phaser platformer, architected as three layers (domain, application, infrastructure) so game rules stay testable and independent of Phaser/React as the game grows (enemies, score, levels, save/load, UI).
+"Knowledge Quest": a 2D learning adventure on Phaser + React. The player learns from a Textbook, crafts gear, explores a Stage for Materials and returns to the Village Hub. Architected as three layers (domain, application, infrastructure) so game rules stay testable and independent of Phaser/React.
 
 ## Language
 
 **Domain layer**:
-Framework-agnostic core holding entities and business rules — health, score, facing direction, level progress. Never imports Phaser or the browser; never holds x/y coordinates or any spatial data.
+Framework-agnostic core holding entities and business rules — health, wallet, backpack, textbook progress, stage progression. Never imports Phaser or the browser; never holds x/y coordinates or any spatial data.
 _Avoid_: core, engine, model layer
 
 **Entity** (domain):
@@ -13,11 +13,11 @@ A plain TypeScript object with identity and non-spatial state — e.g. an Enemy'
 _Avoid_: model, game object
 
 **Application layer**:
-Use cases that orchestrate domain entities in reaction to something the infrastructure layer detected (a collision, an overlap, a button press) — e.g. DefeatEnemyUseCase, CompleteLevelUseCase, SaveGameUseCase. Called directly by infrastructure code; never calls back into infrastructure itself.
+Use cases that orchestrate domain entities in reaction to something the infrastructure layer detected (a collision, an overlap, a button press) — e.g. PerformAttackUseCase, SubmitBookExamUseCase, CompleteStageUseCase. Called directly by infrastructure code; never calls back into infrastructure itself.
 _Avoid_: services, business logic layer, managers
 
 **Infrastructure layer**:
-The outer layer holding everything framework-specific: Phaser scenes/sprites (physics, rendering, input) and React components (score/health/menu UI). Both call into application use cases and both implement domain ports. This is the only layer allowed to know about pixels, coordinates, `localStorage`, or DOM/canvas.
+The outer layer holding everything framework-specific: Phaser scenes/sprites (physics, rendering, input) and React components (HUD, textbook and shop modals). Both call into application use cases and both implement domain ports. This is the only layer allowed to know about pixels, coordinates, `localStorage`, or DOM/canvas.
 _Avoid_: phaser layer, presentation layer (it covers React too, not just Phaser)
 
 **Port**:
@@ -36,13 +36,13 @@ Every infrastructure Phaser sprite that represents something with domain rules (
 _Avoid_: entity ID, entity registry/lookup (for gameplay entities — reserve ID-based lookup for the persistence port only)
 
 **Pairing is optional, not automatic**:
-Not every infrastructure game object needs a paired domain Entity. A pairing exists only when there's an actual rule or piece of state for the domain to own — health, AI decisions, scoring, and the like. A game object that is pure geometry with no rules (e.g. a static floating platform — just a position and a collision box) stays entirely inside infrastructure, with nothing in `domain/` or `application/` for it at all. Don't create an Entity speculatively "because this is a game object" — wait until a real rule shows up.
+Not every infrastructure game object needs a paired domain Entity. A pairing exists only when there's an actual rule or piece of state for the domain to own — health, AI decisions, Credit, and the like. A game object that is pure geometry with no rules (e.g. a static floating platform — just a position and a collision box) stays entirely inside infrastructure, with nothing in `domain/` or `application/` for it at all. Don't create an Entity speculatively "because this is a game object" — wait until a real rule shows up.
 
 **Chapter**:
 One lesson of the curriculum: one Textbook, one Stage, one Boss. Beating the Boss for the first time completes the Chapter.
 
 **Stage**:
-The explorable run of a Chapter, walked left to right and divided into Zones. Its layout is infrastructure-owned spatial data loaded from `stages.json` (spawn points, resource nodes, world width); that layout has no domain Entity (see "Pairing is optional, not automatic"). Enemies and Resource nodes respawn each time the player enters.
+The explorable run of a Chapter, walked left to right and divided into Zones. Its layout is infrastructure-owned spatial data loaded from `stages.json` (zones, spawn points, resource nodes, gate) and a level JSON (platforms, world width); that layout has no domain Entity (see "Pairing is optional, not automatic"). Enemies and Resource nodes respawn each time the player enters.
 _Avoid_: level, map
 
 **Zone**:
@@ -66,3 +66,16 @@ _Avoid_: lesson, course
 
 **Village Hub**:
 The safe place between Stages with no enemies; the player walks to buildings (Library, Academy, Workshop, Forge, World Gate) and returns here to heal and save.
+
+**Skin**:
+A cosmetic look for the player character, bought once with Credit and kept forever. The free default is always owned. Skins change nothing about gameplay.
+_Avoid_: costume, outfit
+
+**Wallet**:
+The player's Credit balance. It holds no other currency.
+
+**Backpack**:
+The player's carried items (Materials, tools, weapons, crafted gear) in a fixed number of slots; this is what is at risk when the player dies.
+
+**Broken Gate**:
+The gate between the cavern Zone and the boss arena. It stays closed until the player brings the right tool and a Repair Kit and answers a question from the Chapter's Textbook.
