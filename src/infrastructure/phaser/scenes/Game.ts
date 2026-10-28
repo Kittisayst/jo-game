@@ -2,7 +2,6 @@ import { EventBus } from '../../EventBus';
 import { Geom, Input, Scene } from 'phaser';
 import { Player } from '../objects/Player';
 import { Platform } from '../objects/Platform';
-import { Coin } from '../objects/Coin';
 import { GoalFlag } from '../objects/GoalFlag';
 import { Door } from '../objects/Door';
 import { Enemy, SPIT_PROJECTILE_KEY } from '../objects/Enemy';
@@ -22,7 +21,6 @@ import { Score } from '../../../domain/entities/Score';
 import { Lives } from '../../../domain/entities/Lives';
 import { PowerUpState } from '../../../domain/entities/PowerUp';
 import { completeLevelUseCase } from '../../../application/CompleteLevelUseCase';
-import { collectCoinUseCase } from '../../../application/CollectCoinUseCase';
 import { defeatEnemyUseCase } from '../../../application/DefeatEnemyUseCase';
 import {
     playerTakeDamageUseCase,
@@ -63,7 +61,6 @@ export class Game extends Scene
     platforms: Phaser.Physics.Arcade.StaticGroup;
     movingPlatforms: Phaser.Physics.Arcade.Group;
     spikes: Phaser.Physics.Arcade.StaticGroup;
-    coins: Phaser.Physics.Arcade.StaticGroup;
     powerUps: Phaser.Physics.Arcade.StaticGroup;
     enemies: Phaser.Physics.Arcade.Group;
     playerProjectiles: Phaser.Physics.Arcade.Group;
@@ -72,7 +69,6 @@ export class Game extends Scene
     goalFlag?: GoalFlag;
     door?: Door;
     elderNpc?: NPC;
-    merchantNpc?: NPC;
     isDialogueActive = false;
     particleManager: ParticleManager;
     cursors: Phaser.Types.Input.Keyboard.CursorKeys;
@@ -89,7 +85,6 @@ export class Game extends Scene
     currentSkinId = 'cyber-blue';
     initialScoreValue = 0;
     initialLivesValue = 3;
-    initialCoinsValue = 0;
     initialElapsedMs = 0;
     private damageTakenInLevel = 0;
     private tickCache = createTickEmitterCache();
@@ -124,7 +119,6 @@ export class Game extends Scene
         score?: number;
         lives?: number;
         skinId?: string;
-        coins?: number;
         elapsedMs?: number;
     })
     {
@@ -133,7 +127,6 @@ export class Game extends Scene
         this.door = undefined;
         this.goalFlag = undefined;
         this.elderNpc = undefined;
-        this.merchantNpc = undefined;
         this.isDialogueActive = false;
         this.touchControls = { left: false, right: false, up: false };
 
@@ -141,7 +134,6 @@ export class Game extends Scene
         this.initialScoreValue = typeof data?.score === 'number' ? data.score : 0;
         this.initialLivesValue = typeof data?.lives === 'number' ? data.lives : 3;
         this.currentSkinId = data?.skinId ?? 'cyber-blue';
-        this.initialCoinsValue = typeof data?.coins === 'number' ? data.coins : 0;
         this.initialElapsedMs = typeof data?.elapsedMs === 'number' ? data.elapsedMs : 0;
 
         this.interactiveBuildings = [];
@@ -198,7 +190,6 @@ export class Game extends Scene
         }
 
         const itemAssets = [
-            { key: 'coin-texture', path: 'assets/items/coin.png' },
             { key: 'powerup-heart', path: 'assets/items/heart.png' },
             { key: 'powerup-star', path: 'assets/items/star.png' },
             { key: 'powerup-spring', path: 'assets/items/spring.png' },
@@ -245,7 +236,6 @@ export class Game extends Scene
         this.door = undefined;
         this.goalFlag = undefined;
         this.elderNpc = undefined;
-        this.merchantNpc = undefined;
 
         this.level = this.cache.json.get(this.currentLevelKey) as Level;
         this.levelProgress = new LevelProgress(this.currentLevelKey, this.level.nextLevel || null);
@@ -254,7 +244,6 @@ export class Game extends Scene
             this.currentLevelKey,
             this.initialScoreValue,
             this.initialLivesValue,
-            this.initialCoinsValue,
             this.initialElapsedMs,
             trackTime
         );
@@ -276,7 +265,6 @@ export class Game extends Scene
         this.platforms = this.createPlatforms();
         this.movingPlatforms = this.createMovingPlatforms();
         this.spikes = this.createSpikes();
-        this.coins = this.createCoins();
         this.powerUps = this.createPowerUps();
         this.enemies = this.createEnemies();
 
@@ -290,12 +278,6 @@ export class Game extends Scene
             this.elderNpc.onInteract = () =>
             {
                 EventBus.emit('start-dialogue', 'village_elder');
-            };
-
-            this.merchantNpc = new NPC(this, 1000, baseY, 'npc-merchant', '🛒 [E] ຮ້ານຄ້າ (Shop)');
-            this.merchantNpc.onInteract = () =>
-            {
-                EventBus.emit('start-dialogue', 'cyber_merchant');
             };
         }
         else if (this.level.scenery === 'stage-ch1' || this.currentLevelKey === 'stage-ch1')
@@ -342,10 +324,6 @@ export class Game extends Scene
             if (this.elderNpc && this.elderNpc.isInteractable)
             {
                 this.elderNpc.triggerInteraction();
-            }
-            else if (this.merchantNpc && this.merchantNpc.isInteractable)
-            {
-                this.merchantNpc.triggerInteraction();
             }
         };
 
@@ -424,15 +402,6 @@ export class Game extends Scene
         this.physics.add.overlap(this.player, this.spikes, (_player, spikeObj) =>
         {
             this.handlePlayerSpikeCollision(spikeObj as Spike);
-        });
-        this.physics.add.overlap(this.player, this.coins, (_player, coinObj) =>
-        {
-            const coin = coinObj as Coin;
-            coin.collect();
-            this.particleManager.emitCoinSparkle(coin.x, coin.y);
-            this.session.addCoin(1);
-            collectCoinUseCase(this.score, 10);
-            trackAchievementUseCase(entities.achievementManager, 'coin-collector', 1);
         });
 
         this.physics.add.overlap(this.player, this.powerUps, (_player, powerUpObj) =>
@@ -593,13 +562,11 @@ export class Game extends Scene
         const jKey = this.input.keyboard?.addKey('J');
         const zKey = this.input.keyboard?.addKey('Z');
         const qKey = this.input.keyboard?.addKey('Q');
-        const shiftKey = this.input.keyboard?.addKey(Input.Keyboard.KeyCodes.SHIFT);
         const f2Key = this.input.keyboard?.addKey(Input.Keyboard.KeyCodes.F2);
 
         jKey?.on('down', () => this.handlePlayerAttack());
         zKey?.on('down', () => this.handlePlayerAttack());
         qKey?.on('down', () => this.handleCycleWeapon());
-        shiftKey?.on('down', () => this.handlePlayerDash());
         f2Key?.on('down', () => this.togglePhysicsDebug());
 
         const onVirtualInput = (inputs: { left?: boolean; right?: boolean; up?: boolean }) =>
@@ -613,8 +580,6 @@ export class Game extends Scene
 
         const onVirtualAttack = () => this.handlePlayerAttack();
         const onVirtualCycleWeapon = () => this.handleCycleWeapon();
-        const onVirtualDash = () => this.handlePlayerDash();
-        const onTriggerBomb = () => this.handleTriggerBombAoE(2);
         const onTogglePhysicsDebug = () => this.togglePhysicsDebug();
 
         const onQuizFinisherPassed = () =>
@@ -664,8 +629,6 @@ export class Game extends Scene
         EventBus.on('virtual-interact', onVirtualInteract);
         EventBus.on('virtual-attack', onVirtualAttack);
         EventBus.on('virtual-cycle-weapon', onVirtualCycleWeapon);
-        EventBus.on('virtual-dash', onVirtualDash);
-        EventBus.on('trigger-bomb', onTriggerBomb);
         EventBus.on('toggle-physics-debug', onTogglePhysicsDebug);
         EventBus.on('quiz-finisher-passed', onQuizFinisherPassed);
         EventBus.on('quiz-finisher-failed', onQuizFinisherFailed);
@@ -720,8 +683,6 @@ export class Game extends Scene
             EventBus.removeListener('virtual-interact', onVirtualInteract);
             EventBus.removeListener('virtual-attack', onVirtualAttack);
             EventBus.removeListener('virtual-cycle-weapon', onVirtualCycleWeapon);
-            EventBus.removeListener('virtual-dash', onVirtualDash);
-            EventBus.removeListener('trigger-bomb', onTriggerBomb);
             EventBus.removeListener('toggle-physics-debug', onTogglePhysicsDebug);
             EventBus.removeListener('quiz-finisher-passed', onQuizFinisherPassed);
             EventBus.removeListener('quiz-finisher-failed', onQuizFinisherFailed);
@@ -731,7 +692,6 @@ export class Game extends Scene
             this.door = undefined;
             this.goalFlag = undefined;
             this.elderNpc = undefined;
-            this.merchantNpc = undefined;
             this.bgTileSprite = undefined;
             entities.attackCooldown.reset();
             this.input.keyboard?.removeAllKeys(true);
@@ -762,10 +722,6 @@ export class Game extends Scene
         if (this.elderNpc && this.elderNpc.active)
         {
             this.elderNpc.updateProximity(this.player.x, this.player.y);
-        }
-        if (this.merchantNpc && this.merchantNpc.active)
-        {
-            this.merchantNpc.updateProximity(this.player.x, this.player.y);
         }
 
         this.updateInteractionPrompt();
@@ -974,14 +930,6 @@ export class Game extends Scene
         EventBus.emit('weapon-changed', nextWeapon);
     }
 
-    private handlePlayerDash (): void
-    {
-        if (this.isDialogueActive || this.lives.isDead || this.levelProgress.isComplete) return;
-        if (!entities.upgradeTree.hasDash) return;
-
-        this.player.dash(this.player.facingDir);
-    }
-
     togglePhysicsDebug (): void
     {
         const world = this.physics.world;
@@ -996,36 +944,6 @@ export class Game extends Scene
             world.debugGraphic.clear();
         }
         soundManager.playSelect();
-    }
-
-    private handleTriggerBombAoE (damage = 2): void
-    {
-        soundManager.playBombExplode();
-        trackAchievementUseCase(entities.achievementManager, 'bomb-expert', 1);
-        this.cameras.main.shake(320, 0.015);
-        this.cameras.main.flash(180, 255, 200, 50, true);
-
-        for (const child of this.enemies.getChildren())
-        {
-            const enemy = child as Enemy;
-            if (enemy.active && !enemy.entity.isDefeated)
-            {
-                this.particleManager.emitCelebration(enemy.x, enemy.y);
-                const res = enemy.takeDamage(damage, 0, true);
-                this.showDamageNumber(enemy.x, enemy.y, damage, true);
-                if (res.defeated)
-                {
-                    this.handleEnemyDefeated(enemy);
-                }
-            }
-        }
-
-        if (this.boss && this.boss.active && !this.boss.entity.isDefeated && !this.boss.isInvulnerable)
-        {
-            this.particleManager.emitCelebration(this.boss.x, this.boss.y);
-            this.boss.takeDamage(this.score, damage);
-            this.showDamageNumber(this.boss.x, this.boss.y, damage, true);
-        }
     }
 
     private hitStopCounter = 0;
@@ -1694,15 +1612,6 @@ export class Game extends Scene
             return;
         }
 
-        if (this.merchantNpc && this.merchantNpc.isInteractable)
-        {
-            this.interactionPromptText.setText('🛒 [E] ຮ້ານຄ້າ (Shop)');
-            this.interactionPromptText.setPosition(this.merchantNpc.x, py - 40);
-            this.interactionPromptText.setVisible(true);
-            this.activeInteraction = () => this.merchantNpc!.triggerInteraction();
-            return;
-        }
-
         this.interactionPromptText.setVisible(false);
         this.activeInteraction = null;
     }
@@ -2151,22 +2060,6 @@ export class Game extends Scene
         return platforms;
     }
 
-    private createCoins ()
-    {
-        // Collectible items — pure geometry/visuals, domain state managed via collectCoinUseCase.
-        const coins = this.physics.add.staticGroup();
-
-        if (this.level.coins)
-        {
-            for (const { x, y } of this.level.coins)
-            {
-                coins.add(new Coin(this, x, y));
-            }
-        }
-
-        return coins;
-    }
-
     private getItemEmoji (itemId: string): string
     {
         const itemEmojiMap: Record<string, string> = {
@@ -2208,18 +2101,6 @@ export class Game extends Scene
             EventBus.emit('backpack-changed');
         }
 
-        // Roll dynamic coin drops based on archetype (legacy enemies only)
-        if (enemy.entity.coinDropChance > 0 && Math.random() <= enemy.entity.coinDropChance)
-        {
-            const amount = enemy.entity.coinDropAmount;
-            for (let i = 0; i < amount; i++)
-            {
-                const offsetX = amount > 1 ? (i * 20 - (amount - 1) * 10) : 0;
-                const coin = new Coin(this, enemy.x + offsetX, enemy.y - 10);
-                this.coins.add(coin);
-                this.particleManager.emitCoinSparkle(coin.x, coin.y);
-            }
-        }
     }
 
     private spawnEnemySpit (x: number, y: number, dirX: number, dirY = 0): void

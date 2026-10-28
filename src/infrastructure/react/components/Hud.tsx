@@ -1,14 +1,6 @@
 import { formatTime } from '../utils/formatTime';
 import { getLevelItem } from '../../phaser/levelCatalog';
 
-export interface InventorySlotView
-{
-    id: string;
-    name: string;
-    icon: string;
-    count: number;
-}
-
 export interface EquippedWeaponView
 {
     id: string;
@@ -21,7 +13,6 @@ export interface HudProps
     currentLevel: string;
     lives: number;
     maxLives: number;
-    coinsCount: number;
     score: number;
     elapsedSeconds: number;
     highScore: number;
@@ -32,11 +23,8 @@ export interface HudProps
     bossMaxHp: number;
     walletBalance: number;
     equippedWeapon: EquippedWeaponView;
-    inventorySlots: InventorySlotView[];
     onTogglePause: () => void;
     onCycleWeapon: () => void;
-    onUseItem: (itemId: string) => void;
-    onOpenShop?: () => void;
     onOpenAchievements?: () => void;
     unclaimedAchievementsCount?: number;
     onOpenBackpack?: () => void;
@@ -50,7 +38,6 @@ export function Hud ({
     currentLevel,
     lives,
     maxLives,
-    coinsCount,
     score,
     elapsedSeconds,
     highScore,
@@ -61,11 +48,8 @@ export function Hud ({
     bossMaxHp,
     walletBalance,
     equippedWeapon,
-    inventorySlots,
     onTogglePause,
     onCycleWeapon,
-    onUseItem,
-    onOpenShop,
     onOpenAchievements,
     unclaimedAchievementsCount,
     onOpenBackpack,
@@ -157,11 +141,6 @@ export function Hud ({
 
                     {!isVillage && (
                         <>
-                            <div className="hud-badge coin-badge">
-                                <span className="badge-icon">💰</span>
-                                <span className="badge-label">Stage</span>
-                                <span className="badge-value">{coinsCount}</span>
-                            </div>
                             <div className="hud-badge score-badge">
                                 <span className="badge-icon">⭐</span>
                                 <span className="badge-label">Score</span>
@@ -222,23 +201,6 @@ export function Hud ({
                         </button>
                     )}
 
-                    {onOpenShop && (
-                        <button
-                            className="hud-badge shop-hud-btn"
-                            onClick={(e) =>
-                            {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                onOpenShop();
-                            }}
-                            title="ເປີດຮ້ານຄ້າ (Shop)"
-                            type="button"
-                        >
-                            <span className="badge-icon">🛒</span>
-                            <span className="badge-label">ຮ້ານຄ້າ</span>
-                        </button>
-                    )}
-
                     <button
                         id="hud-menu-btn"
                         className={`hud-badge hud-menu-btn ${isGamePaused ? 'paused-active' : ''}`}
@@ -255,24 +217,6 @@ export function Hud ({
                         <span className="badge-label">{isGamePaused ? 'ສືບຕໍ່' : 'ເມນູ'}</span>
                     </button>
                 </div>
-            </div>
-
-            {/* Consumable Items Hotbar (bottom left/center) */}
-            <div className="hud-hotbar">
-                {inventorySlots.map((slot, index) => (
-                    <button
-                        key={slot.id}
-                        className={`hotbar-slot ${slot.count === 0 ? 'slot-empty' : ''}`}
-                        disabled={slot.count === 0}
-                        onClick={() => onUseItem(slot.id)}
-                        title={`${slot.name} (${slot.count}) - ກົດປຸ່ມ [${index + 1}]`}
-                        type="button"
-                    >
-                        <span className="slot-key">[{index + 1}]</span>
-                        <span className="slot-icon">{slot.icon}</span>
-                        <span className="slot-count">{slot.count}</span>
-                    </button>
-                ))}
             </div>
 
             {/* Boss Bar */}

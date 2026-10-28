@@ -50,6 +50,8 @@
 
 **ສະຖານະ Phase 2 (ເຮັດແລ້ວ):** ການໂຈມຕີ/stomp/Boss ໃຊ້ດາເມດຈາກ `EquipmentState`; ສັດຕູ `stage-ch1` ອ່ານ HP/drops ຈາກ `enemies.json` (forest-slime ×3, rock-golem ×2, **cave-guardian** Mini-boss ×1 drop ຜລຶກ 2 + ແຮ່ເຫຼັກ); Boss HP 300 ຈາກຂໍ້ມູນ, phase ຕາມອັດຕາສ່ວນ HP; ຕອບຜິດ Boss ຟື້ນ 15% ຂອງ HP ສູງສຸດ; Q ສັບດາບທີ່ມີໃນກະເປົາ; ລຶບ `PurchaseWeapon`/`EquipWeapon` use case + tab ອາວຸດໃນ Shop. **ຍັງຄ້າງ:** ຍັງບໍ່ໄດ້ຫຼິ້ນ `stage-ch1` ຈິງ (ກວດແຕ່ typecheck/test/build ແລະໂຫຼດ level-1 ໃນ browser ໂດຍບໍ່ມີ error); Mini-boss ຍັງເປັນ armored slime ຂະໜາດ ×1.8 (ບໍ່ມີ 2 ທ່າໂຈມຕີ); `Weapon.ts`/`WeaponLoadout` ຍັງຢູ່ເພື່ອ save compat (ລຶບໃນ Phase 4 ພ້ອມ save v6); `Projectile`/bomb/dash/`StageMapModal` ຍັງສະແດງ level-1/2/3 ເກົ່າ; HP ສັດຕູ vs ດາເມດ ຍັງບໍ່ໄດ້ playtest ປັບ.
 
+**ສະຖານະ Phase 3 (ເຮັດແລ້ວ):** ລຶບຫຼຽນທັງໝົດ (Coin object, `CollectCoinUseCase`, coin drop, `GameSession.coins`, ຫຼຽນໃນ HUD/ເມນູ/Game Over/Level Complete, ການເອົາຫຼຽນເຂົ້າ Wallet), Shop (`ShopModal`, `PurchaseItem/Upgrade`, NPC ຮ້ານຄ້າ, `merchantDialogue`), upgrade ເກົ່າ (`Upgrade.ts`), Inventory ເກົ່າ (`Inventory.ts`, `UseItemUseCase`, hotbar 1-2-3), dash ແລະ bomb. ຊ່ອງທາງເຂົ້າ Achievements (ປຸ່ມ HUD/ເມນູ/toast) ຖືກເຊື່ອງ ເພື່ອບໍ່ໃຫ້ມີ Credit ຈາກການຂ້າສັດຕູ; ໂຄດ Achievement ຍັງຢູ່ (Phase 4). `upgrades`/`inventory` ຖືກເອົາອອກຈາກ save schema (save ເກົ່າຖືກເມີນ field ເຫຼົ່ານີ້).
+
 ## ແນວທາງ (Approach)
 
 - **ຕັດເປັນຂັ້ນນ້ອຍ**, ແຕ່ລະຂັ້ນ typecheck + lint + test ຜ່ານ ແລ້ວ commit ແຍກ (ຍ້ອນກັບງ່າຍ). ບໍ່ລວມຫຼາຍຂັ້ນໃນ commit ດຽວ.

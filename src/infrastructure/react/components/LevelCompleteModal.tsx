@@ -7,7 +7,6 @@ export interface LevelCompleteModalProps
 {
     currentLevel: string;
     nextLevel: string | null;
-    coinsCount: number;
     score: number;
     elapsedSeconds: number;
     bestTime: number | null;
@@ -57,7 +56,6 @@ function useAnimatedCount (targetValue: number, durationMs = 600)
 export function LevelCompleteModal ({
     currentLevel,
     nextLevel,
-    coinsCount,
     score,
     elapsedSeconds,
     bestTime,
@@ -70,11 +68,10 @@ export function LevelCompleteModal ({
 }: LevelCompleteModalProps)
 {
     const animatedScore = useAnimatedCount(score);
-    const animatedCoins = useAnimatedCount(coinsCount);
 
     const rating = calculateStarRating({
-        coinsCollected: coinsCount,
-        targetCoins: 3,
+        coinsCollected: 0,
+        targetCoins: 0,
         elapsedSeconds,
         targetSeconds: 60,
         score,
@@ -188,10 +185,6 @@ export function LevelCompleteModal ({
                         <div className="stat-item">
                             <span className="stat-label">🚩 Stage:</span>
                             <strong className="stat-val">{currentLevel.toUpperCase()}</strong>
-                        </div>
-                        <div className="stat-item">
-                            <span className="stat-label">🪙 Coins:</span>
-                            <strong className="stat-val">{animatedCoins}</strong>
                         </div>
                         <div className="stat-item">
                             <span className="stat-label">⭐ Total Score:</span>

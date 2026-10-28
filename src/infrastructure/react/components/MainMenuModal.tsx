@@ -11,7 +11,6 @@ export interface MainMenuModalProps
     onOpenStageSelect: () => void;
     onOpenSkinModal: () => void;
     onOpenSettings: () => void;
-    onOpenShop?: () => void;
     onOpenAchievements?: () => void;
     unclaimedAchievementsCount?: number;
 }
@@ -25,7 +24,6 @@ export function MainMenuModal ({
     onOpenStageSelect,
     onOpenSkinModal,
     onOpenSettings,
-    onOpenShop,
     onOpenAchievements,
     unclaimedAchievementsCount = 0,
 }: MainMenuModalProps)
@@ -67,7 +65,7 @@ export function MainMenuModal ({
                         <span className="menu-stat-val">{formatTime(bestTime)}</span>
                     </div>
                     <div className="menu-stat">
-                        <span className="menu-stat-label">🪙 ຫຼຽນ</span>
+                        <span className="menu-stat-label">🎓 Credit</span>
                         <span className="menu-stat-val text-gold">{walletBalance}</span>
                     </div>
                     <div className="menu-stat">
@@ -97,18 +95,6 @@ export function MainMenuModal ({
 
                     {/* Secondary Navigation Options Grid */}
                     <div className="menu-sub-grid">
-                        {onOpenShop && (
-                            <button
-                                id="menu-shop-btn"
-                                className="menu-action-btn secondary shop-menu-btn"
-                                onClick={onOpenShop}
-                                type="button"
-                            >
-                                <span className="btn-icon">🛒</span>
-                                <span>ຮ້ານຄ້າ (Shop)</span>
-                            </button>
-                        )}
-
                         {onOpenAchievements && (
                             <button
                                 id="menu-achievements-btn"

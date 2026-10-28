@@ -24,8 +24,6 @@ describe('SaveData Domain Entity & Migration', () =>
         expect(defaultSave.wallet.balance).toBe(20);
         expect(defaultSave.weapons.owned).toEqual(['cyber-saber']);
         expect(defaultSave.weapons.equippedId).toBe('cyber-saber');
-        expect(defaultSave.upgrades.maxHp).toBe(0);
-        expect(defaultSave.inventory).toEqual({});
 
         // v5 Buy-to-Read properties (books start unpurchased)
         expect(defaultSave.books?.['book-ch1']?.unlocked).toBe(false);
@@ -158,13 +156,6 @@ describe('SaveData Domain Entity & Migration', () =>
                 owned: ['hacked_laser_death_ray'],
                 equippedId: 'hacked_laser_death_ray',
             },
-            upgrades: {
-                maxHp: 9999,
-            },
-            inventory: {
-                'invalid-item': 50,
-                'heal-potion': 100, // exceeds maxStack of 3
-            },
         };
 
         const sanitized = migrateSaveSnapshot(maliciousData);
@@ -179,11 +170,5 @@ describe('SaveData Domain Entity & Migration', () =>
         expect(sanitized.weapons.owned).toEqual(['cyber-saber']);
         expect(sanitized.weapons.equippedId).toBe('cyber-saber');
 
-        // Upgrades clamped to maxLevel (maxHp is 3)
-        expect(sanitized.upgrades.maxHp).toBe(3);
-
-        // Inventory clamped
-        expect(sanitized.inventory['invalid-item']).toBeUndefined();
-        expect(sanitized.inventory['heal-potion']).toBe(3);
     });
 });

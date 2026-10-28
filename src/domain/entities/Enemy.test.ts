@@ -75,7 +75,6 @@ describe('Enemy entity', () =>
         expect(armored.maxHp).toBe(3);
         expect(armored.currentHp).toBe(3);
         expect(armored.canStomp).toBe(false);
-        expect(armored.coinDropAmount).toBe(2);
 
         // Takes 3 hits
         expect(armored.takeDamage(1).defeated).toBe(false);
@@ -102,13 +101,12 @@ describe('Enemy entity', () =>
             drops: [{ itemId: 'stone', chance: 1, count: 2 }],
         };
 
-        it('takes HP and drops from data and never drops coins', () =>
+        it('takes HP and drops from data', () =>
         {
             const enemy = Enemy.fromDefinition(golem, 'slime-armored');
             expect(enemy.maxHp).toBe(80);
             expect(enemy.definitionId).toBe('rock-golem');
             expect(enemy.drops).toEqual([{ itemId: 'stone', chance: 1, count: 2 }]);
-            expect(enemy.coinDropChance).toBe(0);
         });
 
         it('survives hits until total damage reaches its HP', () =>

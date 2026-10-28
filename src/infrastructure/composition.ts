@@ -6,8 +6,6 @@ import { StageProgression } from '../domain/entities/StageProgression';
 import { GamePauseState } from '../domain/entities/GamePauseState';
 import { Wallet } from '../domain/entities/Wallet';
 import { WeaponLoadout } from '../domain/entities/Weapon';
-import { UpgradeTree } from '../domain/entities/Upgrade';
-import { Inventory } from '../domain/entities/Inventory';
 import { AttackCooldown } from '../domain/entities/Combat';
 import { AchievementManager } from '../domain/entities/Achievement';
 import { BookProgress } from '../domain/entities/Book';
@@ -54,8 +52,6 @@ export const entities = {
     dialogueState: new DialogueState(),
     wallet: new Wallet(initialSave.wallet.balance),
     weaponLoadout: new WeaponLoadout(initialSave.weapons.owned, initialSave.weapons.equippedId),
-    upgradeTree: new UpgradeTree(initialSave.upgrades),
-    inventory: new Inventory(initialSave.inventory),
     attackCooldown: new AttackCooldown(),
     achievementManager: new AchievementManager(initialSave.achievements),
 

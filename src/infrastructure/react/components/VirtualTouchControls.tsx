@@ -209,19 +209,6 @@ export const VirtualTouchControls: React.FC<VirtualTouchControlsProps> = ({ visi
         }, 120);
     };
 
-    const handleDashTap = (e: React.PointerEvent<HTMLButtonElement>) =>
-    {
-        e.preventDefault();
-        triggerHaptic(22);
-        setActiveButtons(prev => ({ ...prev, dash: true }));
-        EventBus.emit('virtual-dash');
-
-        setTimeout(() =>
-        {
-            setActiveButtons(prev => ({ ...prev, dash: false }));
-        }, 140);
-    };
-
     if (!visible || !isTouchEnvironment)
     {
         return null;
@@ -295,17 +282,6 @@ export const VirtualTouchControls: React.FC<VirtualTouchControlsProps> = ({ visi
                 >
                     <span className="virtual-touch-icon">🔀</span>
                     <span className="virtual-touch-label">[Q]</span>
-                </button>
-
-                <button
-                    aria-label="ແດຊ (Dash)"
-                    className={`virtual-touch-btn virtual-touch-dash ${activeButtons.dash ? 'is-active' : ''}`}
-                    onPointerDown={handleDashTap}
-                    title="Cyber Dash [Shift]"
-                    type="button"
-                >
-                    <span className="virtual-touch-icon">⚡</span>
-                    <span className="virtual-touch-label">Dash</span>
                 </button>
 
                 <button

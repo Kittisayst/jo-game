@@ -9,7 +9,6 @@ describe('GameSession entity', () =>
         expect(session.levelId).toBe('level-1');
         expect(session.score.value).toBe(0);
         expect(session.lives.current).toBe(3);
-        expect(session.coins).toBe(0);
         expect(session.elapsedMs).toBe(0);
         expect(session.elapsedSeconds).toBe(0);
         expect(session.isGameOver).toBe(false);
@@ -19,26 +18,12 @@ describe('GameSession entity', () =>
 
     it('initializes with custom parameters', () =>
     {
-        const session = new GameSession('level-2', 500, 2, 15, 25400);
+        const session = new GameSession('level-2', 500, 2, 25400);
         expect(session.levelId).toBe('level-2');
         expect(session.score.value).toBe(500);
         expect(session.lives.current).toBe(2);
-        expect(session.coins).toBe(15);
         expect(session.elapsedMs).toBe(25400);
         expect(session.elapsedSeconds).toBe(25.4);
-    });
-
-    it('adds coins correctly', () =>
-    {
-        const session = new GameSession();
-        session.addCoin();
-        expect(session.coins).toBe(1);
-
-        session.addCoin(5);
-        expect(session.coins).toBe(6);
-
-        session.addCoin(-3);
-        expect(session.coins).toBe(6);
     });
 
     it('advances elapsed time and updates power-ups on tick', () =>
@@ -72,21 +57,20 @@ describe('GameSession entity', () =>
 
     it('resets run state completely', () =>
     {
-        const session = new GameSession('level-2', 300, 1, 10, 42000);
+        const session = new GameSession('level-2', 300, 1, 42000);
         session.powerUps.activateSpring(1000);
 
         session.resetRun('level-1');
         expect(session.levelId).toBe('level-1');
         expect(session.score.value).toBe(0);
         expect(session.lives.current).toBe(3);
-        expect(session.coins).toBe(0);
         expect(session.elapsedMs).toBe(0);
         expect(session.powerUps.isSpringActive).toBe(false);
     });
 
     it('returns an accurate snapshot of the entire session', () =>
     {
-        const session = new GameSession('level-3', 250, 2, 7, 15000);
+        const session = new GameSession('level-3', 250, 2, 15000);
         session.powerUps.activateStar(4000);
         const snapshot = session.getSnapshot();
 
@@ -94,7 +78,6 @@ describe('GameSession entity', () =>
             score: 250,
             lives: 2,
             maxLives: 3,
-            coins: 7,
             levelId: 'level-3',
             elapsedSeconds: 15,
             elapsedMs: 15000,
@@ -108,7 +91,7 @@ describe('GameSession entity', () =>
 
     it('does not increment elapsed time when trackTime is false', () =>
     {
-        const session = new GameSession('village', 0, 3, 0, 0, false);
+        const session = new GameSession('village', 0, 3, 0, false);
         session.tick(1000);
         expect(session.elapsedMs).toBe(0);
         expect(session.elapsedSeconds).toBe(0);

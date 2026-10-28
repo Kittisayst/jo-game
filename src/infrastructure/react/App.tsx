@@ -6,10 +6,6 @@ import {
     LevelCompletePayload,
 } from '../../application/CompleteLevelUseCase';
 import {
-    COIN_COLLECTED_EVENT,
-    CoinCollectedPayload,
-} from '../../application/CollectCoinUseCase';
-import {
     ENEMY_DEFEATED_EVENT,
     EnemyDefeatedPayload,
 } from '../../application/DefeatEnemyUseCase';
@@ -59,16 +55,12 @@ import { SkinModal } from './components/SkinModal';
 import { MainMenuModal } from './components/MainMenuModal';
 import { SettingsModal } from './components/SettingsModal';
 import { StageMapModal } from './components/StageMapModal';
-import { ShopModal } from './components/ShopModal';
 import { AchievementModal } from './components/AchievementModal';
-import { AchievementToast } from './components/AchievementToast';
 import { ACHIEVEMENT_UNLOCKED_EVENT } from '../../domain/entities/Achievement';
 import { DialogueChoice, DialogueNode } from '../../domain/entities/Dialogue';
 import { DialogueModal } from './components/DialogueModal';
 import { VirtualTouchControls } from './components/VirtualTouchControls';
 import { VILLAGE_ELDER_DIALOGUE } from '../dialogue/villageElderDialogue';
-import { MERCHANT_DIALOGUE } from '../dialogue/merchantDialogue';
-import type { Game } from '../phaser/scenes/Game';
 import {
     advanceDialogueUseCase,
     closeDialogueUseCase,
@@ -78,7 +70,6 @@ import {
 import { completeStageUseCase } from '../../application/CompleteStageUseCase';
 import { awardChapterClearUseCase } from '../../application/AwardChapterClearUseCase';
 import { selectStageUseCase } from '../../application/SelectStageUseCase';
-import { useItemUseCase as executeUseItemUseCase } from '../../application/UseItemUseCase';
 import { WEAPON_CONFIGS } from '../../domain/entities/EquipmentState';
 import { cycleEquippedWeaponUseCase } from '../../application/CycleEquippedWeaponUseCase';
 import { TextbookModal, TextbookModalMode } from './components/TextbookModal';
@@ -111,14 +102,11 @@ function App ()
     const [currentLevel, setCurrentLevel] = useState(() => (shouldResumeInGame ? initialSession : 'village'));
     const [nextLevel, setNextLevel] = useState<string | null>(null);
     const [score, setScore] = useState(0);
-    const [coinsCount, setCoinsCount] = useState(0);
     const [lives, setLives] = useState(3);
     const [walletBalance, setWalletBalance] = useState(() => entities.wallet.balance);
     const [equippedWeaponId, setEquippedWeaponId] = useState(() => entities.equipment.equippedWeaponId);
-    const [isShopOpen, setIsShopOpen] = useState(false);
     const [isAchievementsOpen, setIsAchievementsOpen] = useState(false);
     const [unclaimedAchievementsCount, setUnclaimedAchievementsCount] = useState(() => entities.achievementManager.unclaimedCount);
-    const [inventoryRevision, setInventoryRevision] = useState(0);
     const [gameStats] = useState(() => entities.gameStats);
     const [skinManager] = useState(() => entities.skinManager);
     const [settings] = useState(() => entities.settings);
@@ -172,15 +160,11 @@ function App ()
     levelCompleteRef.current = levelComplete;
     const gameOverRef = useRef(gameOver);
     gameOverRef.current = gameOver;
-    const coinsCountRef = useRef(coinsCount);
-    coinsCountRef.current = coinsCount;
     const [isDialogueOpen, setIsDialogueOpen] = useState(false);
     const [currentDialogueNode, setCurrentDialogueNode] = useState<DialogueNode | null>(null);
     const [dialogueChoices, setDialogueChoices] = useState<DialogueChoice[]>([]);
     const isDialogueOpenRef = useRef(isDialogueOpen);
     isDialogueOpenRef.current = isDialogueOpen;
-    const isShopOpenRef = useRef(isShopOpen);
-    isShopOpenRef.current = isShopOpen;
     const isSkinModalOpenRef = useRef(isSkinModalOpen);
     isSkinModalOpenRef.current = isSkinModalOpen;
     const isSettingsOpenRef = useRef(isSettingsOpen);
@@ -300,17 +284,7 @@ function App ()
             setIsNewHighScore(result.isNewHighScore);
             setIsNewBestTime(result.isNewBestTime);
 
-            // Earn all stage coins permanently in wallet
-            entities.wallet.earn(coinsCountRef.current);
-            setWalletBalance(entities.wallet.balance);
-
             saveManager.autoSave(getCurrentSnapshot());
-        };
-
-        const onCoinCollected = (payload: CoinCollectedPayload) =>
-        {
-            setScore(payload.score);
-            setCoinsCount(prev => prev + 1);
         };
 
         const onEnemyDefeated = (payload: EnemyDefeatedPayload) =>
@@ -340,14 +314,6 @@ function App ()
             {
                 returnToVillageUseCase('death', entities.backpack);
                 setBackpackRevision(r => r + 1);
-            }
-
-            // Retain 50% of coins earned this run
-            const earnedCoins = Math.floor(coinsCountRef.current / 2);
-            if (earnedCoins > 0)
-            {
-                entities.wallet.earn(earnedCoins);
-                setWalletBalance(entities.wallet.balance);
             }
 
             saveManager.autoSave(getCurrentSnapshot());
@@ -418,12 +384,6 @@ function App ()
             else if (e.key === 'Escape' || e.key === 'p' || e.key === 'P')
             {
                 if (isMainMenuOpenRef.current || levelCompleteRef.current || gameOverRef.current) return;
-
-                if (isShopOpenRef.current)
-                {
-                    setIsShopOpen(false);
-                    return;
-                }
 
                 if (isDialogueOpenRef.current)
                 {
@@ -502,18 +462,6 @@ function App ()
                     setIsBackpackOpen(prev => !prev);
                 }
             }
-            else if (e.key === '1')
-            {
-                handleUseItem('heal-potion');
-            }
-            else if (e.key === '2')
-            {
-                handleUseItem('bubble-shield');
-            }
-            else if (e.key === '3')
-            {
-                handleUseItem('slime-bomb');
-            }
             else if (e.key === 'q' || e.key === 'Q')
             {
                 if (!isMainMenuOpenRef.current && !levelCompleteRef.current && !gameOverRef.current)
@@ -528,14 +476,6 @@ function App ()
             if (graphId === 'village_elder')
             {
                 startDialogueUseCase(entities.dialogueState, VILLAGE_ELDER_DIALOGUE);
-                setCurrentDialogueNode(entities.dialogueState.getCurrentNode());
-                setDialogueChoices(entities.dialogueState.getAvailableChoices());
-                setIsDialogueOpen(true);
-                EventBus.emit('dialogue-open-state', true);
-            }
-            else if (graphId === 'cyber_merchant')
-            {
-                startDialogueUseCase(entities.dialogueState, MERCHANT_DIALOGUE);
                 setCurrentDialogueNode(entities.dialogueState.getCurrentNode());
                 setDialogueChoices(entities.dialogueState.getAvailableChoices());
                 setIsDialogueOpen(true);
@@ -616,7 +556,6 @@ function App ()
         EventBus.on('backpack-item-used', onBackpackItemUsed);
         EventBus.on('backpack-changed', onBackpackChanged);
         DomainEvents.on<LevelCompletePayload>(LEVEL_COMPLETE_EVENT, onLevelComplete);
-        DomainEvents.on<CoinCollectedPayload>(COIN_COLLECTED_EVENT, onCoinCollected);
         DomainEvents.on<EnemyDefeatedPayload>(ENEMY_DEFEATED_EVENT, onEnemyDefeated);
         DomainEvents.on<PlayerDamagedPayload>(PLAYER_DAMAGED_EVENT, onPlayerDamaged);
         DomainEvents.on(GAME_OVER_EVENT, onGameOver);
@@ -648,7 +587,6 @@ function App ()
             EventBus.removeListener('backpack-item-used', onBackpackItemUsed);
             EventBus.removeListener('backpack-changed', onBackpackChanged);
             DomainEvents.off<LevelCompletePayload>(LEVEL_COMPLETE_EVENT, onLevelComplete);
-            DomainEvents.off<CoinCollectedPayload>(COIN_COLLECTED_EVENT, onCoinCollected);
             DomainEvents.off<EnemyDefeatedPayload>(ENEMY_DEFEATED_EVENT, onEnemyDefeated);
             DomainEvents.off<PlayerDamagedPayload>(PLAYER_DAMAGED_EVENT, onPlayerDamaged);
             DomainEvents.off(GAME_OVER_EVENT, onGameOver);
@@ -668,12 +606,6 @@ function App ()
     {
         advanceDialogueUseCase(entities.dialogueState);
         const node = entities.dialogueState.getCurrentNode();
-        if (node?.id === 'open_shop_node')
-        {
-            setIsShopOpen(true);
-            handleCloseDialogue();
-            return;
-        }
         setCurrentDialogueNode(node);
         setDialogueChoices(entities.dialogueState.getAvailableChoices());
         if (!entities.dialogueState.isOpen)
@@ -687,12 +619,6 @@ function App ()
     {
         selectDialogueChoiceUseCase(entities.dialogueState, choiceIndex);
         const node = entities.dialogueState.getCurrentNode();
-        if (node?.id === 'open_shop_node')
-        {
-            setIsShopOpen(true);
-            handleCloseDialogue();
-            return;
-        }
         setCurrentDialogueNode(node);
         setDialogueChoices(entities.dialogueState.getAvailableChoices());
         if (!entities.dialogueState.isOpen)
@@ -716,40 +642,6 @@ function App ()
         const nextId = cycleEquippedWeaponUseCase(entities.equipment, entities.backpack);
         soundManager.playSelect();
         setEquippedWeaponId(nextId);
-        saveManager.autoSave(getCurrentSnapshot());
-    };
-
-    const handleUseItem = (itemId: string) =>
-    {
-        if (isMainMenuOpen || levelComplete || gameOver || isGamePaused) return;
-
-        const result = executeUseItemUseCase(entities.inventory, itemId);
-        if (!result.success) return;
-
-        setInventoryRevision(r => r + 1);
-        soundManager.playUseItem();
-
-        const gameScene = phaserRef.current?.scene as Game | null;
-
-        if (itemId === 'heal-potion')
-        {
-            setLives(prev => Math.min(maxLives, prev + 1));
-        }
-        else if (itemId === 'bubble-shield')
-        {
-            gameScene?.player?.activateStar(8000);
-            setStarTimer(8);
-        }
-        else if (itemId === 'star-candy')
-        {
-            gameScene?.player?.activateStar(6000);
-            setStarTimer(6);
-        }
-        else if (itemId === 'slime-bomb')
-        {
-            EventBus.emit('trigger-bomb');
-        }
-
         saveManager.autoSave(getCurrentSnapshot());
     };
 
@@ -782,8 +674,6 @@ function App ()
                 balance: entities.wallet.balance,
             },
             weapons: entities.weaponLoadout.serialize(),
-            upgrades: entities.upgradeTree.serialize(),
-            inventory: entities.inventory.serialize(),
             achievements: entities.achievementManager.serialize(),
 
             // Version 4 Knowledge Quest fields
@@ -821,15 +711,6 @@ function App ()
         {
             entities.wallet.setBalance(snap.wallet.balance);
             setWalletBalance(snap.wallet.balance);
-        }
-        if (snap.upgrades)
-        {
-            entities.upgradeTree.loadFrom(snap.upgrades);
-        }
-        if (snap.inventory)
-        {
-            entities.inventory.loadFrom(snap.inventory);
-            setInventoryRevision(r => r + 1);
         }
         if (snap.achievements)
         {
@@ -973,7 +854,6 @@ function App ()
         setLevelComplete(false);
         setGameOver(false);
         setScore(0);
-        setCoinsCount(0);
         setLives(maxLives);
         setElapsedSeconds(0);
         setCurrentLevel(stageKey);
@@ -1050,11 +930,6 @@ function App ()
         }
     };
 
-    const handleOpenAchievements = () =>
-    {
-        setIsAchievementsOpen(true);
-    };
-
     const handleCloseAchievements = () =>
     {
         setIsAchievementsOpen(false);
@@ -1129,7 +1004,6 @@ function App ()
             score,
             lives,
             skinId: activeSkinId,
-            coins: coinsCount,
             elapsedMs: nextElapsedMs,
         });
     };
@@ -1144,7 +1018,6 @@ function App ()
         if (resetToStart)
         {
             setScore(0);
-            setCoinsCount(0);
             setLives(maxLives);
             setElapsedSeconds(0);
             setIsNewHighScore(false);
@@ -1164,7 +1037,6 @@ function App ()
             score: resetToStart ? 0 : score,
             lives: resetToStart ? maxLives : lives,
             skinId: activeSkinId,
-            coins: resetToStart ? 0 : coinsCount,
             elapsedMs: resetToStart ? 0 : Math.round(elapsedSeconds * 1000),
         });
     };
@@ -1181,13 +1053,6 @@ function App ()
 
     const activeSkinName =
         AVAILABLE_SKINS.find(s => s.id === activeSkinId)?.name.split(' ')[0] || 'Cyber';
-
-    const inventorySlotViews = useMemo(() => [
-        { id: 'heal-potion', name: 'Cyber Elixir', icon: '🧪', count: entities.inventory.getItemCount('heal-potion') },
-        { id: 'bubble-shield', name: 'Nano Shield', icon: '🛡️', count: entities.inventory.getItemCount('bubble-shield') },
-        { id: 'slime-bomb', name: 'Pulse Bomb', icon: '💣', count: entities.inventory.getItemCount('slime-bomb') },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    ], [inventoryRevision]);
 
     const equippedWeaponDef = {
         id: equippedWeaponId,
@@ -1207,7 +1072,6 @@ function App ()
 
     return (
         <div id="app">
-            <AchievementToast />
             {villageWelcomeToast && (
                 <div className="village-welcome-toast">{villageWelcomeToast}</div>
             )}
@@ -1216,7 +1080,6 @@ function App ()
                 <Hud
                     bossHp={bossHp}
                     bossMaxHp={bossMaxHp}
-                    coinsCount={coinsCount}
                     currentLevel={currentLevel}
                     elapsedSeconds={elapsedSeconds}
                     equippedWeapon={{
@@ -1225,13 +1088,10 @@ function App ()
                         icon: equippedWeaponDef.icon,
                     }}
                     highScore={highScore}
-                    inventorySlots={inventorySlotViews}
                     isGamePaused={isGamePaused}
                     lives={lives}
                     maxLives={maxLives}
                     onCycleWeapon={handleCycleWeapon}
-                    onOpenAchievements={handleOpenAchievements}
-                    onOpenShop={() => setIsShopOpen(true)}
                     onOpenBackpack={() => setIsBackpackOpen(true)}
                     onOpenLibrary={() =>
                     {
@@ -1244,7 +1104,6 @@ function App ()
                     backpackCount={backpackSlotsUsed}
                     maxBackpackSlots={entities.backpack.maxSlots}
                     onTogglePause={handleTogglePause}
-                    onUseItem={handleUseItem}
                     score={score}
                     springTimer={springTimer}
                     starTimer={starTimer}
@@ -1257,7 +1116,6 @@ function App ()
 
             {gameOver && (
                 <GameOverModal
-                    coinsCount={coinsCount}
                     currentLevel={currentLevel}
                     elapsedSeconds={elapsedSeconds}
                     highScore={highScore}
@@ -1269,7 +1127,6 @@ function App ()
             {levelComplete && (
                 <LevelCompleteModal
                     bestTime={bestTime}
-                    coinsCount={coinsCount}
                     currentLevel={currentLevel}
                     elapsedSeconds={elapsedSeconds}
                     isNewBestTime={isNewBestTime}
@@ -1290,13 +1147,11 @@ function App ()
             {isGamePaused && !isMainMenuOpen && !levelComplete && !gameOver && (
                 <PauseMenuModal
                     activeSkinName={activeSkinName}
-                    coinsCount={coinsCount}
                     currentLevel={currentLevel}
                     elapsedSeconds={elapsedSeconds}
                     isMusicMuted={isMusicMuted}
                     isMuted={isMuted}
                     onExitToMainMenu={handleOpenMainMenu}
-                    onOpenAchievements={handleOpenAchievements}
                     onOpenSettings={() => setIsSettingsOpen(true)}
                     onOpenSkinModal={() => setIsSkinModalOpen(true)}
                     onRestartLevel={() => handleRestart(false)}
@@ -1325,9 +1180,7 @@ function App ()
                     bestTime={bestTime}
                     highScore={highScore}
                     walletBalance={walletBalance}
-                    onOpenAchievements={handleOpenAchievements}
                     onOpenSettings={() => setIsSettingsOpen(true)}
-                    onOpenShop={() => setIsShopOpen(true)}
                     onOpenSkinModal={() => setIsSkinModalOpen(true)}
                     onOpenStageSelect={() => setIsStageMapOpen(true)}
                     onStartGame={handleStartGame}
@@ -1369,14 +1222,6 @@ function App ()
                     onAdvance={handleAdvanceDialogue}
                     onChoose={handleSelectDialogueChoice}
                     onClose={handleCloseDialogue}
-                />
-            )}
-
-            {isShopOpen && (
-                <ShopModal
-                    onClose={() => setIsShopOpen(false)}
-                    onUpdateWallet={(bal) => setWalletBalance(bal)}
-                    walletBalance={walletBalance}
                 />
             )}
 
@@ -1536,7 +1381,6 @@ function App ()
                     !levelComplete &&
                     !gameOver &&
                     !isDialogueOpen &&
-                    !isShopOpen &&
                     !isSettingsOpen &&
                     !isSkinModalOpen &&
                     !isAchievementsOpen &&

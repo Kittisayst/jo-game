@@ -57,7 +57,6 @@ export interface Level
     finishX: number;
     spawn: { x: number; y: number };
     platforms: { x: number; y: number }[];
-    coins?: { x: number; y: number }[];
     enemies?: EnemySpawnData[];
     powerUps?: PowerUpSpawnData[];
     spikes?: SpikeSpawnData[];

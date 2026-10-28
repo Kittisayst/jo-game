@@ -29,8 +29,6 @@ export interface EnemyArchetype
     maxHp: number;
     canStomp: boolean;
     speed: number;
-    coinDropChance: number;
-    coinDropAmount: number;
 }
 
 export const ENEMY_ARCHETYPES: Record<EnemyType, EnemyArchetype> = {
@@ -41,8 +39,6 @@ export const ENEMY_ARCHETYPES: Record<EnemyType, EnemyArchetype> = {
         maxHp: 1,
         canStomp: true,
         speed: 70,
-        coinDropChance: 0.35,
-        coinDropAmount: 1,
     },
     'slime-flying': {
         type: 'slime-flying',
@@ -51,8 +47,6 @@ export const ENEMY_ARCHETYPES: Record<EnemyType, EnemyArchetype> = {
         maxHp: 1,
         canStomp: true,
         speed: 95,
-        coinDropChance: 0.5,
-        coinDropAmount: 1,
     },
     'slime-armored': {
         type: 'slime-armored',
@@ -61,8 +55,6 @@ export const ENEMY_ARCHETYPES: Record<EnemyType, EnemyArchetype> = {
         maxHp: 3,
         canStomp: false,
         speed: 45,
-        coinDropChance: 1.0,
-        coinDropAmount: 2,
     },
     'slime-spitter': {
         type: 'slime-spitter',
@@ -71,8 +63,6 @@ export const ENEMY_ARCHETYPES: Record<EnemyType, EnemyArchetype> = {
         maxHp: 2,
         canStomp: true,
         speed: 55,
-        coinDropChance: 0.75,
-        coinDropAmount: 1,
     },
 };
 
@@ -89,15 +79,13 @@ export class Enemy
     private _currentHp: number;
     private readonly _maxHp: number;
     private readonly _canStomp: boolean;
-    private readonly _coinDropChance: number;
-    private readonly _coinDropAmount: number;
     private _definitionId: string | null = null;
     private _kind: EnemyKind = 'normal';
     private _drops: EnemyDrop[] = [];
 
     /**
      * Builds an enemy whose HP and drops come from data. Behaviour (patrol, hop, spit) still
-     * comes from the archetype. Definition enemies never drop coins: Credit is learned, not farmed.
+     * comes from the archetype. Enemies never drop coins: Credit is learned, not farmed.
      */
     static fromDefinition (definition: EnemyDefinition, archetype: EnemyType = 'slime'): Enemy
     {
@@ -123,8 +111,6 @@ export class Enemy
             this._points = pointsOrMaxHp !== undefined ? Math.max(0, pointsOrMaxHp) : archetype.points;
             this._maxHp = maxHpParam !== undefined ? Math.max(1, maxHpParam) : archetype.maxHp;
             this._canStomp = canStompParam !== undefined ? canStompParam : archetype.canStomp;
-            this._coinDropChance = archetype.coinDropChance;
-            this._coinDropAmount = archetype.coinDropAmount;
         }
         else
         {
@@ -133,8 +119,6 @@ export class Enemy
             this._points = Math.max(0, typeOrPoints);
             this._maxHp = Math.max(1, pointsOrMaxHp ?? 1);
             this._canStomp = canStompParam ?? true;
-            this._coinDropChance = 0.35;
-            this._coinDropAmount = 1;
         }
 
         this._currentHp = this._maxHp;
@@ -163,16 +147,6 @@ export class Enemy
     get canStomp (): boolean
     {
         return this._canStomp;
-    }
-
-    get coinDropChance (): number
-    {
-        return this._definitionId ? 0 : this._coinDropChance;
-    }
-
-    get coinDropAmount (): number
-    {
-        return this._coinDropAmount;
     }
 
     get state (): EnemyState

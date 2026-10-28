@@ -7,7 +7,6 @@ export interface GameSessionSnapshot
     score: number;
     lives: number;
     maxLives: number;
-    coins: number;
     levelId: string;
     elapsedSeconds: number;
     elapsedMs: number;
@@ -20,7 +19,7 @@ export interface GameSessionSnapshot
 
 /**
  * Domain entity representing an active gameplay session across levels.
- * Aggregate root consolidating Score, Lives, PowerUpState, Coins, and Speedrun time.
+ * Aggregate root consolidating Score, Lives, PowerUpState, and Speedrun time.
  * Pure business logic (no Phaser, no DOM, no storage) — see "Domain layer" in CONTEXT.md.
  */
 export class GameSession
@@ -29,7 +28,6 @@ export class GameSession
     readonly lives: Lives;
     readonly powerUps: PowerUpState;
 
-    private _coins: number = 0;
     private _levelId: string;
     private _elapsedMs: number = 0;
 
@@ -37,7 +35,6 @@ export class GameSession
         initialLevelId = 'level-1',
         initialScore = 0,
         initialLives = 3,
-        initialCoins = 0,
         initialElapsedMs = 0,
         readonly trackTime = true
     )
@@ -45,7 +42,6 @@ export class GameSession
         this._levelId = initialLevelId;
         this.score = new Score(initialScore);
         this.lives = new Lives(initialLives, 3);
-        this._coins = Math.max(0, initialCoins);
         this._elapsedMs = Math.max(0, initialElapsedMs);
         this.powerUps = new PowerUpState();
     }
@@ -58,20 +54,6 @@ export class GameSession
     setLevelId (levelId: string): void
     {
         this._levelId = levelId;
-    }
-
-    get coins (): number
-    {
-        return this._coins;
-    }
-
-    addCoin (amount = 1): number
-    {
-        if (amount > 0)
-        {
-            this._coins += amount;
-        }
-        return this._coins;
     }
 
     get elapsedMs (): number
@@ -114,7 +96,6 @@ export class GameSession
         this._levelId = levelId;
         this.score.reset();
         this.lives.reset();
-        this._coins = 0;
         this._elapsedMs = 0;
         this.powerUps.reset();
     }
@@ -131,7 +112,6 @@ export class GameSession
             score: this.score.value,
             lives: this.lives.current,
             maxLives: this.lives.max,
-            coins: this._coins,
             levelId: this._levelId,
             elapsedSeconds: this.elapsedSeconds,
             elapsedMs: this._elapsedMs,

@@ -35,7 +35,6 @@ export class Preloader extends Scene
         this.load.image('goal-flag-texture', 'assets/environment/goal_flag.png');
         this.load.image('spike-texture', 'assets/environment/spikes.png');
 
-        this.load.image('coin-texture', 'assets/items/coin.png');
         this.load.image('powerup-heart', 'assets/items/heart.png');
         this.load.image('powerup-star', 'assets/items/star.png');
         this.load.image('powerup-spring', 'assets/items/spring.png');
@@ -60,7 +59,6 @@ export class Preloader extends Scene
                 score: 0,
                 lives: 3,
                 skinId: activeSkinId,
-                coins: 0,
                 elapsedMs: 0,
             });
         }

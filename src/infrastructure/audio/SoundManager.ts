@@ -1,6 +1,5 @@
 import { DomainEvents } from '../../domain/DomainEvents';
 import { LEVEL_COMPLETE_EVENT } from '../../application/CompleteLevelUseCase';
-import { COIN_COLLECTED_EVENT } from '../../application/CollectCoinUseCase';
 import { ENEMY_DEFEATED_EVENT } from '../../application/DefeatEnemyUseCase';
 import {
     PLAYER_DAMAGED_EVENT,
@@ -161,7 +160,6 @@ export class SoundManager
         if (this.initialized) return;
         this.initialized = true;
 
-        DomainEvents.on(COIN_COLLECTED_EVENT, () => this.playCoin());
         DomainEvents.on(ENEMY_DEFEATED_EVENT, () => this.playStomp());
         DomainEvents.on(PLAYER_DAMAGED_EVENT, () => this.playHurt());
         DomainEvents.on(GAME_OVER_EVENT, () =>

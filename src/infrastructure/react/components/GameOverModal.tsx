@@ -4,7 +4,6 @@ import { formatTime } from '../utils/formatTime';
 export interface GameOverModalProps
 {
     currentLevel: string;
-    coinsCount: number;
     score: number;
     elapsedSeconds: number;
     highScore: number;
@@ -56,7 +55,6 @@ function useAnimatedCount (targetValue: number, durationMs = 600)
 
 export function GameOverModal ({
     currentLevel,
-    coinsCount,
     score,
     elapsedSeconds,
     highScore,
@@ -64,7 +62,6 @@ export function GameOverModal ({
 }: GameOverModalProps)
 {
     const animatedScore = useAnimatedCount(score);
-    const animatedCoins = useAnimatedCount(coinsCount);
     const [randomTip] = useState(() => GAME_TIPS[Math.floor(Math.random() * GAME_TIPS.length)]);
 
     useEffect(() =>
@@ -97,10 +94,6 @@ export function GameOverModal ({
                     <div className="stat-item">
                         <span className="stat-label">🚩 Reached:</span>
                         <strong className="stat-val">{currentLevel.toUpperCase()}</strong>
-                    </div>
-                    <div className="stat-item">
-                        <span className="stat-label">🪙 Coins:</span>
-                        <strong className="stat-val">{animatedCoins}</strong>
                     </div>
                     <div className="stat-item">
                         <span className="stat-label">⭐ Final Score:</span>

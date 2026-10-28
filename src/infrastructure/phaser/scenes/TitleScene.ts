@@ -95,7 +95,6 @@ export class TitleScene extends Scene
                 score: 0,
                 lives: 3,
                 skinId: payload?.skinId ?? 'cyber-blue',
-                coins: 0,
                 elapsedMs: 0,
             };
 

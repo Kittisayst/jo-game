@@ -1,7 +1,5 @@
 import { GameStatsData, SettingsData, StageProgressionData } from '../ports';
 import { DEFAULT_WEAPON_ID, WEAPON_CATALOG } from './Weapon';
-import { UPGRADE_CATALOG, UpgradeType } from './Upgrade';
-import { getItemDefinition } from './Inventory';
 import { AchievementProgress } from './Achievement';
 import { BookProgressSnapshot } from './Book';
 import { BackpackSlotSnapshot } from './Backpack';
@@ -27,8 +25,6 @@ export interface SaveGameSnapshot
         owned: string[];
         equippedId: string;
     };
-    upgrades: Record<string, number>;
-    inventory: Record<string, number>;
     achievements?: Record<string, AchievementProgress>;
 
     // Version 4 Knowledge Quest fields
@@ -66,14 +62,6 @@ export function createDefaultSaveSnapshot (slotId = 'slot_1'): SaveGameSnapshot
             owned: [DEFAULT_WEAPON_ID],
             equippedId: DEFAULT_WEAPON_ID,
         },
-        upgrades: {
-            maxHp: 0,
-            weaponPower: 0,
-            attackSpeed: 0,
-            coinMagnet: 0,
-            dash: 0,
-        },
-        inventory: {},
         achievements: {},
 
         // Version 5 Knowledge Quest defaults (Buy-to-Read: books start unpurchased)
@@ -192,27 +180,6 @@ export function migrateSaveSnapshot (raw: unknown, fallbackSlotId = 'slot_1'): S
         equippedId = DEFAULT_WEAPON_ID;
     }
 
-    // 7. Validate or migrate Upgrades
-    const rawUpgrades = (data.upgrades && typeof data.upgrades === 'object' ? data.upgrades : {}) as Record<string, unknown>;
-    const upgrades: Record<string, number> = {};
-    for (const def of UPGRADE_CATALOG)
-    {
-        const val = rawUpgrades[def.id];
-        const num = typeof val === 'number' && !isNaN(val) ? Math.floor(val) : 0;
-        upgrades[def.id] = Math.max(0, Math.min(def.maxLevel, num));
-    }
-
-    // 8. Validate or migrate Inventory
-    const rawInventory = (data.inventory && typeof data.inventory === 'object' ? data.inventory : {}) as Record<string, unknown>;
-    const inventory: Record<string, number> = {};
-    for (const [key, val] of Object.entries(rawInventory))
-    {
-        const itemDef = getItemDefinition(key);
-        if (itemDef && typeof val === 'number' && !isNaN(val) && val > 0)
-        {
-            inventory[key] = Math.min(itemDef.maxStack, Math.floor(val));
-        }
-    }
 
     // 9. Validate or migrate Achievements
     const rawAchievements = (data.achievements && typeof data.achievements === 'object' ? data.achievements : {}) as Record<string, unknown>;
@@ -356,8 +323,6 @@ export function migrateSaveSnapshot (raw: unknown, fallbackSlotId = 'slot_1'): S
             owned,
             equippedId,
         },
-        upgrades: upgrades as Record<UpgradeType, number>,
-        inventory,
         achievements,
 
         books,

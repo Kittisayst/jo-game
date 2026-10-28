@@ -5,7 +5,6 @@ export interface PauseMenuModalProps
 {
     currentLevel: string;
     score: number;
-    coinsCount: number;
     elapsedSeconds: number;
     isMuted: boolean;
     isMusicMuted: boolean;
@@ -24,7 +23,6 @@ export interface PauseMenuModalProps
 export function PauseMenuModal ({
     currentLevel,
     score,
-    coinsCount,
     elapsedSeconds,
     isMuted,
     isMusicMuted,
@@ -68,10 +66,6 @@ export function PauseMenuModal ({
                     <div className="pause-stat-item">
                         <span className="pause-stat-label">⭐ ຄະແນນ</span>
                         <span className="pause-stat-val">{score}</span>
-                    </div>
-                    <div className="pause-stat-item">
-                        <span className="pause-stat-label">🪙 ຫຼຽນ</span>
-                        <span className="pause-stat-val">{coinsCount}</span>
                     </div>
                     <div className="pause-stat-item">
                         <span className="pause-stat-label">⏱️ ເວລາ</span>
