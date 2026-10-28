@@ -376,7 +376,7 @@ export function SettingsModal ({
                         style={{ width: '100%', borderColor: 'rgba(239, 68, 68, 0.4)', color: '#f87171' }}
                         type="button"
                     >
-                        🗑️ ລ້າງຄະແນນ & ຂໍ້ມູນທັງໝົດ (Reset All Data)
+                        🗑️ ລ້າງຂໍ້ມູນທັງໝົດ (Reset All Data)
                     </button>
                 </div>
             </div>

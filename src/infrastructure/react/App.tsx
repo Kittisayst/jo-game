@@ -12,10 +12,9 @@ import {
     BossDamagedPayload,
     BossDefeatedPayload,
 } from '../../application/DamageBossUseCase';
-import { toggleSoundUseCase, toggleMusicUseCase, applySettingsUseCase } from '../../application/UpdateSettingsUseCase';
-import { resetSaveDataUseCase } from '../../application/ResetSaveDataUseCase';
+import { toggleSoundUseCase, toggleMusicUseCase } from '../../application/UpdateSettingsUseCase';
 import { soundManager } from '../audio/SoundManager';
-import { CURRENT_SAVE_VERSION, SaveGameSnapshot } from '../../domain/entities/SaveData';
+import { SaveGameSnapshot } from '../../domain/entities/SaveData';
 import { saveManager, SaveSlotId } from '../storage/SaveManager';
 import {
     GAME_PAUSED_EVENT,
@@ -28,25 +27,17 @@ import { EventBus } from '../EventBus';
 import { entities, repositories } from '../composition';
 import { Hud } from './components/Hud';
 import { SkinModal } from './components/SkinModal';
-import { purchaseSkinUseCase } from '../../application/PurchaseSkinUseCase';
-import { selectSkinUseCase } from '../../application/SelectSkinUseCase';
-import { STARTER_BOOK_CREDIT_RESERVE } from '../../domain/entities/SaveData';
+import { useDialogue } from './hooks/useDialogue';
+import { useSkinShop } from './hooks/useSkinShop';
+import { createCurrentSnapshot, resetEntitiesToNewGame, restoreEntitiesFromSnapshot } from '../saveSnapshot';
 import { getNextObjective } from '../../domain/utils/nextObjective';
 import { loadBooksData } from '../dataLoader';
 import { PauseMenuModal } from './components/PauseMenuModal';
 import { MainMenuModal } from './components/MainMenuModal';
 import { SettingsModal } from './components/SettingsModal';
 import { StageMapModal } from './components/StageMapModal';
-import { DialogueChoice, DialogueNode } from '../../domain/entities/Dialogue';
 import { DialogueModal } from './components/DialogueModal';
 import { VirtualTouchControls } from './components/VirtualTouchControls';
-import { VILLAGE_ELDER_DIALOGUE } from '../dialogue/villageElderDialogue';
-import {
-    advanceDialogueUseCase,
-    closeDialogueUseCase,
-    selectDialogueChoiceUseCase,
-    startDialogueUseCase,
-} from '../../application/AdvanceDialogueUseCase';
 import { completeStageUseCase } from '../../application/CompleteStageUseCase';
 import { awardChapterClearUseCase } from '../../application/AwardChapterClearUseCase';
 import { selectStageUseCase } from '../../application/SelectStageUseCase';
@@ -61,9 +52,6 @@ import { GateRepairModal } from './components/GateRepairModal';
 import { WaypointModal } from './components/WaypointModal';
 import { QuizFinisherModal } from './components/QuizFinisherModal';
 import { returnToVillageUseCase } from '../../application/ReturnToVillageUseCase';
-import { BookProgress } from '../../domain/entities/Book';
-import { EquipmentState } from '../../domain/entities/EquipmentState';
-import { SpacedRepetitionSystem } from '../../domain/entities/Quiz';
 import {
     ACTIVE_SESSION_STORAGE_KEY,
     readString,
@@ -89,9 +77,6 @@ function App ()
     const [isMusicMuted, setIsMusicMuted] = useState(entities.settings.isMusicMuted);
     const [bossHp, setBossHp] = useState<number | null>(null);
     const [bossMaxHp, setBossMaxHp] = useState(5);
-    const [activeSkinId, setActiveSkinId] = useState(entities.skinManager.activeSkinId);
-    const [isSkinModalOpen, setIsSkinModalOpen] = useState(false);
-    const [skinNotice, setSkinNotice] = useState<string | null>(null);
     const [isMainMenuOpen, setIsMainMenuOpen] = useState(!shouldResumeInGame);
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
     const [isStageSelectOpen, setIsStageSelectOpen] = useState(false);
@@ -117,11 +102,25 @@ function App ()
     pauseStateRef.current = pauseState;
     const isMainMenuOpenRef = useRef(isMainMenuOpen);
     isMainMenuOpenRef.current = isMainMenuOpen;
-    const [isDialogueOpen, setIsDialogueOpen] = useState(false);
-    const [currentDialogueNode, setCurrentDialogueNode] = useState<DialogueNode | null>(null);
-    const [dialogueChoices, setDialogueChoices] = useState<DialogueChoice[]>([]);
-    const isDialogueOpenRef = useRef(isDialogueOpen);
-    isDialogueOpenRef.current = isDialogueOpen;
+    const {
+        isDialogueOpen,
+        isDialogueOpenRef,
+        currentDialogueNode,
+        dialogueChoices,
+        advanceDialogue,
+        selectDialogueChoice,
+        closeDialogue,
+    } = useDialogue();
+    const {
+        activeSkinId,
+        setActiveSkinId,
+        isSkinModalOpen,
+        skinNotice,
+        openSkinModal,
+        closeSkinModal,
+        buySkin,
+        equipSkin,
+    } = useSkinShop(() => setWalletBalance(entities.wallet.balance));
     const isSettingsOpenRef = useRef(isSettingsOpen);
     isSettingsOpenRef.current = isSettingsOpen;
     const isStageSelectOpenRef = useRef(isStageSelectOpen);
@@ -191,7 +190,7 @@ function App ()
             );
             const bonus = awardChapterClearUseCase(entities.wallet, clear.isFirstTimeClear);
             setWalletBalance(entities.wallet.balance);
-            saveManager.autoSave(getCurrentSnapshot());
+            saveManager.autoSave(createCurrentSnapshot());
             EventBus.emit('change-level', 'village');
             const bonusText = bonus > 0 ? ` +${bonus} 🎓 Credit!` : '';
             setTimeout(() => setVillageWelcomeToast(`🏆 ຊະນະ Boss ບົດທີ 1!${bonusText} ກັບມາໝູ່ບ້ານເພື່ອຮຽນ ແລະ ສ້າງອາວຸດຕໍ່ໄປ`), 300);
@@ -207,7 +206,7 @@ function App ()
             // Dying costs half the carried Materials, then the player wakes up healed in the village
             const result = returnToVillageUseCase('death', entities.backpack);
             setBackpackRevision(r => r + 1);
-            saveManager.autoSave(getCurrentSnapshot());
+            saveManager.autoSave(createCurrentSnapshot());
 
             const lostCount = result.lostMaterials.reduce((total, m) => total + m.count, 0);
             setTimeout(() =>
@@ -258,7 +257,7 @@ function App ()
 
                 if (isDialogueOpenRef.current)
                 {
-                    handleCloseDialogue();
+                    closeDialogue();
                     return;
                 }
 
@@ -337,18 +336,6 @@ function App ()
             }
         };
 
-        const onStartDialogue = (graphId: string) =>
-        {
-            if (graphId === 'village_elder')
-            {
-                startDialogueUseCase(entities.dialogueState, VILLAGE_ELDER_DIALOGUE);
-                setCurrentDialogueNode(entities.dialogueState.getCurrentNode());
-                setDialogueChoices(entities.dialogueState.getAvailableChoices());
-                setIsDialogueOpen(true);
-                EventBus.emit('dialogue-open-state', true);
-            }
-        };
-
         const onOpenStageMap = () =>
         {
             setIsStageMapOpen(true);
@@ -391,21 +378,20 @@ function App ()
         {
             setWalletBalance(entities.wallet.balance);
             setBackpackRevision(r => r + 1);
-            saveManager.autoSave(getCurrentSnapshot());
+            saveManager.autoSave(createCurrentSnapshot());
         };
         const onDailyPracticeCompleted = () =>
         {
             setWalletBalance(entities.wallet.balance);
-            saveManager.autoSave(getCurrentSnapshot());
+            saveManager.autoSave(createCurrentSnapshot());
         };
         const onBackpackItemUsed = () =>
         {
             setBackpackRevision(r => r + 1);
-            saveManager.autoSave(getCurrentSnapshot());
+            saveManager.autoSave(createCurrentSnapshot());
         };
         const onBackpackChanged = () => setBackpackRevision(r => r + 1);
 
-        EventBus.on('start-dialogue', onStartDialogue);
         EventBus.on('open-stage-map', onOpenStageMap);
         EventBus.on('weapon-changed', onWeaponChanged);
         EventBus.on('open-library', onOpenLibrary);
@@ -432,7 +418,6 @@ function App ()
 
         return () =>
         {
-            EventBus.removeListener('start-dialogue', onStartDialogue);
             EventBus.removeListener('open-stage-map', onOpenStageMap);
             EventBus.removeListener('weapon-changed', onWeaponChanged);
             EventBus.removeListener('open-library', onOpenLibrary);
@@ -460,159 +445,36 @@ function App ()
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    const handleAdvanceDialogue = () =>
-    {
-        advanceDialogueUseCase(entities.dialogueState);
-        const node = entities.dialogueState.getCurrentNode();
-        setCurrentDialogueNode(node);
-        setDialogueChoices(entities.dialogueState.getAvailableChoices());
-        if (!entities.dialogueState.isOpen)
-        {
-            setIsDialogueOpen(false);
-            EventBus.emit('dialogue-open-state', false);
-        }
-    };
-
-    const handleSelectDialogueChoice = (choiceIndex: number) =>
-    {
-        selectDialogueChoiceUseCase(entities.dialogueState, choiceIndex);
-        const node = entities.dialogueState.getCurrentNode();
-        setCurrentDialogueNode(node);
-        setDialogueChoices(entities.dialogueState.getAvailableChoices());
-        if (!entities.dialogueState.isOpen)
-        {
-            setIsDialogueOpen(false);
-            EventBus.emit('dialogue-open-state', false);
-        }
-    };
-
-    const handleCloseDialogue = () =>
-    {
-        closeDialogueUseCase(entities.dialogueState);
-        setIsDialogueOpen(false);
-        setCurrentDialogueNode(null);
-        setDialogueChoices([]);
-        EventBus.emit('dialogue-open-state', false);
-    };
-
     const handleCycleWeapon = () =>
     {
         const nextId = cycleEquippedWeaponUseCase(entities.equipment, entities.backpack);
         soundManager.playSelect();
         setEquippedWeaponId(nextId);
-        saveManager.autoSave(getCurrentSnapshot());
+        saveManager.autoSave(createCurrentSnapshot());
     };
 
-    const getCurrentSnapshot = (slotId?: SaveSlotId): SaveGameSnapshot =>
+    /** Refreshes React state after the live entities were replaced (load, import or reset). */
+    const syncStateFromEntities = () =>
     {
-        const bookSnapshots: Record<string, any> = {};
-        for (const [key, val] of Object.entries(entities.books))
-        {
-            bookSnapshots[key] = val.toSnapshot();
-        }
-
-        return {
-            version: CURRENT_SAVE_VERSION,
-            timestamp: Date.now(),
-            slotId: slotId ?? saveManager.getActiveSlot(),
-            activeSkinId: skinManager.activeSkinId,
-            ownedSkins: skinManager.ownedSkinIds,
-            settings: {
-                soundMuted: settings.isSoundMuted,
-                musicMuted: settings.isMusicMuted,
-            },
-            stageProgression: {
-                unlockedStages: stageProgression.unlockedStages,
-                completedStages: stageProgression.completedStages,
-            },
-            wallet: {
-                balance: entities.wallet.balance,
-            },
-            achievements: entities.achievementManager.serialize(),
-
-            // Version 4 Knowledge Quest fields
-            books: bookSnapshots,
-            backpack: entities.backpack.toSnapshot(),
-            equipment: entities.equipment.toSnapshot(),
-            practiceStats: entities.spacedRepetition.toSnapshot(),
-            repairedGates: Array.from(entities.repairedGates),
-            forgeUnlocked: entities.forgeUnlocked,
-        };
+        setActiveSkinId(skinManager.activeSkinId);
+        setIsMuted(settings.isSoundMuted);
+        setIsMusicMuted(settings.isMusicMuted);
+        setWalletBalance(entities.wallet.balance);
+        setEquippedWeaponId(entities.equipment.equippedWeaponId);
+        setBooksRevision(r => r + 1);
+        setBackpackRevision(r => r + 1);
     };
 
     const applyLoadedSnapshot = (snap: SaveGameSnapshot) =>
     {
-
-        skinManager.restore(snap.activeSkinId, snap.ownedSkins);
-        repositories.skin.saveActiveSkinId(skinManager.activeSkinId);
-        setActiveSkinId(skinManager.activeSkinId);
-
-        settings.setSoundMuted(snap.settings.soundMuted);
-        settings.setMusicMuted(snap.settings.musicMuted);
-        repositories.settings.save({ soundMuted: snap.settings.soundMuted, musicMuted: snap.settings.musicMuted });
-        applySettingsUseCase(settings);
-        setIsMuted(settings.isSoundMuted);
-        setIsMusicMuted(settings.isMusicMuted);
-
-        stageProgression.loadFrom(snap.stageProgression.unlockedStages, snap.stageProgression.completedStages);
-        repositories.stageProgression.save(stageProgression);
-
-        if (snap.wallet)
-        {
-            entities.wallet.setBalance(snap.wallet.balance);
-            setWalletBalance(snap.wallet.balance);
-        }
-        if (snap.achievements)
-        {
-            entities.achievementManager.loadFrom(snap.achievements);
-        }
-
-        // Version 5 Knowledge Quest fields restoration
-        for (const existingKey of Object.keys(entities.books))
-        {
-            delete entities.books[existingKey];
-        }
-        if (snap.books)
-        {
-            for (const [key, val] of Object.entries(snap.books))
-            {
-                entities.books[key] = BookProgress.fromSnapshot(val);
-            }
-        }
-        if (!entities.books['book-ch1'])
-        {
-            entities.books['book-ch1'] = new BookProgress('book-ch1', false);
-        }
-        setBooksRevision(r => r + 1);
-        if (snap.backpack)
-        {
-            entities.backpack.loadFromSnapshot(snap.backpack);
-            setBackpackRevision(r => r + 1);
-        }
-        if (snap.equipment)
-        {
-            entities.equipment = EquipmentState.fromSnapshot(snap.equipment);
-            setEquippedWeaponId(entities.equipment.equippedWeaponId);
-        }
-        if (snap.practiceStats)
-        {
-            entities.spacedRepetition = SpacedRepetitionSystem.fromSnapshot(snap.practiceStats);
-        }
-        if (snap.repairedGates)
-        {
-            entities.repairedGates = new Set(snap.repairedGates);
-        }
-        if (typeof snap.forgeUnlocked === 'boolean')
-        {
-            entities.forgeUnlocked = snap.forgeUnlocked;
-        }
-
+        restoreEntitiesFromSnapshot(snap);
+        syncStateFromEntities();
         soundManager.playPowerUp();
     };
 
     const handleSaveGame = (slotId: SaveSlotId) =>
     {
-        const snapshot = getCurrentSnapshot(slotId);
+        const snapshot = createCurrentSnapshot(slotId);
         saveManager.save(snapshot, slotId);
         saveManager.setActiveSlot(slotId);
         soundManager.playCoin();
@@ -651,14 +513,14 @@ function App ()
     {
         const payload = toggleSoundUseCase(settings, repositories.settings);
         setIsMuted(payload.soundMuted);
-        saveManager.autoSave(getCurrentSnapshot());
+        saveManager.autoSave(createCurrentSnapshot());
     };
 
     const handleToggleMusic = () =>
     {
         const payload = toggleMusicUseCase(settings, repositories.settings);
         setIsMusicMuted(payload.musicMuted);
-        saveManager.autoSave(getCurrentSnapshot());
+        saveManager.autoSave(createCurrentSnapshot());
     };
 
     const handlePauseGame = () =>
@@ -764,29 +626,10 @@ function App ()
 
     const handleClearAllData = () =>
     {
-        if (typeof window !== 'undefined' && window.confirm('Are you sure you want to reset all High Scores and saved data?'))
+        if (typeof window !== 'undefined' && window.confirm('Are you sure you want to reset all saved data?'))
         {
-            resetSaveDataUseCase(
-                { skinManager, settings, stageProgression },
-                repositories
-            );
-            saveManager.clearSlot(saveManager.getActiveSlot());
-            entities.achievementManager.reset();
-            entities.wallet.setBalance(50);
-            for (const existingKey of Object.keys(entities.books))
-            {
-                delete entities.books[existingKey];
-            }
-            entities.books['book-ch1'] = new BookProgress('book-ch1', false);
-            entities.backpack.loadFromSnapshot([]);
-            entities.repairedGates.clear();
-            entities.forgeUnlocked = false;
-            setWalletBalance(20);
-            setBooksRevision(r => r + 1);
-            setBackpackRevision(r => r + 1);
-            setActiveSkinId('cyber-blue');
-            setIsMuted(settings.isSoundMuted);
-            setIsMusicMuted(settings.isMusicMuted);
+            resetEntitiesToNewGame();
+            syncStateFromEntities();
             removeKey(ACTIVE_SESSION_STORAGE_KEY);
             soundManager.playCoin();
         }
@@ -811,40 +654,6 @@ function App ()
             levelKey: target,
             skinId: activeSkinId,
         });
-    };
-
-    const handleBuySkin = (skinId: string) =>
-    {
-        // Until the first textbook is bought, its price stays untouchable
-        const reserve = entities.books['book-ch1']?.isUnlocked ? 0 : STARTER_BOOK_CREDIT_RESERVE;
-        const result = purchaseSkinUseCase(entities.wallet, skinManager, skinId, reserve);
-
-        if (result.success)
-        {
-            setWalletBalance(entities.wallet.balance);
-            setSkinNotice('🎉 ຊື້ຊຸດສຳເລັດ! ກົດ "ໃສ່" ເພື່ອໃສ່ຊຸດນີ້');
-            soundManager.playBuy();
-            saveManager.autoSave(getCurrentSnapshot());
-            return;
-        }
-
-        soundManager.playHurt();
-        const reasons: Record<typeof result.reason, string> = {
-            unknown_skin: '❌ ບໍ່ພົບຊຸດນີ້',
-            already_owned: 'ເຈົ້າມີຊຸດນີ້ແລ້ວ',
-            insufficient_credit: '❌ Credit ບໍ່ພໍ — ຮຽນ ແລະ ສອບເພື່ອຫາ Credit ເພີ່ມ',
-            reserved_for_textbook: `📚 ເກັບ ${STARTER_BOOK_CREDIT_RESERVE} Credit ໄວ້ຊື້ປຶ້ມຕຳລາບົດທີ 1 ກ່ອນ`,
-        };
-        setSkinNotice(reasons[result.reason]);
-    };
-
-    const handleEquipSkin = (skinId: string) =>
-    {
-        if (selectSkinUseCase(skinManager, skinId, repositories.skin))
-        {
-            setActiveSkinId(skinId);
-            saveManager.autoSave(getCurrentSnapshot());
-        }
     };
 
     const equippedWeaponDef = {
@@ -936,7 +745,7 @@ function App ()
                     isMuted={isMuted}
                     onExitToMainMenu={handleOpenMainMenu}
                     onOpenSettings={() => setIsSettingsOpen(true)}
-                    onOpenSkinModal={() => setIsSkinModalOpen(true)}
+                    onOpenSkinModal={openSkinModal}
                     onRestartLevel={() => handleRestart(false)}
                     onResume={handleResumeGame}
                     onToggleMusic={handleToggleMusic}
@@ -950,9 +759,9 @@ function App ()
                     walletBalance={walletBalance}
                     skinManager={skinManager}
                     notice={skinNotice}
-                    onClose={() => { setIsSkinModalOpen(false); setSkinNotice(null); }}
-                    onBuySkin={handleBuySkin}
-                    onEquipSkin={handleEquipSkin}
+                    onClose={closeSkinModal}
+                    onBuySkin={buySkin}
+                    onEquipSkin={equipSkin}
                 />
             )}
 
@@ -960,7 +769,7 @@ function App ()
                 <MainMenuModal
                     walletBalance={walletBalance}
                     onOpenSettings={() => setIsSettingsOpen(true)}
-                    onOpenSkinModal={() => setIsSkinModalOpen(true)}
+                    onOpenSkinModal={openSkinModal}
                     onOpenStageSelect={() => setIsStageMapOpen(true)}
                     onStartGame={handleStartGame}
                 />
@@ -997,9 +806,9 @@ function App ()
                 <DialogueModal
                     choices={dialogueChoices}
                     node={currentDialogueNode}
-                    onAdvance={handleAdvanceDialogue}
-                    onChoose={handleSelectDialogueChoice}
-                    onClose={handleCloseDialogue}
+                    onAdvance={advanceDialogue}
+                    onChoose={selectDialogueChoice}
+                    onClose={closeDialogue}
                 />
             )}
 
@@ -1015,12 +824,12 @@ function App ()
                 {
                     setWalletBalance(newBalance);
                     setBooksRevision(r => r + 1);
-                    saveManager.autoSave(getCurrentSnapshot());
+                    saveManager.autoSave(createCurrentSnapshot());
                 }}
                 onPageRead={() =>
                 {
                     setBooksRevision(r => r + 1);
-                    saveManager.autoSave(getCurrentSnapshot());
+                    saveManager.autoSave(createCurrentSnapshot());
                 }}
                 onGoToExam={(bookId) =>
                 {
@@ -1037,7 +846,7 @@ function App ()
                 onCreditChanged={(newBalance) =>
                 {
                     setWalletBalance(newBalance);
-                    saveManager.autoSave(getCurrentSnapshot());
+                    saveManager.autoSave(createCurrentSnapshot());
                 }}
                 onOpenLibraryStore={() =>
                 {
@@ -1059,7 +868,7 @@ function App ()
                     setWalletBalance(entities.wallet.balance);
                     setBooksRevision(r => r + 1);
                     setBackpackRevision(r => r + 1);
-                    saveManager.autoSave(getCurrentSnapshot());
+                    saveManager.autoSave(createCurrentSnapshot());
                 }}
             />
 
@@ -1098,7 +907,7 @@ function App ()
                         setHealth(prev => Math.min(maxHealth, prev + 1));
                     }
                     setBackpackRevision(r => r + 1);
-                    saveManager.autoSave(getCurrentSnapshot());
+                    saveManager.autoSave(createCurrentSnapshot());
                 }}
             />
 
@@ -1110,7 +919,7 @@ function App ()
                 {
                     setIsGateRepairOpen(false);
                     setBackpackRevision(r => r + 1);
-                    saveManager.autoSave(getCurrentSnapshot());
+                    saveManager.autoSave(createCurrentSnapshot());
                 }}
             />
 
@@ -1134,7 +943,7 @@ function App ()
                     setIsQuizFinisherOpen(false);
                     EventBus.emit('quiz-finisher-passed');
                     setBackpackRevision(r => r + 1);
-                    saveManager.autoSave(getCurrentSnapshot());
+                    saveManager.autoSave(createCurrentSnapshot());
                 }}
                 onFail={() =>
                 {

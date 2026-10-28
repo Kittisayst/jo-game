@@ -209,7 +209,9 @@ Chapter 1 ຈົບໃນ 4 ຮອບອອກສຳຫຼວດ:
 | TitleScene | ໜ້າເລີ່ມ |
 | Game | ທັງໝູ່ບ້ານ (Hub) ແລະ ດ່ານ (Stage) ໃນ scene ດຽວ; ໂຫຼດ layout ຕາມ stages.json |
 
-**UI (React modal ໃນ `infrastructure/react/components/`):** `Hud`, `TextbookModal` (Library), `AcademyModal`, `WorkshopModal`, `ForgeModal`, `GateRepairModal`, `QuizFinisherModal` (ຄຳຖາມ Boss), `BackpackModal`, `StageSelectModal`/`StageMapModal` (World Gate), `ShopModal`.
+**UI (React modal ໃນ `infrastructure/react/components/`):** `Hud`, `TextbookModal` (Library), `AcademyModal`, `WorkshopModal`, `ForgeModal`, `GateRepairModal`, `QuizFinisherModal` (ຄຳຖາມ Boss), `BackpackModal`, `StageMapModal` (World Gate), `SkinModal` (ຊື້/ໃສ່ Skin ດ້ວຍ Credit).
+
+**ໂຄງສ້າງໂຄດ Phaser:** `scenes/Game.ts` ເປັນ scene ເຈົ້າຂອງ physics/ການໂຕ້ຕອບ; ຮູບຮ່າງຂອງໝູ່ບ້ານ ແລະ ດ່ານ ຖືກສ້າງໂດຍ `scenery/VillageBuilder.ts` ແລະ `scenery/StageBuilder.ts` (ລວມ `BrokenGate`); `stages/StageDefinition.ts` ກວດຮູບແບບ `stages.json` ຕອນເລີ່ມ scene.
 
 > ການແຍກເປັນ HubScene / StageScene / UIScene / QuizScene / BuildingScene ໃນ GDD ເວີຊັນກ່ອນ ບໍ່ໄດ້ເຮັດ ແລະ ບໍ່ວາງແຜນເຮັດ: ການໃຊ້ React modal ໃຫ້ UI ຍືດຫຍຸ່ນກວ່າ ແລະທົດສອບໄດ້ງ່າຍກວ່າ.
 
@@ -219,7 +221,7 @@ Chapter 1 ຈົບໃນ 4 ຮອບອອກສຳຫຼວດ:
 - `questions.json` — id, bookId, ຄຳຖາມ, choices, ຄຳຕອບ, ຄຳອະທິບາຍ, ໜ້າອ້າງອີງ
 - `items.json` — ວັດສະດຸ, ເຄື່ອງມື, ອາວຸດ ພ້ອມ stat
 - `recipes.json` — ວັດສະດຸທີ່ຕ້ອງໃຊ້, Credit, ຕ້ອງການປຶ້ມໃດ
-- `stages.json` — ເຂດ, ຈຸດເກີດຊັບພະຍາກອນ, ສັດຕູ, mini-boss, boss
+- `stages.json` — ເຂດ, ປ້າຍ, waypoint, ຈຸດເກີດຊັບພະຍາກອນ, ຈຸດເກີດສັດຕູ/mini-boss, ປະຕູ, boss (platform/spike/ຈຸດເກີດຜູ້ຫຼິ້ນຢູ່ໃນ `assets/levels/*.json`)
 - `enemies.json` — HP, damage, ທ່າໂຈມຕີ, drop table
 
 **ຕົວຢ່າງ 1 ຄຳຖາມ:**
