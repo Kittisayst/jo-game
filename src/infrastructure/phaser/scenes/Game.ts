@@ -408,6 +408,11 @@ export class Game extends Scene
 
         this.physics.add.collider(this.player, this.ground);
         this.physics.add.collider(this.player, this.platforms);
+        // The gate wall is built with the scenery, before the player exists, so it is hooked up here
+        if (this.brokenGateWall)
+        {
+            this.physics.add.collider(this.player, this.brokenGateWall);
+        }
         this.physics.add.collider(this.player, this.movingPlatforms);
 
         // Colliders for enemies
@@ -445,6 +450,7 @@ export class Game extends Scene
         {
             const bossDefinition = this.level.boss.enemyId ? this.getEnemyDefinition(this.level.boss.enemyId) : undefined;
             this.boss = new Boss(this, this.level.boss.x, this.level.boss.y, bossDefinition?.maxHp ?? this.level.boss.hp ?? 5);
+            this.boss.awaitFinisher = this.currentLevelKey === 'stage-ch1';
             this.boss.onLanding = (x, y) =>
             {
                 this.particleManager.emitLandingDust(x, y);
@@ -613,8 +619,10 @@ export class Game extends Scene
 
         const onQuizFinisherPassed = () =>
         {
+            this.boss?.playDefeatTween();
             entities.backpack.addItem('boss-core', 1);
             entities.backpack.addItem('crystal', 3);
+            EventBus.emit('backpack-changed');
             this.showLootNotification(this.player.x, this.player.y - 40, '+1 🔮 Boss Core & +3 💎 Crystal!', '#a855f7');
             trackAchievementUseCase(entities.achievementManager, 'boss-slayer', 1);
             this.particleManager.emitCelebration(this.player.x, this.player.y);
@@ -631,8 +639,7 @@ export class Game extends Scene
             if (this.boss)
             {
                 const healAmount = Math.ceil(this.boss.entity.maxHp * 0.15);
-                this.boss.entity.heal(healAmount);
-                this.boss.isInvulnerable = false;
+                this.boss.reviveAfterFailedFinisher(healAmount);
                 this.particleManager.emitSpikeHit(this.boss.x, this.boss.y);
                 this.showLootNotification(this.boss.x, this.boss.y - 30, `⚠️ Boss ຟື້ນຟູ ${healAmount} HP!`, '#ef4444');
                 soundManager.playPowerUp();
@@ -1593,7 +1600,6 @@ export class Game extends Scene
                 wallSprite.setSize(40, 120);
                 wallSprite.setVisible(false);
                 this.brokenGateWall.add(wallSprite);
-                this.physics.add.collider(this.player, this.brokenGateWall);
             }
         }
         else
@@ -1720,6 +1726,7 @@ export class Game extends Scene
             node.graphic.clear();
             this.particleManager.emitCelebration(node.x, node.y - 20);
 
+            EventBus.emit('backpack-changed');
             const dropTexts = result.drops.map(d => `+${d.count} ${this.getItemEmoji(d.itemId)} ${d.itemId}`).join(', ');
             this.showLootNotification(node.x, node.y - 30, `🎒 ${dropTexts}`, '#22c55e');
         }
@@ -2196,6 +2203,7 @@ export class Game extends Scene
             if (drops.overflow.length > 0) parts.push('🎒 ກະເປົາເຕັມ!');
             this.showLootNotification(enemy.x, enemy.y - 30, parts.join(', '), drops.overflow.length > 0 ? '#f59e0b' : '#22c55e');
             soundManager.playCoin();
+            EventBus.emit('backpack-changed');
         }
 
         // Roll dynamic coin drops based on archetype (legacy enemies only)

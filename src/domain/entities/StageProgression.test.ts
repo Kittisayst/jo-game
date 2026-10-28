@@ -80,4 +80,12 @@ describe('StageProgression entity', () =>
         expect(progression.isStageCompleted('level-1')).toBe(true);
         expect(progression.isStageCompleted('level-2')).toBe(false);
     });
+
+    it('keeps Chapter 1 open from the start, since nothing precedes it', () =>
+    {
+        const progression = new StageProgression();
+        expect(progression.isStageUnlocked('stage-ch1')).toBe(true);
+        progression.reset();
+        expect(progression.isStageUnlocked('stage-ch1')).toBe(true);
+    });
 });

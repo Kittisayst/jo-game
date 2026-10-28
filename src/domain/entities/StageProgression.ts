@@ -2,18 +2,20 @@
  * Domain entity managing stage/level unlocking and completion progression.
  * Pure business rules — see "Domain layer" in CONTEXT.md.
  */
+/** Stages the player can always enter. Chapter 1 has no earlier stage to unlock it, so it starts open. */
+export const ALWAYS_UNLOCKED_STAGES = ['village', 'level-1', 'stage-ch1'];
+
 export class StageProgression
 {
     private _unlockedStages: Set<string>;
     private _completedStages: Set<string>;
 
     constructor (
-        initialUnlockedStages: string[] = ['village', 'level-1'],
+        initialUnlockedStages: string[] = [...ALWAYS_UNLOCKED_STAGES],
         initialCompletedStages: string[] = []
     )
     {
-        // Village and level-1 are always unlocked at minimum
-        const baseUnlocked = new Set(['village', 'level-1', ...initialUnlockedStages]);
+        const baseUnlocked = new Set([...ALWAYS_UNLOCKED_STAGES, ...initialUnlockedStages]);
         this._unlockedStages = baseUnlocked;
         this._completedStages = new Set(initialCompletedStages);
     }
@@ -30,7 +32,7 @@ export class StageProgression
 
     isStageUnlocked (stageId: string): boolean
     {
-        if (stageId === 'village' || stageId === 'level-1')
+        if (ALWAYS_UNLOCKED_STAGES.includes(stageId))
         {
             return true;
         }
@@ -79,13 +81,13 @@ export class StageProgression
 
     reset (): void
     {
-        this._unlockedStages = new Set(['village', 'level-1']);
+        this._unlockedStages = new Set(ALWAYS_UNLOCKED_STAGES);
         this._completedStages = new Set();
     }
 
     loadFrom (unlockedStages: string[], completedStages: string[]): void
     {
-        this._unlockedStages = new Set(['village', 'level-1', ...unlockedStages]);
+        this._unlockedStages = new Set([...ALWAYS_UNLOCKED_STAGES, ...unlockedStages]);
         this._completedStages = new Set(completedStages);
     }
 }

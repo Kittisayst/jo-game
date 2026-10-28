@@ -450,6 +450,13 @@ export class Boss extends Physics.Arcade.Sprite
         return true;
     }
 
+    /**
+     * When true, the boss only freezes at 0 HP instead of vanishing, so a wrong finisher answer
+     * can bring it back (see `reviveAfterFailedFinisher`). The scene then calls `playDefeatTween`
+     * once the finisher is answered correctly.
+     */
+    awaitFinisher = false;
+
     private handleDefeated (): void
     {
         const body = this.body as Phaser.Physics.Arcade.Body;
@@ -461,6 +468,32 @@ export class Boss extends Physics.Arcade.Sprite
         this.scene.cameras.main.shake(400, 0.015);
         this.onDefeated?.(this.x, this.y);
 
+        if (this.awaitFinisher)
+        {
+            this.setVelocity(0, 0);
+            return;
+        }
+
+        this.playDefeatTween();
+    }
+
+    /** Brings a boss frozen at 0 HP back into the fight after a wrong finisher answer. */
+    reviveAfterFailedFinisher (healAmount: number): void
+    {
+        this.entity.heal(healAmount);
+        const body = this.body as Phaser.Physics.Arcade.Body;
+        if (body)
+        {
+            body.enable = true;
+        }
+        this.setAlpha(1);
+        this.isInvulnerable = false;
+        this.applyPhaseAppearance();
+        this.transitionTo('idle');
+    }
+
+    playDefeatTween (): void
+    {
         this.scene.tweens.add({
             targets: this,
             scaleX: 1.5,

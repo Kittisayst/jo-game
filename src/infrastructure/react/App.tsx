@@ -576,6 +576,7 @@ function App ()
             setBackpackRevision(r => r + 1);
             saveManager.autoSave(getCurrentSnapshot());
         };
+        const onBackpackChanged = () => setBackpackRevision(r => r + 1);
 
         EventBus.on('start-dialogue', onStartDialogue);
         EventBus.on('open-stage-map', onOpenStageMap);
@@ -592,6 +593,7 @@ function App ()
         EventBus.on('book-exam-passed', onBookExamPassed);
         EventBus.on('daily-practice-completed', onDailyPracticeCompleted);
         EventBus.on('backpack-item-used', onBackpackItemUsed);
+        EventBus.on('backpack-changed', onBackpackChanged);
         DomainEvents.on<LevelCompletePayload>(LEVEL_COMPLETE_EVENT, onLevelComplete);
         DomainEvents.on<CoinCollectedPayload>(COIN_COLLECTED_EVENT, onCoinCollected);
         DomainEvents.on<EnemyDefeatedPayload>(ENEMY_DEFEATED_EVENT, onEnemyDefeated);
@@ -623,6 +625,7 @@ function App ()
             EventBus.removeListener('book-exam-passed', onBookExamPassed);
             EventBus.removeListener('daily-practice-completed', onDailyPracticeCompleted);
             EventBus.removeListener('backpack-item-used', onBackpackItemUsed);
+            EventBus.removeListener('backpack-changed', onBackpackChanged);
             DomainEvents.off<LevelCompletePayload>(LEVEL_COMPLETE_EVENT, onLevelComplete);
             DomainEvents.off<CoinCollectedPayload>(COIN_COLLECTED_EVENT, onCoinCollected);
             DomainEvents.off<EnemyDefeatedPayload>(ENEMY_DEFEATED_EVENT, onEnemyDefeated);
