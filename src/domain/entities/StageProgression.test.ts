@@ -70,4 +70,14 @@ describe('StageProgression entity', () =>
         expect(progression.isStageUnlocked('level-2')).toBe(false);
         expect(progression.completedStages).toEqual([]);
     });
+
+    it('loads progression from snapshot', () =>
+    {
+        const progression = new StageProgression();
+        progression.loadFrom(['village', 'level-1', 'level-2'], ['level-1']);
+
+        expect(progression.isStageUnlocked('level-2')).toBe(true);
+        expect(progression.isStageCompleted('level-1')).toBe(true);
+        expect(progression.isStageCompleted('level-2')).toBe(false);
+    });
 });

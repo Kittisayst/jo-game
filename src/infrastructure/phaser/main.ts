@@ -1,3 +1,5 @@
+import { Preloader } from './scenes/Preloader';
+import { TitleScene } from './scenes/TitleScene';
 import { Game as MainGame } from './scenes/Game';
 import { AUTO, Game, Scale } from 'phaser';
 
@@ -8,7 +10,8 @@ const config: Phaser.Types.Core.GameConfig = {
     width: 1280,
     height: 720,
     parent: 'game-container',
-    backgroundColor: '#028af8',
+    backgroundColor: '#030712',
+    pixelArt: true,
     scale: {
         mode: Scale.FIT,
         autoCenter: Scale.CENTER_BOTH
@@ -21,6 +24,8 @@ const config: Phaser.Types.Core.GameConfig = {
         }
     },
     scene: [
+        Preloader,
+        TitleScene,
         MainGame
     ]
 };

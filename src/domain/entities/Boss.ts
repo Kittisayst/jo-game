@@ -1,3 +1,5 @@
+export type BossPhase = 1 | 2 | 3;
+
 /**
  * Domain entity representing the King Slime Boss.
  * Pure non-spatial state and business rules — see "Domain layer" in CONTEXT.md.
@@ -34,6 +36,35 @@ export class Boss
     get points (): number
     {
         return this._points;
+    }
+
+    /**
+     * Determines current combat phase based on remaining HP:
+     * - Phase 1: High HP (>= 4 / 5) - Regal & methodical attacks
+     * - Phase 2: Mid HP (2 - 3 / 5) - Enraged dash charges
+     * - Phase 3: Critical HP (1 / 5) - Berserk frenzy & frantic double slams
+     */
+    get phase (): BossPhase
+    {
+        if (this._currentHp >= 4)
+        {
+            return 1;
+        }
+        if (this._currentHp >= 2)
+        {
+            return 2;
+        }
+        return 3;
+    }
+
+    get isEnraged (): boolean
+    {
+        return this._currentHp <= 3;
+    }
+
+    get isBerserk (): boolean
+    {
+        return this._currentHp === 1;
     }
 
     takeDamage (amount = 1): { defeated: boolean; currentHp: number }

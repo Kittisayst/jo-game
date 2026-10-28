@@ -1,6 +1,7 @@
 import { Physics, Scene } from 'phaser';
 
-const TEXTURE_KEY = 'hazard-spike';
+const TEXTURE_KEY = 'spike-texture';
+const FALLBACK_KEY = 'hazard-spike';
 const WIDTH = 64;
 const HEIGHT = 24;
 
@@ -14,8 +15,9 @@ export class Spike extends Physics.Arcade.Sprite
     constructor (scene: Scene, x: number, y: number)
     {
         Spike.ensureTexture(scene);
+        const textureToUse = scene.textures.exists(TEXTURE_KEY) ? TEXTURE_KEY : FALLBACK_KEY;
 
-        super(scene, x, y, TEXTURE_KEY);
+        super(scene, x, y, textureToUse);
 
         scene.add.existing(this);
         scene.physics.add.existing(this, true);

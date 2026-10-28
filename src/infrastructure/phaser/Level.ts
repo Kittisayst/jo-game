@@ -7,12 +7,15 @@
  * JSON file will fail in whatever way reading a missing/wrong-typed field fails.
  */
 
+import type { EnemyType } from '../../domain/entities/Enemy';
+
 export interface EnemySpawnData
 {
     x: number;
     y: number;
     patrolDistance?: number;
     speed?: number;
+    type?: EnemyType;
 }
 
 export interface PowerUpSpawnData
@@ -57,7 +60,7 @@ export interface Level
     movingPlatforms?: MovingPlatformSpawnData[];
     boss?: BossSpawnData;
     finishType?: 'flag' | 'door';
-    scenery?: 'village' | 'default';
+    scenery?: 'village' | 'default' | 'plains' | 'sky-islands' | 'boss-arena';
     nextLevel?: string | null;
     trackTime?: boolean;
 }

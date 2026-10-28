@@ -82,4 +82,10 @@ export class StageProgression
         this._unlockedStages = new Set(['village', 'level-1']);
         this._completedStages = new Set();
     }
+
+    loadFrom (unlockedStages: string[], completedStages: string[]): void
+    {
+        this._unlockedStages = new Set(['village', 'level-1', ...unlockedStages]);
+        this._completedStages = new Set(completedStages);
+    }
 }

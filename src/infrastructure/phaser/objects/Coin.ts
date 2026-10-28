@@ -1,6 +1,7 @@
 import { Physics, Scene } from 'phaser';
 
-const TEXTURE_KEY = 'coin-placeholder';
+const TEXTURE_KEY = 'coin-texture';
+const FALLBACK_KEY = 'coin-placeholder';
 const DIAMETER = 24;
 
 /**
@@ -15,8 +16,9 @@ export class Coin extends Physics.Arcade.Sprite
     constructor (scene: Scene, x: number, y: number)
     {
         Coin.ensureTexture(scene);
+        const textureToUse = scene.textures.exists(TEXTURE_KEY) ? TEXTURE_KEY : FALLBACK_KEY;
 
-        super(scene, x, y, TEXTURE_KEY);
+        super(scene, x, y, textureToUse);
 
         scene.add.existing(this);
         scene.physics.add.existing(this, true);

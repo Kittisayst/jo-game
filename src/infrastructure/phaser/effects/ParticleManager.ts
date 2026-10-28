@@ -121,6 +121,11 @@ export class ParticleManager
         this.dustEmitter.explode(6, x, y);
     }
 
+    emitRunDust (x: number, y: number, dir: number): void
+    {
+        this.dustEmitter.explode(2, x + dir * -8, y);
+    }
+
     emitLandingDust (x: number, y: number): void
     {
         this.dustEmitter.explode(10, x, y);

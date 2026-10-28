@@ -1,13 +1,21 @@
+import { DialogueState } from '../domain/entities/Dialogue';
 import { GameStats } from '../domain/entities/GameStats';
 import { Settings } from '../domain/entities/Settings';
 import { SkinManager } from '../domain/entities/Skin';
 import { StageProgression } from '../domain/entities/StageProgression';
 import { GamePauseState } from '../domain/entities/GamePauseState';
+import { Wallet } from '../domain/entities/Wallet';
+import { WeaponLoadout } from '../domain/entities/Weapon';
+import { UpgradeTree } from '../domain/entities/Upgrade';
+import { Inventory } from '../domain/entities/Inventory';
+import { AttackCooldown } from '../domain/entities/Combat';
+import { AchievementManager } from '../domain/entities/Achievement';
 import { applySettingsUseCase } from '../application/UpdateSettingsUseCase';
 import { localStorageGameStatsRepository } from './storage/LocalStorageGameStatsRepository';
 import { localStorageSkinRepository } from './storage/LocalStorageSkinRepository';
 import { localStorageSettingsRepository } from './storage/LocalStorageSettingsRepository';
 import { localStorageStageProgressionRepository } from './storage/LocalStorageStageProgressionRepository';
+import { saveManager } from './storage/SaveManager';
 import './audio/SoundManager';
 
 /**
@@ -22,16 +30,21 @@ export const repositories = {
     stageProgression: localStorageStageProgressionRepository,
 };
 
-const savedStats = repositories.gameStats.load();
-const savedSettings = repositories.settings.load();
-const savedProgression = repositories.stageProgression.load();
+const initialSave = saveManager.load();
 
 export const entities = {
-    gameStats: new GameStats(savedStats.highScore, savedStats.bestTimeSeconds),
-    skinManager: new SkinManager(repositories.skin.loadActiveSkinId() ?? undefined),
-    settings: new Settings(savedSettings.soundMuted, savedSettings.musicMuted),
-    stageProgression: new StageProgression(savedProgression.unlockedStages, savedProgression.completedStages),
+    gameStats: new GameStats(initialSave.gameStats.highScore, initialSave.gameStats.bestTimeSeconds),
+    skinManager: new SkinManager(initialSave.activeSkinId),
+    settings: new Settings(initialSave.settings.soundMuted, initialSave.settings.musicMuted),
+    stageProgression: new StageProgression(initialSave.stageProgression.unlockedStages, initialSave.stageProgression.completedStages),
     pauseState: new GamePauseState(false),
+    dialogueState: new DialogueState(),
+    wallet: new Wallet(initialSave.wallet.balance),
+    weaponLoadout: new WeaponLoadout(initialSave.weapons.owned, initialSave.weapons.equippedId),
+    upgradeTree: new UpgradeTree(initialSave.upgrades),
+    inventory: new Inventory(initialSave.inventory),
+    attackCooldown: new AttackCooldown(),
+    achievementManager: new AchievementManager(initialSave.achievements),
 };
 
 // Push persisted audio preferences into SoundManager (it listens for SETTINGS_CHANGED_EVENT).

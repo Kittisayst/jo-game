@@ -1,6 +1,7 @@
 import { Physics, Scene } from 'phaser';
 
-const TEXTURE_KEY = 'moving-platform-hover';
+const TEXTURE_KEY = 'platform-texture';
+const FALLBACK_KEY = 'moving-platform-hover';
 const WIDTH = 140;
 const HEIGHT = 24;
 
@@ -29,8 +30,9 @@ export class MovingPlatform extends Physics.Arcade.Sprite
     constructor (scene: Scene, x: number, y: number, config?: MovingPlatformConfig)
     {
         MovingPlatform.ensureTexture(scene);
+        const textureToUse = scene.textures.exists(TEXTURE_KEY) ? TEXTURE_KEY : FALLBACK_KEY;
 
-        super(scene, x, y, TEXTURE_KEY);
+        super(scene, x, y, textureToUse);
 
         this.startX = x;
         this.startY = y;
@@ -49,6 +51,12 @@ export class MovingPlatform extends Physics.Arcade.Sprite
             // High friction ensures bodies standing on it move along with the platform
             body.friction.x = 1;
             body.friction.y = 1;
+
+            // One-way jump-through support for hover moving platforms
+            body.checkCollision.down = false;
+            body.checkCollision.left = false;
+            body.checkCollision.right = false;
+            body.checkCollision.up = true;
 
             // Start initial velocity
             if (this.distanceX > 0)

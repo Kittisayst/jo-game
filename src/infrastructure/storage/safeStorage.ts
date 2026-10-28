@@ -64,6 +64,44 @@ export function writeJson (key: string, value: unknown): void
     writeString(key, JSON.stringify(value));
 }
 
+/**
+ * Atomic crash-safe JSON writer (save-systems pattern).
+ * Keeps a .bak copy of the previous good save before overwriting.
+ */
+export function writeJsonAtomic (key: string, value: unknown): void
+{
+    const s = storage();
+    if (!s) return;
+    try
+    {
+        const serialized = JSON.stringify(value);
+        const existing = s.getItem(key);
+        if (existing)
+        {
+            s.setItem(`${key}_bak`, existing);
+        }
+        s.setItem(`${key}_tmp`, serialized);
+        s.setItem(key, serialized);
+        s.removeItem(`${key}_tmp`);
+    }
+    catch
+    {
+        // Graceful handling of quota errors
+    }
+}
+
+/**
+ * Defensive JSON reader that automatically falls back to .bak if primary is corrupted or null.
+ */
+export function readJsonSafe<T> (key: string): T | null
+{
+    const primary = readJson<T>(key);
+    if (primary !== null) return primary;
+
+    // Fallback to .bak
+    return readJson<T>(`${key}_bak`);
+}
+
 export function removeKey (key: string): void
 {
     const s = storage();
@@ -71,6 +109,8 @@ export function removeKey (key: string): void
     try
     {
         s.removeItem(key);
+        s.removeItem(`${key}_bak`);
+        s.removeItem(`${key}_tmp`);
     }
     catch
     {

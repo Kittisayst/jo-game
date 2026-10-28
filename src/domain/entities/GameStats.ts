@@ -51,4 +51,11 @@ export class GameStats
         this._highScore = 0;
         this._bestTimeSeconds = null;
     }
+
+    loadFrom (highScore: number, bestTimeSeconds: number | null = null): void
+    {
+        this._highScore = Math.max(0, highScore);
+        this._bestTimeSeconds =
+            bestTimeSeconds !== null ? Math.max(0, bestTimeSeconds) : null;
+    }
 }

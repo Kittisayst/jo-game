@@ -72,6 +72,11 @@ export class SkinManager
         return true;
     }
 
+    setActiveSkin (skinId: string): boolean
+    {
+        return this.forceEquip(skinId);
+    }
+
     forceEquip (skinId: string): boolean
     {
         if (!this.isValidSkin(skinId)) return false;

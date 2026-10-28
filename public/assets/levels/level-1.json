@@ -6,6 +6,7 @@
         "y": 556
     },
     "nextLevel": "level-2",
+    "scenery": "plains",
     "platforms": [
         {
             "x": 400,
@@ -83,19 +84,29 @@
             "x": 520,
             "y": 620,
             "patrolDistance": 160,
-            "speed": 60
+            "speed": 60,
+            "type": "slime"
         },
         {
             "x": 900,
             "y": 540,
             "patrolDistance": 100,
-            "speed": 50
+            "speed": 50,
+            "type": "slime-spitter"
         },
         {
-            "x": 1600,
+            "x": 1300,
+            "y": 480,
+            "patrolDistance": 180,
+            "speed": 90,
+            "type": "slime-flying"
+        },
+        {
+            "x": 1650,
             "y": 620,
-            "patrolDistance": 220,
-            "speed": 75
+            "patrolDistance": 180,
+            "speed": 45,
+            "type": "slime-armored"
         }
     ],
     "powerUps": [

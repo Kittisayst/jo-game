@@ -26,6 +26,7 @@ export function SkinModal ({
                 <div className="skin-modal-header">
                     <h2>🥋 Character Skins & Costumes</h2>
                     <button
+                        aria-label="Close"
                         className="skin-close-btn"
                         onClick={onClose}
                         type="button"

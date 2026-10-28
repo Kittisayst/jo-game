@@ -9,17 +9,37 @@ const MOVE_SPEED = 220;
 const JUMP_SPEED = 420;
 const SPRING_JUMP_SPEED = 560;
 
+export interface PlayerInputControls
+{
+    left: { isDown: boolean };
+    right: { isDown: boolean };
+    up: { isDown: boolean };
+}
+
 export class Player extends Physics.Arcade.Sprite
 {
     isInvincible = false;
     hasStarPower = false;
     hasSpringPower = false;
+    facingDir = 1;
+    isDashing = false;
+    dashCooldownTimer = 0;
+    isWallSliding = false;
+    private wallJumpLockout = 0;
+    private currentSkinId = 'cyber-blue';
     private jumpSpeed = JUMP_SPEED;
     private isKnockedBack = false;
     private wasInAir = false;
+    private coyoteTimer = 0;
+    private jumpBufferTimer = 0;
+    private wasJumpDown = false;
+    private footstepTimer = 0;
+    private runDustTimer = 0;
 
     onJump?: (x: number, y: number) => void;
     onLand?: (x: number, y: number) => void;
+    onRunStep?: (x: number, y: number, dir: number) => void;
+    onWallSlide?: (x: number, y: number, wallDir: number) => void;
 
     constructor (scene: Scene, x: number, y: number, skinId = 'cyber-blue')
     {
@@ -27,17 +47,80 @@ export class Player extends Physics.Arcade.Sprite
 
         super(scene, x, y, `player-skin-${skinId}`);
 
+        this.currentSkinId = skinId;
         scene.add.existing(this);
         scene.physics.add.existing(this);
 
+        // Tuned collision box (22x44 with 5px horizontal offset, 4px vertical offset)
+        this.setSize(22, 44);
+        this.setOffset(5, 4);
         this.setCollideWorldBounds(true);
         this.setDepth(10);
+
+        // Terminal velocity limits to prevent tunneling during extreme leaps/falls
+        this.setMaxVelocity(320, 650);
+
+        this.initAnimations(skinId);
     }
 
     setSkin (skinId: string): void
     {
+        this.currentSkinId = skinId;
         Player.ensureSkinTexture(this.scene, skinId);
         this.setTexture(`player-skin-${skinId}`);
+        this.initAnimations(skinId);
+    }
+
+    private initAnimations (skinId: string): void
+    {
+        const anims = this.scene.anims;
+        const textureKey = `player-skin-${skinId}`;
+        const texture = this.scene.textures.get(textureKey);
+
+        if (!texture || texture.frameTotal <= 1) return;
+
+        const idleKey = `${skinId}-idle`;
+        const runKey = `${skinId}-run`;
+        const jumpKey = `${skinId}-jump`;
+        const fallKey = `${skinId}-fall`;
+
+        if (!anims.exists(idleKey))
+        {
+            anims.create({
+                key: idleKey,
+                frames: anims.generateFrameNumbers(textureKey, { start: 0, end: 3 }),
+                frameRate: 6,
+                repeat: -1,
+            });
+        }
+
+        if (!anims.exists(runKey))
+        {
+            anims.create({
+                key: runKey,
+                frames: anims.generateFrameNumbers(textureKey, { start: 4, end: 9 }),
+                frameRate: 11,
+                repeat: -1,
+            });
+        }
+
+        if (!anims.exists(jumpKey))
+        {
+            anims.create({
+                key: jumpKey,
+                frames: [{ key: textureKey, frame: 10 }],
+                frameRate: 1,
+            });
+        }
+
+        if (!anims.exists(fallKey))
+        {
+            anims.create({
+                key: fallKey,
+                frames: [{ key: textureKey, frame: 11 }],
+                frameRate: 1,
+            });
+        }
     }
 
     private static ensureSkinTexture (scene: Scene, skinId: string)
@@ -128,15 +211,20 @@ export class Player extends Physics.Arcade.Sprite
             this.isKnockedBack = false;
         });
 
-        // Invincibility flashing tween (1.4s)
+        // Invincibility flashing tween with damage red tint (1.4s)
         this.scene.tweens.add({
             targets: this,
             alpha: 0.25,
             duration: 100,
             yoyo: true,
             repeat: 6,
+            onStart: () =>
+            {
+                this.setTint(0xef4444);
+            },
             onComplete: () =>
             {
+                this.clearTint();
                 this.alpha = 1;
                 this.isInvincible = false;
             },
@@ -231,9 +319,142 @@ export class Player extends Physics.Arcade.Sprite
         }
     }
 
-    update (cursors: Phaser.Types.Input.Keyboard.CursorKeys)
+    dash (dir?: number): boolean
     {
+        if (this.dashCooldownTimer > 0 || this.isKnockedBack || this.isDashing) return false;
+
+        const dashDir = typeof dir === 'number' && dir !== 0 ? Math.sign(dir) : this.facingDir;
+        this.isDashing = true;
+        this.isInvincible = true;
+        this.dashCooldownTimer = 1100;
+        soundManager.playDash();
+
+        this.setMaxVelocity(600, 650);
+        this.setVelocityX(dashDir * 520);
+        this.setVelocityY(0);
+
+        // Ghost trails
+        for (let i = 0; i < 3; i++)
+        {
+            this.scene.time.delayedCall(i * 40, () =>
+            {
+                if (!this.active || !this.scene) return;
+                const ghost = this.scene.add.sprite(this.x, this.y, this.texture.key, this.frame.name);
+                ghost.setFlipX(this.flipX);
+                ghost.setTint(0x38bdf8);
+                ghost.setAlpha(0.65);
+                ghost.setDepth(9);
+                this.scene.tweens.add({
+                    targets: ghost,
+                    alpha: 0,
+                    scaleX: 1.1,
+                    scaleY: 0.9,
+                    duration: 160,
+                    onComplete: () => ghost.destroy(),
+                });
+            });
+        }
+
+        this.scene.time.delayedCall(160, () =>
+        {
+            this.isDashing = false;
+            this.isInvincible = false;
+            this.setMaxVelocity(320, 650);
+            if (this.body)
+            {
+                this.setVelocityX(dashDir * MOVE_SPEED);
+            }
+        });
+
+        return true;
+    }
+
+    triggerSlashVfx (weaponId: string): void
+    {
+        const slashX = this.x + (this.facingDir * 30);
+        const slashY = this.y;
+
+        const slash = this.scene.add.graphics({ x: slashX, y: slashY });
+        slash.setDepth(15);
+
+        if (weaponId === 'cyber-saber')
+        {
+            const color = 0x06b6d4;
+            slash.lineStyle(4, color, 1);
+            slash.beginPath();
+            slash.arc(0, 0, 26, this.facingDir > 0 ? -Math.PI / 3 : (4 * Math.PI) / 3, this.facingDir > 0 ? Math.PI / 3 : (2 * Math.PI) / 3, false);
+            slash.strokePath();
+
+            slash.lineStyle(2, 0xffffff, 1);
+            slash.beginPath();
+            slash.arc(0, 0, 20, this.facingDir > 0 ? -Math.PI / 4 : (5 * Math.PI) / 4, this.facingDir > 0 ? Math.PI / 4 : (3 * Math.PI) / 4, false);
+            slash.strokePath();
+
+            this.scene.tweens.add({
+                targets: slash,
+                scaleX: 1.3,
+                scaleY: 1.3,
+                alpha: 0,
+                duration: 130,
+                onComplete: () => slash.destroy(),
+            });
+        }
+        else if (weaponId === 'thunder-hammer')
+        {
+            slash.lineStyle(6, 0xf59e0b, 1);
+            slash.beginPath();
+            slash.arc(0, 0, 36, this.facingDir > 0 ? -Math.PI / 2 : (3 * Math.PI) / 2, this.facingDir > 0 ? Math.PI / 4 : (3 * Math.PI) / 4, false);
+            slash.strokePath();
+
+            slash.fillStyle(0xfef08a, 1);
+            slash.fillCircle(this.facingDir * 18, 14, 4);
+            slash.fillCircle(this.facingDir * 28, -6, 3);
+
+            this.scene.tweens.add({
+                targets: slash,
+                scaleX: 1.4,
+                scaleY: 1.4,
+                alpha: 0,
+                duration: 180,
+                onComplete: () => slash.destroy(),
+            });
+        }
+        else
+        {
+            // Muzzle flash for blaster / projectile
+            slash.fillStyle(0x38bdf8, 1);
+            slash.fillCircle(0, 0, 8);
+            slash.fillStyle(0xffffff, 1);
+            slash.fillCircle(0, 0, 4);
+
+            this.scene.tweens.add({
+                targets: slash,
+                scale: 1.6,
+                alpha: 0,
+                duration: 90,
+                onComplete: () => slash.destroy(),
+            });
+        }
+
+        // Quick punchy player squeeze
+        this.scene.tweens.add({
+            targets: this,
+            scaleX: 1.12,
+            scaleY: 0.92,
+            duration: 70,
+            yoyo: true,
+        });
+    }
+
+    update (controls: PlayerInputControls | Phaser.Types.Input.Keyboard.CursorKeys, delta = 16.66)
+    {
+        if (this.dashCooldownTimer > 0)
+        {
+            this.dashCooldownTimer = Math.max(0, this.dashCooldownTimer - delta);
+        }
+
         if (this.isKnockedBack) return;
+        if (this.isDashing) return;
 
         const body = this.body as Phaser.Physics.Arcade.Body;
         const onGround = body.blocked.down;
@@ -246,8 +467,8 @@ export class Player extends Physics.Arcade.Sprite
             // Subtle landing squash
             this.scene.tweens.add({
                 targets: this,
-                scaleY: 0.88,
-                scaleX: 1.12,
+                scaleY: 0.86,
+                scaleX: 1.15,
                 duration: 90,
                 yoyo: true,
                 ease: 'Quad.easeOut',
@@ -255,25 +476,104 @@ export class Player extends Physics.Arcade.Sprite
         }
         this.wasInAir = !onGround;
 
-        // Horizontal movement
-        if (cursors.left.isDown)
+        // Coyote Time tracking (allows jumping briefly after running off a ledge)
+        if (onGround)
         {
-            this.setVelocityX(-MOVE_SPEED);
-            this.setFlipX(true);
-        }
-        else if (cursors.right.isDown)
-        {
-            this.setVelocityX(MOVE_SPEED);
-            this.setFlipX(false);
+            this.coyoteTimer = 110;
         }
         else
         {
-            this.setVelocityX(0);
+            this.coyoteTimer = Math.max(0, this.coyoteTimer - delta);
         }
 
-        // Jump action
-        if (cursors.up.isDown && onGround)
+        if (this.wallJumpLockout > 0)
         {
+            this.wallJumpLockout = Math.max(0, this.wallJumpLockout - delta);
+        }
+
+        // Horizontal movement & footstep sounds
+        const isMovingHorizontally = controls.left.isDown || controls.right.isDown;
+        if (this.wallJumpLockout <= 0)
+        {
+            if (controls.left.isDown)
+            {
+                this.setVelocityX(-MOVE_SPEED);
+                this.setFlipX(true);
+                this.facingDir = -1;
+            }
+            else if (controls.right.isDown)
+            {
+                this.setVelocityX(MOVE_SPEED);
+                this.setFlipX(false);
+                this.facingDir = 1;
+            }
+            else
+            {
+                this.setVelocityX(0);
+            }
+        }
+
+        // Wall Slide detection & deceleration
+        const isTouchingWall = !onGround && (body.blocked.left || body.blocked.right);
+        const wallDir = body.blocked.left ? -1 : (body.blocked.right ? 1 : 0);
+        const isPressingIntoWall = (wallDir === -1 && controls.left.isDown) || (wallDir === 1 && controls.right.isDown);
+        const isSlidingDown = body.velocity.y > 0;
+
+        this.isWallSliding = isTouchingWall && isPressingIntoWall && isSlidingDown;
+
+        if (this.isWallSliding)
+        {
+            // Decelerate downward slide (friction along the wall)
+            if (body.velocity.y > 90)
+            {
+                this.setVelocityY(90);
+            }
+            this.onWallSlide?.(this.x + (wallDir * 12), this.y, wallDir);
+        }
+
+        if (onGround && isMovingHorizontally)
+        {
+            this.footstepTimer -= delta;
+            if (this.footstepTimer <= 0)
+            {
+                this.footstepTimer = 185;
+                soundManager.playFootstep();
+            }
+
+            this.runDustTimer -= delta;
+            if (this.runDustTimer <= 0)
+            {
+                this.runDustTimer = 110;
+                const dir = this.flipX ? 1 : -1;
+                this.onRunStep?.(this.x, this.y + HEIGHT / 2 - 2, dir);
+            }
+        }
+        else
+        {
+            this.footstepTimer = 50;
+            this.runDustTimer = 30;
+        }
+
+        // Jump input buffering & edge detection
+        const jumpIsDown = Boolean(controls.up.isDown);
+        const jumpJustPressed = jumpIsDown && !this.wasJumpDown;
+        const jumpJustReleased = !jumpIsDown && this.wasJumpDown;
+        this.wasJumpDown = jumpIsDown;
+
+        if (jumpJustPressed)
+        {
+            this.jumpBufferTimer = 130;
+        }
+        else
+        {
+            this.jumpBufferTimer = Math.max(0, this.jumpBufferTimer - delta);
+        }
+
+        // Execute jump if buffered press meets coyote window
+        if (this.jumpBufferTimer > 0 && this.coyoteTimer > 0)
+        {
+            this.jumpBufferTimer = 0;
+            this.coyoteTimer = 0;
             this.setVelocityY(-this.jumpSpeed);
             soundManager.playJump();
             this.onJump?.(this.x, this.y + HEIGHT / 2);
@@ -281,12 +581,95 @@ export class Player extends Physics.Arcade.Sprite
             // Subtle jump stretch
             this.scene.tweens.add({
                 targets: this,
-                scaleY: 1.15,
-                scaleX: 0.9,
+                scaleY: 1.2,
+                scaleX: 0.85,
                 duration: 110,
                 yoyo: true,
-                ease: 'Quad.easeOut',
+                ease: 'Back.easeOut',
             });
+        }
+        else if (this.jumpBufferTimer > 0 && isTouchingWall)
+        {
+            // Wall Jump / Wall Kick!
+            this.jumpBufferTimer = 0;
+            this.coyoteTimer = 0;
+            this.isWallSliding = false;
+            this.wallJumpLockout = 160;
+
+            // Kick off horizontally opposite to wall, leap upwards
+            this.setVelocityX(-wallDir * 230);
+            this.setVelocityY(-this.jumpSpeed * 0.95);
+            this.facingDir = -wallDir;
+            this.setFlipX(wallDir > 0);
+
+            soundManager.playJump();
+            this.onJump?.(this.x + (wallDir * 12), this.y);
+
+            this.scene.tweens.add({
+                targets: this,
+                scaleY: 1.18,
+                scaleX: 0.88,
+                duration: 100,
+                yoyo: true,
+                ease: 'Back.easeOut',
+            });
+        }
+
+        // Variable jump cut: early button release cuts the upward leap short
+        if (jumpJustReleased && body.velocity.y < -80)
+        {
+            this.setVelocityY(body.velocity.y * 0.45);
+        }
+
+        // Asymmetric fall gravity: snappier, weighty descent
+        if (body.velocity.y > 0)
+        {
+            body.setGravityY(420);
+        }
+        else
+        {
+            body.setGravityY(0);
+        }
+
+        // Animation playback according to state & velocity
+        const idleKey = `${this.currentSkinId}-idle`;
+        const runKey = `${this.currentSkinId}-run`;
+        const jumpKey = `${this.currentSkinId}-jump`;
+        const fallKey = `${this.currentSkinId}-fall`;
+
+        if (!onGround)
+        {
+            if (body.velocity.y < 0)
+            {
+                if (this.scene.anims.exists(jumpKey))
+                {
+                    this.play(jumpKey, true);
+                }
+            }
+            else
+            {
+                if (this.scene.anims.exists(fallKey))
+                {
+                    this.play(fallKey, true);
+                }
+            }
+        }
+        else
+        {
+            if (Math.abs(body.velocity.x) > 10)
+            {
+                if (this.scene.anims.exists(runKey))
+                {
+                    this.play(runKey, true);
+                }
+            }
+            else
+            {
+                if (this.scene.anims.exists(idleKey))
+                {
+                    this.play(idleKey, true);
+                }
+            }
         }
     }
 }

@@ -19,6 +19,8 @@ import {
     SETTINGS_CHANGED_EVENT,
     SettingsChangedPayload,
 } from '../../application/UpdateSettingsUseCase';
+import { ACHIEVEMENT_UNLOCKED_EVENT } from '../../domain/entities/Achievement';
+import { EventBus } from '../EventBus';
 
 // Adventure melody notes (C major energetic 8-bit chiptune)
 const ADVENTURE_MELODY = [
@@ -52,6 +54,22 @@ const BOSS_BASS = [
     110.00, 110.00, 103.83, 103.83, 73.42, 146.83, 73.42, 0,
 ];
 
+// Title Theme melody (Cyberpunk synth arpeggio, ambient and mysterious)
+const TITLE_MELODY = [
+    261.63, 0, 392.00, 0, 523.25, 0, 659.25, 0,
+    783.99, 659.25, 523.25, 392.00, 440.00, 0, 523.25, 0,
+    349.23, 0, 440.00, 0, 523.25, 0, 659.25, 0,
+    587.33, 523.25, 440.00, 392.00, 329.63, 0, 392.00, 0,
+];
+
+// Title Theme bassline (deep pulsing cyber drone)
+const TITLE_BASS = [
+    65.41, 65.41, 130.81, 130.81, 65.41, 65.41, 130.81, 130.81,
+    87.31, 87.31, 174.61, 174.61, 87.31, 87.31, 174.61, 174.61,
+    73.42, 73.42, 146.83, 146.83, 73.42, 73.42, 146.83, 146.83,
+    98.00, 98.00, 196.00, 196.00, 65.41, 65.41, 130.81, 0,
+];
+
 /**
  * Procedural retro sound manager built on the browser's Web Audio API.
  * Synthesizes arcade sound effects and 8-bit chiptune background music at runtime.
@@ -64,12 +82,13 @@ export class SoundManager
     private bgmGain: GainNode | null = null;
     private _isMuted = false;
     private _isMusicMuted = false;
+    private isDucked = false;
     private initialized = false;
 
     private bgmIntervalId: number | null = null;
     private nextNoteTime = 0;
     private currentStep = 0;
-    private currentTheme: 'adventure' | 'boss' = 'adventure';
+    private currentTheme: 'adventure' | 'boss' | 'title' = 'adventure';
     private isBgmRunning = false;
 
     constructor ()
@@ -119,7 +138,8 @@ export class SoundManager
             this.masterGain.connect(this.ctx.destination);
 
             this.bgmGain = this.ctx.createGain();
-            this.bgmGain.gain.setValueAtTime(this._isMusicMuted ? 0 : 0.045, this.ctx.currentTime);
+            const bgmVolume = this._isMusicMuted ? 0 : (this.isDucked ? 0.012 : 0.045);
+            this.bgmGain.gain.setValueAtTime(bgmVolume, this.ctx.currentTime);
             this.bgmGain.connect(this.masterGain);
         }
     }
@@ -176,11 +196,13 @@ export class SoundManager
             this.setMuted(soundMuted);
             this.setMusicMuted(musicMuted);
         });
+        DomainEvents.on(ACHIEVEMENT_UNLOCKED_EVENT, () => this.playAchievementFanfare());
+        EventBus.on('dialogue-open-state', (isActive: boolean) => this.setDucked(isActive));
     }
 
     // --- BGM Engine ---
 
-    startBgm (theme: 'adventure' | 'boss' = 'adventure'): void
+    startBgm (theme: 'adventure' | 'boss' | 'title' = 'adventure'): void
     {
         this.currentTheme = theme;
         this.isBgmRunning = true;
@@ -238,7 +260,8 @@ export class SoundManager
             if (!this.ctx || !this.isBgmRunning) return;
 
             const isBoss = this.currentTheme === 'boss';
-            const tempo = isBoss ? 165 : 138;
+            const isTitle = this.currentTheme === 'title';
+            const tempo = isBoss ? 165 : (isTitle ? 120 : 138);
             const secondsPerBeat = 60 / tempo;
             const stepDuration = secondsPerBeat / 4; // 16th notes
 
@@ -246,20 +269,23 @@ export class SoundManager
             {
                 this.playStep(this.currentStep, this.nextNoteTime, this.currentTheme);
                 this.nextNoteTime += stepDuration;
-                const totalSteps = isBoss ? BOSS_MELODY.length : ADVENTURE_MELODY.length;
+                const totalSteps = isBoss
+                    ? BOSS_MELODY.length
+                    : (isTitle ? TITLE_MELODY.length : ADVENTURE_MELODY.length);
                 this.currentStep = (this.currentStep + 1) % totalSteps;
             }
         }, 35);
     }
 
-    private playStep (step: number, time: number, theme: 'adventure' | 'boss'): void
+    private playStep (step: number, time: number, theme: 'adventure' | 'boss' | 'title'): void
     {
         if (!this.ctx || !this.bgmGain) return;
 
         const isBoss = theme === 'boss';
-        const melodyTrack = isBoss ? BOSS_MELODY : ADVENTURE_MELODY;
-        const bassTrack = isBoss ? BOSS_BASS : ADVENTURE_BASS;
-        const noteDuration = isBoss ? 0.09 : 0.11;
+        const isTitle = theme === 'title';
+        const melodyTrack = isBoss ? BOSS_MELODY : (isTitle ? TITLE_MELODY : ADVENTURE_MELODY);
+        const bassTrack = isBoss ? BOSS_BASS : (isTitle ? TITLE_BASS : ADVENTURE_BASS);
+        const noteDuration = isBoss ? 0.09 : (isTitle ? 0.14 : 0.11);
 
         // Play melody note if not rest (0)
         const melodyFreq = melodyTrack[step % melodyTrack.length];
@@ -268,10 +294,10 @@ export class SoundManager
             const osc = this.ctx.createOscillator();
             const noteGain = this.ctx.createGain();
 
-            osc.type = isBoss ? 'sawtooth' : 'square';
+            osc.type = isBoss ? 'sawtooth' : (isTitle ? 'sine' : 'square');
             osc.frequency.setValueAtTime(melodyFreq, time);
 
-            noteGain.gain.setValueAtTime(0.35, time);
+            noteGain.gain.setValueAtTime(isTitle ? 0.28 : 0.35, time);
             noteGain.gain.exponentialRampToValueAtTime(0.01, time + noteDuration);
 
             osc.connect(noteGain);
@@ -288,10 +314,10 @@ export class SoundManager
             const bassOsc = this.ctx.createOscillator();
             const bassGain = this.ctx.createGain();
 
-            bassOsc.type = 'triangle';
+            bassOsc.type = isTitle ? 'sine' : 'triangle';
             bassOsc.frequency.setValueAtTime(bassFreq, time);
 
-            bassGain.gain.setValueAtTime(0.5, time);
+            bassGain.gain.setValueAtTime(isTitle ? 0.4 : 0.5, time);
             bassGain.gain.exponentialRampToValueAtTime(0.01, time + noteDuration * 0.9);
 
             bassOsc.connect(bassGain);
@@ -318,7 +344,24 @@ export class SoundManager
         this._isMusicMuted = muted;
         if (this.bgmGain && this.ctx)
         {
-            this.bgmGain.gain.setValueAtTime(this._isMusicMuted ? 0 : 0.045, this.ctx.currentTime);
+            const targetVolume = this._isMusicMuted ? 0 : (this.isDucked ? 0.012 : 0.045);
+            this.bgmGain.gain.setValueAtTime(targetVolume, this.ctx.currentTime);
+        }
+    }
+
+    /**
+     * Duck BGM volume when dialogue or cutscenes are active (sidechain audio ducking)
+     */
+    setDucked (ducked: boolean): void
+    {
+        this.isDucked = ducked;
+        if (this.bgmGain && this.ctx && !this._isMusicMuted)
+        {
+            const targetVolume = ducked ? 0.012 : 0.045;
+            const now = this.ctx.currentTime;
+            this.bgmGain.gain.cancelScheduledValues(now);
+            this.bgmGain.gain.setValueAtTime(this.bgmGain.gain.value, now);
+            this.bgmGain.gain.linearRampToValueAtTime(targetVolume, now + (ducked ? 0.15 : 0.4));
         }
     }
 
@@ -369,7 +412,37 @@ export class SoundManager
     }
 
     /**
-     * Jump Sound: rising pitch frequency sweep
+     * Game Start Fanfare / Warp Sound: ascending retro chime sweep
+     */
+    playGameStart (): void
+    {
+        if (this._isMuted) return;
+        this.initContext();
+        if (!this.ctx) return;
+
+        const now = this.ctx.currentTime;
+        const notes = [392.00, 523.25, 659.25, 783.99, 1046.50];
+        notes.forEach((freq, idx) => {
+            const osc = this.ctx!.createOscillator();
+            const gain = this.ctx!.createGain();
+            const start = now + idx * 0.055;
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(freq, start);
+            osc.frequency.exponentialRampToValueAtTime(freq * 1.04, start + 0.14);
+
+            gain.gain.setValueAtTime(0.22, start);
+            gain.gain.exponentialRampToValueAtTime(0.001, start + 0.18);
+
+            osc.connect(gain);
+            this.connectOutput(gain);
+
+            osc.start(start);
+            osc.stop(start + 0.18);
+        });
+    }
+
+    /**
+     * Jump Sound: rising pitch sweep with subtle organic pitch randomization
      */
     playJump (): void
     {
@@ -381,9 +454,10 @@ export class SoundManager
         const osc = this.ctx.createOscillator();
         const gain = this.ctx.createGain();
 
+        const pitchFactor = 1 + (Math.random() - 0.5) * 0.08;
         osc.type = 'square';
-        osc.frequency.setValueAtTime(150, now);
-        osc.frequency.exponentialRampToValueAtTime(400, now + 0.12);
+        osc.frequency.setValueAtTime(150 * pitchFactor, now);
+        osc.frequency.exponentialRampToValueAtTime(400 * pitchFactor, now + 0.12);
 
         gain.gain.setValueAtTime(0.12, now);
         gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
@@ -396,7 +470,7 @@ export class SoundManager
     }
 
     /**
-     * Coin Sound: classic 2-tone ping (B5 -> E6)
+     * Coin Sound: classic 2-tone ping with harmonic pitch variation
      */
     playCoin (): void
     {
@@ -408,9 +482,10 @@ export class SoundManager
         const osc = this.ctx.createOscillator();
         const gain = this.ctx.createGain();
 
+        const pitchFactor = 1 + (Math.random() - 0.5) * 0.06;
         osc.type = 'sine';
-        osc.frequency.setValueAtTime(987.77, now);
-        osc.frequency.setValueAtTime(1318.51, now + 0.08);
+        osc.frequency.setValueAtTime(987.77 * pitchFactor, now);
+        osc.frequency.setValueAtTime(1318.51 * pitchFactor, now + 0.08);
 
         gain.gain.setValueAtTime(0.15, now);
         gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
@@ -420,6 +495,121 @@ export class SoundManager
 
         osc.start(now);
         osc.stop(now + 0.35);
+    }
+
+    /**
+     * Footstep Sound: gentle soft pat with pitch randomization
+     */
+    playFootstep (): void
+    {
+        if (this._isMuted) return;
+        this.initContext();
+        if (!this.ctx) return;
+
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        const filter = this.ctx.createBiquadFilter();
+
+        const baseFreq = 120 + (Math.random() - 0.5) * 30;
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(baseFreq, now);
+        osc.frequency.exponentialRampToValueAtTime(45, now + 0.035);
+
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(380, now);
+
+        gain.gain.setValueAtTime(0.035, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.035);
+
+        osc.connect(filter);
+        filter.connect(gain);
+        this.connectOutput(gain);
+
+        osc.start(now);
+        osc.stop(now + 0.035);
+    }
+
+    /**
+     * Landing Sound: low punchy thud with exponential sweep
+     */
+    playLand (): void
+    {
+        if (this._isMuted) return;
+        this.initContext();
+        if (!this.ctx) return;
+
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(130, now);
+        osc.frequency.exponentialRampToValueAtTime(40, now + 0.08);
+
+        gain.gain.setValueAtTime(0.12, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+
+        osc.connect(gain);
+        this.connectOutput(gain);
+
+        osc.start(now);
+        osc.stop(now + 0.08);
+    }
+
+    /**
+     * Dialogue Text Blip: cute retro speech chirp with organic pitch jitter
+     */
+    playDialogueBlip (): void
+    {
+        if (this._isMuted) return;
+        this.initContext();
+        if (!this.ctx) return;
+
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+
+        const pitch = 360 + (Math.random() - 0.5) * 50;
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(pitch, now);
+        osc.frequency.exponentialRampToValueAtTime(pitch * 1.15, now + 0.022);
+
+        gain.gain.setValueAtTime(0.045, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.022);
+
+        osc.connect(gain);
+        this.connectOutput(gain);
+
+        osc.start(now);
+        osc.stop(now + 0.022);
+    }
+
+    /**
+     * UI Select Sound: bright rising selection chime
+     */
+    playSelect (): void
+    {
+        if (this._isMuted) return;
+        this.initContext();
+        if (!this.ctx) return;
+
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(520, now);
+        osc.frequency.exponentialRampToValueAtTime(780, now + 0.06);
+
+        gain.gain.setValueAtTime(0.1, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
+
+        osc.connect(gain);
+        this.connectOutput(gain);
+
+        osc.start(now);
+        osc.stop(now + 0.06);
     }
 
     /**
@@ -676,6 +866,360 @@ export class SoundManager
 
             osc.start(startTime);
             osc.stop(startTime + 0.12);
+        });
+    }
+
+    /**
+     * Weapon Slash Sound: crisp blade cutting through air
+     */
+    playSlash (): void
+    {
+        if (this._isMuted) return;
+        this.initContext();
+        if (!this.ctx) return;
+
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(620, now);
+        osc.frequency.exponentialRampToValueAtTime(140, now + 0.09);
+
+        gain.gain.setValueAtTime(0.18, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.09);
+
+        osc.connect(gain);
+        this.connectOutput(gain);
+
+        osc.start(now);
+        osc.stop(now + 0.09);
+    }
+
+    /**
+     * Blaster Fire Sound: laser pew shot
+     */
+    playBlaster (): void
+    {
+        if (this._isMuted) return;
+        this.initContext();
+        if (!this.ctx) return;
+
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(880, now);
+        osc.frequency.exponentialRampToValueAtTime(220, now + 0.11);
+
+        gain.gain.setValueAtTime(0.15, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.11);
+
+        osc.connect(gain);
+        this.connectOutput(gain);
+
+        osc.start(now);
+        osc.stop(now + 0.11);
+    }
+
+    /**
+     * Thunder Hammer Impact: heavy bass shockwave
+     */
+    playHammer (): void
+    {
+        if (this._isMuted) return;
+        this.initContext();
+        if (!this.ctx) return;
+
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(160, now);
+        osc.frequency.exponentialRampToValueAtTime(30, now + 0.22);
+
+        gain.gain.setValueAtTime(0.3, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
+
+        osc.connect(gain);
+        this.connectOutput(gain);
+
+        osc.start(now);
+        osc.stop(now + 0.22);
+    }
+
+    /**
+     * Cyber Disc Whirr: high spinning metallic oscillation
+     */
+    playDisc (): void
+    {
+        if (this._isMuted) return;
+        this.initContext();
+        if (!this.ctx) return;
+
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(740, now);
+        osc.frequency.linearRampToValueAtTime(920, now + 0.08);
+        osc.frequency.linearRampToValueAtTime(640, now + 0.16);
+
+        gain.gain.setValueAtTime(0.12, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.16);
+
+        osc.connect(gain);
+        this.connectOutput(gain);
+
+        osc.start(now);
+        osc.stop(now + 0.16);
+    }
+
+    /**
+     * Dash Sound: quick air-burst whoosh
+     */
+    playDash (): void
+    {
+        if (this._isMuted) return;
+        this.initContext();
+        if (!this.ctx) return;
+
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(350, now);
+        osc.frequency.exponentialRampToValueAtTime(180, now + 0.12);
+
+        gain.gain.setValueAtTime(0.16, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+
+        osc.connect(gain);
+        this.connectOutput(gain);
+
+        osc.start(now);
+        osc.stop(now + 0.12);
+    }
+
+    /**
+     * Shop Purchase Sound: double coin chime of success
+     */
+    playBuy (): void
+    {
+        if (this._isMuted) return;
+        this.initContext();
+        if (!this.ctx) return;
+
+        const now = this.ctx.currentTime;
+        const notes = [659.25, 987.77];
+        notes.forEach((freq, idx) =>
+        {
+            if (!this.ctx) return;
+            const startTime = now + idx * 0.08;
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, startTime);
+
+            gain.gain.setValueAtTime(0.18, startTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.18);
+
+            osc.connect(gain);
+            this.connectOutput(gain);
+
+            osc.start(startTime);
+            osc.stop(startTime + 0.18);
+        });
+    }
+
+    /**
+     * Use Consumable Item Sound: celestial sparkle shimmer
+     */
+    playUseItem (): void
+    {
+        if (this._isMuted) return;
+        this.initContext();
+        if (!this.ctx) return;
+
+        const now = this.ctx.currentTime;
+        const notes = [587.33, 739.99, 880.00, 1174.66];
+        notes.forEach((freq, idx) =>
+        {
+            if (!this.ctx) return;
+            const startTime = now + idx * 0.05;
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(freq, startTime);
+
+            gain.gain.setValueAtTime(0.15, startTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.15);
+
+            osc.connect(gain);
+            this.connectOutput(gain);
+
+            osc.start(startTime);
+            osc.stop(startTime + 0.15);
+        });
+    }
+
+    /**
+     * Bomb Explosion Sound: deep rumble punch
+     */
+    playBombExplode (): void
+    {
+        if (this._isMuted) return;
+        this.initContext();
+        if (!this.ctx) return;
+
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(200, now);
+        osc.frequency.exponentialRampToValueAtTime(25, now + 0.35);
+
+        gain.gain.setValueAtTime(0.35, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+
+        osc.connect(gain);
+        this.connectOutput(gain);
+
+        osc.start(now);
+        osc.stop(now + 0.35);
+    }
+
+    /**
+     * Toxic Slime Spit Sound: rapid pitch-bending acid squirt
+     */
+    playSpit (): void
+    {
+        if (this._isMuted) return;
+        this.initContext();
+        if (!this.ctx) return;
+
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(580, now);
+        osc.frequency.exponentialRampToValueAtTime(140, now + 0.14);
+
+        gain.gain.setValueAtTime(0.22, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.14);
+
+        osc.connect(gain);
+        this.connectOutput(gain);
+
+        osc.start(now);
+        osc.stop(now + 0.14);
+    }
+
+    /**
+     * Armored Slime Metallic Clink Sound: bright steel deflection ping
+     */
+    playClink (): void
+    {
+        if (this._isMuted) return;
+        this.initContext();
+        if (!this.ctx) return;
+
+        const now = this.ctx.currentTime;
+
+        // Dual high-pitch strike for metallic ping resonance
+        const freqs = [1850, 2480];
+        freqs.forEach((freq) =>
+        {
+            if (!this.ctx) return;
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(freq, now);
+            osc.frequency.exponentialRampToValueAtTime(freq * 0.9, now + 0.12);
+
+            gain.gain.setValueAtTime(0.24, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+
+            osc.connect(gain);
+            this.connectOutput(gain);
+
+            osc.start(now);
+            osc.stop(now + 0.12);
+        });
+    }
+
+    /**
+     * Flying Drone Slime Flutter Sound: high electronic hover flutter
+     */
+    playDroneBuzz (): void
+    {
+        if (this._isMuted) return;
+        this.initContext();
+        if (!this.ctx) return;
+
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(340, now);
+        osc.frequency.linearRampToValueAtTime(420, now + 0.05);
+        osc.frequency.linearRampToValueAtTime(320, now + 0.10);
+
+        gain.gain.setValueAtTime(0.08, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.10);
+
+        osc.connect(gain);
+        this.connectOutput(gain);
+
+        osc.start(now);
+        osc.stop(now + 0.10);
+    }
+
+    /**
+     * Achievement Unlocked Fanfare: celestial 4-chord ascending triumphant fanfare
+     */
+    playAchievementFanfare (): void
+    {
+        if (this._isMuted) return;
+        this.initContext();
+        if (!this.ctx) return;
+
+        const now = this.ctx.currentTime;
+        // C5, E5, G5, C6 triumphant fanfare
+        const notes = [523.25, 659.25, 783.99, 1046.50];
+        const step = 0.09;
+
+        notes.forEach((freq, idx) =>
+        {
+            if (!this.ctx) return;
+            const startTime = now + idx * step;
+            const isLast = idx === notes.length - 1;
+            const duration = isLast ? 0.45 : 0.2;
+
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+
+            osc.type = isLast ? 'triangle' : 'sine';
+            osc.frequency.setValueAtTime(freq, startTime);
+
+            gain.gain.setValueAtTime(isLast ? 0.25 : 0.18, startTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+
+            osc.connect(gain);
+            this.connectOutput(gain);
+
+            osc.start(startTime);
+            osc.stop(startTime + duration);
         });
     }
 }

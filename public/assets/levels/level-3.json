@@ -3,6 +3,7 @@
     "finishX": 1520,
     "spawn": { "x": 120, "y": 556 },
     "nextLevel": null,
+    "scenery": "boss-arena",
     "platforms": [
         { "x": 240, "y": 510 },
         { "x": 440, "y": 400 },

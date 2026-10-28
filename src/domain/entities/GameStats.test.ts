@@ -75,4 +75,13 @@ describe('GameStats entity', () =>
         expect(stats.highScore).toBe(0);
         expect(stats.bestTimeSeconds).toBeNull();
     });
+
+    it('loads stats from snapshot', () =>
+    {
+        const stats = new GameStats();
+        stats.loadFrom(2500, 42.1);
+
+        expect(stats.highScore).toBe(2500);
+        expect(stats.bestTimeSeconds).toBe(42.1);
+    });
 });

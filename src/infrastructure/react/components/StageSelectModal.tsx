@@ -19,6 +19,7 @@ export function StageSelectModal ({
                 <div className="skin-modal-header">
                     <h2>🚩 ເລືອກດ່ານ (Select Stage)</h2>
                     <button
+                        aria-label="Close"
                         className="skin-close-btn"
                         onClick={onClose}
                         type="button"

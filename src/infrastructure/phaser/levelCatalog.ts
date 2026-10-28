@@ -18,7 +18,7 @@ export const LEVEL_CATALOG: LevelCatalogItem[] = [
         key: 'village',
         name: '🏡 ໝູ່ບ້ານເລີ່ມຕົ້ນ (Starter Village)',
         shortTitle: 'Village 🏡',
-        hudLabel: 'ໝູ່ບ້ານ (Village)',
+        hudLabel: 'ໝູ່ບ້ານ',
         description: 'ໝູ່ບ້ານສະຫງົບສຸກ, ຍ່າງໄປຫາປະຕູ portal ເພື່ອເລືອກດ່ານ',
         assetPath: 'assets/levels/village.json',
         isBoss: false,

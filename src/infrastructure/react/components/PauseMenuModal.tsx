@@ -17,6 +17,8 @@ export interface PauseMenuModalProps
     onOpenSettings: () => void;
     onRestartLevel: () => void;
     onExitToMainMenu: () => void;
+    onOpenAchievements?: () => void;
+    unclaimedAchievementsCount?: number;
 }
 
 export function PauseMenuModal ({
@@ -34,6 +36,8 @@ export function PauseMenuModal ({
     onOpenSettings,
     onRestartLevel,
     onExitToMainMenu,
+    onOpenAchievements,
+    unclaimedAchievementsCount,
 }: PauseMenuModalProps)
 {
     const levelLabel = getLevelItem(currentLevel)?.shortTitle || currentLevel;
@@ -109,12 +113,27 @@ export function PauseMenuModal ({
                 {/* Menu Actions */}
                 <div className="pause-buttons-list">
                     <button
+                        autoFocus
                         className="menu-action-btn primary pulse"
                         onClick={onResume}
                         type="button"
                     >
                         ▶️ ສືບຕໍ່ຫຼິ້ນ (Resume Game)
                     </button>
+
+                    {onOpenAchievements && (
+                        <button
+                            id="pause-achievements-btn"
+                            className="menu-action-btn secondary achievements-pause-btn"
+                            onClick={onOpenAchievements}
+                            type="button"
+                        >
+                            🏆 ຜົນສຳເລັດ & ພາລະກິດ (Achievements)
+                            {unclaimedAchievementsCount !== undefined && unclaimedAchievementsCount > 0 && (
+                                <span className="menu-unclaimed-badge">{unclaimedAchievementsCount}</span>
+                            )}
+                        </button>
+                    )}
 
                     <button
                         className="menu-action-btn secondary"
@@ -141,6 +160,7 @@ export function PauseMenuModal ({
                     </button>
 
                     <button
+                        id="btn-exit-main-menu"
                         className="menu-action-btn danger"
                         onClick={onExitToMainMenu}
                         type="button"

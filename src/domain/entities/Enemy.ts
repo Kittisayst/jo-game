@@ -1,15 +1,137 @@
+export type EnemyState = 'patrol' | 'alert' | 'chase' | 'return';
+
+export type EnemyType = 'slime' | 'slime-flying' | 'slime-armored' | 'slime-spitter';
+
+export interface EnemyArchetype
+{
+    type: EnemyType;
+    name: string;
+    points: number;
+    maxHp: number;
+    canStomp: boolean;
+    speed: number;
+    coinDropChance: number;
+    coinDropAmount: number;
+}
+
+export const ENEMY_ARCHETYPES: Record<EnemyType, EnemyArchetype> = {
+    'slime': {
+        type: 'slime',
+        name: 'Basic Slime',
+        points: 100,
+        maxHp: 1,
+        canStomp: true,
+        speed: 70,
+        coinDropChance: 0.35,
+        coinDropAmount: 1,
+    },
+    'slime-flying': {
+        type: 'slime-flying',
+        name: 'Cyber Drone Slime',
+        points: 150,
+        maxHp: 1,
+        canStomp: true,
+        speed: 95,
+        coinDropChance: 0.5,
+        coinDropAmount: 1,
+    },
+    'slime-armored': {
+        type: 'slime-armored',
+        name: 'Armored Slime',
+        points: 250,
+        maxHp: 3,
+        canStomp: false,
+        speed: 45,
+        coinDropChance: 1.0,
+        coinDropAmount: 2,
+    },
+    'slime-spitter': {
+        type: 'slime-spitter',
+        name: 'Toxic Spitter Slime',
+        points: 200,
+        maxHp: 2,
+        canStomp: true,
+        speed: 55,
+        coinDropChance: 0.75,
+        coinDropAmount: 1,
+    },
+};
+
 /**
  * Domain entity representing an Enemy.
  * Pure non-spatial state and business rules — see "Domain layer" in CONTEXT.md.
  */
 export class Enemy
 {
+    private readonly _type: EnemyType;
     private _isDefeated = false;
     private readonly _points: number;
+    private _state: EnemyState = 'patrol';
+    private _currentHp: number;
+    private readonly _maxHp: number;
+    private readonly _canStomp: boolean;
+    private readonly _coinDropChance: number;
+    private readonly _coinDropAmount: number;
 
-    constructor (points = 100)
+    constructor (
+        typeOrPoints: EnemyType | number = 'slime',
+        pointsOrMaxHp?: number,
+        maxHpParam?: number,
+        canStompParam?: boolean
+    )
     {
-        this._points = Math.max(0, points);
+        if (typeof typeOrPoints === 'string')
+        {
+            const archetype = ENEMY_ARCHETYPES[typeOrPoints] ?? ENEMY_ARCHETYPES['slime'];
+            this._type = archetype.type;
+            this._points = pointsOrMaxHp !== undefined ? Math.max(0, pointsOrMaxHp) : archetype.points;
+            this._maxHp = maxHpParam !== undefined ? Math.max(1, maxHpParam) : archetype.maxHp;
+            this._canStomp = canStompParam !== undefined ? canStompParam : archetype.canStomp;
+            this._coinDropChance = archetype.coinDropChance;
+            this._coinDropAmount = archetype.coinDropAmount;
+        }
+        else
+        {
+            // Legacy signature: constructor(points = 100, maxHp = 1)
+            this._type = 'slime';
+            this._points = Math.max(0, typeOrPoints);
+            this._maxHp = Math.max(1, pointsOrMaxHp ?? 1);
+            this._canStomp = canStompParam ?? true;
+            this._coinDropChance = 0.35;
+            this._coinDropAmount = 1;
+        }
+
+        this._currentHp = this._maxHp;
+    }
+
+    get type (): EnemyType
+    {
+        return this._type;
+    }
+
+    get canStomp (): boolean
+    {
+        return this._canStomp;
+    }
+
+    get coinDropChance (): number
+    {
+        return this._coinDropChance;
+    }
+
+    get coinDropAmount (): number
+    {
+        return this._coinDropAmount;
+    }
+
+    get state (): EnemyState
+    {
+        return this._state;
+    }
+
+    setState (nextState: EnemyState): void
+    {
+        this._state = nextState;
     }
 
     get points (): number
@@ -22,8 +144,40 @@ export class Enemy
         return this._isDefeated;
     }
 
+    get currentHp (): number
+    {
+        return this._currentHp;
+    }
+
+    get maxHp (): number
+    {
+        return this._maxHp;
+    }
+
+    takeDamage (amount = 1): { defeated: boolean; currentHp: number }
+    {
+        if (this._isDefeated)
+        {
+            return { defeated: true, currentHp: 0 };
+        }
+
+        const validAmount = Math.max(0, amount);
+        this._currentHp = Math.max(0, this._currentHp - validAmount);
+
+        if (this._currentHp === 0)
+        {
+            this._isDefeated = true;
+        }
+
+        return {
+            defeated: this._isDefeated,
+            currentHp: this._currentHp,
+        };
+    }
+
     defeat (): void
     {
+        this._currentHp = 0;
         this._isDefeated = true;
     }
 }
