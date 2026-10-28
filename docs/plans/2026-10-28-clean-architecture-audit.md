@@ -1,7 +1,7 @@
 # ກວດ ແລະ ປັບໂຄງສ້າງໃຫ້ຕົງກັບ Clean Architecture
 
 - **Date:** 2026-10-28
-- **Status:** Phase 0–5 ເຮັດແລ້ວ; Phase 6 ຍັງ planned
+- **Status:** done (Phase 0–6); ລາຍການຄ້າງຢູ່ໃນບັນທຶກຂອງແຕ່ລະ Phase
 - **Project:** jo-game (ພະຈົນໄພຄວາມຮູ້ / Knowledge Quest)
 
 ## ເປົ້າໝາຍ (Goal)
@@ -79,6 +79,8 @@
 
 ### Phase 6 — ເອກະສານ
 19. ADR 0006: "ເນື້ອຫາ (JSON) ກວດຮູບແບບຢູ່ catalog ແລະ state ຢູ່ໃນ GameState ດຽວ"; ອັບເດດ ADR 0002 (ສິ່ງທີ່ຍັງຕ້ອງທົດສອບມືຢູ່ infrastructure ເຫຼືອນ້ອຍລົງ), `CLAUDE.md`, `CONTEXT.md` (ເພີ່ມ `GameState`, `Content catalog`).
+
+**ສະຖານະ Phase 6 (ເຮັດແລ້ວ):** ເພີ່ມ `docs/adr/0006-content-catalog-and-single-game-state.md` (ໂຫຼດ+ກວດເນື້ອຫາຄັ້ງດຽວ, `ItemCatalog`, `GameState` load ແບບ in-place, lint ບັງຄັບຊັ້ນ; ບັນທຶກທາງເລືອກທີ່ຂ້າມ: zod, React Context); ADR 0001 ເພີ່ມໝາຍເຫດວ່າ lint ບັງຄັບກົດ; ADR 0002/0003 ອັບເດດໃນ Phase 3; `CONTEXT.md` ເພີ່ມ Game state ແລະ Content catalog; `CLAUDE.md` ອັບເດດຕາມແຕ່ລະ Phase.
 
 ## Files ທີ່ຈະຖືກກະທົບ
 
