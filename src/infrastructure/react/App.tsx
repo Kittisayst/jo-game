@@ -33,7 +33,7 @@ import { useDialogue } from './hooks/useDialogue';
 import { useSkinShop } from './hooks/useSkinShop';
 import { createCurrentSnapshot, resetEntitiesToNewGame, restoreEntitiesFromSnapshot } from '../saveSnapshot';
 import { getNextObjective } from '../../domain/utils/nextObjective';
-import { loadBooksData } from '../dataLoader';
+import { getGameContent } from '../content/ContentCatalog';
 import { PauseMenuModal } from './components/PauseMenuModal';
 import { MainMenuModal } from './components/MainMenuModal';
 import { SettingsModal } from './components/SettingsModal';
@@ -673,13 +673,7 @@ function App ()
         return entities.backpack.usedSlotsCount;
     }, [backpackRevision]);
 
-    const [ch1PageCount, setCh1PageCount] = useState(0);
-    useEffect(() =>
-    {
-        loadBooksData()
-            .then(books => setCh1PageCount(books.find(b => b.id === 'book-ch1')?.pages.length ?? 0))
-            .catch(console.error);
-    }, []);
+    const ch1PageCount = getGameContent().books.find(b => b.id === 'book-ch1')?.pages.length ?? 0;
 
     const objective = useMemo(() => {
         void booksRevision;

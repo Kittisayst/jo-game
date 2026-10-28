@@ -5,7 +5,7 @@ import {
     purchaseBookUseCase,
 } from '../../../application/PurchaseBookUseCase';
 import { readBookPageUseCase } from '../../../application/ReadBookPageUseCase';
-import { loadBooksData } from '../../dataLoader';
+import { getGameContent } from '../../content/ContentCatalog';
 import { entities } from '../../composition';
 import { soundManager } from '../../audio/SoundManager';
 import { EventBus } from '../../EventBus';
@@ -40,18 +40,13 @@ export const TextbookModal: React.FC<TextbookModalProps> = ({
     onGoToExam,
 }) =>
 {
-    const [books, setBooks] = useState<BookDefinition[]>([]);
+    const [books] = useState<BookDefinition[]>(() => getGameContent().books);
     const [selectedBookId, setSelectedBookId] = useState<string>(initialBookId || 'book-ch1');
     const [currentPageIndex, setCurrentPageIndex] = useState<number>(0);
     const [storeSubView, setStoreSubView] = useState<'shelf' | 'reading'>('shelf');
     const [remainingReadSeconds, setRemainingReadSeconds] = useState<number>(0);
     const [toastMessage, setToastMessage] = useState<string | null>(null);
     const [, setRevision] = useState(0);
-
-    useEffect(() =>
-    {
-        loadBooksData().then(setBooks).catch(console.error);
-    }, []);
 
     // Reset sub-view whenever modal opens or mode changes
     useEffect(() =>

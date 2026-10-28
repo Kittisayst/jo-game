@@ -7,7 +7,9 @@ export default defineConfig({
         environment: 'node',
         include: [
             'src/domain/**/*.test.ts',
-            'src/application/**/*.test.ts'
+            'src/application/**/*.test.ts',
+            // Pure data validators: no Phaser, React or DOM involved
+            'src/infrastructure/content/**/*.test.ts'
         ]
     }
 });

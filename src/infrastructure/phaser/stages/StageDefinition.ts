@@ -8,6 +8,7 @@
  */
 
 import type { EnemyType } from '../../../domain/entities/Enemy';
+import { makeValidators } from '../../content/validate';
 
 export type ResourceNodeType = 'tree' | 'herb' | 'stone' | 'iron-vein';
 
@@ -121,46 +122,7 @@ export function getStageDefinition (stages: StageDefinition[] | undefined, stage
     return stages?.find(stage => stage.id === stageId);
 }
 
-type Raw = Record<string, unknown>;
-
-function fail (path: string, expected: string): never
-{
-    throw new Error(`stages.json: ${path} must be ${expected}`);
-}
-
-function asObject (value: unknown, path: string): Raw
-{
-    if (typeof value !== 'object' || value === null || Array.isArray(value)) fail(path, 'an object');
-    return value as Raw;
-}
-
-function asArray (value: unknown, path: string): unknown[]
-{
-    if (!Array.isArray(value)) fail(path, 'an array');
-    return value as unknown[];
-}
-
-function asString (value: unknown, path: string): string
-{
-    if (typeof value !== 'string' || value.length === 0) fail(path, 'a non-empty string');
-    return value as string;
-}
-
-function asNumber (value: unknown, path: string): number
-{
-    if (typeof value !== 'number' || !Number.isFinite(value)) fail(path, 'a number');
-    return value as number;
-}
-
-function optionalString (value: unknown, path: string): string | undefined
-{
-    return value === undefined ? undefined : asString(value, path);
-}
-
-function optionalNumber (value: unknown, path: string): number | undefined
-{
-    return value === undefined ? undefined : asNumber(value, path);
-}
+const { asObject, asArray, asString, asNumber, optionalNumber, optionalString, fail } = makeValidators('stages.json');
 
 function parseDrops (value: unknown, path: string): StageDrop[]
 {

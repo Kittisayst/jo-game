@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { BookDefinition, BookProgress } from '../../../domain/entities/Book';
 import { QuestionData, QuizExamSession } from '../../../domain/entities/Quiz';
-import { loadBooksData, loadQuestionsData } from '../../dataLoader';
+import { getGameContent } from '../../content/ContentCatalog';
 import { entities } from '../../composition';
 import { submitBookExamUseCase, SubmitBookExamResult } from '../../../application/SubmitBookExamUseCase';
 import {
@@ -34,8 +34,8 @@ export const AcademyModal: React.FC<AcademyModalProps> = ({
 }) =>
 {
     const [activeTab, setActiveTab] = useState<'exam' | 'practice'>('exam');
-    const [books, setBooks] = useState<BookDefinition[]>([]);
-    const [allQuestions, setAllQuestions] = useState<QuestionData[]>([]);
+    const [books] = useState<BookDefinition[]>(() => getGameContent().books);
+    const [allQuestions] = useState<QuestionData[]>(() => getGameContent().questions);
     const [selectedBookId, setSelectedBookId] = useState<string>(initialBookId);
 
     // Exam State
@@ -49,12 +49,6 @@ export const AcademyModal: React.FC<AcademyModalProps> = ({
     const [practiceResults, setPracticeResults] = useState<SubmitDailyPracticeResult | null>(null);
 
     const todayDate = new Date().toISOString().split('T')[0];
-
-    useEffect(() =>
-    {
-        loadBooksData().then(setBooks).catch(console.error);
-        loadQuestionsData().then(setAllQuestions).catch(console.error);
-    }, []);
 
     useEffect(() =>
     {

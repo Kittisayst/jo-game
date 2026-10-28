@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { BackpackSlot } from '../../../domain/entities/Backpack';
-import { ItemData, loadItemsData } from '../../dataLoader';
 import { entities } from '../../composition';
 import { soundManager } from '../../audio/SoundManager';
 import { EventBus } from '../../EventBus';
@@ -20,20 +19,14 @@ type FilterCategory = 'all' | 'gear' | 'material' | 'consumable';
 
 export const BackpackModal: React.FC<BackpackModalProps> = ({ isOpen, onClose, onUseItem, onOpenBooks }) =>
 {
-    const [items, setItems] = useState<ItemData[]>([]);
     const [selectedSlotIndex, setSelectedSlotIndex] = useState<number>(0);
     const [activeFilter, setActiveFilter] = useState<FilterCategory>('all');
     const [showDiscardConfirm, setShowDiscardConfirm] = useState(false);
     const [notice, setNotice] = useState<string | null>(null);
     const [, setRevision] = useState(0);
 
-    useEffect(() =>
-    {
-        loadItemsData().then(setItems).catch(console.error);
-    }, []);
-
     const allSlots = entities.backpack.getAllSlots();
-    const getItem = useCallback((id: string) => items.find(i => i.id === id), [items]);
+    const getItem = useCallback((id: string) => entities.itemCatalog.get(id), []);
 
     useEffect(() =>
     {

@@ -1,11 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import { Backpack } from './Backpack';
+import { createTestItemCatalog } from '../testing/itemCatalog';
 
 describe('Backpack Entity', () =>
 {
     it('manages 20 slots and adds items with stack boundaries', () =>
     {
-        const backpack = new Backpack();
+        const backpack = new Backpack([], createTestItemCatalog());
         expect(backpack.maxSlots).toBe(20);
         expect(backpack.usedSlotsCount).toBe(0);
 
@@ -19,7 +20,7 @@ describe('Backpack Entity', () =>
 
     it('rejects adding items when inventory is completely full', () =>
     {
-        const backpack = new Backpack();
+        const backpack = new Backpack([], createTestItemCatalog());
         // Fill all 20 slots with 1 axe each
         for (let i = 0; i < 20; i++)
         {
@@ -35,7 +36,7 @@ describe('Backpack Entity', () =>
 
     it('removes items cleanly across multiple slots', () =>
     {
-        const backpack = new Backpack();
+        const backpack = new Backpack([], createTestItemCatalog());
         backpack.addItem('wood', 120); // slot 0: 99, slot 1: 21
         expect(backpack.getItemCount('wood')).toBe(120);
 
@@ -47,11 +48,11 @@ describe('Backpack Entity', () =>
 
     it('accurately verifies canCraftAfterRemoving when backpack is full', () =>
     {
-        const backpack = new Backpack();
+        const backpack = new Backpack([], createTestItemCatalog());
         // Fill 19 slots with random junk
         for (let i = 0; i < 19; i++)
         {
-            backpack.addItem(`junk-${i}`, 1, 1);
+            backpack.addItem(`junk-${i}`, 1);
         }
         // Slot 20 holds 10 iron-ore
         backpack.addItem('iron-ore', 10);
@@ -71,7 +72,7 @@ describe('Backpack Entity', () =>
 
     it('applies 50% material penalty on emergency retreat / death', () =>
     {
-        const backpack = new Backpack();
+        const backpack = new Backpack([], createTestItemCatalog());
         backpack.addItem('wood', 10); // material: loses ceil(10*0.5) = 5
         backpack.addItem('stone', 7); // material: loses ceil(7*0.5) = 4, leaves 3
         backpack.addItem('axe-t1', 1); // tool: kept 100%
@@ -91,7 +92,7 @@ describe('Backpack Entity', () =>
 
     it('keeps story items (crystal, boss-core) when applying the retreat penalty', () =>
     {
-        const backpack = new Backpack();
+        const backpack = new Backpack([], createTestItemCatalog());
         backpack.addItem('wood', 5);
         backpack.addItem('crystal', 3);
         backpack.addItem('boss-core', 1);
@@ -106,7 +107,7 @@ describe('Backpack Entity', () =>
 
     it('serializes and deserializes snapshot cleanly', () =>
     {
-        const backpack = new Backpack();
+        const backpack = new Backpack([], createTestItemCatalog());
         backpack.addItem('wood', 50);
         backpack.addItem('iron-ore', 12);
 
@@ -120,7 +121,7 @@ describe('Backpack Entity', () =>
 
     it('removes slot directly and sorts slots cleanly', () =>
     {
-        const backpack = new Backpack();
+        const backpack = new Backpack([], createTestItemCatalog());
         backpack.addItem('wood', 10);
         backpack.addItem('stone', 20);
         backpack.addItem('iron-ore', 5);
@@ -147,7 +148,7 @@ describe('Backpack.removeFromSlot', () =>
 {
     it('removes part of a stack and empties the slot at zero', () =>
     {
-        const backpack = new Backpack();
+        const backpack = new Backpack([], createTestItemCatalog());
         backpack.addItem('wood', 5);
 
         expect(backpack.removeFromSlot(0, 2)).toBe(true);
@@ -158,7 +159,7 @@ describe('Backpack.removeFromSlot', () =>
 
     it('rejects an empty slot, a bad index or more than the slot holds', () =>
     {
-        const backpack = new Backpack();
+        const backpack = new Backpack([], createTestItemCatalog());
         backpack.addItem('wood', 2);
 
         expect(backpack.removeFromSlot(5, 1)).toBe(false);

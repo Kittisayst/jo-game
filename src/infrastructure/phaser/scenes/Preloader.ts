@@ -11,16 +11,6 @@ export class Preloader extends Scene
 
     preload ()
     {
-        if (!this.cache.json.exists('enemies'))
-        {
-            this.load.json('enemies', 'data/enemies.json');
-        }
-
-        if (!this.cache.json.exists('stages'))
-        {
-            this.load.json('stages', 'data/stages.json');
-        }
-
         for (const item of LEVEL_CATALOG)
         {
             if (!this.cache.json.exists(item.key))

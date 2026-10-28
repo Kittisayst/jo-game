@@ -10,11 +10,11 @@ import { NPC } from '../objects/NPC';
 import { ParticleManager } from '../effects/ParticleManager';
 import { soundManager } from '../../audio/SoundManager';
 import { Level } from '../Level';
+import { getGameContent } from '../../content/ContentCatalog';
 import {
     getStageBossSpawn,
     getStageDefinition,
     getStageEnemySpawns,
-    parseStageDefinitions,
     StageDefinition,
 } from '../stages/StageDefinition';
 import {
@@ -122,14 +122,6 @@ export class Game extends Scene
     preload ()
     {
         // Fallback load in case Game scene is loaded directly without Preloader
-        if (!this.cache.json.exists('enemies'))
-        {
-            this.load.json('enemies', 'data/enemies.json');
-        }
-        if (!this.cache.json.exists('stages'))
-        {
-            this.load.json('stages', 'data/stages.json');
-        }
         for (const item of LEVEL_CATALOG)
         {
             if (!this.cache.json.exists(item.key))
@@ -214,7 +206,7 @@ export class Game extends Scene
         this.elderNpc = undefined;
 
         this.level = this.cache.json.get(this.currentLevelKey) as Level;
-        this.stage = getStageDefinition(parseStageDefinitions(this.cache.json.get('stages')), this.currentLevelKey);
+        this.stage = getStageDefinition(getGameContent().stages, this.currentLevelKey);
         this.isStageCleared = false;
         // One Health for the whole session so the backpack UI can heal the same hearts the scene damages
         this.health = entities.health;
@@ -1149,8 +1141,7 @@ export class Game extends Scene
 
     private getEnemyDefinition (enemyId: string): EnemyDefinition | undefined
     {
-        const all = this.cache.json.get('enemies') as EnemyDefinition[] | undefined;
-        return all?.find(e => e.id === enemyId);
+        return getGameContent().enemies.find(e => e.id === enemyId);
     }
 
     private createEnemies ()

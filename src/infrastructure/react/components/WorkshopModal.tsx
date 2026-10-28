@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { RecipeDefinition, craftRecipeUseCase } from '../../../application/CraftRecipeUseCase';
-import { ItemData, loadItemsData, loadRecipesData } from '../../dataLoader';
+import { getGameContent } from '../../content/ContentCatalog';
 import { entities } from '../../composition';
 import { soundManager } from '../../audio/SoundManager';
 
@@ -12,20 +12,11 @@ interface WorkshopModalProps
 
 export const WorkshopModal: React.FC<WorkshopModalProps> = ({ isOpen, onClose }) =>
 {
-    const [recipes, setRecipes] = useState<RecipeDefinition[]>([]);
-    const [items, setItems] = useState<ItemData[]>([]);
+    const [recipes] = useState<RecipeDefinition[]>(() => getGameContent().recipes.filter(
+        (r): r is RecipeDefinition => r.building === 'workshop' && 'resultItemId' in r
+    ));
+    const items = entities.itemCatalog.all();
     const [, setRevision] = useState(0);
-
-    useEffect(() =>
-    {
-        loadRecipesData().then(all =>
-        {
-            const workshopRecipes = all.filter(r => (r as RecipeDefinition).building === 'workshop') as RecipeDefinition[];
-            setRecipes(workshopRecipes);
-        }).catch(console.error);
-
-        loadItemsData().then(setItems).catch(console.error);
-    }, []);
 
     if (!isOpen) return null;
 

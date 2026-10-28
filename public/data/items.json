@@ -50,6 +50,7 @@
     "nameEn": "Magic Crystal",
     "description": "ຜລຶກແກ້ວສີຟ້າເຫຼື້ອມ ເປັ່ງພະລັງງານ ໄດ້ຈາກການປາບຜູ້ພິທັກຖ້ຳ",
     "category": "material",
+    "story": true,
     "maxStack": 99,
     "icon": "💎"
   },
@@ -59,6 +60,7 @@
     "nameEn": "Boss Core",
     "description": "ແກນພະລັງງານເຂັ້ມຂຸ້ນທີ່ໄດ້ຈາກບອສໃຫຍ່ ປະຈຳບົດທີ 1",
     "category": "material",
+    "story": true,
     "maxStack": 99,
     "icon": "🔮"
   },

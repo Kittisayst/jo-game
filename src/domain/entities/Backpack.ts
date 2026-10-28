@@ -1,3 +1,5 @@
+import { ItemCatalog } from './ItemCatalog';
+
 export interface BackpackSlot
 {
     slotIndex: number;
@@ -20,45 +22,11 @@ export interface CraftingIngredient
 
 export const BACKPACK_MAX_SLOTS = 20;
 
-export const DEFAULT_ITEM_MAX_STACKS: Record<string, number> = {
-    'wood': 99,
-    'stone': 99,
-    'iron-ore': 99,
-    'herb': 99,
-    'fiber': 99,
-    'crystal': 99,
-    'boss-core': 99,
-    'repair-kit': 10,
-    'herb-potion': 20,
-    'axe-t1': 1,
-    'pickaxe-t1': 1,
-    'hammer-t1': 1,
-    'wooden-sword': 1,
-    'iron-sword': 1,
-    'crystal-sword': 1,
-};
-
-export const MATERIAL_ITEM_IDS = new Set([
-    'wood',
-    'stone',
-    'iron-ore',
-    'herb',
-    'fiber',
-    'crystal',
-    'boss-core',
-]);
-
-/** Materials that are never lost on death, so beating a Mini-boss or Boss is never wasted. */
-export const STORY_ITEM_IDS = new Set([
-    'crystal',
-    'boss-core',
-]);
-
 export class Backpack
 {
     private _slots: (BackpackSlot | null)[];
 
-    constructor (initialSlots: BackpackSlotSnapshot[] = [])
+    constructor (initialSlots: BackpackSlotSnapshot[] = [], private readonly _catalog: ItemCatalog = new ItemCatalog())
     {
         this._slots = new Array(BACKPACK_MAX_SLOTS).fill(null);
         this.loadFromSnapshot(initialSlots);
@@ -104,16 +72,15 @@ export class Backpack
         return total;
     }
 
-    getMaxStack (itemId: string, customMaxStack?: number): number
+    getMaxStack (itemId: string): number
     {
-        if (customMaxStack && customMaxStack > 0) return customMaxStack;
-        return DEFAULT_ITEM_MAX_STACKS[itemId] ?? 99;
+        return this._catalog.maxStackOf(itemId);
     }
 
-    canAddItem (itemId: string, count: number, customMaxStack?: number): boolean
+    canAddItem (itemId: string, count: number): boolean
     {
         if (count <= 0) return true;
-        const maxStack = this.getMaxStack(itemId, customMaxStack);
+        const maxStack = this.getMaxStack(itemId);
 
         let needed = count;
 
@@ -134,10 +101,10 @@ export class Backpack
         return emptySlots >= slotsNeeded;
     }
 
-    addItem (itemId: string, count: number, customMaxStack?: number): { added: number; overflow: number }
+    addItem (itemId: string, count: number): { added: number; overflow: number }
     {
         if (count <= 0) return { added: 0, overflow: 0 };
-        const maxStack = this.getMaxStack(itemId, customMaxStack);
+        const maxStack = this.getMaxStack(itemId);
 
         let remaining = count;
 
@@ -219,8 +186,7 @@ export class Backpack
     canCraftAfterRemoving (
         ingredients: CraftingIngredient[],
         resultItemId: string,
-        resultCount: number,
-        resultMaxStack?: number
+        resultCount: number
     ): boolean
     {
         // Check ingredient sufficiency first
@@ -233,7 +199,7 @@ export class Backpack
         }
 
         // Clone backpack slots
-        const sim = new Backpack(this.toSnapshot());
+        const sim = new Backpack(this.toSnapshot(), this._catalog);
 
         // Remove ingredients
         for (const ing of ingredients)
@@ -242,22 +208,21 @@ export class Backpack
         }
 
         // Check if result can be added
-        return sim.canAddItem(resultItemId, resultCount, resultMaxStack);
+        return sim.canAddItem(resultItemId, resultCount);
     }
 
     /**
      * Applies 50% material loss upon death or emergency retreat.
      * Keeps 100% of weapons, tools, consumables, and story items (crystal, boss core).
      */
-    applyRetreatPenalty (isMaterialFn?: (itemId: string) => boolean): { lost: { itemId: string; count: number }[] }
+    applyRetreatPenalty (): { lost: { itemId: string; count: number }[] }
     {
         const lost: { itemId: string; count: number }[] = [];
-        const isMaterial = isMaterialFn || ((id: string) => MATERIAL_ITEM_IDS.has(id) && !STORY_ITEM_IDS.has(id));
 
         for (let i = 0; i < this._slots.length; i++)
         {
             const slot = this._slots[i];
-            if (slot && isMaterial(slot.itemId))
+            if (slot && this._catalog.isLostOnRetreat(slot.itemId))
             {
                 const lostCount = Math.ceil(slot.count * 0.5);
                 const keptCount = slot.count - lostCount;

@@ -57,7 +57,7 @@ describe('HarvestResourceNodeUseCase', () =>
         // Fill remaining 19 slots with 1 item each of maxStack 1
         for (let i = 0; i < 19; i++)
         {
-            backpack.addItem(`filler-${i}`, 1, 1);
+            backpack.addItem(`filler-${i}`, 1);
         }
 
         const result = harvestResourceNodeUseCase(treeNode, backpack);

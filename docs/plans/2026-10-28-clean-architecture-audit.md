@@ -1,7 +1,7 @@
 # ກວດ ແລະ ປັບໂຄງສ້າງໃຫ້ຕົງກັບ Clean Architecture
 
 - **Date:** 2026-10-28
-- **Status:** Phase 0–2 ເຮັດແລ້ວ; Phase 3–6 ຍັງ planned
+- **Status:** Phase 0–3 ເຮັດແລ້ວ; Phase 4–6 ຍັງ planned
 - **Project:** jo-game (ພະຈົນໄພຄວາມຮູ້ / Knowledge Quest)
 
 ## ເປົ້າໝາຍ (Goal)
@@ -60,6 +60,8 @@
 10. ເພີ່ມ `ItemDefinition` (id, category, maxStack, healAmount, tier…) ໃນ `domain/entities/`; `Backpack` ຮັບ catalog (ຫຼື function `getMaxStack`) ແທນ `DEFAULT_ITEM_MAX_STACKS`/`MATERIAL_ITEM_IDS`/`STORY_ITEM_IDS` ທີ່ຂຽນເອງ — ເພີ່ມ flag `story: true` ໃນ items.json. ອັບເດດ test ຂອງ Backpack.
 11. `infrastructure/content/ContentCatalog.ts`: ໂຫຼດ `books/questions/items/recipes/enemies/stages` ຄັ້ງດຽວ, ກວດຮູບແບບທຸກໄຟລ໌ (ຍົກ `parseStageDefinitions` ເປັນແບບຢ່າງ), ເອົາໃຫ້ UI ຜ່ານ context/props ແທນ `dataLoader` ໃນ 8 ໄຟລ໌. ແກ້ e2e ທີ່ກ່ຽວຂ້ອງ.
 12. ອັບເດດ ADR 0003 (ຍ້າຍບັນທຶກ validation ມາເປັນ catalog).
+
+**ສະຖານະ Phase 3 (ເຮັດແລ້ວ):** ເພີ່ມ `ItemDefinition`/`ItemCatalog` ໃນ domain; `Backpack` ຖາມ catalog ເລື່ອງ stack ແລະ "ວັດສະດຸທີ່ເສຍຕອນຕາຍ" (ລຶບ `DEFAULT_ITEM_MAX_STACKS`/`MATERIAL_ITEM_IDS`/`STORY_ITEM_IDS` ແລະພາຣາມິເຕີ `customMaxStack`; `items.json` ມີ flag `story`). `infrastructure/content/ContentCatalog.ts` ໂຫຼດ + ກວດ 6 ໄຟລ໌ຄັ້ງດຽວກ່ອນ render (`main.tsx`) ແລະສະແດງໜ້າ error ຖ້າຜິດ; `dataLoader.ts` ຖືກລຶບ, modal 7 ໜ້າ + `App.tsx` + `Game.ts`/`Preloader` ອ່ານ `getGameContent()` ແບບ synchronous. ເພີ່ມ `ContentIntegrity.test.ts` (ກວດ id ອ້າງອີງຂ້າມໄຟລ໌) ແລະ `ContentCatalog.test.ts`. **ພົບ bug ຂໍ້ມູນ:** `enemies.json` ໃຊ້ `type` ແຕ່ domain ອ່ານ `kind` (ເຮັດໃຫ້ mini-boss/boss ຖືກອ່ານເປັນ undefined) — ແກ້ເປັນ `kind` ແລ້ວ ແລະມີ test ກັນຊ້ຳ. ຜົນ: 223 unit test, e2e 9 ຜ່ານ. **ຍັງຄ້າງ:** ລາງວັນ Boss (`BOSS_FINISHER_REWARD`) ຍັງຂຽນໃນ domain ຊ້ຳກັບ `drops` ຂອງ boss ໃນ `enemies.json` (ຄວນລວມເປັນແຫຼ່ງດຽວ); ໜ້າ error ຕອນໂຫຼດຂໍ້ມູນລົ້ມເຫຼວ ຍັງບໍ່ໄດ້ເບິ່ງດ້ວຍຕາ (ກວດແຕ່ຂໍ້ຄວາມຂອງ parser ດ້ວຍ test).
 
 ### Phase 4 — ສະຖານະ ແລະ composition
 13. ຍ້າຍ `Health` (ແລະ HP ຂອງ Boss ທີ່ສະແດງໃນ HUD) ມາຢູ່ `GameState` ດຽວ; scene ແລະ React ອ່ານຈາກນັ້ນ + event ມີແຕ່ແຈ້ງການປ່ຽນ. ລຶບ `maxHealth` ຊ້ຳ.

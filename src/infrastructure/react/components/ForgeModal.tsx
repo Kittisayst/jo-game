@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { RecipeDefinition, craftRecipeUseCase } from '../../../application/CraftRecipeUseCase';
 import { WeaponUpgradeRecipe, upgradeWeaponTierUseCase } from '../../../application/UpgradeWeaponTierUseCase';
-import { ItemData, loadItemsData, loadRecipesData } from '../../dataLoader';
+import { getGameContent } from '../../content/ContentCatalog';
 import { entities } from '../../composition';
 import { soundManager } from '../../audio/SoundManager';
 
@@ -14,23 +14,14 @@ interface ForgeModalProps
 export const ForgeModal: React.FC<ForgeModalProps> = ({ isOpen, onClose }) =>
 {
     const [activeTab, setActiveTab] = useState<'craft' | 'upgrade'>('craft');
-    const [craftRecipes, setCraftRecipes] = useState<RecipeDefinition[]>([]);
-    const [upgradeRecipes, setUpgradeRecipes] = useState<WeaponUpgradeRecipe[]>([]);
-    const [items, setItems] = useState<ItemData[]>([]);
+    const [craftRecipes] = useState<RecipeDefinition[]>(() => getGameContent().recipes.filter(
+        (r): r is RecipeDefinition => r.building === 'forge' && 'resultItemId' in r
+    ));
+    const [upgradeRecipes] = useState<WeaponUpgradeRecipe[]>(() => getGameContent().recipes.filter(
+        (r): r is WeaponUpgradeRecipe => r.building === 'forge' && 'targetWeaponId' in r
+    ));
+    const items = entities.itemCatalog.all();
     const [, setRevision] = useState(0);
-
-    useEffect(() =>
-    {
-        loadRecipesData().then(all =>
-        {
-            const craftList = all.filter(r => (r as RecipeDefinition).building === 'forge' && (r as RecipeDefinition).resultItemId) as RecipeDefinition[];
-            const upgradeList = all.filter(r => (r as WeaponUpgradeRecipe).building === 'forge' && (r as WeaponUpgradeRecipe).targetWeaponId) as WeaponUpgradeRecipe[];
-            setCraftRecipes(craftList);
-            setUpgradeRecipes(upgradeList);
-        }).catch(console.error);
-
-        loadItemsData().then(setItems).catch(console.error);
-    }, []);
 
     if (!isOpen) return null;
 

@@ -1,12 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import { returnToVillageUseCase } from './ReturnToVillageUseCase';
 import { Backpack } from '../domain/entities/Backpack';
+import { createTestItemCatalog } from '../domain/testing/itemCatalog';
 
 describe('ReturnToVillageUseCase', () =>
 {
     it('preserves 100% materials and calls full heal when returning via safe waypoint', () =>
     {
-        const backpack = new Backpack();
+        const backpack = new Backpack([], createTestItemCatalog());
         backpack.addItem('wood', 10);
         backpack.addItem('iron-ore', 6);
         let healed = false;
@@ -22,7 +23,7 @@ describe('ReturnToVillageUseCase', () =>
 
     it('inflicts 50% material loss upon death/retreat, but preserves tools and heals HP', () =>
     {
-        const backpack = new Backpack();
+        const backpack = new Backpack([], createTestItemCatalog());
         backpack.addItem('wood', 10);
         backpack.addItem('axe-t1', 1);
         backpack.addItem('herb-potion', 2);

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { QuestionData } from '../../../domain/entities/Quiz';
-import { loadQuestionsData } from '../../dataLoader';
+import { getGameContent } from '../../content/ContentCatalog';
 import { entities } from '../../composition';
 import {
     checkGateRequirements,
@@ -38,16 +38,13 @@ export const GateRepairModal: React.FC<GateRepairModalProps> = ({
 
     useEffect(() =>
     {
-        loadQuestionsData().then(qs =>
+        const ch1Questions = getGameContent().questions.filter(q => q.bookId === 'book-ch1');
+        setQuestions(ch1Questions);
+        if (ch1Questions.length > 0)
         {
-            const ch1Questions = qs.filter(q => q.bookId === 'book-ch1');
-            setQuestions(ch1Questions);
-            if (ch1Questions.length > 0)
-            {
-                const rand = ch1Questions[Math.floor(Math.random() * ch1Questions.length)];
-                setCurrentQuestion(rand);
-            }
-        }).catch(console.error);
+            const rand = ch1Questions[Math.floor(Math.random() * ch1Questions.length)];
+            setCurrentQuestion(rand);
+        }
     }, [isOpen]);
 
     if (!isOpen) return null;

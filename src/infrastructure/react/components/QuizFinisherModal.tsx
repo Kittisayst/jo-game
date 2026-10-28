@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { QuestionData } from '../../../domain/entities/Quiz';
-import { loadQuestionsData } from '../../dataLoader';
+import { getGameContent } from '../../content/ContentCatalog';
 import { soundManager } from '../../audio/SoundManager';
 
 interface QuizFinisherModalProps
@@ -27,17 +27,14 @@ export const QuizFinisherModal: React.FC<QuizFinisherModalProps> = ({
     {
         if (isOpen)
         {
-            loadQuestionsData().then(qs =>
+            const ch1Questions = getGameContent().questions.filter(q => q.bookId === 'book-ch1');
+            if (ch1Questions.length > 0)
             {
-                const ch1Questions = qs.filter(q => q.bookId === 'book-ch1');
-                if (ch1Questions.length > 0)
-                {
-                    const rand = ch1Questions[Math.floor(Math.random() * ch1Questions.length)];
-                    setQuestion(rand);
-                    setSelectedOption(null);
-                    setIsAnswered(false);
-                }
-            }).catch(console.error);
+                const rand = ch1Questions[Math.floor(Math.random() * ch1Questions.length)];
+                setQuestion(rand);
+                setSelectedOption(null);
+                setIsAnswered(false);
+            }
         }
     }, [isOpen]);
 
