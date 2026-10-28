@@ -254,6 +254,21 @@ function App ()
     {
         const onLevelComplete = (payload: LevelCompletePayload) =>
         {
+            if (payload.levelId === 'stage-ch1')
+            {
+                // Beating the Chapter 1 Boss sends the player home to learn and craft, not to a score screen
+                completeStageUseCase(
+                    stageProgressionRef.current,
+                    repositories.stageProgression,
+                    payload.levelId,
+                    payload.nextLevel
+                );
+                saveManager.autoSave(getCurrentSnapshot());
+                EventBus.emit('change-level', 'village');
+                setTimeout(() => setVillageWelcomeToast('🏆 ຊະນະ Boss ບົດທີ 1! ກັບມາໝູ່ບ້ານເພື່ອຮຽນ ແລະ ສ້າງອາວຸດຕໍ່ໄປ'), 300);
+                return;
+            }
+
             levelCompleteRef.current = true;
             setLevelComplete(true);
             setNextLevel(payload.nextLevel);
