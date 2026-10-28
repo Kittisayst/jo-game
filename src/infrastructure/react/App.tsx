@@ -76,6 +76,7 @@ import {
     startDialogueUseCase,
 } from '../../application/AdvanceDialogueUseCase';
 import { completeStageUseCase } from '../../application/CompleteStageUseCase';
+import { awardChapterClearUseCase } from '../../application/AwardChapterClearUseCase';
 import { selectStageUseCase } from '../../application/SelectStageUseCase';
 import { useItemUseCase as executeUseItemUseCase } from '../../application/UseItemUseCase';
 import { WEAPON_CONFIGS } from '../../domain/entities/EquipmentState';
@@ -258,15 +259,18 @@ function App ()
             if (payload.levelId === 'stage-ch1')
             {
                 // Beating the Chapter 1 Boss sends the player home to learn and craft, not to a score screen
-                completeStageUseCase(
+                const clear = completeStageUseCase(
                     stageProgressionRef.current,
                     repositories.stageProgression,
                     payload.levelId,
                     payload.nextLevel
                 );
+                const bonus = awardChapterClearUseCase(entities.wallet, clear.isFirstTimeClear);
+                setWalletBalance(entities.wallet.balance);
                 saveManager.autoSave(getCurrentSnapshot());
                 EventBus.emit('change-level', 'village');
-                setTimeout(() => setVillageWelcomeToast('🏆 ຊະນະ Boss ບົດທີ 1! ກັບມາໝູ່ບ້ານເພື່ອຮຽນ ແລະ ສ້າງອາວຸດຕໍ່ໄປ'), 300);
+                const bonusText = bonus > 0 ? ` +${bonus} 🎓 Credit!` : '';
+                setTimeout(() => setVillageWelcomeToast(`🏆 ຊະນະ Boss ບົດທີ 1!${bonusText} ກັບມາໝູ່ບ້ານເພື່ອຮຽນ ແລະ ສ້າງອາວຸດຕໍ່ໄປ`), 300);
                 return;
             }
 

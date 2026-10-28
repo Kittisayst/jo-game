@@ -16,6 +16,8 @@
         "resourceNodes": [
           { "id": "tree-1", "type": "tree", "requiredTool": "axe", "toolTier": 1, "x": 300, "y": 480, "hp": 3, "drops": [{ "itemId": "wood", "count": 3 }] },
           { "id": "tree-2", "type": "tree", "requiredTool": "axe", "toolTier": 1, "x": 550, "y": 480, "hp": 3, "drops": [{ "itemId": "wood", "count": 3 }] },
+          { "id": "tree-3", "type": "tree", "requiredTool": "axe", "toolTier": 1, "x": 660, "y": 480, "hp": 3, "drops": [{ "itemId": "wood", "count": 3 }] },
+          { "id": "tree-4", "type": "tree", "requiredTool": "axe", "toolTier": 1, "x": 900, "y": 480, "hp": 3, "drops": [{ "itemId": "wood", "count": 3 }] },
           { "id": "herb-1", "type": "herb", "requiredTool": null, "toolTier": 0, "x": 420, "y": 480, "hp": 1, "drops": [{ "itemId": "herb", "count": 2 }] },
           { "id": "herb-2", "type": "herb", "requiredTool": null, "toolTier": 0, "x": 780, "y": 480, "hp": 1, "drops": [{ "itemId": "herb", "count": 2 }] }
         ],
@@ -32,8 +34,8 @@
         "endX": 2000,
         "resourceNodes": [
           { "id": "stone-1", "type": "stone", "requiredTool": "pickaxe", "toolTier": 1, "x": 1150, "y": 480, "hp": 3, "drops": [{ "itemId": "stone", "count": 3 }] },
-          { "id": "iron-1", "type": "iron-vein", "requiredTool": "pickaxe", "toolTier": 1, "x": 1350, "y": 480, "hp": 4, "drops": [{ "itemId": "iron-ore", "count": 3 }] },
-          { "id": "iron-2", "type": "iron-vein", "requiredTool": "pickaxe", "toolTier": 1, "x": 1600, "y": 480, "hp": 4, "drops": [{ "itemId": "iron-ore", "count": 3 }] }
+          { "id": "iron-1", "type": "iron-vein", "requiredTool": "pickaxe", "toolTier": 1, "x": 1350, "y": 480, "hp": 4, "drops": [{ "itemId": "iron-ore", "count": 4 }] },
+          { "id": "iron-2", "type": "iron-vein", "requiredTool": "pickaxe", "toolTier": 1, "x": 1600, "y": 480, "hp": 4, "drops": [{ "itemId": "iron-ore", "count": 4 }] }
         ],
         "enemySpawns": [
           { "enemyId": "rock-golem", "x": 1250, "y": 480 },

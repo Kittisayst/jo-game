@@ -32,7 +32,8 @@ export function submitBookExamUseCase (
     examSession: QuizExamSession,
     bookProgress: BookProgress,
     wallet: Wallet,
-    requiredBookPages = 0
+    requiredBookPages = 0,
+    today = new Date().toISOString().split('T')[0]
 ): SubmitBookExamResult
 {
     const total = examSession.totalQuestions;
@@ -64,7 +65,7 @@ export function submitBookExamUseCase (
     }
 
     const score = examSession.score;
-    const examRecord = bookProgress.recordExamResult(score, total);
+    const examRecord = bookProgress.recordExamResult(score, total, today);
 
     let forgeUnlocked = false;
     if (examRecord.passed)

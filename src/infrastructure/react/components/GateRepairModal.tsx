@@ -189,6 +189,13 @@ export const GateRepairModal: React.FC<GateRepairModalProps> = ({
                             <p className="text-xs text-slate-300">
                                 ໂຊກດີທີ່ຊຸດສ້ອມແປງບໍ່ໄດ້ສູນເສຍ. ທ່ານສາມາດທົດລອງໃໝ່ໄດ້.
                             </p>
+                            {currentQuestion && (
+                                <div className="text-xs bg-slate-900/60 p-3 rounded-xl border border-slate-800 space-y-1 text-left">
+                                    <p className="text-emerald-300">ຄຳຕອບທີ່ຖືກ: {currentQuestion.options[currentQuestion.correctIndex]}</p>
+                                    <p className="text-slate-300">💡 {currentQuestion.explanation}</p>
+                                    <p className="text-indigo-300">📖 ອ່ານທົບທວນໄດ້ທີ່ໜ້າ {currentQuestion.pageNumber} ຂອງຕຳລາບົດທີ 1</p>
+                                </div>
+                            )}
                             <button
                                 onClick={() => {
                                     setResult(null);

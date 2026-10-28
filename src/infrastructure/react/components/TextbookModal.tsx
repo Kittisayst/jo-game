@@ -33,7 +33,7 @@ export const TextbookModal: React.FC<TextbookModalProps> = ({
     isInVillage = true,
     initialBookId,
     initialPageNumber,
-    pageReadTimerSeconds = 3,
+    pageReadTimerSeconds = 5,
     onClose,
     onBookPurchased,
     onPageRead,

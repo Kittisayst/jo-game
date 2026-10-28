@@ -1389,6 +1389,8 @@ export class Game extends Scene
             { id: 'tree-1', type: 'tree', requiredTool: 'axe', toolTier: 1, drops: [{ itemId: 'wood', count: 3 }], x: 300, label: '🪵 [E] ຕັດຕົ້ນໄມ້ (+3 Wood)' },
             { id: 'herb-1', type: 'herb', requiredTool: null, toolTier: 0, drops: [{ itemId: 'herb', count: 2 }], x: 420, label: '🌿 [E] ເກັບສະໝຸນໄພ (+2 Herb)' },
             { id: 'tree-2', type: 'tree', requiredTool: 'axe', toolTier: 1, drops: [{ itemId: 'wood', count: 3 }], x: 550, label: '🪵 [E] ຕັດຕົ້ນໄມ້ (+3 Wood)' },
+            { id: 'tree-3', type: 'tree', requiredTool: 'axe', toolTier: 1, drops: [{ itemId: 'wood', count: 3 }], x: 660, label: '🪵 [E] ຕັດຕົ້ນໄມ້ (+3 Wood)' },
+            { id: 'tree-4', type: 'tree', requiredTool: 'axe', toolTier: 1, drops: [{ itemId: 'wood', count: 3 }], x: 900, label: '🪵 [E] ຕັດຕົ້ນໄມ້ (+3 Wood)' },
             { id: 'herb-2', type: 'herb', requiredTool: null, toolTier: 0, drops: [{ itemId: 'herb', count: 2 }], x: 780, label: '🌿 [E] ເກັບສະໝຸນໄພ (+2 Herb)' },
         ];
 
@@ -1444,8 +1446,8 @@ export class Game extends Scene
 
         const zoneBNodes = [
             { id: 'stone-1', type: 'stone', requiredTool: 'pickaxe', toolTier: 1, drops: [{ itemId: 'stone', count: 3 }], x: 1150, label: '🪨 [E] ທຸບຫີນ (+3 Stone)' },
-            { id: 'iron-1', type: 'iron-vein', requiredTool: 'pickaxe', toolTier: 1, drops: [{ itemId: 'iron-ore', count: 3 }], x: 1350, label: '⛏️ [E] ຂຸດແຮ່ເຫຼັກ (+3 Iron Ore)' },
-            { id: 'iron-2', type: 'iron-vein', requiredTool: 'pickaxe', toolTier: 1, drops: [{ itemId: 'iron-ore', count: 3 }], x: 1600, label: '⛏️ [E] ຂຸດແຮ່ເຫຼັກ (+3 Iron Ore)' },
+            { id: 'iron-1', type: 'iron-vein', requiredTool: 'pickaxe', toolTier: 1, drops: [{ itemId: 'iron-ore', count: 4 }], x: 1350, label: '⛏️ [E] ຂຸດແຮ່ເຫຼັກ (+4 Iron Ore)' },
+            { id: 'iron-2', type: 'iron-vein', requiredTool: 'pickaxe', toolTier: 1, drops: [{ itemId: 'iron-ore', count: 4 }], x: 1600, label: '⛏️ [E] ຂຸດແຮ່ເຫຼັກ (+4 Iron Ore)' },
         ];
 
         for (const n of zoneBNodes)

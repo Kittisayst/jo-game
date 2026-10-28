@@ -36,6 +36,8 @@ export interface BookProgressSnapshot
     examPassed: boolean;
     bestScore: number;
     attempts: number;
+    /** Date (YYYY-MM-DD) the daily resit reward was last paid. */
+    lastResitRewardDate?: string | null;
 }
 
 export class BookProgress
@@ -46,6 +48,7 @@ export class BookProgress
     private _examPassed: boolean;
     private _bestScore: number;
     private _attempts: number;
+    private _lastResitRewardDate: string | null;
 
     constructor (
         bookId: string,
@@ -53,7 +56,8 @@ export class BookProgress
         readPages: number[] = [],
         examPassed = false,
         bestScore = 0,
-        attempts = 0
+        attempts = 0,
+        lastResitRewardDate: string | null = null
     )
     {
         this.bookId = bookId;
@@ -62,6 +66,7 @@ export class BookProgress
         this._examPassed = examPassed;
         this._bestScore = Math.max(0, bestScore);
         this._attempts = Math.max(0, attempts);
+        this._lastResitRewardDate = lastResitRewardDate;
     }
 
     get isUnlocked (): boolean
@@ -162,10 +167,10 @@ export class BookProgress
     /**
      * Records exam completion. Pass threshold is 4/5 (>= 80%).
      * First pass reward: 50 credit.
-     * Subsequent pass reward: 5 credit.
+     * Subsequent pass reward: 5 credit, paid at most once per calendar day (`today`, YYYY-MM-DD).
      * Fail (< 4): 0 credit.
      */
-    recordExamResult (score: number, totalQuestions = 5): { passed: boolean; firstTime: boolean; creditReward: number }
+    recordExamResult (score: number, totalQuestions = 5, today = ''): { passed: boolean; firstTime: boolean; creditReward: number }
     {
         this._attempts++;
         if (score > this._bestScore)
@@ -183,7 +188,16 @@ export class BookProgress
 
         const firstTime = !this._examPassed;
         this._examPassed = true;
-        const creditReward = firstTime ? 50 : 5;
+        let creditReward = 50;
+        if (!firstTime)
+        {
+            const alreadyPaidToday = today !== '' && this._lastResitRewardDate === today;
+            creditReward = alreadyPaidToday ? 0 : 5;
+            if (creditReward > 0)
+            {
+                this._lastResitRewardDate = today || null;
+            }
+        }
 
         return { passed: true, firstTime, creditReward };
     }
@@ -197,6 +211,7 @@ export class BookProgress
             examPassed: this._examPassed,
             bestScore: this._bestScore,
             attempts: this._attempts,
+            lastResitRewardDate: this._lastResitRewardDate,
         };
     }
 
@@ -208,7 +223,8 @@ export class BookProgress
             snapshot.readPages,
             snapshot.examPassed,
             snapshot.bestScore,
-            snapshot.attempts
+            snapshot.attempts,
+            snapshot.lastResitRewardDate ?? null
         );
     }
 }

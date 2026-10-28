@@ -268,6 +268,7 @@ export function migrateSaveSnapshot (raw: unknown, fallbackSlotId = 'slot_1'): S
                 examPassed,
                 bestScore: typeof b.bestScore === 'number' ? Math.max(0, Math.floor(b.bestScore)) : 0,
                 attempts: typeof b.attempts === 'number' ? Math.max(0, Math.floor(b.attempts)) : 0,
+                lastResitRewardDate: typeof b.lastResitRewardDate === 'string' ? b.lastResitRewardDate : null,
             };
         }
     }

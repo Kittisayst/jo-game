@@ -304,7 +304,7 @@ export const AcademyModal: React.FC<AcademyModalProps> = ({
                                                 </div>
                                                 <div>
                                                     <span className="text-slate-400">ລາງວັນສອບຊ້ຳ:</span>
-                                                    <span className="font-bold text-amber-300 ml-2">+5 🎓 Credit</span>
+                                                    <span className="font-bold text-amber-300 ml-2">+5 🎓 Credit (ໄດ້ 1 ຄັ້ງ/ມື້)</span>
                                                 </div>
                                                 <div>
                                                     <span className="text-slate-400">ຈຳນວນຄັ້ງທີ່ສອບ:</span>
@@ -382,7 +382,9 @@ export const AcademyModal: React.FC<AcademyModalProps> = ({
                                         </p>
                                         {examResults.passed && (
                                             <p className="text-amber-400 font-bold text-base">
-                                                +{examResults.creditReward} 🎓 Credit ໄດ້ຮັບແລ້ວ!
+                                                {examResults.creditReward > 0
+                                                    ? `+${examResults.creditReward} 🎓 Credit ໄດ້ຮັບແລ້ວ!`
+                                                    : '✅ ວັນນີ້ຮັບລາງວັນສອບຊ້ຳແລ້ວ (ໄດ້ 1 ຄັ້ງຕໍ່ມື້)'}
                                                 {examResults.forgeUnlocked && ' 🔨 ໂຮງຕີເຫຼັກ (Forge) ໄດ້ຮັບການປົດລັອກແລ້ວ!'}
                                             </p>
                                         )}

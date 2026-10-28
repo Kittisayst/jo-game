@@ -21,8 +21,7 @@
     "damage": 15,
     "speed": 40,
     "drops": [
-      { "itemId": "stone", "chance": 1.0, "count": 2 },
-      { "itemId": "iron-ore", "chance": 0.5, "count": 1 }
+      { "itemId": "stone", "chance": 1.0, "count": 3 }
     ]
   },
   {
@@ -34,8 +33,7 @@
     "damage": 20,
     "speed": 55,
     "drops": [
-      { "itemId": "crystal", "chance": 1.0, "count": 2 },
-      { "itemId": "iron-ore", "chance": 1.0, "count": 3 }
+      { "itemId": "crystal", "chance": 1.0, "count": 2 }
     ]
   },
   {

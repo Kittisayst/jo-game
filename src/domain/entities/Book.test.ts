@@ -112,5 +112,38 @@ describe('BookProgress Entity', () =>
         expect(restored.bestScore).toBe(4);
         expect(restored.attempts).toBe(2);
     });
-});
 
+    describe('resit reward cap', () =>
+    {
+        const passedBook = (): BookProgress => new BookProgress('b1', true, [1, 2, 3], true, 5, 1);
+
+        it('pays the +5 resit reward only once per day', () =>
+        {
+            const book = passedBook();
+
+            const first = book.recordExamResult(5, 5, '2026-10-28');
+            const second = book.recordExamResult(5, 5, '2026-10-28');
+
+            expect(first).toMatchObject({ passed: true, firstTime: false, creditReward: 5 });
+            expect(second).toMatchObject({ passed: true, firstTime: false, creditReward: 0 });
+        });
+
+        it('pays again on the next day', () =>
+        {
+            const book = passedBook();
+            book.recordExamResult(4, 5, '2026-10-28');
+
+            expect(book.recordExamResult(5, 5, '2026-10-29').creditReward).toBe(5);
+        });
+
+        it('keeps the resit date through a snapshot round trip', () =>
+        {
+            const book = passedBook();
+            book.recordExamResult(5, 5, '2026-10-28');
+
+            const restored = BookProgress.fromSnapshot(book.toSnapshot());
+
+            expect(restored.recordExamResult(5, 5, '2026-10-28').creditReward).toBe(0);
+        });
+    });
+});

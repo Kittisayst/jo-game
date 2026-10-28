@@ -132,6 +132,11 @@ export const QuizFinisherModal: React.FC<QuizFinisherModalProps> = ({
                         <p className="text-xs text-slate-300 bg-slate-900/60 p-3 rounded-xl border border-slate-800">
                             {question.explanation}
                         </p>
+                        {!isCorrect && (
+                            <p className="text-xs text-indigo-300">
+                                📖 ອ່ານທົບທວນໄດ້ທີ່ໜ້າ {question.pageNumber} ຂອງຕຳລາບົດທີ 1 (ເປີດຈາກກະເປົາ ຫຼື ຫໍສະໝຸດໃນໝູ່ບ້ານ)
+                            </p>
+                        )}
                         <button
                             onClick={handleContinue}
                             className="px-6 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs transition"
