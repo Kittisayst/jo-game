@@ -1,5 +1,6 @@
 import { Scene } from 'phaser';
 import { LEVEL_CATALOG } from '../levelCatalog';
+import { ACTIVE_SESSION_STORAGE_KEY, readString, STORAGE_PREFIX } from '../../storage/safeStorage';
 
 export class Preloader extends Scene
 {
@@ -45,6 +46,22 @@ export class Preloader extends Scene
 
     create ()
     {
-        this.scene.start('Title');
+        const activeSession = readString(ACTIVE_SESSION_STORAGE_KEY);
+        if (activeSession && activeSession !== 'title')
+        {
+            const activeSkinId = readString(`${STORAGE_PREFIX}active_skin_id`) ?? 'cyber-blue';
+            this.scene.start('Game', {
+                levelKey: activeSession,
+                score: 0,
+                lives: 3,
+                skinId: activeSkinId,
+                coins: 0,
+                elapsedMs: 0,
+            });
+        }
+        else
+        {
+            this.scene.start('Title');
+        }
     }
 }

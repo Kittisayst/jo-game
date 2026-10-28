@@ -79,13 +79,22 @@ import { completeStageUseCase } from '../../application/CompleteStageUseCase';
 import { selectStageUseCase } from '../../application/SelectStageUseCase';
 import { useItemUseCase as executeUseItemUseCase } from '../../application/UseItemUseCase';
 import { WEAPON_CATALOG } from '../../domain/entities/Weapon';
+import {
+    ACTIVE_SESSION_STORAGE_KEY,
+    readString,
+    writeString,
+    removeKey,
+} from '../storage/safeStorage';
 
 function App ()
 {
     const phaserRef = useRef<IRefPhaserGame | null>(null);
+    const initialSession = readString(ACTIVE_SESSION_STORAGE_KEY);
+    const shouldResumeInGame = initialSession !== null && initialSession !== 'title';
+
     const [levelComplete, setLevelComplete] = useState(false);
     const [gameOver, setGameOver] = useState(false);
-    const [currentLevel, setCurrentLevel] = useState('village');
+    const [currentLevel, setCurrentLevel] = useState(() => (shouldResumeInGame ? initialSession : 'village'));
     const [nextLevel, setNextLevel] = useState<string | null>(null);
     const [score, setScore] = useState(0);
     const [coinsCount, setCoinsCount] = useState(0);
@@ -109,7 +118,7 @@ function App ()
     const [bossMaxHp, setBossMaxHp] = useState(5);
     const [activeSkinId, setActiveSkinId] = useState(entities.skinManager.activeSkinId);
     const [isSkinModalOpen, setIsSkinModalOpen] = useState(false);
-    const [isMainMenuOpen, setIsMainMenuOpen] = useState(true);
+    const [isMainMenuOpen, setIsMainMenuOpen] = useState(!shouldResumeInGame);
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
     const [isStageSelectOpen, setIsStageSelectOpen] = useState(false);
     const [isStageMapOpen, setIsStageMapOpen] = useState(false);
@@ -119,8 +128,21 @@ function App ()
     const [elapsedSeconds, setElapsedSeconds] = useState(0);
     const [isNewHighScore, setIsNewHighScore] = useState(false);
     const [isNewBestTime, setIsNewBestTime] = useState(false);
-    const [villageWelcomeToast, setVillageWelcomeToast] = useState<string | null>(null);
+    const [villageWelcomeToast, setVillageWelcomeToast] = useState<string | null>(() =>
+        shouldResumeInGame && initialSession === 'village'
+            ? '🏡 ຍິນດີຕ້ອນຮັບສູ່ ໝູ່ບ້ານ Cyber Village! (ລົມກັບຫົວໜ້າໝູ່ບ້ານ ແລະ NPC Mina)'
+            : null
+    );
     const maxLives = 3;
+
+    useEffect(() =>
+    {
+        if (villageWelcomeToast)
+        {
+            const timer = setTimeout(() => setVillageWelcomeToast(null), 5000);
+            return () => clearTimeout(timer);
+        }
+    }, [villageWelcomeToast]);
 
     const scoreRef = useRef(score);
     scoreRef.current = score;
@@ -717,6 +739,8 @@ function App ()
         setIsNewHighScore(false);
         setIsNewBestTime(false);
 
+        writeString(ACTIVE_SESSION_STORAGE_KEY, stageKey);
+
         if (stageKey === 'village')
         {
             setVillageWelcomeToast('🏡 ຍິນດີຕ້ອນຮັບສູ່ ໝູ່ບ້ານ Cyber Village! (ລົມກັບຫົວໜ້າໝູ່ບ້ານ ແລະ NPC Mina)');
@@ -754,6 +778,7 @@ function App ()
 
     const handleOpenMainMenu = () =>
     {
+        writeString(ACTIVE_SESSION_STORAGE_KEY, 'title');
         resumeGameUseCase(pauseState);
         setIsGamePaused(false);
         setIsMainMenuOpen(true);
@@ -815,6 +840,7 @@ function App ()
             setIsMusicMuted(settings.isMusicMuted);
             setIsNewHighScore(false);
             setIsNewBestTime(false);
+            removeKey(ACTIVE_SESSION_STORAGE_KEY);
             soundManager.playCoin();
         }
     };
@@ -826,6 +852,7 @@ function App ()
         resumeGameUseCase(pauseState);
         setIsGamePaused(false);
         const target = nextLevel;
+        writeString(ACTIVE_SESSION_STORAGE_KEY, target);
         setCurrentLevel(target);
         setLevelComplete(false);
         setNextLevel(null);
@@ -855,6 +882,7 @@ function App ()
         resumeGameUseCase(pauseState);
         setIsGamePaused(false);
         const target = resetToStart ? 'village' : currentLevel;
+        writeString(ACTIVE_SESSION_STORAGE_KEY, target);
 
         if (resetToStart)
         {

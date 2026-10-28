@@ -89,5 +89,19 @@ test.describe('Title Start Screen and Village Hub Transition E2E', () => {
     // 6. Verify returned to Title Screen
     await expect(titleCard).toBeVisible({ timeout: 6000 });
     await expect(playBtn).toBeVisible();
+
+    // 7. Verify Refresh Session Persistence:
+    // Click play to enter village again
+    await playBtn.click();
+    await expect(hud).toBeVisible({ timeout: 8000 });
+    await expect(stageBadge).toContainText(/ໝູ່ບ້ານ/i);
+
+    // Refresh page
+    await page.reload();
+
+    // On reload, it should directly resume into Village with HUD visible, NOT Title screen
+    await expect(page.locator('.game-hud')).toBeVisible({ timeout: 8000 });
+    await expect(page.locator('.level-badge')).toContainText(/ໝູ່ບ້ານ/i);
+    await expect(page.locator('.main-menu-card')).not.toBeVisible();
   });
 });

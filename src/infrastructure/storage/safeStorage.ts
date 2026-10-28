@@ -3,6 +3,7 @@
  * All keys this game writes start with `jo_` so a reset never touches other apps' data.
  */
 export const STORAGE_PREFIX = 'jo_';
+export const ACTIVE_SESSION_STORAGE_KEY = `${STORAGE_PREFIX}active_session_scene`;
 
 function storage (): Storage | null
 {
