@@ -87,7 +87,11 @@ export function createDefaultSaveSnapshot (slotId = 'slot_1'): SaveGameSnapshot
                 attempts: 0,
             },
         },
-        backpack: [],
+        backpack: [
+            { slotIndex: 0, itemId: 'wooden-sword', count: 1 },
+            // Trees need an axe and the axe recipe needs wood, so the player must start with one
+            { slotIndex: 1, itemId: 'axe-t1', count: 1 },
+        ],
         equipment: {
             equippedWeaponId: 'wooden-sword',
             upgradeLevels: {},

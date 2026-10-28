@@ -48,6 +48,12 @@ export const MATERIAL_ITEM_IDS = new Set([
     'boss-core',
 ]);
 
+/** Materials that are never lost on death, so beating a Mini-boss or Boss is never wasted. */
+export const STORY_ITEM_IDS = new Set([
+    'crystal',
+    'boss-core',
+]);
+
 export class Backpack
 {
     private _slots: (BackpackSlot | null)[];
@@ -241,12 +247,12 @@ export class Backpack
 
     /**
      * Applies 50% material loss upon death or emergency retreat.
-     * Keeps 100% of weapons, tools, and consumables.
+     * Keeps 100% of weapons, tools, consumables, and story items (crystal, boss core).
      */
     applyRetreatPenalty (isMaterialFn?: (itemId: string) => boolean): { lost: { itemId: string; count: number }[] }
     {
         const lost: { itemId: string; count: number }[] = [];
-        const isMaterial = isMaterialFn || ((id: string) => MATERIAL_ITEM_IDS.has(id));
+        const isMaterial = isMaterialFn || ((id: string) => MATERIAL_ITEM_IDS.has(id) && !STORY_ITEM_IDS.has(id));
 
         for (let i = 0; i < this._slots.length; i++)
         {

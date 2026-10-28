@@ -89,6 +89,21 @@ describe('Backpack Entity', () =>
         expect(backpack.getItemCount('herb-potion')).toBe(2);
     });
 
+    it('keeps story items (crystal, boss-core) when applying the retreat penalty', () =>
+    {
+        const backpack = new Backpack();
+        backpack.addItem('wood', 5);
+        backpack.addItem('crystal', 3);
+        backpack.addItem('boss-core', 1);
+
+        const penalty = backpack.applyRetreatPenalty();
+
+        expect(penalty.lost).toEqual([{ itemId: 'wood', count: 3 }]);
+        expect(backpack.getItemCount('wood')).toBe(2);
+        expect(backpack.getItemCount('crystal')).toBe(3);
+        expect(backpack.getItemCount('boss-core')).toBe(1);
+    });
+
     it('serializes and deserializes snapshot cleanly', () =>
     {
         const backpack = new Backpack();

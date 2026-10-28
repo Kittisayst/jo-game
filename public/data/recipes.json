@@ -45,7 +45,7 @@
     "ingredients": [
       { "itemId": "wood", "count": 5 },
       { "itemId": "iron-ore", "count": 3 },
-      { "itemId": "fiber", "count": 4 }
+      { "itemId": "crystal", "count": 1 }
     ]
   },
   {

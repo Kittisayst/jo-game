@@ -29,7 +29,10 @@ describe('SaveData Domain Entity & Migration', () =>
 
         // v5 Buy-to-Read properties (books start unpurchased)
         expect(defaultSave.books?.['book-ch1']?.unlocked).toBe(false);
-        expect(defaultSave.backpack).toEqual([]);
+        expect(defaultSave.backpack).toEqual([
+            { slotIndex: 0, itemId: 'wooden-sword', count: 1 },
+            { slotIndex: 1, itemId: 'axe-t1', count: 1 },
+        ]);
         expect(defaultSave.equipment?.equippedWeaponId).toBe('wooden-sword');
         expect(defaultSave.forgeUnlocked).toBe(false);
     });
