@@ -10,6 +10,20 @@ import { NPC } from '../objects/NPC';
 import { ParticleManager } from '../effects/ParticleManager';
 import { soundManager } from '../../audio/SoundManager';
 import { Level } from '../Level';
+import {
+    getStageBossSpawn,
+    getStageDefinition,
+    getStageEnemySpawns,
+    parseStageDefinitions,
+    StageDefinition,
+} from '../stages/StageDefinition';
+import {
+    BrokenGate,
+    buildStageScenery,
+    ResourceNodeView,
+    WaypointView,
+} from '../scenery/StageBuilder';
+import { buildVillageScenery, InteractiveBuilding } from '../scenery/VillageBuilder';
 import { LEVEL_CATALOG } from '../levelCatalog';
 import { DomainEvents } from '../../../domain/DomainEvents';
 import { Health } from '../../../domain/entities/Health';
@@ -35,6 +49,8 @@ import { harvestResourceNodeUseCase } from '../../../application/HarvestResource
 
 const WORLD_HEIGHT = 720;
 const GROUND_HEIGHT = 64;
+/** Top of the ground: where buildings, trees and nodes stand. */
+const GROUND_Y = WORLD_HEIGHT - GROUND_HEIGHT;
 const GROUND_TILE_SIZE = 64;
 const MAX_HEALTH = 3;
 
@@ -57,6 +73,8 @@ export class Game extends Scene
     touchControls = { left: false, right: false, up: false };
     bgTileSprite?: Phaser.GameObjects.TileSprite;
     level: Level;
+    /** Zones, resource nodes, enemies and gate of the current Stage; undefined in the village. */
+    stage?: StageDefinition;
     /** True once the stage boss is beaten and the stage-cleared event has been sent. */
     isStageCleared = false;
     health: Health;
@@ -64,22 +82,10 @@ export class Game extends Scene
     currentSkinId = 'cyber-blue';
 
     // Knowledge Quest: Village Hub & 4-Zone Stage fields
-    private interactiveBuildings: { x: number; label: string; action: () => void }[] = [];
-    private resourceNodes: {
-        id: string;
-        type: string;
-        requiredTool: string | null;
-        toolTier: number;
-        drops: { itemId: string; count: number }[];
-        x: number;
-        y: number;
-        graphic: Phaser.GameObjects.Graphics;
-        label: string;
-        harvested: boolean;
-    }[] = [];
-    private waypoints: { x: number; y: number; name: string }[] = [];
-    private brokenGate?: { x: number; y: number; gateId: string; graphic: Phaser.GameObjects.Graphics; labelText: Phaser.GameObjects.Text };
-    private brokenGateWall?: Phaser.Physics.Arcade.StaticGroup;
+    private interactiveBuildings: InteractiveBuilding[] = [];
+    private resourceNodes: ResourceNodeView[] = [];
+    private waypoints: WaypointView[] = [];
+    private brokenGate?: BrokenGate;
     private interactionPromptText?: Phaser.GameObjects.Text;
     private activeInteraction: (() => void) | null = null;
 
@@ -109,7 +115,7 @@ export class Game extends Scene
         this.resourceNodes = [];
         this.waypoints = [];
         this.brokenGate = undefined;
-        this.brokenGateWall = undefined;
+        this.stage = undefined;
         this.interactionPromptText = undefined;
         this.activeInteraction = null;
     }
@@ -120,6 +126,10 @@ export class Game extends Scene
         if (!this.cache.json.exists('enemies'))
         {
             this.load.json('enemies', 'data/enemies.json');
+        }
+        if (!this.cache.json.exists('stages'))
+        {
+            this.load.json('stages', 'data/stages.json');
         }
         for (const item of LEVEL_CATALOG)
         {
@@ -205,6 +215,7 @@ export class Game extends Scene
         this.elderNpc = undefined;
 
         this.level = this.cache.json.get(this.currentLevelKey) as Level;
+        this.stage = getStageDefinition(parseStageDefinitions(this.cache.json.get('stages')), this.currentLevelKey);
         this.isStageCleared = false;
         this.health = new Health(MAX_HEALTH, MAX_HEALTH);
 
@@ -226,7 +237,11 @@ export class Game extends Scene
 
         if (this.level.scenery === 'village' || this.currentLevelKey === 'village')
         {
-            this.createVillageScenery();
+            this.interactiveBuildings = buildVillageScenery(
+                this,
+                GROUND_Y,
+                Boolean(entities.forgeUnlocked || entities.books['book-ch1']?.examPassed)
+            );
             const baseY = WORLD_HEIGHT - GROUND_HEIGHT - 24;
             this.elderNpc = new NPC(this, 460, baseY, 'npc-elder');
             this.elderNpc.onInteract = () =>
@@ -234,9 +249,12 @@ export class Game extends Scene
                 EventBus.emit('start-dialogue', 'village_elder');
             };
         }
-        else if (this.level.scenery === 'stage-ch1' || this.currentLevelKey === 'stage-ch1')
+        else if (this.stage)
         {
-            this.createStageCh1Scenery();
+            const built = buildStageScenery(this, this.stage, GROUND_Y, entities.repairedGates);
+            this.resourceNodes = built.resourceNodes;
+            this.waypoints = built.waypoints;
+            this.brokenGate = built.brokenGate;
         }
 
         // Floating interaction prompt text
@@ -300,9 +318,9 @@ export class Game extends Scene
         this.physics.add.collider(this.player, this.ground);
         this.physics.add.collider(this.player, this.platforms);
         // The gate wall is built with the scenery, before the player exists, so it is hooked up here
-        if (this.brokenGateWall)
+        if (this.brokenGate?.wall)
         {
-            this.physics.add.collider(this.player, this.brokenGateWall);
+            this.physics.add.collider(this.player, this.brokenGate.wall);
         }
         this.physics.add.collider(this.player, this.movingPlatforms);
 
@@ -322,11 +340,12 @@ export class Game extends Scene
             this.handlePlayerEnemyCollision(playerObj as Player, enemyObj as Enemy);
         });
 
-        // Spawn Boss if defined for this level
-        if (this.level.boss)
+        // Spawn Boss if the stage has one
+        const bossSpawn = this.stage ? getStageBossSpawn(this.stage) : undefined;
+        if (bossSpawn)
         {
-            const bossDefinition = this.level.boss.enemyId ? this.getEnemyDefinition(this.level.boss.enemyId) : undefined;
-            this.boss = new Boss(this, this.level.boss.x, this.level.boss.y, bossDefinition?.maxHp ?? this.level.boss.hp ?? 5);
+            const bossDefinition = this.getEnemyDefinition(bossSpawn.enemyId);
+            this.boss = new Boss(this, bossSpawn.x, bossSpawn.y, bossDefinition?.maxHp ?? 5);
             this.boss.awaitFinisher = this.currentLevelKey === 'stage-ch1';
             this.boss.onLanding = (x, y) =>
             {
@@ -470,11 +489,7 @@ export class Game extends Scene
         {
             if (this.brokenGate && this.brokenGate.gateId === gateId)
             {
-                if (this.brokenGateWall)
-                {
-                    this.brokenGateWall.clear(true, true);
-                }
-                this.redrawBrokenGate(true);
+                this.brokenGate.repair();
                 this.particleManager.emitCelebration(this.brokenGate.x, this.brokenGate.y - 40);
                 soundManager.playPowerUp();
             }
@@ -490,7 +505,7 @@ export class Game extends Scene
         EventBus.on('gate-repaired', onGateRepaired);
 
         // Start BGM (boss theme for level-3, adventure theme for levels 1 & 2)
-        const isBossStage = Boolean(this.level.boss);
+        const isBossStage = Boolean(bossSpawn);
         soundManager.startBgm(isBossStage ? 'boss' : 'adventure');
 
         const onSkinChanged = (payload: SkinChangedPayload) =>
@@ -868,410 +883,6 @@ export class Game extends Scene
         EventBus.emit('stage-cleared', { stageId: this.currentLevelKey });
     }
 
-    private createVillageScenery ()
-    {
-        const baseY = WORLD_HEIGHT - GROUND_HEIGHT;
-
-        const buildings = [
-            { x: 320, width: 140, height: 160, roofColor: 0x6366f1, bodyColor: 0x1e293b, icon: '📚', name: 'ຫໍສະໝຸດ (Library)', sub: 'ອ່ານຕຳລາ' },
-            { x: 600, width: 160, height: 180, roofColor: 0x3b82f6, bodyColor: 0x0f172a, icon: '🏛️', name: 'ສະຖາບັນ (Academy)', sub: 'ສອບເສັງ & ຝຶກຝົນ' },
-            { x: 880, width: 150, height: 150, roofColor: 0x10b981, bodyColor: 0x1e293b, icon: '🔨', name: 'ໂຮງຊ່າງ (Workshop)', sub: 'ສ້າງເຄື່ອງມື' },
-            {
-                x: 1140,
-                width: 150,
-                height: 160,
-                roofColor: (entities.forgeUnlocked || entities.books['book-ch1']?.examPassed) ? 0xf97316 : 0x475569,
-                bodyColor: 0x1e293b,
-                icon: (entities.forgeUnlocked || entities.books['book-ch1']?.examPassed) ? '⚔️' : '🔒',
-                name: (entities.forgeUnlocked || entities.books['book-ch1']?.examPassed) ? 'ໂຮງຕີເຫຼັກ (Forge)' : 'ໂຮງຕີເຫຼັກ (ລັອກ)',
-                sub: (entities.forgeUnlocked || entities.books['book-ch1']?.examPassed) ? 'ອັບເກຣດອາວຸດ' : 'ສອບຜ່ານບົດທີ 1 ກ່ອນ',
-            },
-        ];
-
-        // Background trees
-        const treeXPositions = [180, 460, 740, 1020, 1280];
-        for (const tx of treeXPositions)
-        {
-            const tree = this.add.graphics();
-            tree.setDepth(1);
-            tree.fillStyle(0x78350f, 1);
-            tree.fillRect(tx - 6, baseY - 50, 12, 50);
-            tree.fillStyle(0x15803d, 0.95);
-            tree.fillCircle(tx, baseY - 70, 26);
-            tree.fillStyle(0x22c55e, 0.9);
-            tree.fillCircle(tx - 6, baseY - 76, 18);
-        }
-
-        for (const b of buildings)
-        {
-            const g = this.add.graphics();
-            g.setDepth(1);
-
-            // House body
-            g.fillStyle(b.bodyColor, 0.92);
-            g.fillRoundedRect(b.x - b.width / 2, baseY - b.height, b.width, b.height, 8);
-
-            // Roof
-            g.fillStyle(b.roofColor, 1);
-            g.beginPath();
-            g.moveTo(b.x - b.width / 2 - 16, baseY - b.height);
-            g.lineTo(b.x, baseY - b.height - 45);
-            g.lineTo(b.x + b.width / 2 + 16, baseY - b.height);
-            g.closePath();
-            g.fillPath();
-
-            // Windows
-            g.fillStyle(0xfef08a, 0.9);
-            g.fillRect(b.x - b.width / 3, baseY - b.height + 30, 24, 24);
-            g.fillRect(b.x + b.width / 3 - 24, baseY - b.height + 30, 24, 24);
-
-            // Door
-            g.fillStyle(0x78350f, 1);
-            g.fillRoundedRect(b.x - 14, baseY - 48, 28, 48, 4);
-
-            // Sign banner above roof
-            const sign = this.add.text(b.x, baseY - b.height - 60, `${b.icon} ${b.name}\n(${b.sub})`, {
-                fontFamily: '"Noto Sans Lao", sans-serif',
-                fontSize: '12px',
-                color: '#fef08a',
-                stroke: '#0f172a',
-                strokeThickness: 3,
-                align: 'center',
-            });
-            sign.setOrigin(0.5, 0.5);
-            sign.setDepth(2);
-        }
-
-        // Lanterns along pathway
-        const lanternX = [220, 500, 780, 1060, 1340];
-        for (const lx of lanternX)
-        {
-            const post = this.add.graphics();
-            post.setDepth(2);
-            post.fillStyle(0x1e293b, 1);
-            post.fillRect(lx - 2, baseY - 50, 4, 50);
-            post.fillStyle(0xf59e0b, 1);
-            post.fillCircle(lx, baseY - 54, 7);
-            post.fillStyle(0xfef08a, 0.9);
-            post.fillCircle(lx, baseY - 54, 3);
-        }
-
-        // Welcome sign
-        const welcomeSign = this.add.text(120, baseY - 80, '🏡 ໝູ່ບ້ານແຫ່ງປັນຍາ\n(Knowledge Village)', {
-            fontFamily: '"Noto Sans Lao", sans-serif',
-            fontSize: '13px',
-            color: '#fef08a',
-            stroke: '#0f172a',
-            strokeThickness: 3,
-            align: 'center',
-        });
-        welcomeSign.setOrigin(0.5, 0.5);
-        welcomeSign.setDepth(2);
-
-        // World Gate Portal at x = 1420
-        const portalSign = this.add.text(1420, baseY - 90, '🌀 ປະຕູມິຕິ (World Gate)\n[E] ເປີດແຜນທີ່ດ່ານ ➡️', {
-            fontFamily: '"Noto Sans Lao", sans-serif',
-            fontSize: '14px',
-            color: '#38bdf8',
-            stroke: '#0284c7',
-            strokeThickness: 3,
-            align: 'center',
-        });
-        portalSign.setOrigin(0.5, 0.5);
-        portalSign.setDepth(2);
-
-        this.tweens.add({
-            targets: portalSign,
-            y: baseY - 96,
-            duration: 900,
-            yoyo: true,
-            repeat: -1,
-            ease: 'Sine.easeInOut',
-        });
-
-        // Register interactive zones for buildings
-        this.interactiveBuildings = [
-            { x: 320, label: '📚 [E] ເຂົ້າຫໍສະໝຸດ (Library)', action: () => EventBus.emit('open-library') },
-            { x: 600, label: '🏛️ [E] ເຂົ້າສະຖາບັນ (Academy)', action: () => EventBus.emit('open-academy') },
-            { x: 880, label: '🔨 [E] ເຂົ້າໂຮງຊ່າງ (Workshop)', action: () => EventBus.emit('open-workshop') },
-            {
-                x: 1140,
-                label: (entities.forgeUnlocked || entities.books['book-ch1']?.examPassed)
-                    ? '⚔️ [E] ເຂົ້າໂຮງຕີເຫຼັກ (Forge)'
-                    : '🔒 [E] ໂຮງຕີເຫຼັກ (ຕ້ອງສອບເສັງບົດທີ 1 ຜ່ານກ່ອນ)',
-                action: () => EventBus.emit('open-forge'),
-            },
-            { x: 1420, label: '🌀 [E] ເລືອກດ່ານຜະຈົນໄພ (World Map)', action: () => EventBus.emit('open-stage-map') },
-        ];
-    }
-
-    private createStageCh1Scenery ()
-    {
-        const baseY = WORLD_HEIGHT - GROUND_HEIGHT;
-
-        this.resourceNodes = [];
-        this.waypoints = [];
-
-        // 1. Zone A: Forest (0 .. 1000)
-        const wp1Graphics = this.add.graphics();
-        wp1Graphics.setDepth(2);
-        wp1Graphics.fillStyle(0x06b6d4, 0.85);
-        wp1Graphics.fillCircle(120, baseY - 35, 18);
-        wp1Graphics.lineStyle(2, 0x67e8f9, 1);
-        wp1Graphics.strokeCircle(120, baseY - 35, 22);
-
-        const wp1Label = this.add.text(120, baseY - 70, '🌀 ຈຸດວາບປອດໄພ 1\n(Zone A Entrance)', {
-            fontFamily: '"Noto Sans Lao", sans-serif',
-            fontSize: '11px',
-            color: '#67e8f9',
-            stroke: '#083344',
-            strokeThickness: 3,
-            align: 'center',
-        }).setOrigin(0.5, 0.5).setDepth(2);
-
-        this.tweens.add({
-            targets: [wp1Graphics, wp1Label],
-            y: '-=6',
-            duration: 1000,
-            yoyo: true,
-            repeat: -1,
-            ease: 'Sine.easeInOut',
-        });
-
-        this.waypoints.push({ x: 120, y: baseY - 35, name: 'ຈຸດວາບປອດໄພ ປາກທາງເຂົ້າ (Zone A)' });
-
-        const zoneANodes = [
-            { id: 'tree-1', type: 'tree', requiredTool: 'axe', toolTier: 1, drops: [{ itemId: 'wood', count: 3 }], x: 300, label: '🪵 [E] ຕັດຕົ້ນໄມ້ (+3 Wood)' },
-            { id: 'herb-1', type: 'herb', requiredTool: null, toolTier: 0, drops: [{ itemId: 'herb', count: 2 }], x: 420, label: '🌿 [E] ເກັບສະໝຸນໄພ (+2 Herb)' },
-            { id: 'tree-2', type: 'tree', requiredTool: 'axe', toolTier: 1, drops: [{ itemId: 'wood', count: 3 }], x: 550, label: '🪵 [E] ຕັດຕົ້ນໄມ້ (+3 Wood)' },
-            { id: 'tree-3', type: 'tree', requiredTool: 'axe', toolTier: 1, drops: [{ itemId: 'wood', count: 3 }], x: 660, label: '🪵 [E] ຕັດຕົ້ນໄມ້ (+3 Wood)' },
-            { id: 'tree-4', type: 'tree', requiredTool: 'axe', toolTier: 1, drops: [{ itemId: 'wood', count: 3 }], x: 900, label: '🪵 [E] ຕັດຕົ້ນໄມ້ (+3 Wood)' },
-            { id: 'herb-2', type: 'herb', requiredTool: null, toolTier: 0, drops: [{ itemId: 'herb', count: 2 }], x: 780, label: '🌿 [E] ເກັບສະໝຸນໄພ (+2 Herb)' },
-        ];
-
-        for (const n of zoneANodes)
-        {
-            const g = this.add.graphics();
-            g.setDepth(2);
-            if (n.type === 'tree')
-            {
-                g.fillStyle(0x78350f, 1);
-                g.fillRect(n.x - 10, baseY - 70, 20, 70);
-                g.fillStyle(0x16a34a, 0.95);
-                g.fillCircle(n.x, baseY - 90, 36);
-                g.fillStyle(0x22c55e, 0.9);
-                g.fillCircle(n.x - 8, baseY - 100, 24);
-            }
-            else
-            {
-                g.fillStyle(0x16a34a, 1);
-                g.fillRect(n.x - 2, baseY - 20, 4, 20);
-                g.fillStyle(0x4ade80, 0.95);
-                g.fillCircle(n.x, baseY - 24, 12);
-                g.fillCircle(n.x - 6, baseY - 20, 8);
-                g.fillCircle(n.x + 6, baseY - 20, 8);
-            }
-
-            this.resourceNodes.push({
-                ...n,
-                y: baseY - 30,
-                graphic: g,
-                harvested: false,
-            });
-        }
-
-        this.add.text(240, baseY - 110, '🌲 ເຂດປ່າໄມ້ (Zone A - Forest)\n[E] ເກັບກ່ຽວຊັບພະຍາກອນ', {
-            fontFamily: '"Noto Sans Lao", sans-serif',
-            fontSize: '13px',
-            color: '#86efac',
-            stroke: '#064e3b',
-            strokeThickness: 3,
-            align: 'center',
-        }).setOrigin(0.5, 0.5).setDepth(2);
-
-        // 2. Zone B: Mineral Cavern (1000 .. 2000)
-        this.add.text(1100, baseY - 110, '⛏️ ເຂດຖ້ຳສາຍແຮ່ (Zone B - Cavern)\nຕ້ອງໃຊ້ Pickaxe ຂຸດແຮ່ເຫຼັກ', {
-            fontFamily: '"Noto Sans Lao", sans-serif',
-            fontSize: '13px',
-            color: '#cbd5e1',
-            stroke: '#1e293b',
-            strokeThickness: 3,
-            align: 'center',
-        }).setOrigin(0.5, 0.5).setDepth(2);
-
-        const zoneBNodes = [
-            { id: 'stone-1', type: 'stone', requiredTool: 'pickaxe', toolTier: 1, drops: [{ itemId: 'stone', count: 3 }], x: 1150, label: '🪨 [E] ທຸບຫີນ (+3 Stone)' },
-            { id: 'iron-1', type: 'iron-vein', requiredTool: 'pickaxe', toolTier: 1, drops: [{ itemId: 'iron-ore', count: 4 }], x: 1350, label: '⛏️ [E] ຂຸດແຮ່ເຫຼັກ (+4 Iron Ore)' },
-            { id: 'iron-2', type: 'iron-vein', requiredTool: 'pickaxe', toolTier: 1, drops: [{ itemId: 'iron-ore', count: 4 }], x: 1600, label: '⛏️ [E] ຂຸດແຮ່ເຫຼັກ (+4 Iron Ore)' },
-        ];
-
-        for (const n of zoneBNodes)
-        {
-            const g = this.add.graphics();
-            g.setDepth(2);
-            if (n.type === 'stone')
-            {
-                g.fillStyle(0x64748b, 1);
-                g.fillCircle(n.x, baseY - 20, 22);
-                g.fillStyle(0x94a3b8, 0.9);
-                g.fillCircle(n.x - 5, baseY - 24, 12);
-            }
-            else
-            {
-                g.fillStyle(0x475569, 1);
-                g.fillCircle(n.x, baseY - 24, 26);
-                g.fillStyle(0xd97706, 1);
-                g.fillTriangle(n.x - 12, baseY - 32, n.x - 2, baseY - 48, n.x + 8, baseY - 32);
-                g.fillStyle(0xf59e0b, 1);
-                g.fillTriangle(n.x, baseY - 24, n.x + 12, baseY - 40, n.x + 18, baseY - 24);
-            }
-
-            this.resourceNodes.push({
-                ...n,
-                y: baseY - 30,
-                graphic: g,
-                harvested: false,
-            });
-        }
-
-        // Mini-boss marker at x = 1850
-        const minibossSign = this.add.text(1850, baseY - 80, '⚠️ ຜູ້ພິທັກຖ້ຳ Cave Guardian\n(ປາບເພື່ອຮັບຜລຶກແກ້ວ 💎)', {
-            fontFamily: '"Noto Sans Lao", sans-serif',
-            fontSize: '12px',
-            color: '#f87171',
-            stroke: '#450a0a',
-            strokeThickness: 3,
-            align: 'center',
-        }).setOrigin(0.5, 0.5).setDepth(2);
-
-        this.tweens.add({
-            targets: minibossSign,
-            y: baseY - 86,
-            duration: 700,
-            yoyo: true,
-            repeat: -1,
-            ease: 'Sine.easeInOut',
-        });
-
-        // 3. Broken Gate Zone (2000 .. 2300)
-        const wp2Graphics = this.add.graphics();
-        wp2Graphics.setDepth(2);
-        wp2Graphics.fillStyle(0x06b6d4, 0.85);
-        wp2Graphics.fillCircle(2050, baseY - 35, 18);
-        wp2Graphics.lineStyle(2, 0x67e8f9, 1);
-        wp2Graphics.strokeCircle(2050, baseY - 35, 22);
-
-        const wp2Label = this.add.text(2050, baseY - 70, '🌀 ຈຸດວາບປອດໄພ 2\n(Gate Waypoint)', {
-            fontFamily: '"Noto Sans Lao", sans-serif',
-            fontSize: '11px',
-            color: '#67e8f9',
-            stroke: '#083344',
-            strokeThickness: 3,
-            align: 'center',
-        }).setOrigin(0.5, 0.5).setDepth(2);
-
-        this.tweens.add({
-            targets: [wp2Graphics, wp2Label],
-            y: '-=6',
-            duration: 1000,
-            yoyo: true,
-            repeat: -1,
-            ease: 'Sine.easeInOut',
-        });
-
-        this.waypoints.push({ x: 2050, y: baseY - 35, name: 'ຈຸດວາບປອດໄພ ໜ້າປະຕູໃຫຍ່ (Broken Gate)' });
-
-        const isGateRepaired = entities.repairedGates.has('gate-ch1');
-        const gateGraphic = this.add.graphics();
-        gateGraphic.setDepth(2);
-
-        const gateLabel = this.add.text(2150, baseY - 130, '', {
-            fontFamily: '"Noto Sans Lao", sans-serif',
-            fontSize: '13px',
-            color: '#fde047',
-            stroke: '#713f12',
-            strokeThickness: 3,
-            align: 'center',
-        }).setOrigin(0.5, 0.5).setDepth(3);
-
-        this.brokenGate = {
-            x: 2150,
-            y: baseY - 70,
-            gateId: 'gate-ch1',
-            graphic: gateGraphic,
-            labelText: gateLabel,
-        };
-
-        this.redrawBrokenGate(isGateRepaired);
-
-        // 4. Zone C: Boss Arena (2300 .. 3200)
-        const bossBanner = this.add.text(2800, 115, '👑 ຈອມມານຮາດແວບູຮານ (Hardware Overlord) 👑\n(ຫຼົບກະແສໄຟຟ້າ & ໂຈມຕີປິດສາກດ້ວຍຄວາມຮູ້!)', {
-            fontFamily: '"Noto Sans Lao", sans-serif',
-            fontSize: '15px',
-            color: '#fef08a',
-            fontStyle: 'bold',
-            align: 'center',
-            stroke: '#7c3aed',
-            strokeThickness: 3,
-            backgroundColor: 'rgba(15, 23, 42, 0.88)',
-            padding: { x: 14, y: 6 },
-        }).setOrigin(0.5, 0.5).setDepth(2);
-
-        this.tweens.add({
-            targets: bossBanner,
-            y: 122,
-            duration: 1200,
-            yoyo: true,
-            repeat: -1,
-            ease: 'Sine.easeInOut',
-        });
-    }
-
-    private redrawBrokenGate (isRepaired: boolean): void
-    {
-        if (!this.brokenGate) return;
-        const baseY = WORLD_HEIGHT - GROUND_HEIGHT;
-        const gx = this.brokenGate.x;
-        const g = this.brokenGate.graphic;
-        g.clear();
-
-        if (!isRepaired)
-        {
-            g.fillStyle(0x78350f, 1);
-            g.fillRect(gx - 30, baseY - 120, 60, 120);
-            g.fillStyle(0x334155, 1);
-            g.fillRect(gx - 26, baseY - 110, 52, 12);
-            g.fillRect(gx - 26, baseY - 60, 52, 12);
-            g.lineStyle(3, 0xf59e0b, 1);
-            g.strokeRect(gx - 30, baseY - 120, 60, 120);
-
-            g.fillStyle(0xef4444, 1);
-            g.fillCircle(gx, baseY - 70, 12);
-
-            this.brokenGate.labelText.setText('🚪 ປະຕູຫັກພັງ (Broken Gate)\n[E] ໃຊ້ຄ້ອນ + ຊຸດສ້ອມແປງ');
-
-            if (!this.brokenGateWall)
-            {
-                this.brokenGateWall = this.physics.add.staticGroup();
-                const wallSprite = this.physics.add.staticSprite(gx, baseY - 60, '');
-                wallSprite.setSize(40, 120);
-                wallSprite.setVisible(false);
-                this.brokenGateWall.add(wallSprite);
-            }
-        }
-        else
-        {
-            g.fillStyle(0x1e293b, 0.9);
-            g.fillRect(gx - 40, baseY - 140, 18, 140);
-            g.fillRect(gx + 22, baseY - 140, 18, 140);
-            g.fillStyle(0x10b981, 1);
-            g.fillRoundedRect(gx - 44, baseY - 150, 88, 16, 4);
-
-            this.brokenGate.labelText.setText('✨ ປະຕູສ້ອມແປງແລ້ວ! (Open)\nທາງຜ່ານສູ່ Zone C');
-            this.brokenGate.labelText.setColor('#86efac');
-        }
-    }
-
     private updateInteractionPrompt (): void
     {
         if (!this.player || !this.interactionPromptText || this.isDialogueActive || this.health.isDead)
@@ -1353,18 +964,7 @@ export class Game extends Scene
         this.activeInteraction = null;
     }
 
-    private handleHarvestResourceNode (node: {
-        id: string;
-        type: string;
-        requiredTool: string | null;
-        toolTier: number;
-        drops: { itemId: string; count: number }[];
-        x: number;
-        y: number;
-        graphic: Phaser.GameObjects.Graphics;
-        label: string;
-        harvested: boolean;
-    }): void
+    private handleHarvestResourceNode (node: ResourceNodeView): void
     {
         const result = harvestResourceNodeUseCase(node, entities.backpack);
         if (result.success)
@@ -1421,7 +1021,7 @@ export class Game extends Scene
         {
             bgKey = 'bg-village';
         }
-        else if (this.level.scenery === 'stage-ch1' || Boolean(this.level.boss))
+        else if (this.stage)
         {
             bgKey = 'bg-boss-arena';
         }
@@ -1570,28 +1170,24 @@ export class Game extends Scene
     {
         const enemies = this.physics.add.group();
 
-        if (this.level.enemies)
+        for (const spawn of this.stage ? getStageEnemySpawns(this.stage) : [])
         {
-            for (const item of this.level.enemies)
+            const enemy = new Enemy(
+                this,
+                spawn.x,
+                spawn.y,
+                spawn.patrolDistance,
+                spawn.speed,
+                undefined,
+                spawn.type ?? 'slime',
+                this.getEnemyDefinition(spawn.enemyId)
+            );
+            if (spawn.scale) enemy.setScale(spawn.scale);
+            enemy.onSpit = (x, y, dirX, dirY) =>
             {
-                const definition = item.enemyId ? this.getEnemyDefinition(item.enemyId) : undefined;
-                const enemy = new Enemy(
-                    this,
-                    item.x,
-                    item.y,
-                    item.patrolDistance,
-                    item.speed,
-                    undefined,
-                    item.type ?? 'slime',
-                    definition
-                );
-                if (item.scale) enemy.setScale(item.scale);
-                enemy.onSpit = (x, y, dirX, dirY) =>
-                {
-                    this.spawnEnemySpit(x, y, dirX, dirY);
-                };
-                enemies.add(enemy);
-            }
+                this.spawnEnemySpit(x, y, dirX, dirY);
+            };
+            enemies.add(enemy);
         }
 
         return enemies;
