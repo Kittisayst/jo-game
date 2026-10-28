@@ -31,14 +31,14 @@ test.describe('Hero Attack Controls (J / Z) & Combat Verification', () => {
     await expect(stage1Node).toBeVisible();
     await stage1Node.click();
 
-    // 4. Verify in Level 1 with HUD and Cyber Saber
+    // 4. Verify in Level 1 with HUD and the starter wooden sword
     const hud = page.locator('.game-hud');
     await expect(hud).toBeVisible({ timeout: 8000 });
     const levelBadge = page.locator('.level-badge');
     await expect(levelBadge).toContainText(/Level 1|ດ່ານ 1/i);
 
     const weaponBadge = page.locator('.weapon-hud-badge');
-    await expect(weaponBadge).toContainText(/Cyber Saber/i);
+    await expect(weaponBadge).toContainText(/ດາບໄມ້/i);
 
     // Test Key [J] attack in place
     console.log('Testing Key [J] attack action...');

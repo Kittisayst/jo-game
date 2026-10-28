@@ -1,8 +1,8 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('Knowledge Quest — Buy-to-Read Textbook & Chapter 1 Loop E2E', () => {
-  test('Enforces Buy-at-Library -> Read-All-Pages (3s timer) -> Unlock-Academy-Exam loop', async ({ page }) => {
-    test.setTimeout(60000);
+  test('Enforces Buy-at-Library -> Read-All-Pages (5s timer) -> Unlock-Academy-Exam loop', async ({ page }) => {
+    test.setTimeout(120000);
     page.on('console', msg => console.log(`BROWSER [${msg.type()}]:`, msg.text()));
     page.on('pageerror', err => console.log('PAGE ERROR:', err.message));
 
@@ -20,9 +20,12 @@ test.describe('Knowledge Quest — Buy-to-Read Textbook & Chapter 1 Loop E2E', (
     const hud = page.locator('.game-hud');
     await expect(hud).toBeVisible({ timeout: 12000 });
 
-    // 2. Verify initial state: 50 Credit & 0 Owned Textbooks
+    // Give the Phaser village scene a moment to finish loading before sending key input
+    await page.waitForTimeout(1000);
+
+    // 2. Verify initial state: 20 Credit (exactly the first textbook) & 0 Owned Textbooks
     const creditBadge = page.locator('.wallet-hud-badge');
-    await expect(creditBadge).toContainText('50');
+    await expect(creditBadge).toContainText('20');
 
     const textbookBtn = page.locator('#hud-library-btn');
     await expect(textbookBtn).toContainText('ຕຳລາ (0)');
@@ -52,8 +55,9 @@ test.describe('Knowledge Quest — Buy-to-Read Textbook & Chapter 1 Loop E2E', (
     await expect(buyCh1Btn).toBeVisible();
     await buyCh1Btn.click();
 
-    // Verify Wallet deducted 50 -> 30 and HUD textbook badge updated to (1)
-    await expect(creditBadge).toContainText('30');
+    // Verify Wallet deducted 20 -> 0 and HUD textbook badge updated to (1)
+    await expect(creditBadge).not.toContainText('20');
+    await expect(creditBadge).toContainText('0');
     await expect(textbookBtn).toContainText('ຕຳລາ (1)');
     await expect(page.locator('button:has-text("ເປີດອ່ານຕຳລາ (0/5)")')).toBeVisible();
 
@@ -75,7 +79,7 @@ test.describe('Knowledge Quest — Buy-to-Read Textbook & Chapter 1 Loop E2E', (
     const continueReadingBtn = page.locator('button:has-text("ເປີດອ່ານປຶ້ມຕຳລາຕໍ່ (0/5)")');
     await expect(continueReadingBtn).toBeVisible();
 
-    // 5. Click shortcut to open Personal Reader and read all 5 pages (3s first-read timer per page)
+    // 5. Click shortcut to open Personal Reader and read all 5 pages (5s first-read timer per page)
     await continueReadingBtn.click();
     await expect(page.locator('h2:has-text("ປຶ້ມຕຳລາສ່ວນຕົວ")')).toBeVisible();
 
@@ -83,11 +87,11 @@ test.describe('Knowledge Quest — Buy-to-Read Textbook & Chapter 1 Loop E2E', (
       await expect(page.locator(`text=ໜ້າທີ ${pageNum} / 5`)).toBeVisible();
       if (pageNum < 5) {
         const confirmNextBtn = page.locator('button:has-text("ອ່ານເຂົ້າໃຈແລ້ວ & ໜ້າຕໍ່ໄປ")');
-        await expect(confirmNextBtn).toBeVisible({ timeout: 5000 });
+        await expect(confirmNextBtn).toBeVisible({ timeout: 8000 });
         await confirmNextBtn.click();
       } else {
         const confirmFinalBtn = page.locator('button:has-text("ຢືນຢັນອ່ານຈົບໜ້າສຸດທ້າຍ")');
-        await expect(confirmFinalBtn).toBeVisible({ timeout: 5000 });
+        await expect(confirmFinalBtn).toBeVisible({ timeout: 8000 });
         await confirmFinalBtn.click();
       }
     }

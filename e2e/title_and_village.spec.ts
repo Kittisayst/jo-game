@@ -25,11 +25,9 @@ test.describe('Title Start Screen and Village Hub Transition E2E', () => {
     await expect(playBtn).toBeVisible();
     await expect(playBtn).toContainText(/ເຂົ້າເກມ/i);
 
-    const shopBtn = page.locator('#menu-shop-btn');
-    await expect(shopBtn).toBeVisible();
-
-    const achBtn = page.locator('#menu-achievements-btn');
-    await expect(achBtn).toBeVisible();
+    // The coin shop and the old achievements are gone: Credit is only earned by learning
+    await expect(page.locator('#menu-shop-btn')).toHaveCount(0);
+    await expect(page.locator('#menu-achievements-btn')).toHaveCount(0);
 
     const stageBtn = page.locator('#menu-stage-select-btn');
     await expect(stageBtn).toBeVisible();

@@ -36,7 +36,7 @@ test.describe('Playwright UI Audit — Backpack & Village Hub', () => {
     await expect(modalHeader).toBeVisible();
 
     // Verify 20 slots grid exists
-    const slots = page.locator('.grid button');
+    const slots = page.locator('.grid-cols-4 button');
     await expect(slots).toHaveCount(20);
 
     // Verify Category Filter toolbar
