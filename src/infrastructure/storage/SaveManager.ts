@@ -31,8 +31,6 @@ export interface SlotMetadata
 
 export class SaveManager implements SavePort
 {
-    private lastAutoSaveTime = 0;
-
     getActiveSlot (): SaveSlotId
     {
         const saved = readString(ACTIVE_SLOT_KEY);
@@ -80,18 +78,11 @@ export class SaveManager implements SavePort
     }
 
     /**
-     * Auto-save on milestones (level complete, skin equip, etc.)
-     * Throttled to at most once every 3 seconds to avoid disk churn.
+     * Auto-save on milestones (level complete, skin equip, etc.). Always writes; callers that
+     * save often should go through `autoSaveGame()`, which spaces the writes out.
      */
-    autoSave (snapshot: SaveGameSnapshot, force = false): void
+    autoSave (snapshot: SaveGameSnapshot): void
     {
-        const now = Date.now();
-        if (!force && now - this.lastAutoSaveTime < 3000)
-        {
-            return;
-        }
-        this.lastAutoSaveTime = now;
-
         // Write to both autosave slot and current active slot
         this.save(snapshot, 'autosave');
         const activeSlot = this.getActiveSlot();
