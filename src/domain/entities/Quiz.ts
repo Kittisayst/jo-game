@@ -26,6 +26,10 @@ export interface ExamAnswerResult
     correctOption: number;
     isCorrect: boolean;
     explanation: string;
+    pageNumber: number;
+    options: string[];
+    /** 1-based position in the exam, for showing "ຂໍ້ 2". */
+    questionNumber: number;
 }
 
 export class QuizExamSession
@@ -104,8 +108,17 @@ export class QuizExamSession
                 correctOption: q.correctIndex,
                 isCorrect: selected === q.correctIndex,
                 explanation: q.explanation,
+                pageNumber: q.pageNumber,
+                options: q.options,
+                questionNumber: index + 1,
             };
         });
+    }
+
+    /** Questions answered wrongly or left blank, so the player can review them in the textbook. */
+    getMissedResults (): ExamAnswerResult[]
+    {
+        return this.getResults().filter(r => !r.isCorrect);
     }
 }
 

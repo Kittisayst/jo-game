@@ -18,6 +18,8 @@ export interface TextbookModalProps
     mode?: TextbookModalMode;
     isInVillage?: boolean;
     initialBookId?: string;
+    /** Book page number (1-based) to open the reader on, e.g. from an exam review. */
+    initialPageNumber?: number;
     pageReadTimerSeconds?: number;
     onClose: () => void;
     onBookPurchased?: (bookId: string, newBalance: number) => void;
@@ -30,6 +32,7 @@ export const TextbookModal: React.FC<TextbookModalProps> = ({
     mode = 'reader',
     isInVillage = true,
     initialBookId,
+    initialPageNumber,
     pageReadTimerSeconds = 3,
     onClose,
     onBookPurchased,
@@ -78,10 +81,14 @@ export const TextbookModal: React.FC<TextbookModalProps> = ({
             {
                 setSelectedBookId(ownedIds[0]);
             }
-            setCurrentPageIndex(0);
+            const targetBook = books.find(b => b.id === (initialBookId ?? selectedBookId));
+            const pageIndex = initialPageNumber && targetBook
+                ? targetBook.pages.findIndex(p => p.pageNumber === initialPageNumber)
+                : -1;
+            setCurrentPageIndex(pageIndex >= 0 ? pageIndex : 0);
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [isOpen, mode, initialBookId]);
+    }, [isOpen, mode, initialBookId, initialPageNumber, books.length]);
 
     const ensureBookProgress = (bookId: string): BookProgress =>
     {

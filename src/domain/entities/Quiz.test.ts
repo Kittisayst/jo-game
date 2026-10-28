@@ -11,6 +11,37 @@ const mockQuestions: QuestionData[] = [
 
 describe('QuizExamSession Entity', () =>
 {
+    it('lists only the missed questions with the correct answer, explanation and book page', () =>
+    {
+        const exam = new QuizExamSession(mockQuestions);
+        exam.answerQuestion(0, 0); // Correct
+        exam.answerQuestion(1, 3); // Wrong (correct is 1)
+        exam.answerQuestion(3, 3); // Correct
+        // Q3 (index 2) and Q5 (index 4) are left unanswered
+
+        const missed = exam.getMissedResults();
+
+        expect(missed.map(m => m.questionId)).toEqual(['q2', 'q3', 'q5']);
+        expect(missed[0]).toMatchObject({
+            questionNumber: 2,
+            selectedOption: 3,
+            correctOption: 1,
+            options: ['A', 'B', 'C', 'D'],
+            explanation: 'Exp 2',
+            pageNumber: 1,
+        });
+        expect(missed[1].selectedOption).toBe(-1);
+        expect(missed[1].pageNumber).toBe(2);
+    });
+
+    it('returns no missed questions for a perfect exam', () =>
+    {
+        const exam = new QuizExamSession(mockQuestions);
+        mockQuestions.forEach((q, i) => exam.answerQuestion(i, q.correctIndex));
+
+        expect(exam.getMissedResults()).toEqual([]);
+    });
+
     it('manages exam answers and computes score', () =>
     {
         const exam = new QuizExamSession(mockQuestions);

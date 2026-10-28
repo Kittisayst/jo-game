@@ -199,6 +199,7 @@ function App ()
     const [isLibraryOpen, setIsLibraryOpen] = useState(false);
     const [textbookModalMode, setTextbookModalMode] = useState<TextbookModalMode>('reader');
     const [activeReaderBookId, setActiveReaderBookId] = useState<string | undefined>(undefined);
+    const [activeReaderPageNumber, setActiveReaderPageNumber] = useState<number | undefined>(undefined);
     const [booksRevision, setBooksRevision] = useState(0);
     const [isAcademyOpen, setIsAcademyOpen] = useState(false);
     const [isWorkshopOpen, setIsWorkshopOpen] = useState(false);
@@ -552,6 +553,7 @@ function App ()
         const onOpenLibrary = (bookId?: string) =>
         {
             setActiveReaderBookId(bookId);
+            setActiveReaderPageNumber(undefined);
             setTextbookModalMode('library-store');
             setIsLibraryOpen(true);
         };
@@ -1230,6 +1232,7 @@ function App ()
                     onOpenLibrary={() =>
                     {
                         setActiveReaderBookId(undefined);
+                        setActiveReaderPageNumber(undefined);
                         setTextbookModalMode('reader');
                         setIsLibraryOpen(true);
                     }}
@@ -1388,6 +1391,7 @@ function App ()
                 mode={textbookModalMode}
                 isInVillage={currentLevel === 'village'}
                 initialBookId={activeReaderBookId}
+                initialPageNumber={activeReaderPageNumber}
                 onClose={() => setIsLibraryOpen(false)}
                 onBookPurchased={(_bookId, newBalance) =>
                 {
@@ -1425,9 +1429,10 @@ function App ()
                         setIsLibraryOpen(true);
                     }
                 }}
-                onOpenReader={(bookId) =>
+                onOpenReader={(bookId, pageNumber) =>
                 {
                     setActiveReaderBookId(bookId);
+                    setActiveReaderPageNumber(pageNumber);
                     setTextbookModalMode('reader');
                     setIsLibraryOpen(true);
                 }}
@@ -1464,6 +1469,7 @@ function App ()
                 onOpenBooks={() =>
                 {
                     setActiveReaderBookId(undefined);
+                    setActiveReaderPageNumber(undefined);
                     setTextbookModalMode('reader');
                     setIsLibraryOpen(true);
                 }}

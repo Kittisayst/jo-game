@@ -16,7 +16,7 @@ interface AcademyModalProps
     onExamPassed?: (bookId: string) => void;
     onCreditChanged?: (newBalance: number) => void;
     onOpenLibraryStore?: () => void;
-    onOpenReader?: (bookId: string) => void;
+    onOpenReader?: (bookId: string, pageNumber?: number) => void;
 }
 
 export const AcademyModal: React.FC<AcademyModalProps> = ({
@@ -387,6 +387,45 @@ export const AcademyModal: React.FC<AcademyModalProps> = ({
                                             </p>
                                         )}
                                     </div>
+
+                                    {examSession && examSession.getMissedResults().length > 0 && (
+                                        <div className="space-y-3">
+                                            <h4 className="font-bold text-amber-300">
+                                                📝 ທົບທວນຂໍ້ທີ່ຍັງບໍ່ຖືກ ({examSession.getMissedResults().length} ຂໍ້)
+                                            </h4>
+                                            {examSession.getMissedResults().map((m) => (
+                                                <div
+                                                    key={m.questionId}
+                                                    className="bg-slate-800/60 p-4 rounded-xl border border-slate-700/60 space-y-2"
+                                                >
+                                                    <p className="font-bold text-white flex gap-2">
+                                                        <span className="text-indigo-400">ຂໍ້ {m.questionNumber}.</span>
+                                                        <span>{m.question}</span>
+                                                    </p>
+                                                    <p className="text-sm text-rose-300">
+                                                        {m.selectedOption >= 0
+                                                            ? `ຄຳຕອບຂອງທ່ານ: ${m.options[m.selectedOption]}`
+                                                            : 'ທ່ານບໍ່ໄດ້ຕອບຂໍ້ນີ້'}
+                                                    </p>
+                                                    <p className="text-sm text-emerald-300">
+                                                        ຄຳຕອບທີ່ຖືກ: {m.options[m.correctOption]}
+                                                    </p>
+                                                    {m.explanation && (
+                                                        <p className="text-sm text-slate-300">💡 {m.explanation}</p>
+                                                    )}
+                                                    {onOpenReader && currentBook && (
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => onOpenReader(currentBook.id, m.pageNumber)}
+                                                            className="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 font-bold text-xs transition"
+                                                        >
+                                                            📖 ເປີດໜ້າ {m.pageNumber} ໃນປຶ້ມ
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
 
                                     <button
                                         onClick={() => { setExamSession(null); setExamResults(null); }}
