@@ -887,111 +887,18 @@ export class SoundManager
     /**
      * Blaster Fire Sound: laser pew shot
      */
-    playBlaster (): void
-    {
-        if (this._isMuted) return;
-        this.initContext();
-        if (!this.ctx) return;
-
-        const now = this.ctx.currentTime;
-        const osc = this.ctx.createOscillator();
-        const gain = this.ctx.createGain();
-
-        osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(880, now);
-        osc.frequency.exponentialRampToValueAtTime(220, now + 0.11);
-
-        gain.gain.setValueAtTime(0.15, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.11);
-
-        osc.connect(gain);
-        this.connectOutput(gain);
-
-        osc.start(now);
-        osc.stop(now + 0.11);
-    }
 
     /**
      * Thunder Hammer Impact: heavy bass shockwave
      */
-    playHammer (): void
-    {
-        if (this._isMuted) return;
-        this.initContext();
-        if (!this.ctx) return;
-
-        const now = this.ctx.currentTime;
-        const osc = this.ctx.createOscillator();
-        const gain = this.ctx.createGain();
-
-        osc.type = 'square';
-        osc.frequency.setValueAtTime(160, now);
-        osc.frequency.exponentialRampToValueAtTime(30, now + 0.22);
-
-        gain.gain.setValueAtTime(0.3, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
-
-        osc.connect(gain);
-        this.connectOutput(gain);
-
-        osc.start(now);
-        osc.stop(now + 0.22);
-    }
 
     /**
      * Cyber Disc Whirr: high spinning metallic oscillation
      */
-    playDisc (): void
-    {
-        if (this._isMuted) return;
-        this.initContext();
-        if (!this.ctx) return;
-
-        const now = this.ctx.currentTime;
-        const osc = this.ctx.createOscillator();
-        const gain = this.ctx.createGain();
-
-        osc.type = 'triangle';
-        osc.frequency.setValueAtTime(740, now);
-        osc.frequency.linearRampToValueAtTime(920, now + 0.08);
-        osc.frequency.linearRampToValueAtTime(640, now + 0.16);
-
-        gain.gain.setValueAtTime(0.12, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.16);
-
-        osc.connect(gain);
-        this.connectOutput(gain);
-
-        osc.start(now);
-        osc.stop(now + 0.16);
-    }
 
     /**
      * Dash Sound: quick air-burst whoosh
      */
-    playDash (): void
-    {
-        if (this._isMuted) return;
-        this.initContext();
-        if (!this.ctx) return;
-
-        const now = this.ctx.currentTime;
-        const osc = this.ctx.createOscillator();
-        const gain = this.ctx.createGain();
-
-        osc.type = 'triangle';
-        osc.frequency.setValueAtTime(350, now);
-        osc.frequency.exponentialRampToValueAtTime(180, now + 0.12);
-
-        gain.gain.setValueAtTime(0.16, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
-
-        osc.connect(gain);
-        this.connectOutput(gain);
-
-        osc.start(now);
-        osc.stop(now + 0.12);
-    }
 
     /**
      * Shop Purchase Sound: double coin chime of success
@@ -1028,61 +935,10 @@ export class SoundManager
     /**
      * Use Consumable Item Sound: celestial sparkle shimmer
      */
-    playUseItem (): void
-    {
-        if (this._isMuted) return;
-        this.initContext();
-        if (!this.ctx) return;
-
-        const now = this.ctx.currentTime;
-        const notes = [587.33, 739.99, 880.00, 1174.66];
-        notes.forEach((freq, idx) =>
-        {
-            if (!this.ctx) return;
-            const startTime = now + idx * 0.05;
-            const osc = this.ctx.createOscillator();
-            const gain = this.ctx.createGain();
-
-            osc.type = 'triangle';
-            osc.frequency.setValueAtTime(freq, startTime);
-
-            gain.gain.setValueAtTime(0.15, startTime);
-            gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.15);
-
-            osc.connect(gain);
-            this.connectOutput(gain);
-
-            osc.start(startTime);
-            osc.stop(startTime + 0.15);
-        });
-    }
 
     /**
      * Bomb Explosion Sound: deep rumble punch
      */
-    playBombExplode (): void
-    {
-        if (this._isMuted) return;
-        this.initContext();
-        if (!this.ctx) return;
-
-        const now = this.ctx.currentTime;
-        const osc = this.ctx.createOscillator();
-        const gain = this.ctx.createGain();
-
-        osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(200, now);
-        osc.frequency.exponentialRampToValueAtTime(25, now + 0.35);
-
-        gain.gain.setValueAtTime(0.35, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
-
-        osc.connect(gain);
-        this.connectOutput(gain);
-
-        osc.start(now);
-        osc.stop(now + 0.35);
-    }
 
     /**
      * Toxic Slime Spit Sound: rapid pitch-bending acid squirt

@@ -7,7 +7,6 @@ const HEIGHT = 48;
 
 const MOVE_SPEED = 220;
 const JUMP_SPEED = 420;
-const SPRING_JUMP_SPEED = 560;
 
 export interface PlayerInputControls
 {
@@ -19,15 +18,10 @@ export interface PlayerInputControls
 export class Player extends Physics.Arcade.Sprite
 {
     isInvincible = false;
-    hasStarPower = false;
-    hasSpringPower = false;
     facingDir = 1;
-    isDashing = false;
-    dashCooldownTimer = 0;
     isWallSliding = false;
     private wallJumpLockout = 0;
     private currentSkinId = 'cyber-blue';
-    private jumpSpeed = JUMP_SPEED;
     private isKnockedBack = false;
     private wasInAir = false;
     private coyoteTimer = 0;
@@ -197,7 +191,7 @@ export class Player extends Physics.Arcade.Sprite
 
     triggerDamage (sourceX: number): void
     {
-        if (this.isInvincible || this.hasStarPower) return;
+        if (this.isInvincible) return;
 
         this.isInvincible = true;
         this.isKnockedBack = true;
@@ -229,144 +223,6 @@ export class Player extends Physics.Arcade.Sprite
                 this.isInvincible = false;
             },
         });
-    }
-
-    private rainbowTimer?: Phaser.Time.TimerEvent;
-
-    setStarPower (active: boolean): void
-    {
-        this.hasStarPower = active;
-
-        if (active)
-        {
-            if (this.rainbowTimer)
-            {
-                this.rainbowTimer.remove();
-            }
-
-            const tints = [0xff0000, 0xf97316, 0xfacc15, 0x10b981, 0x06b6d4, 0x8b5cf6, 0xec4899];
-            let tintIndex = 0;
-
-            this.rainbowTimer = this.scene.time.addEvent({
-                delay: 90,
-                loop: true,
-                callback: () =>
-                {
-                    this.setTint(tints[tintIndex % tints.length]);
-                    tintIndex++;
-                },
-            });
-        }
-        else
-        {
-            if (this.rainbowTimer)
-            {
-                this.rainbowTimer.remove();
-                this.rainbowTimer = undefined;
-            }
-            if (this.hasSpringPower)
-            {
-                this.setTint(0x38bdf8);
-            }
-            else
-            {
-                this.clearTint();
-            }
-        }
-    }
-
-    setSpringPower (active: boolean): void
-    {
-        this.hasSpringPower = active;
-        this.jumpSpeed = active ? SPRING_JUMP_SPEED : JUMP_SPEED;
-
-        if (!this.hasStarPower)
-        {
-            if (active)
-            {
-                this.setTint(0x38bdf8);
-            }
-            else
-            {
-                this.clearTint();
-            }
-        }
-    }
-
-    activateStar (durationMs = 8000): void
-    {
-        this.setStarPower(true);
-        if (durationMs > 0)
-        {
-            this.scene.time.delayedCall(durationMs, () =>
-            {
-                if (!this.scene || !this.active) return;
-                this.setStarPower(false);
-            });
-        }
-    }
-
-    activateSpring (durationMs = 10000): void
-    {
-        this.setSpringPower(true);
-        if (durationMs > 0)
-        {
-            this.scene.time.delayedCall(durationMs, () =>
-            {
-                if (!this.scene || !this.active) return;
-                this.setSpringPower(false);
-            });
-        }
-    }
-
-    dash (dir?: number): boolean
-    {
-        if (this.dashCooldownTimer > 0 || this.isKnockedBack || this.isDashing) return false;
-
-        const dashDir = typeof dir === 'number' && dir !== 0 ? Math.sign(dir) : this.facingDir;
-        this.isDashing = true;
-        this.isInvincible = true;
-        this.dashCooldownTimer = 1100;
-        soundManager.playDash();
-
-        this.setMaxVelocity(600, 650);
-        this.setVelocityX(dashDir * 520);
-        this.setVelocityY(0);
-
-        // Ghost trails
-        for (let i = 0; i < 3; i++)
-        {
-            this.scene.time.delayedCall(i * 40, () =>
-            {
-                if (!this.active || !this.scene) return;
-                const ghost = this.scene.add.sprite(this.x, this.y, this.texture.key, this.frame.name);
-                ghost.setFlipX(this.flipX);
-                ghost.setTint(0x38bdf8);
-                ghost.setAlpha(0.65);
-                ghost.setDepth(9);
-                this.scene.tweens.add({
-                    targets: ghost,
-                    alpha: 0,
-                    scaleX: 1.1,
-                    scaleY: 0.9,
-                    duration: 160,
-                    onComplete: () => ghost.destroy(),
-                });
-            });
-        }
-
-        this.scene.time.delayedCall(160, () =>
-        {
-            this.isDashing = false;
-            this.isInvincible = false;
-            this.setMaxVelocity(320, 650);
-            if (this.body)
-            {
-                this.setVelocityX(dashDir * MOVE_SPEED);
-            }
-        });
-
-        return true;
     }
 
     triggerSlashVfx (weaponId: string): void
@@ -453,13 +309,7 @@ export class Player extends Physics.Arcade.Sprite
 
     update (controls: PlayerInputControls | Phaser.Types.Input.Keyboard.CursorKeys, delta = 16.66)
     {
-        if (this.dashCooldownTimer > 0)
-        {
-            this.dashCooldownTimer = Math.max(0, this.dashCooldownTimer - delta);
-        }
-
         if (this.isKnockedBack) return;
-        if (this.isDashing) return;
 
         const body = this.body as Phaser.Physics.Arcade.Body;
         const onGround = body.blocked.down;
@@ -579,7 +429,7 @@ export class Player extends Physics.Arcade.Sprite
         {
             this.jumpBufferTimer = 0;
             this.coyoteTimer = 0;
-            this.setVelocityY(-this.jumpSpeed);
+            this.setVelocityY(-JUMP_SPEED);
             soundManager.playJump();
             this.onJump?.(this.x, this.y + HEIGHT / 2);
 
@@ -603,7 +453,7 @@ export class Player extends Physics.Arcade.Sprite
 
             // Kick off horizontally opposite to wall, leap upwards
             this.setVelocityX(-wallDir * 230);
-            this.setVelocityY(-this.jumpSpeed * 0.95);
+            this.setVelocityY(-JUMP_SPEED * 0.95);
             this.facingDir = -wallDir;
             this.setFlipX(wallDir > 0);
 

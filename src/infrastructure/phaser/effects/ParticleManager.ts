@@ -111,10 +111,6 @@ export class ParticleManager
         this.celebrationEmitter.setDepth(20);
     }
 
-    emitCoinSparkle (x: number, y: number): void
-    {
-        this.coinEmitter.explode(12, x, y);
-    }
 
     emitJumpDust (x: number, y: number): void
     {
@@ -147,21 +143,6 @@ export class ParticleManager
         });
     }
 
-    emitPowerUpBurst (x: number, y: number, type: 'heart' | 'star' | 'spring'): void
-    {
-        if (type === 'heart')
-        {
-            this.celebrationEmitter.explode(18, x, y);
-        }
-        else if (type === 'star')
-        {
-            this.celebrationEmitter.explode(28, x, y);
-        }
-        else
-        {
-            this.stompEmitter.explode(18, x, y);
-        }
-    }
 
     emitSpikeHit (x: number, y: number): void
     {
