@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
     advanceDialogueUseCase,
     closeDialogueUseCase,
@@ -16,8 +16,6 @@ export function useDialogue ()
     const [isDialogueOpen, setIsDialogueOpen] = useState(false);
     const [currentDialogueNode, setCurrentDialogueNode] = useState<DialogueNode | null>(null);
     const [dialogueChoices, setDialogueChoices] = useState<DialogueChoice[]>([]);
-    const isDialogueOpenRef = useRef(isDialogueOpen);
-    isDialogueOpenRef.current = isDialogueOpen;
 
     const refreshFromState = () =>
     {
@@ -74,7 +72,6 @@ export function useDialogue ()
 
     return {
         isDialogueOpen,
-        isDialogueOpenRef,
         currentDialogueNode,
         dialogueChoices,
         advanceDialogue,

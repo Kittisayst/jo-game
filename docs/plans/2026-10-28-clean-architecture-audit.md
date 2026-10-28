@@ -1,7 +1,7 @@
 # ກວດ ແລະ ປັບໂຄງສ້າງໃຫ້ຕົງກັບ Clean Architecture
 
 - **Date:** 2026-10-28
-- **Status:** Phase 0–4 ເຮັດແລ້ວ; Phase 5–6 ຍັງ planned
+- **Status:** Phase 0–5 ເຮັດແລ້ວ; Phase 6 ຍັງ planned
 - **Project:** jo-game (ພະຈົນໄພຄວາມຮູ້ / Knowledge Quest)
 
 ## ເປົ້າໝາຍ (Goal)
@@ -74,6 +74,8 @@
 ### Phase 5 — ແຍກໄຟລ໌ໃຫຍ່ (ເສັ້ນທາງເລືອກ ເຮັດຫຼັງ Phase 1–4)
 17. `Game.ts` → `CombatController` (attack/stomp/boss hit) ແລະ `InteractionController` (prompt + E key); `App.tsx` effect ໃຫຍ່ → hooks (`useGameEvents`, `useGlobalShortcuts`) ແລະ modal state ເປັນ `useModals`; `TextbookModal`/`AcademyModal`/`BackpackModal` ແຍກ logic ອອກເປັນ hook.
 18. ບໍ່ມີ test ໃໝ່ສຳລັບ Phaser; ກວດດ້ວຍ typecheck + e2e + ຫຼິ້ນມື.
+
+**ສະຖານະ Phase 5 (ເຮັດແລ້ວ):** `Game.ts` 1207 → 621 ແຖວ: `CombatController` (ໂຈມຕີ, ຢຽບ, ຖືກສັດຕູ/ໜາມ/ນ້ຳລາຍ, hook ຂອງ Boss, ຂອງຕົກ, hit-stop), `InteractionController` (prompt + ຜົນຂອງປຸ່ມ E ສຳລັບອາຄານ, waypoint, ປະຕູ, node, ຜູ້ເຖົ້າ), `scenery/WorldBuilder` (ທ້ອງຟ້າ/ພື້ນ/platform/ໜາມ) ແລະ `effects/FloatingText`. `App.tsx` 973 → 760 ແຖວ: `useGameEvents` (subscribe ຄັ້ງດຽວແບບຕາຕະລາງ), `useGlobalShortcuts`, `useModalState` (state ຂອງ modal 11 ຕົວ + `closeTopModal`), ແລະລຶບ ref ທີ່ບໍ່ຈຳເປັນອອກ. **bug ທີ່ພົບ ແລະແກ້ພ້ອມກັນ:** (1) ກົດ Q ສັບດາບສອງຄັ້ງ (ທັງ Phaser ແລະ React ຮັບ Q) ຈຶ່ງບໍ່ປ່ຽນດາບເລີຍເມື່ອມີ 2 ເຫຼັ້ມ — ປ່ອຍໃຫ້ Phaser ຮັບ Q ຢ່າງດຽວ ແລະເພີ່ມ `e2e/shortcuts.spec.ts` (ກວດວ່າລົ້ມເຫຼວກັບໂຄດເກົ່າ); (2) handler ໃນ effect ແບບ `[]` ໃຊ້ closure ຈາກ render ທຳອິດ (ເຊັ່ນ `handleStartGame` ອ່ານ skin ເກົ່າ) — ດຽວນີ້ hook ເອີ້ນ handler ຫຼ້າສຸດສະເໝີ (ແກ້ຕາມໂຄດ ຍັງບໍ່ໄດ້ທົດສອບແຍກ); (3) ປ່ຽນດາບຜ່ານ event ຈະບັນທຶກ save ອັດຕະໂນມັດ. ລຶບສາຂາ `'thunder-hammer'` ທີ່ຕາຍແລ້ວໃນ combat. ຜົນ: 236 unit test, e2e 10 ຜ່ານ. **ຍັງຄ້າງ:** `Game.preload` ຍັງຊ້ຳລາຍການ asset ກັບ `Preloader` ແລະໂຫຼດ asset ທີ່ບໍ່ໃຊ້ແລ້ວ (door/flag/powerup); `'thunder-hammer'` ຍັງເຫຼືອໃນ `Player.ts`/`Enemy.ts`; `TextbookModal`/`AcademyModal`/`BackpackModal` ຍັງໃຫຍ່ (600–700 ແຖວ) ແລະ logic ບາງສ່ວນຢູ່ໃນ component.
 
 ### Phase 6 — ເອກະສານ
 19. ADR 0006: "ເນື້ອຫາ (JSON) ກວດຮູບແບບຢູ່ catalog ແລະ state ຢູ່ໃນ GameState ດຽວ"; ອັບເດດ ADR 0002 (ສິ່ງທີ່ຍັງຕ້ອງທົດສອບມືຢູ່ infrastructure ເຫຼືອນ້ອຍລົງ), `CLAUDE.md`, `CONTEXT.md` (ເພີ່ມ `GameState`, `Content catalog`).

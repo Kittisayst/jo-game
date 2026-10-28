@@ -1,26 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { IRefPhaserGame, PhaserGame } from './PhaserGame';
-import { DomainEvents } from '../../domain/DomainEvents';
-import {
-    PLAYER_DAMAGED_EVENT,
-    PLAYER_DIED_EVENT,
-    PlayerDamagedPayload,
-} from '../../application/PlayerTakeDamageUseCase';
-import { PLAYER_HEALED_EVENT, PlayerHealedPayload } from '../../application/ConsumeItemUseCase';
-import { GateRequirements } from '../../application/RepairBrokenGateUseCase';
-import {
-    BOSS_DAMAGED_EVENT,
-    BOSS_DEFEATED_EVENT,
-    BossDamagedPayload,
-    BossDefeatedPayload,
-} from '../../application/DamageBossUseCase';
 import { toggleSoundUseCase, toggleMusicUseCase } from '../../application/UpdateSettingsUseCase';
 import { soundManager } from '../audio/SoundManager';
 import { SaveGameSnapshot } from '../../domain/entities/SaveData';
 import { saveManager, SaveSlotId } from '../storage/SaveManager';
 import {
-    GAME_PAUSED_EVENT,
-    GAME_RESUMED_EVENT,
     pauseGameUseCase,
     resumeGameUseCase,
     togglePauseUseCase,
@@ -30,6 +14,9 @@ import { entities, repositories } from '../composition';
 import { Hud } from './components/Hud';
 import { SkinModal } from './components/SkinModal';
 import { useDialogue } from './hooks/useDialogue';
+import { useGameEvents } from './hooks/useGameEvents';
+import { useGlobalShortcuts } from './hooks/useGlobalShortcuts';
+import { useModalState } from './hooks/useModalState';
 import { useSkinShop } from './hooks/useSkinShop';
 import { autoSaveGame, createCurrentSnapshot, resetEntitiesToNewGame, restoreEntitiesFromSnapshot } from '../saveSnapshot';
 import { getNextObjective } from '../../domain/utils/nextObjective';
@@ -45,7 +32,7 @@ import { awardChapterClearUseCase } from '../../application/AwardChapterClearUse
 import { selectStageUseCase } from '../../application/SelectStageUseCase';
 import { WEAPON_CONFIGS } from '../../domain/entities/EquipmentState';
 import { cycleEquippedWeaponUseCase } from '../../application/CycleEquippedWeaponUseCase';
-import { TextbookModal, TextbookModalMode } from './components/TextbookModal';
+import { TextbookModal } from './components/TextbookModal';
 import { AcademyModal } from './components/AcademyModal';
 import { WorkshopModal } from './components/WorkshopModal';
 import { ForgeModal } from './components/ForgeModal';
@@ -80,9 +67,6 @@ function App ()
     const [bossHp, setBossHp] = useState<number | null>(null);
     const [bossMaxHp, setBossMaxHp] = useState(5);
     const [isMainMenuOpen, setIsMainMenuOpen] = useState(!shouldResumeInGame);
-    const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-    const [isStageSelectOpen, setIsStageSelectOpen] = useState(false);
-    const [isStageMapOpen, setIsStageMapOpen] = useState(false);
     const [isGamePaused, setIsGamePaused] = useState(false);
     const [villageWelcomeToast, setVillageWelcomeToast] = useState<string | null>(() =>
         shouldResumeInGame && initialSession === 'village'
@@ -100,13 +84,8 @@ function App ()
         }
     }, [villageWelcomeToast]);
 
-    const pauseStateRef = useRef(pauseState);
-    pauseStateRef.current = pauseState;
-    const isMainMenuOpenRef = useRef(isMainMenuOpen);
-    isMainMenuOpenRef.current = isMainMenuOpen;
     const {
         isDialogueOpen,
-        isDialogueOpenRef,
         currentDialogueNode,
         dialogueChoices,
         advanceDialogue,
@@ -123,332 +102,36 @@ function App ()
         buySkin,
         equipSkin,
     } = useSkinShop(() => setWalletBalance(entities.wallet.balance));
-    const isSettingsOpenRef = useRef(isSettingsOpen);
-    isSettingsOpenRef.current = isSettingsOpen;
-    const isStageSelectOpenRef = useRef(isStageSelectOpen);
-    isStageSelectOpenRef.current = isStageSelectOpen;
-    const isStageMapOpenRef = useRef(isStageMapOpen);
-    isStageMapOpenRef.current = isStageMapOpen;
-    const stageProgressionRef = useRef(stageProgression);
-    stageProgressionRef.current = stageProgression;
-    const skinManagerRef = useRef(skinManager);
-    skinManagerRef.current = skinManager;
-    const settingsRef = useRef(settings);
-    settingsRef.current = settings;
+    const modals = useModalState();
+    const {
+        isLibraryOpen, setIsLibraryOpen,
+        textbookModalMode, setTextbookModalMode,
+        activeReaderBookId, setActiveReaderBookId,
+        activeReaderPageNumber, setActiveReaderPageNumber,
+        isAcademyOpen, setIsAcademyOpen,
+        activeExamBookId, setActiveExamBookId,
+        isWorkshopOpen, setIsWorkshopOpen,
+        isForgeOpen, setIsForgeOpen,
+        isBackpackOpen, setIsBackpackOpen,
+        isGateRepairOpen, setIsGateRepairOpen,
+        activeGateId, setActiveGateId,
+        activeGateRequirements, setActiveGateRequirements,
+        isWaypointOpen, setIsWaypointOpen,
+        waypointName, setWaypointName,
+        isQuizFinisherOpen, setIsQuizFinisherOpen,
+        isSettingsOpen, setIsSettingsOpen,
+        isStageSelectOpen, setIsStageSelectOpen,
+        isStageMapOpen, setIsStageMapOpen,
+    } = modals;
 
-    // Knowledge Quest v5 States
-    const [isLibraryOpen, setIsLibraryOpen] = useState(false);
-    const [textbookModalMode, setTextbookModalMode] = useState<TextbookModalMode>('reader');
-    const [activeReaderBookId, setActiveReaderBookId] = useState<string | undefined>(undefined);
-    const [activeReaderPageNumber, setActiveReaderPageNumber] = useState<number | undefined>(undefined);
+    // Bumped when books or the backpack change, so memoised values that read them recompute
     const [booksRevision, setBooksRevision] = useState(0);
-    const [isAcademyOpen, setIsAcademyOpen] = useState(false);
-    const [isWorkshopOpen, setIsWorkshopOpen] = useState(false);
-    const [isForgeOpen, setIsForgeOpen] = useState(false);
-    const [isBackpackOpen, setIsBackpackOpen] = useState(false);
-    const [isGateRepairOpen, setIsGateRepairOpen] = useState(false);
-    const [activeGateId, setActiveGateId] = useState('gate-ch1');
-    const [activeGateRequirements, setActiveGateRequirements] = useState<GateRequirements | undefined>(undefined);
-    const [isWaypointOpen, setIsWaypointOpen] = useState(false);
-    const [waypointName, setWaypointName] = useState('ຈຸດວາບປອດໄພ');
-    const [isQuizFinisherOpen, setIsQuizFinisherOpen] = useState(false);
-    const [activeExamBookId, setActiveExamBookId] = useState('book-ch1');
     const [backpackRevision, setBackpackRevision] = useState(0);
-
-    const isLibraryOpenRef = useRef(isLibraryOpen);
-    isLibraryOpenRef.current = isLibraryOpen;
-    const isAcademyOpenRef = useRef(isAcademyOpen);
-    isAcademyOpenRef.current = isAcademyOpen;
-    const isWorkshopOpenRef = useRef(isWorkshopOpen);
-    isWorkshopOpenRef.current = isWorkshopOpen;
-    const isForgeOpenRef = useRef(isForgeOpen);
-    isForgeOpenRef.current = isForgeOpen;
-    const isBackpackOpenRef = useRef(isBackpackOpen);
-    isBackpackOpenRef.current = isBackpackOpen;
-    const isGateRepairOpenRef = useRef(isGateRepairOpen);
-    isGateRepairOpenRef.current = isGateRepairOpen;
-    const isWaypointOpenRef = useRef(isWaypointOpen);
-    isWaypointOpenRef.current = isWaypointOpen;
-    const isQuizFinisherOpenRef = useRef(isQuizFinisherOpen);
-    isQuizFinisherOpenRef.current = isQuizFinisherOpen;
-    const currentLevelRef = useRef(currentLevel);
-    currentLevelRef.current = currentLevel;
 
     useEffect(() =>
     {
         // Ensure legacy local storage keys are migrated into active save slot on startup
         saveManager.load();
-    }, []);
-
-    useEffect(() =>
-    {
-        const onStageCleared = (payload: { stageId: string }) =>
-        {
-            // Beating a Chapter boss sends the player home to learn and craft, not to a score screen
-            const clear = completeStageUseCase(
-                stageProgressionRef.current,
-                repositories.stageProgression,
-                payload.stageId,
-                null
-            );
-            const bonus = awardChapterClearUseCase(entities.wallet, clear.isFirstTimeClear);
-            setWalletBalance(entities.wallet.balance);
-            autoSaveGame();
-            EventBus.emit('change-level', 'village');
-            const bonusText = bonus > 0 ? ` +${bonus} 🎓 Credit!` : '';
-            setTimeout(() => setVillageWelcomeToast(`🏆 ຊະນະ Boss ບົດທີ 1!${bonusText} ກັບມາໝູ່ບ້ານເພື່ອຮຽນ ແລະ ສ້າງອາວຸດຕໍ່ໄປ`), 300);
-        };
-
-        const onPlayerHealthChanged = (payload: PlayerDamagedPayload | PlayerHealedPayload) =>
-        {
-            setHealth(payload.currentHealth);
-        };
-
-        const onGameOver = () =>
-        {
-            // Dying costs half the carried Materials, then the player wakes up healed in the village
-            const result = returnToVillageUseCase('death', entities.backpack);
-            setBackpackRevision(r => r + 1);
-            autoSaveGame();
-
-            const lostCount = result.lostMaterials.reduce((total, m) => total + m.count, 0);
-            setTimeout(() =>
-            {
-                EventBus.emit('change-level', 'village');
-                setTimeout(() => setVillageWelcomeToast(
-                    lostCount > 0
-                        ? `💀 ເຈົ້າສະຫຼົບ! ເສຍວັດສະດຸ ${lostCount} ຊິ້ນ ແຕ່ HP ຟື້ນເຕັມແລ້ວ`
-                        : '💀 ເຈົ້າສະຫຼົບ! ກັບມາໝູ່ບ້ານ HP ຟື້ນເຕັມແລ້ວ'
-                ), 300);
-            }, 1200);
-        };
-
-        const onBossDamaged = (payload: BossDamagedPayload) =>
-        {
-            setBossHp(payload.currentHp);
-            setBossMaxHp(payload.maxHp);
-        };
-
-        const onBossDefeated = () =>
-        {
-            setBossHp(0);
-        };
-
-        const onGamePaused = () =>
-        {
-            setIsGamePaused(true);
-        };
-
-        const onGameResumed = () =>
-        {
-            setIsGamePaused(false);
-        };
-
-        const handleKeyDown = (e: KeyboardEvent) =>
-        {
-            if (e.key === 'm' || e.key === 'M')
-            {
-                setIsMuted(toggleSoundUseCase(entities.settings, repositories.settings).soundMuted);
-            }
-            else if (e.key === 'b' || e.key === 'B')
-            {
-                setIsMusicMuted(toggleMusicUseCase(entities.settings, repositories.settings).musicMuted);
-            }
-            else if (e.key === 'Escape' || e.key === 'p' || e.key === 'P')
-            {
-                if (isMainMenuOpenRef.current) return;
-
-                if (isDialogueOpenRef.current)
-                {
-                    closeDialogue();
-                    return;
-                }
-
-                if (isLibraryOpenRef.current)
-                {
-                    setIsLibraryOpen(false);
-                    return;
-                }
-                if (isAcademyOpenRef.current)
-                {
-                    setIsAcademyOpen(false);
-                    return;
-                }
-                if (isWorkshopOpenRef.current)
-                {
-                    setIsWorkshopOpen(false);
-                    return;
-                }
-                if (isForgeOpenRef.current)
-                {
-                    setIsForgeOpen(false);
-                    return;
-                }
-                if (isBackpackOpenRef.current)
-                {
-                    setIsBackpackOpen(false);
-                    return;
-                }
-                if (isGateRepairOpenRef.current)
-                {
-                    setIsGateRepairOpen(false);
-                    return;
-                }
-                if (isWaypointOpenRef.current)
-                {
-                    setIsWaypointOpen(false);
-                    return;
-                }
-                if (isQuizFinisherOpenRef.current)
-                {
-                    setIsQuizFinisherOpen(false);
-                    return;
-                }
-
-                if (isSettingsOpenRef.current)
-                {
-                    setIsSettingsOpen(false);
-                    return;
-                }
-                if (isStageSelectOpenRef.current)
-                {
-                    setIsStageSelectOpen(false);
-                    return;
-                }
-                if (isStageMapOpenRef.current)
-                {
-                    setIsStageMapOpen(false);
-                    return;
-                }
-
-                togglePauseUseCase(pauseStateRef.current);
-            }
-            else if (e.key === 'i' || e.key === 'I')
-            {
-                if (!isMainMenuOpenRef.current)
-                {
-                    setIsBackpackOpen(prev => !prev);
-                }
-            }
-            else if (e.key === 'q' || e.key === 'Q')
-            {
-                if (!isMainMenuOpenRef.current)
-                {
-                    handleCycleWeapon();
-                }
-            }
-        };
-
-        const onOpenStageMap = () =>
-        {
-            setIsStageMapOpen(true);
-        };
-
-        const onWeaponChanged = (weaponId: string) =>
-        {
-            setEquippedWeaponId(weaponId);
-        };
-
-        // Knowledge Quest Event Handlers (Village Library building opens Bookstore mode)
-        const onOpenLibrary = (bookId?: string) =>
-        {
-            setActiveReaderBookId(bookId);
-            setActiveReaderPageNumber(undefined);
-            setTextbookModalMode('library-store');
-            setIsLibraryOpen(true);
-        };
-        const onOpenAcademy = (bookId?: string) =>
-        {
-            if (bookId) setActiveExamBookId(bookId);
-            setIsAcademyOpen(true);
-        };
-        const onOpenWorkshop = () => setIsWorkshopOpen(true);
-        const onOpenForge = () => setIsForgeOpen(true);
-        const onOpenBackpack = () => setIsBackpackOpen(true);
-        const onOpenGateRepair = (gateId?: string, requirements?: GateRequirements) =>
-        {
-            if (gateId) setActiveGateId(gateId);
-            setActiveGateRequirements(requirements);
-            setIsGateRepairOpen(true);
-        };
-        const onOpenWaypoint = (name?: string) =>
-        {
-            if (name) setWaypointName(name);
-            setIsWaypointOpen(true);
-        };
-        const onOpenQuizFinisher = () => setIsQuizFinisherOpen(true);
-        const onChangeLevel = (levelKey: string) => handleStartGame(levelKey);
-        const onBookExamPassed = () =>
-        {
-            setWalletBalance(entities.wallet.balance);
-            setBackpackRevision(r => r + 1);
-            autoSaveGame();
-        };
-        const onDailyPracticeCompleted = () =>
-        {
-            setWalletBalance(entities.wallet.balance);
-            autoSaveGame();
-        };
-        const onBackpackItemUsed = () =>
-        {
-            setBackpackRevision(r => r + 1);
-            autoSaveGame();
-        };
-        const onBackpackChanged = () => setBackpackRevision(r => r + 1);
-
-        EventBus.on('open-stage-map', onOpenStageMap);
-        EventBus.on('weapon-changed', onWeaponChanged);
-        EventBus.on('open-library', onOpenLibrary);
-        EventBus.on('open-academy', onOpenAcademy);
-        EventBus.on('open-workshop', onOpenWorkshop);
-        EventBus.on('open-forge', onOpenForge);
-        EventBus.on('open-backpack', onOpenBackpack);
-        EventBus.on('open-gate-repair', onOpenGateRepair);
-        EventBus.on('open-waypoint', onOpenWaypoint);
-        EventBus.on('open-quiz-finisher', onOpenQuizFinisher);
-        EventBus.on('change-level', onChangeLevel);
-        EventBus.on('book-exam-passed', onBookExamPassed);
-        EventBus.on('daily-practice-completed', onDailyPracticeCompleted);
-        EventBus.on('backpack-item-used', onBackpackItemUsed);
-        EventBus.on('backpack-changed', onBackpackChanged);
-        EventBus.on('stage-cleared', onStageCleared);
-        DomainEvents.on<PlayerDamagedPayload>(PLAYER_DAMAGED_EVENT, onPlayerHealthChanged);
-        DomainEvents.on<PlayerHealedPayload>(PLAYER_HEALED_EVENT, onPlayerHealthChanged);
-        DomainEvents.on(PLAYER_DIED_EVENT, onGameOver);
-        DomainEvents.on<BossDamagedPayload>(BOSS_DAMAGED_EVENT, onBossDamaged);
-        DomainEvents.on<BossDefeatedPayload>(BOSS_DEFEATED_EVENT, onBossDefeated);
-        DomainEvents.on(GAME_PAUSED_EVENT, onGamePaused);
-        DomainEvents.on(GAME_RESUMED_EVENT, onGameResumed);
-        window.addEventListener('keydown', handleKeyDown);
-
-        return () =>
-        {
-            EventBus.removeListener('open-stage-map', onOpenStageMap);
-            EventBus.removeListener('weapon-changed', onWeaponChanged);
-            EventBus.removeListener('open-library', onOpenLibrary);
-            EventBus.removeListener('open-academy', onOpenAcademy);
-            EventBus.removeListener('open-workshop', onOpenWorkshop);
-            EventBus.removeListener('open-forge', onOpenForge);
-            EventBus.removeListener('open-backpack', onOpenBackpack);
-            EventBus.removeListener('open-gate-repair', onOpenGateRepair);
-            EventBus.removeListener('open-waypoint', onOpenWaypoint);
-            EventBus.removeListener('open-quiz-finisher', onOpenQuizFinisher);
-            EventBus.removeListener('change-level', onChangeLevel);
-            EventBus.removeListener('book-exam-passed', onBookExamPassed);
-            EventBus.removeListener('daily-practice-completed', onDailyPracticeCompleted);
-            EventBus.removeListener('backpack-item-used', onBackpackItemUsed);
-            EventBus.removeListener('backpack-changed', onBackpackChanged);
-            EventBus.removeListener('stage-cleared', onStageCleared);
-            DomainEvents.off<PlayerDamagedPayload>(PLAYER_DAMAGED_EVENT, onPlayerHealthChanged);
-            DomainEvents.off<PlayerHealedPayload>(PLAYER_HEALED_EVENT, onPlayerHealthChanged);
-            DomainEvents.off(PLAYER_DIED_EVENT, onGameOver);
-            DomainEvents.off<BossDamagedPayload>(BOSS_DAMAGED_EVENT, onBossDamaged);
-            DomainEvents.off<BossDefeatedPayload>(BOSS_DEFEATED_EVENT, onBossDefeated);
-            DomainEvents.off(GAME_PAUSED_EVENT, onGamePaused);
-            DomainEvents.off(GAME_RESUMED_EVENT, onGameResumed);
-            window.removeEventListener('keydown', handleKeyDown);
-        };
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const handleCycleWeapon = () =>
@@ -698,6 +381,124 @@ function App ()
         void booksRevision;
         return Object.values(entities.books).filter(b => b.isUnlocked).length;
     }, [booksRevision]);
+
+    const handleEscape = () =>
+    {
+        if (isMainMenuOpen) return;
+
+        if (isDialogueOpen)
+        {
+            closeDialogue();
+            return;
+        }
+
+        if (modals.closeTopModal()) return;
+
+        togglePauseUseCase(pauseState);
+    };
+
+    useGlobalShortcuts({
+        toggleSound: () => setIsMuted(toggleSoundUseCase(entities.settings, repositories.settings).soundMuted),
+        toggleMusic: () => setIsMusicMuted(toggleMusicUseCase(entities.settings, repositories.settings).musicMuted),
+        escape: handleEscape,
+        toggleBackpack: () =>
+        {
+            if (!isMainMenuOpen) setIsBackpackOpen(prev => !prev);
+        },
+    });
+
+    useGameEvents({
+        onStageCleared: payload =>
+        {
+            // Beating a Chapter boss sends the player home to learn and craft, not to a score screen
+            const clear = completeStageUseCase(stageProgression, repositories.stageProgression, payload.stageId, null);
+            const bonus = awardChapterClearUseCase(entities.wallet, clear.isFirstTimeClear);
+            setWalletBalance(entities.wallet.balance);
+            autoSaveGame();
+            EventBus.emit('change-level', 'village');
+            const bonusText = bonus > 0 ? ` +${bonus} 🎓 Credit!` : '';
+            setTimeout(() => setVillageWelcomeToast(`🏆 ຊະນະ Boss ບົດທີ 1!${bonusText} ກັບມາໝູ່ບ້ານເພື່ອຮຽນ ແລະ ສ້າງອາວຸດຕໍ່ໄປ`), 300);
+        },
+        onPlayerHealthChanged: payload => setHealth(payload.currentHealth),
+        onPlayerDied: () =>
+        {
+            // Dying costs half the carried Materials, then the player wakes up healed in the village
+            const result = returnToVillageUseCase('death', entities.backpack);
+            setBackpackRevision(r => r + 1);
+            autoSaveGame();
+
+            const lostCount = result.lostMaterials.reduce((total, m) => total + m.count, 0);
+            setTimeout(() =>
+            {
+                EventBus.emit('change-level', 'village');
+                setTimeout(() => setVillageWelcomeToast(
+                    lostCount > 0
+                        ? `💀 ເຈົ້າສະຫຼົບ! ເສຍວັດສະດຸ ${lostCount} ຊິ້ນ ແຕ່ HP ຟື້ນເຕັມແລ້ວ`
+                        : '💀 ເຈົ້າສະຫຼົບ! ກັບມາໝູ່ບ້ານ HP ຟື້ນເຕັມແລ້ວ'
+                ), 300);
+            }, 1200);
+        },
+        onBossDamaged: payload =>
+        {
+            setBossHp(payload.currentHp);
+            setBossMaxHp(payload.maxHp);
+        },
+        onBossDefeated: () => setBossHp(0),
+        onGamePaused: () => setIsGamePaused(true),
+        onGameResumed: () => setIsGamePaused(false),
+        onOpenStageMap: () => setIsStageMapOpen(true),
+        onWeaponChanged: weaponId =>
+        {
+            setEquippedWeaponId(weaponId);
+            autoSaveGame();
+        },
+        onOpenLibrary: bookId =>
+        {
+            // The Library building opens the bookstore
+            setActiveReaderBookId(bookId);
+            setActiveReaderPageNumber(undefined);
+            setTextbookModalMode('library-store');
+            setIsLibraryOpen(true);
+        },
+        onOpenAcademy: bookId =>
+        {
+            if (bookId) setActiveExamBookId(bookId);
+            setIsAcademyOpen(true);
+        },
+        onOpenWorkshop: () => setIsWorkshopOpen(true),
+        onOpenForge: () => setIsForgeOpen(true),
+        onOpenBackpack: () => setIsBackpackOpen(true),
+        onOpenGateRepair: (gateId, requirements) =>
+        {
+            if (gateId) setActiveGateId(gateId);
+            setActiveGateRequirements(requirements);
+            setIsGateRepairOpen(true);
+        },
+        onOpenWaypoint: name =>
+        {
+            if (name) setWaypointName(name);
+            setIsWaypointOpen(true);
+        },
+        onOpenQuizFinisher: () => setIsQuizFinisherOpen(true),
+        onChangeLevel: levelKey => handleStartGame(levelKey),
+        onBookExamPassed: () =>
+        {
+            setWalletBalance(entities.wallet.balance);
+            setBackpackRevision(r => r + 1);
+            autoSaveGame();
+        },
+        onDailyPracticeCompleted: () =>
+        {
+            setWalletBalance(entities.wallet.balance);
+            autoSaveGame();
+        },
+        onBackpackItemUsed: () =>
+        {
+            setBackpackRevision(r => r + 1);
+            autoSaveGame();
+        },
+        onBackpackChanged: () => setBackpackRevision(r => r + 1),
+    });
 
     return (
         <div id="app">
@@ -950,21 +751,7 @@ function App ()
             />
 
             <VirtualTouchControls
-                visible={
-                    !isMainMenuOpen &&
-                    !isGamePaused &&
-                    !isDialogueOpen &&
-                    !isSettingsOpen &&
-                    !(isStageMapOpen || isStageSelectOpen) &&
-                    !isLibraryOpen &&
-                    !isAcademyOpen &&
-                    !isWorkshopOpen &&
-                    !isForgeOpen &&
-                    !isBackpackOpen &&
-                    !isGateRepairOpen &&
-                    !isWaypointOpen &&
-                    !isQuizFinisherOpen
-                }
+                visible={!isMainMenuOpen && !isGamePaused && !isDialogueOpen && !modals.isAnyModalOpen}
             />
         </div>
     );
