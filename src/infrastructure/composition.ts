@@ -1,16 +1,5 @@
-import { DialogueState } from '../domain/entities/Dialogue';
-import { Settings } from '../domain/entities/Settings';
-import { SkinManager } from '../domain/entities/Skin';
-import { StageProgression } from '../domain/entities/StageProgression';
-import { GamePauseState } from '../domain/entities/GamePauseState';
-import { Wallet } from '../domain/entities/Wallet';
-import { Health } from '../domain/entities/Health';
-import { AttackCooldown } from '../domain/entities/Combat';
-import { BookProgress } from '../domain/entities/Book';
-import { Backpack } from '../domain/entities/Backpack';
+import { GameState } from '../domain/entities/GameState';
 import { ItemCatalog } from '../domain/entities/ItemCatalog';
-import { EquipmentState } from '../domain/entities/EquipmentState';
-import { SpacedRepetitionSystem } from '../domain/entities/Quiz';
 import { applySettingsUseCase } from '../application/UpdateSettingsUseCase';
 import { localStorageSkinRepository } from './storage/LocalStorageSkinRepository';
 import { localStorageSettingsRepository } from './storage/LocalStorageSettingsRepository';
@@ -24,48 +13,12 @@ export const repositories = {
     stageProgression: localStorageStageProgressionRepository,
 };
 
-const initialSave = saveManager.load();
-
-// Initialize Books
-const initialBooks: Record<string, BookProgress> = {};
-if (initialSave.books)
-{
-    for (const [bId, snap] of Object.entries(initialSave.books))
-    {
-        initialBooks[bId] = BookProgress.fromSnapshot(snap);
-    }
-}
-if (!initialBooks['book-ch1'])
-{
-    initialBooks['book-ch1'] = new BookProgress('book-ch1', false);
-}
-
 /** Filled from `items.json` at startup (see main.tsx) before anything reads it. */
 const itemCatalog = new ItemCatalog();
 
-export const entities = {
-    itemCatalog,
-    skinManager: new SkinManager(initialSave.activeSkinId, initialSave.ownedSkins),
-    settings: new Settings(initialSave.settings.soundMuted, initialSave.settings.musicMuted),
-    stageProgression: new StageProgression(initialSave.stageProgression.unlockedStages, initialSave.stageProgression.completedStages),
-    pauseState: new GamePauseState(false),
-    dialogueState: new DialogueState(),
-    wallet: new Wallet(initialSave.wallet.balance),
-    health: new Health(),
-    attackCooldown: new AttackCooldown(),
-
-    // Version 4 Knowledge Quest entities
-    backpack: new Backpack(initialSave.backpack || [], itemCatalog),
-    equipment: EquipmentState.fromSnapshot(initialSave.equipment),
-    spacedRepetition: SpacedRepetitionSystem.fromSnapshot(initialSave.practiceStats || {
-        lastPracticeDate: '',
-        practiceCountToday: 0,
-        questionStats: {},
-    }),
-    books: initialBooks,
-    repairedGates: new Set<string>(initialSave.repairedGates || []),
-    forgeUnlocked: Boolean(initialSave.forgeUnlocked ?? initialBooks['book-ch1']?.examPassed ?? false),
-};
+/** The one live game state. Loading a save changes it in place, so references stay valid. */
+export const entities = new GameState(itemCatalog);
+entities.loadFromSnapshot(saveManager.load());
 
 // Push persisted audio preferences into SoundManager
 applySettingsUseCase(entities.settings);

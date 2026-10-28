@@ -31,7 +31,7 @@ import { Hud } from './components/Hud';
 import { SkinModal } from './components/SkinModal';
 import { useDialogue } from './hooks/useDialogue';
 import { useSkinShop } from './hooks/useSkinShop';
-import { createCurrentSnapshot, resetEntitiesToNewGame, restoreEntitiesFromSnapshot } from '../saveSnapshot';
+import { autoSaveGame, createCurrentSnapshot, resetEntitiesToNewGame, restoreEntitiesFromSnapshot } from '../saveSnapshot';
 import { getNextObjective } from '../../domain/utils/nextObjective';
 import { getGameContent } from '../content/ContentCatalog';
 import { PauseMenuModal } from './components/PauseMenuModal';
@@ -193,7 +193,7 @@ function App ()
             );
             const bonus = awardChapterClearUseCase(entities.wallet, clear.isFirstTimeClear);
             setWalletBalance(entities.wallet.balance);
-            saveManager.autoSave(createCurrentSnapshot());
+            autoSaveGame();
             EventBus.emit('change-level', 'village');
             const bonusText = bonus > 0 ? ` +${bonus} 🎓 Credit!` : '';
             setTimeout(() => setVillageWelcomeToast(`🏆 ຊະນະ Boss ບົດທີ 1!${bonusText} ກັບມາໝູ່ບ້ານເພື່ອຮຽນ ແລະ ສ້າງອາວຸດຕໍ່ໄປ`), 300);
@@ -209,7 +209,7 @@ function App ()
             // Dying costs half the carried Materials, then the player wakes up healed in the village
             const result = returnToVillageUseCase('death', entities.backpack);
             setBackpackRevision(r => r + 1);
-            saveManager.autoSave(createCurrentSnapshot());
+            autoSaveGame();
 
             const lostCount = result.lostMaterials.reduce((total, m) => total + m.count, 0);
             setTimeout(() =>
@@ -382,17 +382,17 @@ function App ()
         {
             setWalletBalance(entities.wallet.balance);
             setBackpackRevision(r => r + 1);
-            saveManager.autoSave(createCurrentSnapshot());
+            autoSaveGame();
         };
         const onDailyPracticeCompleted = () =>
         {
             setWalletBalance(entities.wallet.balance);
-            saveManager.autoSave(createCurrentSnapshot());
+            autoSaveGame();
         };
         const onBackpackItemUsed = () =>
         {
             setBackpackRevision(r => r + 1);
-            saveManager.autoSave(createCurrentSnapshot());
+            autoSaveGame();
         };
         const onBackpackChanged = () => setBackpackRevision(r => r + 1);
 
@@ -456,7 +456,7 @@ function App ()
         const nextId = cycleEquippedWeaponUseCase(entities.equipment, entities.backpack);
         soundManager.playSelect();
         setEquippedWeaponId(nextId);
-        saveManager.autoSave(createCurrentSnapshot());
+        autoSaveGame();
     };
 
     /** Refreshes React state after the live entities were replaced (load, import or reset). */
@@ -519,14 +519,14 @@ function App ()
     {
         const payload = toggleSoundUseCase(settings, repositories.settings);
         setIsMuted(payload.soundMuted);
-        saveManager.autoSave(createCurrentSnapshot());
+        autoSaveGame();
     };
 
     const handleToggleMusic = () =>
     {
         const payload = toggleMusicUseCase(settings, repositories.settings);
         setIsMusicMuted(payload.musicMuted);
-        saveManager.autoSave(createCurrentSnapshot());
+        autoSaveGame();
     };
 
     const handlePauseGame = () =>
@@ -824,12 +824,12 @@ function App ()
                 {
                     setWalletBalance(newBalance);
                     setBooksRevision(r => r + 1);
-                    saveManager.autoSave(createCurrentSnapshot());
+                    autoSaveGame();
                 }}
                 onPageRead={() =>
                 {
                     setBooksRevision(r => r + 1);
-                    saveManager.autoSave(createCurrentSnapshot());
+                    autoSaveGame();
                 }}
                 onGoToExam={(bookId) =>
                 {
@@ -846,7 +846,7 @@ function App ()
                 onCreditChanged={(newBalance) =>
                 {
                     setWalletBalance(newBalance);
-                    saveManager.autoSave(createCurrentSnapshot());
+                    autoSaveGame();
                 }}
                 onOpenLibraryStore={() =>
                 {
@@ -868,7 +868,7 @@ function App ()
                     setWalletBalance(entities.wallet.balance);
                     setBooksRevision(r => r + 1);
                     setBackpackRevision(r => r + 1);
-                    saveManager.autoSave(createCurrentSnapshot());
+                    autoSaveGame();
                 }}
             />
 
@@ -903,7 +903,7 @@ function App ()
                 onUseItem={() =>
                 {
                     setBackpackRevision(r => r + 1);
-                    saveManager.autoSave(createCurrentSnapshot());
+                    autoSaveGame();
                 }}
             />
 
@@ -916,7 +916,7 @@ function App ()
                 {
                     setIsGateRepairOpen(false);
                     setBackpackRevision(r => r + 1);
-                    saveManager.autoSave(createCurrentSnapshot());
+                    autoSaveGame();
                 }}
             />
 
@@ -940,7 +940,7 @@ function App ()
                     setIsQuizFinisherOpen(false);
                     EventBus.emit('quiz-finisher-passed');
                     setBackpackRevision(r => r + 1);
-                    saveManager.autoSave(createCurrentSnapshot());
+                    autoSaveGame();
                 }}
                 onFail={() =>
                 {

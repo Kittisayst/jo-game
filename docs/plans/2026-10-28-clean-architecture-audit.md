@@ -1,7 +1,7 @@
 # ກວດ ແລະ ປັບໂຄງສ້າງໃຫ້ຕົງກັບ Clean Architecture
 
 - **Date:** 2026-10-28
-- **Status:** Phase 0–3 ເຮັດແລ້ວ; Phase 4–6 ຍັງ planned
+- **Status:** Phase 0–4 ເຮັດແລ້ວ; Phase 5–6 ຍັງ planned
 - **Project:** jo-game (ພະຈົນໄພຄວາມຮູ້ / Knowledge Quest)
 
 ## ເປົ້າໝາຍ (Goal)
@@ -68,6 +68,8 @@
 14. ປ່ຽນ `entities` ເປັນ `GameState` ທີ່ມີ method `loadFrom(snapshot)` ແກ້ໃນບ່ອນ (ບໍ່ assign ທັບ `equipment`, `repairedGates`, `forgeUnlocked`, `spacedRepetition`).
 15. ຍ້າຍ `createCurrentSnapshot`/`restoreEntitiesFromSnapshot`/`resetEntitiesToNewGame` ເປັນ `application/` (`CreateSaveSnapshotUseCase`, `RestoreSaveSnapshotUseCase`, `ResetGameUseCase`) ພ້ອມ test ແລະ `SavePort` (SaveManager ເປັນ adapter).
 16. React: ສະໜອງ `GameState` ຜ່ານ Context ແທນ import singleton ໃນ modal; Phaser scene ຮັບຜ່ານ `init(data)`/registry. (ເຮັດຫຼັງຂໍ້ 13–15 ຜ່ານ.)
+
+**ສະຖານະ Phase 4 (ເຮັດແລ້ວ):** ເພີ່ມ `GameState` (domain) ລວມ entity ທັງໝົດ ແລະ `entities` ໃນ `composition.ts` ກາຍເປັນ `GameState` ຕົວດຽວ; ສະມາຊິກທັງໝົດຖືກສ້າງຄັ້ງດຽວ ແລະ load ຈາກ save ແບບ in-place (ເພີ່ມ `EquipmentState.loadFromSnapshot`, `SpacedRepetitionSystem.loadFromSnapshot`; ບໍ່ມີການ assign ທັບ `equipment`/`repairedGates`/`spacedRepetition` ອີກ — ກວດໃນ browser ວ່າ reference ເດີມຍັງຢູ່ຫຼັງ Load). ຍ້າຍ logic snapshot ຈາກ `saveSnapshot.ts` ໄປ `application/SaveSnapshotUseCases.ts` (`createSaveSnapshotUseCase`, `restoreSaveSnapshotUseCase`, `resetGameUseCase`) ພ້ອມ `SavePort` (SaveManager implements) ແລະ test ດ້ວຍ fake port (round trip, reset ໄດ້ຜູ້ຫຼິ້ນໃໝ່ພ້ອມຂວານ/ດາບເລີ່ມຕົ້ນ); `saveSnapshot.ts` ເຫຼືອເປັນຕົວເຊື່ອມບາງໆ + `autoSaveGame()` ແທນ `saveManager.autoSave(createCurrentSnapshot())` ທີ່ຊ້ຳ 17 ບ່ອນ. `Health` ຢູ່ໃນ `GameState` ແລ້ວ (ເຮັດໃນ Phase 1). ຜົນ: 229 unit test, e2e 9 ຜ່ານ; ກວດ Save/Load/Reset ຜ່ານ UI ໃນ browser. **ບໍ່ໄດ້ເຮັດ (ຕັດສິນໃຈຂ້າມ):** ຂັ້ນ 16 React Context — ຍັງມີແຕ່ `App` ເປັນຜູ້ໃຊ້ຫຼັກ ແລະ scene ກໍ່ຕ້ອງເຂົ້າເຖິງ state ດຽວກັນ ຈຶ່ງຍັງບໍ່ໄດ້ຜົນພໍ; ຄວນເຮັດເມື່ອມີ test ຂອງ React. **ພົບແຕ່ຍັງບໍ່ແກ້:** `SaveManager.autoSave` ຂ້າມການບັນທຶກຖ້າຜ່ານມາ < 3 ວິນາທີ (ເຊັ່ນ ຊື້ skin ແລ້ວໃສ່ທັນທີ ຄັ້ງທີສອງບໍ່ຖືກບັນທຶກ ຖ້າປິດເກມໃນທັນໃດ) — ຄວນໃຫ້ເຫດການສຳຄັນ force save.
 
 ### Phase 5 — ແຍກໄຟລ໌ໃຫຍ່ (ເສັ້ນທາງເລືອກ ເຮັດຫຼັງ Phase 1–4)
 17. `Game.ts` → `CombatController` (attack/stomp/boss hit) ແລະ `InteractionController` (prompt + E key); `App.tsx` effect ໃຫຍ່ → hooks (`useGameEvents`, `useGlobalShortcuts`) ແລະ modal state ເປັນ `useModals`; `TextbookModal`/`AcademyModal`/`BackpackModal` ແຍກ logic ອອກເປັນ hook.

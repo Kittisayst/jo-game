@@ -79,3 +79,7 @@ The player's carried items (Materials, tools, weapons, crafted gear) in a fixed 
 
 **Broken Gate**:
 The gate between the cavern Zone and the boss arena. It stays closed until the player brings the right tool and a Repair Kit and answers a question from the Chapter's Textbook.
+
+**Game state**:
+Everything that makes up one player's game (Wallet, Backpack, Health, Equipment, Textbook progress, Skins, stage progress, settings), held in one `GameState` aggregate. Its members are created once and changed in place when a save is loaded.
+_Avoid_: session (the old score-and-lives `GameSession` no longer exists), store, globals

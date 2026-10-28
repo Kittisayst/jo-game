@@ -273,6 +273,15 @@ export class SpacedRepetitionSystem
         };
     }
 
+    /** Replaces the practice history in place (used when a save is loaded). */
+    loadFromSnapshot (snapshot: DailyPracticeProgressSnapshot): void
+    {
+        const loaded = SpacedRepetitionSystem.fromSnapshot(snapshot);
+        this._stats = loaded._stats;
+        this._lastPracticeDate = loaded._lastPracticeDate;
+        this._practiceCountToday = loaded._practiceCountToday;
+    }
+
     static fromSnapshot (snapshot: DailyPracticeProgressSnapshot): SpacedRepetitionSystem
     {
         return new SpacedRepetitionSystem(

@@ -4,8 +4,7 @@ import { selectSkinUseCase } from '../../../application/SelectSkinUseCase';
 import { STARTER_BOOK_CREDIT_RESERVE } from '../../../domain/entities/SaveData';
 import { soundManager } from '../../audio/SoundManager';
 import { entities, repositories } from '../../composition';
-import { createCurrentSnapshot } from '../../saveSnapshot';
-import { saveManager } from '../../storage/SaveManager';
+import { autoSaveGame } from '../../saveSnapshot';
 
 /** State and actions behind the skin shop: buying with Credit and wearing a skin. */
 export function useSkinShop (onWalletChanged: () => void)
@@ -25,7 +24,7 @@ export function useSkinShop (onWalletChanged: () => void)
             onWalletChanged();
             setSkinNotice('🎉 ຊື້ຊຸດສຳເລັດ! ກົດ "ໃສ່" ເພື່ອໃສ່ຊຸດນີ້');
             soundManager.playBuy();
-            saveManager.autoSave(createCurrentSnapshot());
+            autoSaveGame();
             return;
         }
 
@@ -44,7 +43,7 @@ export function useSkinShop (onWalletChanged: () => void)
         if (selectSkinUseCase(entities.skinManager, skinId, repositories.skin))
         {
             setActiveSkinId(skinId);
-            saveManager.autoSave(createCurrentSnapshot());
+            autoSaveGame();
         }
     };
 

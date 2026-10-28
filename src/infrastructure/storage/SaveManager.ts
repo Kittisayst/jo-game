@@ -3,6 +3,7 @@ import {
     createDefaultSaveSnapshot,
     migrateSaveSnapshot,
 } from '../../domain/entities/SaveData';
+import { SavePort } from '../../domain/ports';
 import {
     readJsonSafe,
     readString,
@@ -28,7 +29,7 @@ export interface SlotMetadata
     walletBalance: number;
 }
 
-export class SaveManager
+export class SaveManager implements SavePort
 {
     private lastAutoSaveTime = 0;
 

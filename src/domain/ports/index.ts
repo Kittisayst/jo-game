@@ -37,3 +37,9 @@ export interface StageProgressionPort
     clear(): void;
 }
 
+/** Which save slot the player is using, and wiping one. */
+export interface SavePort
+{
+    getActiveSlot(): string;
+    clearSlot(slotId: string): void;
+}

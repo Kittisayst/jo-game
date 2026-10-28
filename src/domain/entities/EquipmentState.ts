@@ -137,6 +137,14 @@ export class EquipmentState
         };
     }
 
+    /** Replaces the equipped weapon and upgrade levels in place (used when a save is loaded). */
+    loadFromSnapshot (snapshot?: EquipmentSnapshot | null): void
+    {
+        const loaded = EquipmentState.fromSnapshot(snapshot);
+        this._equippedWeaponId = loaded._equippedWeaponId;
+        this._upgradeLevels = loaded._upgradeLevels;
+    }
+
     static fromSnapshot (snapshot?: EquipmentSnapshot | null): EquipmentState
     {
         if (!snapshot)
