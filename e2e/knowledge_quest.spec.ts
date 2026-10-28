@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { walkRightTo } from './helpers/gameProbe';
 
 test.describe('Knowledge Quest — Buy-to-Read Textbook & Chapter 1 Loop E2E', () => {
   test('Enforces Buy-at-Library -> Read-All-Pages (5s timer) -> Unlock-Academy-Exam loop', async ({ page }) => {
@@ -38,9 +39,7 @@ test.describe('Knowledge Quest — Buy-to-Read Textbook & Chapter 1 Loop E2E', (
     await expect(page.locator('text=ທ່ານຍັງບໍ່ມີປຶ້ມຕຳລາຮຽນໃນຄອບຄອງ')).not.toBeVisible();
 
     // 4. Walk from spawn (x=120) to Village Library building (x=320) and press E
-    await page.keyboard.down('KeyD');
-    await page.waitForTimeout(750);
-    await page.keyboard.up('KeyD');
+    await walkRightTo(page, 'KeyD', 290);
     await page.waitForTimeout(150);
     await page.keyboard.press('KeyE');
 
@@ -65,10 +64,8 @@ test.describe('Knowledge Quest — Buy-to-Read Textbook & Chapter 1 Loop E2E', (
     await page.keyboard.press('Escape');
     await expect(libraryStoreHeader).not.toBeVisible();
 
-    await page.keyboard.down('KeyD');
     // Walk far enough to stand at the Academy (x=600), past the elder NPC (x=460) who would otherwise take the E key
-    await page.waitForTimeout(1400);
-    await page.keyboard.up('KeyD');
+    await walkRightTo(page, 'KeyD', 580);
     await page.waitForTimeout(150);
     await page.keyboard.press('KeyE');
 
