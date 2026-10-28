@@ -60,7 +60,7 @@ export function createDefaultSaveSnapshot (slotId = 'slot_1'): SaveGameSnapshot
             completedStages: [],
         },
         wallet: {
-            balance: 50,
+            balance: STARTER_BOOK_CREDIT_RESERVE,
         },
         weapons: {
             owned: [DEFAULT_WEAPON_ID],

@@ -21,7 +21,7 @@ describe('SaveData Domain Entity & Migration', () =>
         expect(defaultSave.stageProgression.completedStages).toEqual([]);
 
         // Legacy properties
-        expect(defaultSave.wallet.balance).toBe(50);
+        expect(defaultSave.wallet.balance).toBe(20);
         expect(defaultSave.weapons.owned).toEqual(['cyber-saber']);
         expect(defaultSave.weapons.equippedId).toBe('cyber-saber');
         expect(defaultSave.upgrades.maxHp).toBe(0);
@@ -46,7 +46,7 @@ describe('SaveData Domain Entity & Migration', () =>
         const saveFromString = migrateSaveSnapshot('corrupted_string', 'slot_3');
         expect(saveFromString.slotId).toBe('slot_3');
         expect(saveFromString.gameStats.highScore).toBe(0);
-        expect(saveFromString.wallet.balance).toBe(50);
+        expect(saveFromString.wallet.balance).toBe(20);
     });
 
     it('migrates legacy flat schema to version 4 successfully', () =>
