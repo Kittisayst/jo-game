@@ -13,7 +13,7 @@ import {
 class MemoryStageProgressionRepository implements StageProgressionPort
 {
     data: StageProgressionData = {
-        unlockedStages: ['village', 'level-1'],
+        unlockedStages: ['village', 'stage-ch1'],
         completedStages: [],
     };
 
@@ -33,7 +33,7 @@ class MemoryStageProgressionRepository implements StageProgressionPort
     clear (): void
     {
         this.data = {
-            unlockedStages: ['village', 'level-1'],
+            unlockedStages: ['village', 'stage-ch1'],
             completedStages: [],
         };
     }
@@ -66,28 +66,28 @@ describe('CompleteStageUseCase', () =>
             unlockedPayload = payload;
         });
 
-        const result = completeStageUseCase(progression, repo, 'level-1', 'level-2');
+        const result = completeStageUseCase(progression, repo, 'stage-ch1', 'stage-ch2');
 
         expect(result.isFirstTimeClear).toBe(true);
-        expect(result.newlyUnlocked).toBe('level-2');
+        expect(result.newlyUnlocked).toBe('stage-ch2');
 
-        expect(repo.data.completedStages).toContain('level-1');
-        expect(repo.data.unlockedStages).toContain('level-2');
+        expect(repo.data.completedStages).toContain('stage-ch1');
+        expect(repo.data.unlockedStages).toContain('stage-ch2');
 
         expect(completedPayload).toEqual({
-            stageId: 'level-1',
+            stageId: 'stage-ch1',
             isFirstTimeClear: true,
-            newlyUnlocked: 'level-2',
+            newlyUnlocked: 'stage-ch2',
         });
 
         expect(unlockedPayload).toEqual({
-            stageId: 'level-2',
+            stageId: 'stage-ch2',
         });
     });
 
     it('re-clearing a stage does not emit STAGE_UNLOCKED_EVENT if already unlocked', () =>
     {
-        completeStageUseCase(progression, repo, 'level-1', 'level-2');
+        completeStageUseCase(progression, repo, 'stage-ch1', 'stage-ch2');
 
         let unlockedEmitted = false;
         DomainEvents.on<StageUnlockedPayload>(STAGE_UNLOCKED_EVENT, () =>
@@ -95,7 +95,7 @@ describe('CompleteStageUseCase', () =>
             unlockedEmitted = true;
         });
 
-        const result = completeStageUseCase(progression, repo, 'level-1', 'level-2');
+        const result = completeStageUseCase(progression, repo, 'stage-ch1', 'stage-ch2');
 
         expect(result.isFirstTimeClear).toBe(false);
         expect(result.newlyUnlocked).toBeNull();

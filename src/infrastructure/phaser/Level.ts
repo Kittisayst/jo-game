@@ -21,13 +21,6 @@ export interface EnemySpawnData
     scale?: number;
 }
 
-export interface PowerUpSpawnData
-{
-    x: number;
-    y: number;
-    type: 'heart' | 'star' | 'spring';
-}
-
 export interface SpikeSpawnData
 {
     x: number;
@@ -54,18 +47,13 @@ export interface BossSpawnData
 export interface Level
 {
     worldWidth: number;
-    finishX: number;
     spawn: { x: number; y: number };
     platforms: { x: number; y: number }[];
     enemies?: EnemySpawnData[];
-    powerUps?: PowerUpSpawnData[];
     spikes?: SpikeSpawnData[];
     movingPlatforms?: MovingPlatformSpawnData[];
     boss?: BossSpawnData;
-    finishType?: 'flag' | 'door';
-    scenery?: 'village' | 'default' | 'plains' | 'sky-islands' | 'boss-arena' | 'stage-ch1';
-    nextLevel?: string | null;
-    trackTime?: boolean;
+    scenery?: 'village' | 'stage-ch1';
 }
 
 

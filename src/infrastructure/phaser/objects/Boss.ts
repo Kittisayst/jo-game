@@ -1,7 +1,6 @@
 import { Physics, Scene } from 'phaser';
 import { Boss as BossEntity, BossPhase } from '../../../domain/entities/Boss';
 import { damageBossUseCase } from '../../../application/DamageBossUseCase';
-import { Score } from '../../../domain/entities/Score';
 
 const TEXTURE_KEY = 'boss-king-slime';
 const WIDTH = 96;
@@ -401,13 +400,13 @@ export class Boss extends Physics.Arcade.Sprite
         }
     }
 
-    takeDamage (score: Score, amount = 1): boolean
+    takeDamage (amount = 1): boolean
     {
         if (this.isInvulnerable || this.entity.isDefeated) return false;
 
         this.isInvulnerable = true;
 
-        const isDefeated = damageBossUseCase(this.entity, score, amount);
+        const isDefeated = damageBossUseCase(this.entity, amount);
         const currentPhase = this.entity.phase;
 
         // Check for dramatic Phase Shift reaction

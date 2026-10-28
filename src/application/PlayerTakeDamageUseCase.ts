@@ -1,33 +1,33 @@
 import { DomainEvents } from '../domain/DomainEvents';
-import { Lives } from '../domain/entities/Lives';
+import { Health } from '../domain/entities/Health';
 
 export const PLAYER_DAMAGED_EVENT = 'player-damaged';
-export const GAME_OVER_EVENT = 'game-over';
+export const PLAYER_DIED_EVENT = 'player-died';
 
 export interface PlayerDamagedPayload
 {
-    currentLives: number;
-    maxLives: number;
+    currentHealth: number;
+    maxHealth: number;
 }
 
 /**
  * Use case executed when the player contacts a hazard or enemy.
- * Deducts a life and emits PLAYER_DAMAGED_EVENT or GAME_OVER_EVENT if depleted.
+ * Deducts a heart and emits PLAYER_DAMAGED_EVENT or PLAYER_DIED_EVENT if depleted.
  * See "Application layer" in CONTEXT.md.
  */
-export function playerTakeDamageUseCase (lives: Lives): void
+export function playerTakeDamageUseCase (health: Health): void
 {
-    if (lives.isDead) return;
+    if (health.isDead) return;
 
-    const isDead = lives.takeDamage();
+    const isDead = health.takeDamage();
 
     DomainEvents.emit<PlayerDamagedPayload>(PLAYER_DAMAGED_EVENT, {
-        currentLives: lives.current,
-        maxLives: lives.max,
+        currentHealth: health.current,
+        maxHealth: health.max,
     });
 
     if (isDead)
     {
-        DomainEvents.emit(GAME_OVER_EVENT, {});
+        DomainEvents.emit(PLAYER_DIED_EVENT, {});
     }
 }

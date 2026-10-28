@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('Hero Attack Controls (J / Z) & Combat Verification', () => {
-  test('Verifies J and Z keys trigger attack, hit spark VFX, and defeat enemies in Level 1', async ({ page }) => {
+  test('Verifies J and Z keys trigger attack, hit spark VFX, and defeat enemies in Chapter 1', async ({ page }) => {
     const pageErrors: string[] = [];
     page.on('console', msg => console.log(`BROWSER [${msg.type()}]:`, msg.text()));
     page.on('pageerror', err => {
@@ -26,16 +26,16 @@ test.describe('Hero Attack Controls (J / Z) & Combat Verification', () => {
     await expect(stageSelectBtn).toBeVisible();
     await stageSelectBtn.click();
 
-    // 3. Select Stage 1 (Green Plains) with enemies
-    const stage1Node = page.locator('.stage-map-node').filter({ hasText: /Stage 1|Green Plains/i }).first();
-    await expect(stage1Node).toBeVisible();
-    await stage1Node.click();
+    // 3. Select Chapter 1 with enemies
+    const chapterNode = page.locator('.stage-map-node').filter({ hasText: /ບົດທີ 1|Chapter 1/i }).first();
+    await expect(chapterNode).toBeVisible();
+    await chapterNode.click();
 
-    // 4. Verify in Level 1 with HUD and the starter wooden sword
+    // 4. Verify in Chapter 1 with HUD and the starter wooden sword
     const hud = page.locator('.game-hud');
     await expect(hud).toBeVisible({ timeout: 8000 });
     const levelBadge = page.locator('.level-badge');
-    await expect(levelBadge).toContainText(/Level 1|ດ່ານ 1/i);
+    await expect(levelBadge).toContainText(/ບົດທີ 1|Chapter 1/i);
 
     const weaponBadge = page.locator('.weapon-hud-badge');
     await expect(weaponBadge).toContainText(/ດາບໄມ້/i);

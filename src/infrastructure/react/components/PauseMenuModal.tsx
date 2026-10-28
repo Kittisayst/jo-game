@@ -1,41 +1,28 @@
-import { formatTime } from '../utils/formatTime';
 import { getLevelItem } from '../../phaser/levelCatalog';
 
 export interface PauseMenuModalProps
 {
     currentLevel: string;
-    score: number;
-    elapsedSeconds: number;
     isMuted: boolean;
     isMusicMuted: boolean;
-    activeSkinName: string;
     onResume: () => void;
     onToggleMute: () => void;
     onToggleMusic: () => void;
-    onOpenSkinModal: () => void;
     onOpenSettings: () => void;
     onRestartLevel: () => void;
     onExitToMainMenu: () => void;
-    onOpenAchievements?: () => void;
-    unclaimedAchievementsCount?: number;
 }
 
 export function PauseMenuModal ({
     currentLevel,
-    score,
-    elapsedSeconds,
     isMuted,
     isMusicMuted,
-    activeSkinName,
     onResume,
     onToggleMute,
     onToggleMusic,
-    onOpenSkinModal,
     onOpenSettings,
     onRestartLevel,
     onExitToMainMenu,
-    onOpenAchievements,
-    unclaimedAchievementsCount,
 }: PauseMenuModalProps)
 {
     const levelLabel = getLevelItem(currentLevel)?.shortTitle || currentLevel;
@@ -62,14 +49,6 @@ export function PauseMenuModal ({
                     <div className="pause-stat-item">
                         <span className="pause-stat-label">🚩 ດ່ານ</span>
                         <span className="pause-stat-val">{levelLabel}</span>
-                    </div>
-                    <div className="pause-stat-item">
-                        <span className="pause-stat-label">⭐ ຄະແນນ</span>
-                        <span className="pause-stat-val">{score}</span>
-                    </div>
-                    <div className="pause-stat-item">
-                        <span className="pause-stat-label">⏱️ ເວລາ</span>
-                        <span className="pause-stat-val">{formatTime(elapsedSeconds)}</span>
                     </div>
                 </div>
 
@@ -113,28 +92,6 @@ export function PauseMenuModal ({
                         type="button"
                     >
                         ▶️ ສືບຕໍ່ຫຼິ້ນ (Resume Game)
-                    </button>
-
-                    {onOpenAchievements && (
-                        <button
-                            id="pause-achievements-btn"
-                            className="menu-action-btn secondary achievements-pause-btn"
-                            onClick={onOpenAchievements}
-                            type="button"
-                        >
-                            🏆 ຜົນສຳເລັດ & ພາລະກິດ (Achievements)
-                            {unclaimedAchievementsCount !== undefined && unclaimedAchievementsCount > 0 && (
-                                <span className="menu-unclaimed-badge">{unclaimedAchievementsCount}</span>
-                            )}
-                        </button>
-                    )}
-
-                    <button
-                        className="menu-action-btn secondary"
-                        onClick={onOpenSkinModal}
-                        type="button"
-                    >
-                        🥋 ປ່ຽນຊຸດຕົວລະຄອນ ({activeSkinName})
                     </button>
 
                     <button

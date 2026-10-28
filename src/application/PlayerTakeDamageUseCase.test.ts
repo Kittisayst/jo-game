@@ -1,67 +1,67 @@
 import { describe, expect, it, vi } from 'vitest';
 import { DomainEvents } from '../domain/DomainEvents';
-import { Lives } from '../domain/entities/Lives';
+import { Health } from '../domain/entities/Health';
 import {
     playerTakeDamageUseCase,
     PLAYER_DAMAGED_EVENT,
-    GAME_OVER_EVENT,
+    PLAYER_DIED_EVENT,
     PlayerDamagedPayload,
 } from './PlayerTakeDamageUseCase';
 
 describe('playerTakeDamageUseCase', () =>
 {
-    it('deducts a life and emits PLAYER_DAMAGED_EVENT when not fatal', () =>
+    it('deducts a heart and emits PLAYER_DAMAGED_EVENT when not fatal', () =>
     {
-        const lives = new Lives(3, 3);
+        const health = new Health(3, 3);
         const damageListener = vi.fn();
         const gameOverListener = vi.fn();
 
         DomainEvents.on<PlayerDamagedPayload>(PLAYER_DAMAGED_EVENT, damageListener);
-        DomainEvents.on(GAME_OVER_EVENT, gameOverListener);
+        DomainEvents.on(PLAYER_DIED_EVENT, gameOverListener);
 
-        playerTakeDamageUseCase(lives);
+        playerTakeDamageUseCase(health);
 
         DomainEvents.off<PlayerDamagedPayload>(PLAYER_DAMAGED_EVENT, damageListener);
-        DomainEvents.off(GAME_OVER_EVENT, gameOverListener);
+        DomainEvents.off(PLAYER_DIED_EVENT, gameOverListener);
 
-        expect(lives.current).toBe(2);
-        expect(damageListener).toHaveBeenCalledWith({ currentLives: 2, maxLives: 3 });
+        expect(health.current).toBe(2);
+        expect(damageListener).toHaveBeenCalledWith({ currentHealth: 2, maxHealth: 3 });
         expect(gameOverListener).not.toHaveBeenCalled();
     });
 
-    it('emits GAME_OVER_EVENT when life reaches 0', () =>
+    it('emits PLAYER_DIED_EVENT when life reaches 0', () =>
     {
-        const lives = new Lives(1, 3);
+        const health = new Health(1, 3);
         const damageListener = vi.fn();
         const gameOverListener = vi.fn();
 
         DomainEvents.on<PlayerDamagedPayload>(PLAYER_DAMAGED_EVENT, damageListener);
-        DomainEvents.on(GAME_OVER_EVENT, gameOverListener);
+        DomainEvents.on(PLAYER_DIED_EVENT, gameOverListener);
 
-        playerTakeDamageUseCase(lives);
+        playerTakeDamageUseCase(health);
 
         DomainEvents.off<PlayerDamagedPayload>(PLAYER_DAMAGED_EVENT, damageListener);
-        DomainEvents.off(GAME_OVER_EVENT, gameOverListener);
+        DomainEvents.off(PLAYER_DIED_EVENT, gameOverListener);
 
-        expect(lives.current).toBe(0);
-        expect(lives.isDead).toBe(true);
-        expect(damageListener).toHaveBeenCalledWith({ currentLives: 0, maxLives: 3 });
+        expect(health.current).toBe(0);
+        expect(health.isDead).toBe(true);
+        expect(damageListener).toHaveBeenCalledWith({ currentHealth: 0, maxHealth: 3 });
         expect(gameOverListener).toHaveBeenCalledOnce();
     });
 
     it('does not emit events if player was already dead', () =>
     {
-        const lives = new Lives(0, 3);
+        const health = new Health(0, 3);
         const damageListener = vi.fn();
         const gameOverListener = vi.fn();
 
         DomainEvents.on<PlayerDamagedPayload>(PLAYER_DAMAGED_EVENT, damageListener);
-        DomainEvents.on(GAME_OVER_EVENT, gameOverListener);
+        DomainEvents.on(PLAYER_DIED_EVENT, gameOverListener);
 
-        playerTakeDamageUseCase(lives);
+        playerTakeDamageUseCase(health);
 
         DomainEvents.off<PlayerDamagedPayload>(PLAYER_DAMAGED_EVENT, damageListener);
-        DomainEvents.off(GAME_OVER_EVENT, gameOverListener);
+        DomainEvents.off(PLAYER_DIED_EVENT, gameOverListener);
 
         expect(damageListener).not.toHaveBeenCalled();
         expect(gameOverListener).not.toHaveBeenCalled();

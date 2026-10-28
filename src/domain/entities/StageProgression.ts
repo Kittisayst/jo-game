@@ -3,7 +3,7 @@
  * Pure business rules — see "Domain layer" in CONTEXT.md.
  */
 /** Stages the player can always enter. Chapter 1 has no earlier stage to unlock it, so it starts open. */
-export const ALWAYS_UNLOCKED_STAGES = ['village', 'level-1', 'stage-ch1'];
+export const ALWAYS_UNLOCKED_STAGES = ['village', 'stage-ch1'];
 
 export class StageProgression
 {

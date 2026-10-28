@@ -1,6 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
 import { DomainEvents } from '../domain/DomainEvents';
-import { GameStats } from '../domain/entities/GameStats';
 import { Settings } from '../domain/entities/Settings';
 import { SkinManager } from '../domain/entities/Skin';
 import { resetSaveDataUseCase, SAVE_DATA_RESET_EVENT } from './ResetSaveDataUseCase';
@@ -11,11 +10,9 @@ describe('resetSaveDataUseCase', () =>
 {
     it('resets entities, clears every port, and emits events', () =>
     {
-        const gameStats = new GameStats(999, 12.3);
         const skinManager = new SkinManager('neon-ninja');
         const settings = new Settings(true, true);
         const ports = {
-            gameStats: { load: vi.fn(), save: vi.fn(), clear: vi.fn() },
             skin: { loadActiveSkinId: vi.fn(), saveActiveSkinId: vi.fn(), clear: vi.fn() },
             settings: { load: vi.fn(), save: vi.fn(), clear: vi.fn() },
         };
@@ -26,18 +23,15 @@ describe('resetSaveDataUseCase', () =>
         DomainEvents.on(SKIN_CHANGED_EVENT, onSkin);
         DomainEvents.on(SETTINGS_CHANGED_EVENT, onSettings);
 
-        resetSaveDataUseCase({ gameStats, skinManager, settings }, ports);
+        resetSaveDataUseCase({ skinManager, settings }, ports);
 
         DomainEvents.off(SAVE_DATA_RESET_EVENT, onReset);
         DomainEvents.off(SKIN_CHANGED_EVENT, onSkin);
         DomainEvents.off(SETTINGS_CHANGED_EVENT, onSettings);
 
-        expect(gameStats.highScore).toBe(0);
-        expect(gameStats.bestTimeSeconds).toBeNull();
         expect(skinManager.activeSkinId).toBe('cyber-blue');
         expect(settings.isSoundMuted).toBe(false);
         expect(settings.isMusicMuted).toBe(false);
-        expect(ports.gameStats.clear).toHaveBeenCalled();
         expect(ports.skin.clear).toHaveBeenCalled();
         expect(ports.settings.clear).toHaveBeenCalled();
         expect(onReset).toHaveBeenCalled();

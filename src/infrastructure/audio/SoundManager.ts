@@ -1,11 +1,8 @@
 import { DomainEvents } from '../../domain/DomainEvents';
-import { LEVEL_COMPLETE_EVENT } from '../../application/CompleteLevelUseCase';
-import { ENEMY_DEFEATED_EVENT } from '../../application/DefeatEnemyUseCase';
 import {
     PLAYER_DAMAGED_EVENT,
-    GAME_OVER_EVENT,
+    PLAYER_DIED_EVENT,
 } from '../../application/PlayerTakeDamageUseCase';
-import { POWERUP_COLLECTED_EVENT } from '../../application/CollectPowerUpUseCase';
 import {
     BOSS_DAMAGED_EVENT,
     BOSS_DEFEATED_EVENT,
@@ -160,19 +157,12 @@ export class SoundManager
         if (this.initialized) return;
         this.initialized = true;
 
-        DomainEvents.on(ENEMY_DEFEATED_EVENT, () => this.playStomp());
         DomainEvents.on(PLAYER_DAMAGED_EVENT, () => this.playHurt());
-        DomainEvents.on(GAME_OVER_EVENT, () =>
+        DomainEvents.on(PLAYER_DIED_EVENT, () =>
         {
             this.stopBgm();
             this.playGameOver();
         });
-        DomainEvents.on(LEVEL_COMPLETE_EVENT, () =>
-        {
-            this.stopBgm();
-            this.playLevelComplete();
-        });
-        DomainEvents.on(POWERUP_COLLECTED_EVENT, () => this.playPowerUp());
         DomainEvents.on(BOSS_DAMAGED_EVENT, () => this.playBossHit());
         DomainEvents.on(BOSS_DEFEATED_EVENT, () =>
         {

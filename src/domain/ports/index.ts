@@ -4,19 +4,6 @@
  * See "Port" in CONTEXT.md.
  */
 
-export interface GameStatsData
-{
-    highScore: number;
-    bestTimeSeconds: number | null;
-}
-
-export interface GameStatsPort
-{
-    load(): GameStatsData;
-    save(data: GameStatsData): void;
-    clear(): void;
-}
-
 export interface SkinPort
 {
     loadActiveSkinId(): string | null;

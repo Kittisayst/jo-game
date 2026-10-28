@@ -1,6 +1,5 @@
 import { DomainEvents } from '../domain/DomainEvents';
 import { Boss } from '../domain/entities/Boss';
-import { Score } from '../domain/entities/Score';
 
 export const BOSS_DAMAGED_EVENT = 'boss-damaged';
 export const BOSS_DEFEATED_EVENT = 'boss-defeated';
@@ -13,16 +12,15 @@ export interface BossDamagedPayload
 
 export interface BossDefeatedPayload
 {
-    points: number;
-    totalScore: number;
+    maxHp: number;
 }
 
 /**
  * Use case executed when the player damages the Boss.
- * Decreases Boss HP, awards score points if defeated, and publishes domain events.
+ * Decreases Boss HP and publishes domain events. Returns true when the blow was fatal.
  * See "Application layer" in CONTEXT.md.
  */
-export function damageBossUseCase (boss: Boss, score: Score, amount = 1): boolean
+export function damageBossUseCase (boss: Boss, amount = 1): boolean
 {
     if (boss.isDefeated) return false;
 
@@ -35,10 +33,8 @@ export function damageBossUseCase (boss: Boss, score: Score, amount = 1): boolea
 
     if (result.defeated)
     {
-        score.add(boss.points);
         DomainEvents.emit<BossDefeatedPayload>(BOSS_DEFEATED_EVENT, {
-            points: boss.points,
-            totalScore: score.value,
+            maxHp: boss.maxHp,
         });
     }
 

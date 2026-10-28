@@ -55,8 +55,8 @@ export function SettingsModal ({
         label: selectedSlot,
         exists: false,
         timestamp: null,
-        highScore: 0,
         completedStagesCount: 0,
+        walletBalance: 0,
         activeSkinId: 'cyber-blue',
     };
 
@@ -234,12 +234,12 @@ export function SettingsModal ({
 
                         <div className="slot-card-details">
                             <div className="slot-detail-item">
-                                <span className="slot-detail-lbl">🏆 ຄະແນນສູງສຸດ:</span>
-                                <span className="slot-detail-val">{currentMeta.highScore.toLocaleString()} pts</span>
+                                <span className="slot-detail-lbl">🎓 Credit:</span>
+                                <span className="slot-detail-val">{currentMeta.walletBalance.toLocaleString()}</span>
                             </div>
                             <div className="slot-detail-item">
                                 <span className="slot-detail-lbl">🗺️ ດ່ານທີ່ຜ່ານ:</span>
-                                <span className="slot-detail-val">{currentMeta.completedStagesCount} / 3 ດ່ານ</span>
+                                <span className="slot-detail-val">{currentMeta.completedStagesCount} / 1 ບົດ</span>
                             </div>
                             <div className="slot-detail-item">
                                 <span className="slot-detail-lbl">🕒 ບັນທຶກເມື່ອ:</span>

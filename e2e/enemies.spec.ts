@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('New Enemy Types E2E Verification', () => {
-  test('Spawns, renders, and interacts with new enemy archetypes in Level 1', async ({ page }) => {
+  test('Spawns, renders, and interacts with new enemy archetypes in Chapter 1', async ({ page }) => {
     const pageErrors: string[] = [];
     page.on('console', msg => console.log('BROWSER LOG:', msg.type(), msg.text()));
     page.on('pageerror', err => {
@@ -17,10 +17,10 @@ test.describe('New Enemy Types E2E Verification', () => {
     const stageSelectBtn = page.getByRole('button', { name: /ເລືອກດ່ານ/i });
     await stageSelectBtn.click();
 
-    // 3. Select Stage 1 in the World Map
-    const level1Card = page.locator('.stage-map-node').filter({ hasText: /Stage 1|Green Plains/i }).first();
-    await expect(level1Card).toBeVisible();
-    await level1Card.click();
+    // 3. Select Chapter 1 in the World Map
+    const chapterCard = page.locator('.stage-map-node').filter({ hasText: /ບົດທີ 1|Chapter 1/i }).first();
+    await expect(chapterCard).toBeVisible();
+    await chapterCard.click();
 
     const canvas = page.locator('canvas');
     await expect(canvas).toBeVisible({ timeout: 10000 });
@@ -34,10 +34,10 @@ test.describe('New Enemy Types E2E Verification', () => {
       await page.waitForTimeout(80);
     }
 
-    // Take screenshot of Level 1 gameplay with enemies
+    // Take screenshot of Chapter 1 gameplay with enemies
     await page.waitForTimeout(1000);
     await page.screenshot({
-      path: 'C:/Users/kitti/.gemini/antigravity-ide/brain/19865946-8b19-4609-b9f5-202555dcb966/enemies_level1_gameplay.png',
+      path: 'C:/Users/kitti/.gemini/antigravity-ide/brain/19865946-8b19-4609-b9f5-202555dcb966/enemies_chapter1_gameplay.png',
     });
 
     // Test melee slash attack action (J / Space)

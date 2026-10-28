@@ -2,10 +2,7 @@ import { EventBus } from '../../EventBus';
 import { Geom, Input, Scene } from 'phaser';
 import { Player } from '../objects/Player';
 import { Platform } from '../objects/Platform';
-import { GoalFlag } from '../objects/GoalFlag';
-import { Door } from '../objects/Door';
 import { Enemy, SPIT_PROJECTILE_KEY } from '../objects/Enemy';
-import { PowerUp } from '../objects/PowerUp';
 import { Spike } from '../objects/Spike';
 import { MovingPlatform } from '../objects/MovingPlatform';
 import { Boss } from '../objects/Boss';
@@ -14,23 +11,12 @@ import { ParticleManager } from '../effects/ParticleManager';
 import { soundManager } from '../../audio/SoundManager';
 import { Level } from '../Level';
 import { LEVEL_CATALOG } from '../levelCatalog';
-import { LevelProgress } from '../../../domain/entities/LevelProgress';
 import { DomainEvents } from '../../../domain/DomainEvents';
-import { GameSession } from '../../../domain/entities/GameSession';
-import { Score } from '../../../domain/entities/Score';
-import { Lives } from '../../../domain/entities/Lives';
-import { PowerUpState } from '../../../domain/entities/PowerUp';
-import { completeLevelUseCase } from '../../../application/CompleteLevelUseCase';
-import { defeatEnemyUseCase } from '../../../application/DefeatEnemyUseCase';
+import { Health } from '../../../domain/entities/Health';
 import {
     playerTakeDamageUseCase,
-    GAME_OVER_EVENT,
+    PLAYER_DIED_EVENT,
 } from '../../../application/PlayerTakeDamageUseCase';
-import { collectPowerUpUseCase } from '../../../application/CollectPowerUpUseCase';
-import {
-    createTickEmitterCache,
-    tickSessionUseCase,
-} from '../../../application/TickSessionUseCase';
 import {
     SKIN_CHANGED_EVENT,
     SkinChangedPayload,
@@ -39,12 +25,10 @@ import {
     GAME_PAUSED_EVENT,
     GAME_RESUMED_EVENT,
 } from '../../../application/TogglePauseUseCase';
-import { Projectile } from '../objects/Projectile';
 import { entities } from '../../composition';
 import { performAttackUseCase } from '../../../application/PerformAttackUseCase';
 import { cycleEquippedWeaponUseCase } from '../../../application/CycleEquippedWeaponUseCase';
 import { collectEnemyDropsUseCase } from '../../../application/CollectEnemyDropsUseCase';
-import { WEAPON_CONFIGS } from '../../../domain/entities/EquipmentState';
 import { EnemyDefinition } from '../../../domain/entities/Enemy';
 import { trackAchievementUseCase } from '../../../application/TrackAchievementUseCase';
 import { harvestResourceNodeUseCase } from '../../../application/HarvestResourceNodeUseCase';
@@ -52,6 +36,7 @@ import { harvestResourceNodeUseCase } from '../../../application/HarvestResource
 const WORLD_HEIGHT = 720;
 const GROUND_HEIGHT = 64;
 const GROUND_TILE_SIZE = 64;
+const MAX_HEALTH = 3;
 
 export class Game extends Scene
 {
@@ -61,13 +46,9 @@ export class Game extends Scene
     platforms: Phaser.Physics.Arcade.StaticGroup;
     movingPlatforms: Phaser.Physics.Arcade.Group;
     spikes: Phaser.Physics.Arcade.StaticGroup;
-    powerUps: Phaser.Physics.Arcade.StaticGroup;
     enemies: Phaser.Physics.Arcade.Group;
-    playerProjectiles: Phaser.Physics.Arcade.Group;
     enemyProjectiles: Phaser.Physics.Arcade.Group;
     boss?: Boss;
-    goalFlag?: GoalFlag;
-    door?: Door;
     elderNpc?: NPC;
     isDialogueActive = false;
     particleManager: ParticleManager;
@@ -76,18 +57,11 @@ export class Game extends Scene
     touchControls = { left: false, right: false, up: false };
     bgTileSprite?: Phaser.GameObjects.TileSprite;
     level: Level;
-    levelProgress: LevelProgress;
-    session: GameSession;
-    score: Score;
-    lives: Lives;
-    powerUpState: PowerUpState;
+    /** True once the stage boss is beaten and the stage-cleared event has been sent. */
+    isStageCleared = false;
+    health: Health;
     currentLevelKey = 'village';
     currentSkinId = 'cyber-blue';
-    initialScoreValue = 0;
-    initialLivesValue = 3;
-    initialElapsedMs = 0;
-    private damageTakenInLevel = 0;
-    private tickCache = createTickEmitterCache();
 
     // Knowledge Quest: Village Hub & 4-Zone Stage fields
     private interactiveBuildings: { x: number; label: string; action: () => void }[] = [];
@@ -124,17 +98,12 @@ export class Game extends Scene
     {
         // Reset per-run references to prevent lingering stale objects across restarts
         this.boss = undefined;
-        this.door = undefined;
-        this.goalFlag = undefined;
         this.elderNpc = undefined;
         this.isDialogueActive = false;
         this.touchControls = { left: false, right: false, up: false };
 
         this.currentLevelKey = data?.levelKey ?? 'village';
-        this.initialScoreValue = typeof data?.score === 'number' ? data.score : 0;
-        this.initialLivesValue = typeof data?.lives === 'number' ? data.lives : 3;
         this.currentSkinId = data?.skinId ?? 'cyber-blue';
-        this.initialElapsedMs = typeof data?.elapsedMs === 'number' ? data.elapsedMs : 0;
 
         this.interactiveBuildings = [];
         this.resourceNodes = [];
@@ -233,31 +202,17 @@ export class Game extends Scene
     create ()
     {
         this.boss = undefined;
-        this.door = undefined;
-        this.goalFlag = undefined;
         this.elderNpc = undefined;
 
         this.level = this.cache.json.get(this.currentLevelKey) as Level;
-        this.levelProgress = new LevelProgress(this.currentLevelKey, this.level.nextLevel || null);
-        const trackTime = this.level.trackTime ?? (this.currentLevelKey !== 'village');
-        this.session = new GameSession(
-            this.currentLevelKey,
-            this.initialScoreValue,
-            this.initialLivesValue,
-            this.initialElapsedMs,
-            trackTime
-        );
-        this.score = this.session.score;
-        this.lives = this.session.lives;
-        this.powerUpState = this.session.powerUps;
-        this.tickCache = createTickEmitterCache();
+        this.isStageCleared = false;
+        this.health = new Health(MAX_HEALTH, MAX_HEALTH);
 
         this.physics.world.setBounds(0, 0, this.level.worldWidth, WORLD_HEIGHT);
 
         this.camera = this.cameras.main;
         this.camera.setBackgroundColor(0x87ceeb);
         this.camera.setBounds(0, 0, this.level.worldWidth, WORLD_HEIGHT);
-        this.damageTakenInLevel = 0;
 
         this.createSky();
 
@@ -265,7 +220,6 @@ export class Game extends Scene
         this.platforms = this.createPlatforms();
         this.movingPlatforms = this.createMovingPlatforms();
         this.spikes = this.createSpikes();
-        this.powerUps = this.createPowerUps();
         this.enemies = this.createEnemies();
 
         this.particleManager = new ParticleManager(this);
@@ -283,18 +237,6 @@ export class Game extends Scene
         else if (this.level.scenery === 'stage-ch1' || this.currentLevelKey === 'stage-ch1')
         {
             this.createStageCh1Scenery();
-        }
-        else if (this.level.scenery === 'sky-islands' || this.currentLevelKey === 'level-2')
-        {
-            this.createSkyIslandsScenery();
-        }
-        else if (this.level.scenery === 'boss-arena' || this.currentLevelKey === 'level-3' || Boolean(this.level.boss))
-        {
-            this.createBossArenaScenery();
-        }
-        else if (this.level.scenery === 'plains' || this.currentLevelKey === 'level-1')
-        {
-            this.createPlainsScenery();
         }
 
         // Floating interaction prompt text
@@ -355,35 +297,6 @@ export class Game extends Scene
         this.player.onRunStep = (x, y, dir) => this.particleManager.emitRunDust(x, y, dir);
         this.player.onWallSlide = (x, y, dir) => this.particleManager.emitRunDust(x, y, -dir);
 
-        // Place GoalFlag or Door at finish line
-        const finishY = WORLD_HEIGHT - GROUND_HEIGHT - 70;
-        if (this.level.finishType === 'door')
-        {
-            this.door = new Door(this, this.level.finishX, finishY);
-            let doorDebounce = false;
-            this.physics.add.overlap(this.player, this.door, () =>
-            {
-                if (doorDebounce) return;
-                doorDebounce = true;
-                this.time.delayedCall(1200, () =>
-                {
-                    doorDebounce = false;
-                });
-                this.handleDoorReached();
-            });
-        }
-        else
-        {
-            this.goalFlag = new GoalFlag(this, this.level.finishX, finishY);
-            this.physics.add.overlap(this.player, this.goalFlag, () =>
-            {
-                if (!this.boss || this.boss.entity.isDefeated)
-                {
-                    this.handleGoalReached();
-                }
-            });
-        }
-
         this.physics.add.collider(this.player, this.ground);
         this.physics.add.collider(this.player, this.platforms);
         // The gate wall is built with the scenery, before the player exists, so it is hooked up here
@@ -404,11 +317,6 @@ export class Game extends Scene
             this.handlePlayerSpikeCollision(spikeObj as Spike);
         });
 
-        this.physics.add.overlap(this.player, this.powerUps, (_player, powerUpObj) =>
-        {
-            this.handleCollectPowerUp(powerUpObj as PowerUp);
-        });
-
         this.physics.add.overlap(this.player, this.enemies, (playerObj, enemyObj) =>
         {
             this.handlePlayerEnemyCollision(playerObj as Player, enemyObj as Enemy);
@@ -425,22 +333,11 @@ export class Game extends Scene
                 this.particleManager.emitLandingDust(x, y);
                 this.cameras.main.shake(140, 0.007);
             };
-            this.boss.onDefeated = (x, y) =>
+            this.boss.onDefeated = () =>
             {
                 if (this.currentLevelKey === 'stage-ch1')
                 {
                     EventBus.emit('open-quiz-finisher');
-                }
-                else
-                {
-                    trackAchievementUseCase(entities.achievementManager, 'boss-slayer', 1);
-                    this.particleManager.emitCelebration(x, y);
-                    this.cameras.main.shake(450, 0.018);
-                    this.cameras.main.flash(200, 255, 255, 255, true);
-                    this.time.delayedCall(1200, () =>
-                    {
-                        this.handleGoalReached();
-                    });
                 }
             };
             this.boss.onSummonMinion = (x, y) =>
@@ -478,36 +375,6 @@ export class Game extends Scene
         }
 
         // Setup player projectile pool & collisions
-        this.playerProjectiles = this.physics.add.group({
-            classType: Projectile,
-            runChildUpdate: true,
-        });
-
-        this.physics.add.collider(this.playerProjectiles, this.ground, (proj) =>
-        {
-            (proj as Projectile).destroy();
-        });
-        this.physics.add.collider(this.playerProjectiles, this.platforms, (proj) =>
-        {
-            (proj as Projectile).destroy();
-        });
-        this.physics.add.collider(this.playerProjectiles, this.movingPlatforms, (proj) =>
-        {
-            (proj as Projectile).destroy();
-        });
-        this.physics.add.overlap(this.playerProjectiles, this.enemies, (proj, enemy) =>
-        {
-            this.handleProjectileEnemyHit(proj as Projectile, enemy as Enemy);
-        });
-        if (this.boss)
-        {
-            this.physics.add.overlap(this.playerProjectiles, this.boss, (proj, boss) =>
-            {
-                this.handleProjectileBossHit(proj as Projectile, boss as Boss);
-            });
-        }
-
-        // Setup enemy projectile pool & collisions
         this.enemyProjectiles = this.physics.add.group();
 
         this.physics.add.collider(this.enemyProjectiles, this.ground, (proj) =>
@@ -527,25 +394,13 @@ export class Game extends Scene
         this.physics.add.overlap(this.player, this.enemyProjectiles, (_player, proj) =>
         {
             (proj as Phaser.Physics.Arcade.Sprite).destroy();
-            if (this.player.isInvincible || this.player.hasStarPower) return;
+            if (this.player.isInvincible) return;
 
             this.player.triggerDamage(this.player.x);
-            this.damageTakenInLevel++;
             this.particleManager.emitSpikeHit(this.player.x, this.player.y);
             this.cameras.main.shake(150, 0.007);
             this.cameras.main.flash(100, 34, 197, 94, true);
-            playerTakeDamageUseCase(this.lives);
-        });
-
-        // Player projectiles destroy enemy spit projectiles
-        this.physics.add.overlap(this.playerProjectiles, this.enemyProjectiles, (playerProj, spit) =>
-        {
-            (spit as Phaser.Physics.Arcade.Sprite).destroy();
-            this.particleManager.emitStompBurst((spit as Phaser.Physics.Arcade.Sprite).x, (spit as Phaser.Physics.Arcade.Sprite).y);
-            if (!(playerProj as Projectile).pierce)
-            {
-                (playerProj as Projectile).destroy();
-            }
+            playerTakeDamageUseCase(this.health);
         });
 
         this.camera.startFollow(this.player, true, 0.1, 0.1);
@@ -595,7 +450,7 @@ export class Game extends Scene
             this.cameras.main.flash(200, 255, 255, 255, true);
             this.time.delayedCall(1500, () =>
             {
-                this.handleGoalReached();
+                this.handleStageCleared();
             });
         };
 
@@ -635,7 +490,7 @@ export class Game extends Scene
         EventBus.on('gate-repaired', onGateRepaired);
 
         // Start BGM (boss theme for level-3, adventure theme for levels 1 & 2)
-        const isBossStage = this.currentLevelKey === 'level-3' || Boolean(this.level.boss);
+        const isBossStage = Boolean(this.level.boss);
         soundManager.startBgm(isBossStage ? 'boss' : 'adventure');
 
         const onSkinChanged = (payload: SkinChangedPayload) =>
@@ -670,14 +525,14 @@ export class Game extends Scene
         {
             this.physics.pause();
         };
-        DomainEvents.on(GAME_OVER_EVENT, onGameOver);
+        DomainEvents.on(PLAYER_DIED_EVENT, onGameOver);
 
         this.events.on('shutdown', () =>
         {
             DomainEvents.off<SkinChangedPayload>(SKIN_CHANGED_EVENT, onSkinChanged);
             DomainEvents.off(GAME_PAUSED_EVENT, onGamePaused);
             DomainEvents.off(GAME_RESUMED_EVENT, onGameResumed);
-            DomainEvents.off(GAME_OVER_EVENT, onGameOver);
+            DomainEvents.off(PLAYER_DIED_EVENT, onGameOver);
             EventBus.removeListener('dialogue-open-state', onDialogueState);
             EventBus.removeListener('virtual-input', onVirtualInput);
             EventBus.removeListener('virtual-interact', onVirtualInteract);
@@ -689,8 +544,6 @@ export class Game extends Scene
             EventBus.removeListener('gate-repaired', onGateRepaired);
             soundManager.stopBgm();
             this.boss = undefined;
-            this.door = undefined;
-            this.goalFlag = undefined;
             this.elderNpc = undefined;
             this.bgTileSprite = undefined;
             entities.attackCooldown.reset();
@@ -705,7 +558,7 @@ export class Game extends Scene
     {
         entities.attackCooldown.tick(delta);
 
-        if (this.levelProgress.isComplete || this.lives.isDead)
+        if (this.isStageCleared || this.health.isDead)
         {
             return;
         }
@@ -725,17 +578,6 @@ export class Game extends Scene
         }
 
         this.updateInteractionPrompt();
-
-        const tickResult = tickSessionUseCase(this.session, delta, this.tickCache);
-
-        if (tickResult.starExpired)
-        {
-            this.player.setStarPower(false);
-        }
-        if (tickResult.springExpired)
-        {
-            this.player.setSpringPower(false);
-        }
 
         const isLeft = Boolean(this.cursors.left.isDown || this.wasdKeys?.left?.isDown || this.touchControls.left);
         const isRight = Boolean(this.cursors.right.isDown || this.wasdKeys?.right?.isDown || this.touchControls.right);
@@ -775,13 +617,6 @@ export class Game extends Scene
             this.bgTileSprite.tilePositionX = this.cameras.main.scrollX * 0.25;
         }
 
-        if (this.player.x >= this.level.finishX)
-        {
-            if (!this.boss || this.boss.entity.isDefeated)
-            {
-                this.handleGoalReached();
-            }
-        }
     }
 
     showDamageNumber (x: number, y: number, amount: number, isCrit = false): void
@@ -808,7 +643,7 @@ export class Game extends Scene
 
     handlePlayerAttack (): void
     {
-        if (this.isDialogueActive || this.lives.isDead || this.levelProgress.isComplete) return;
+        if (this.isDialogueActive || this.health.isDead || this.isStageCleared) return;
 
         const attack = performAttackUseCase(entities.equipment, entities.attackCooldown);
 
@@ -876,7 +711,7 @@ export class Game extends Scene
             if (Geom.Intersects.RectangleToRectangle(bounds, this.boss.getBounds()))
             {
                 hitAny = true;
-                this.boss.takeDamage(this.score, damage);
+                this.boss.takeDamage(damage);
                 this.showDamageNumber(this.boss.x, this.boss.y, damage, weaponId === 'thunder-hammer');
                 this.particleManager.emitStompBurst(this.boss.x, this.boss.y);
             }
@@ -886,40 +721,6 @@ export class Game extends Scene
         {
             this.triggerHitStop(weaponId === 'thunder-hammer' ? 65 : 45);
             this.cameras.main.shake(120, weaponId === 'thunder-hammer' ? 0.008 : 0.004);
-        }
-    }
-
-    private handleProjectileEnemyHit (proj: Projectile, enemy: Enemy): void
-    {
-        if (!proj.active || !enemy.active || enemy.entity.isDefeated) return;
-
-        const dir = proj.body?.velocity.x ? Math.sign(proj.body.velocity.x) : this.player.facingDir;
-        const res = enemy.takeDamage(proj.damage, dir);
-        this.showDamageNumber(enemy.x, enemy.y, proj.damage, false);
-        this.particleManager.emitStompBurst(enemy.x, enemy.y);
-
-        if (res.defeated)
-        {
-            this.handleEnemyDefeated(enemy);
-        }
-
-        if (!proj.pierce && !proj.isBoomerang)
-        {
-            proj.destroy();
-        }
-    }
-
-    private handleProjectileBossHit (proj: Projectile, boss: Boss): void
-    {
-        if (!proj.active || !boss.active || boss.entity.isDefeated || boss.isInvulnerable) return;
-
-        boss.takeDamage(this.score, proj.damage);
-        this.showDamageNumber(boss.x, boss.y, proj.damage, false);
-        this.particleManager.emitStompBurst(boss.x, boss.y);
-
-        if (!proj.pierce && !proj.isBoomerang)
-        {
-            proj.destroy();
         }
     }
 
@@ -966,17 +767,6 @@ export class Game extends Scene
     {
         if (enemy.entity.isDefeated) return;
 
-        // Invincible star power knocks out enemies on contact
-        if (player.hasStarPower)
-        {
-            player.setVelocityY(-260);
-            this.particleManager.emitStompBurst(enemy.x, enemy.y);
-            this.cameras.main.shake(100, 0.0035);
-            this.handleEnemyDefeated(enemy);
-            enemy.squashAndDefeat();
-            return;
-        }
-
         const playerBody = player.body as Phaser.Physics.Arcade.Body;
         const isFalling = playerBody.velocity.y > 0;
         const isAbove = player.y < enemy.y - 4;
@@ -993,9 +783,8 @@ export class Game extends Scene
                 if (!player.isInvincible)
                 {
                     player.triggerDamage(enemy.x);
-                    this.damageTakenInLevel++;
                     this.cameras.main.flash(100, 239, 68, 68, true);
-                    playerTakeDamageUseCase(this.lives);
+                    playerTakeDamageUseCase(this.health);
                 }
                 return;
             }
@@ -1018,40 +807,27 @@ export class Game extends Scene
             if (!player.isInvincible)
             {
                 player.triggerDamage(enemy.x);
-                this.damageTakenInLevel++;
                 this.cameras.main.shake(160, 0.008);
                 this.cameras.main.flash(110, 239, 68, 68, true);
-                playerTakeDamageUseCase(this.lives);
+                playerTakeDamageUseCase(this.health);
             }
         }
     }
 
     private handlePlayerSpikeCollision (spike: Spike)
     {
-        if (this.player.isInvincible || this.player.hasStarPower) return;
+        if (this.player.isInvincible) return;
 
         this.player.triggerDamage(spike.x);
-        this.damageTakenInLevel++;
         this.particleManager.emitSpikeHit(spike.x, spike.y);
         this.cameras.main.shake(180, 0.009);
         this.cameras.main.flash(110, 239, 68, 68, true);
-        playerTakeDamageUseCase(this.lives);
+        playerTakeDamageUseCase(this.health);
     }
 
     private handlePlayerBossCollision (player: Player, boss: Boss)
     {
         if (boss.entity.isDefeated) return;
-
-        // Invincible star power hurts boss
-        if (player.hasStarPower)
-        {
-            player.setVelocityY(-360);
-            this.particleManager.emitStompBurst(boss.x, boss.y);
-            this.triggerHitStop(60);
-            this.cameras.main.shake(160, 0.008);
-            boss.takeDamage(this.score, entities.equipment.equippedStats.damage);
-            return;
-        }
 
         const playerBody = player.body as Phaser.Physics.Arcade.Body;
         const isFalling = playerBody.velocity.y > 0;
@@ -1066,7 +842,7 @@ export class Game extends Scene
             this.cameras.main.shake(200, 0.012);
             this.cameras.main.flash(70, 255, 255, 255, true);
             soundManager.playStomp();
-            boss.takeDamage(this.score, entities.equipment.equippedStats.damage);
+            boss.takeDamage(entities.equipment.equippedStats.damage);
         }
         else
         {
@@ -1076,59 +852,20 @@ export class Game extends Scene
                 player.triggerDamage(boss.x);
                 this.cameras.main.shake(220, 0.012);
                 this.cameras.main.flash(140, 239, 68, 68, true);
-                playerTakeDamageUseCase(this.lives);
+                playerTakeDamageUseCase(this.health);
             }
         }
     }
 
-    private handleDoorReached ()
+    private handleStageCleared ()
     {
-        if (this.door)
-        {
-            this.door.celebrate();
-            this.particleManager.emitCelebration(this.door.x, this.door.y - 30);
-            soundManager.playCoin();
-        }
-
-        if (this.currentLevelKey === 'village')
-        {
-            EventBus.emit('open-stage-map');
-        }
-        else
-        {
-            this.handleGoalReached();
-        }
-    }
-
-    private handleGoalReached ()
-    {
-        if (this.levelProgress.isComplete) return;
+        if (this.isStageCleared) return;
+        this.isStageCleared = true;
 
         this.physics.pause();
-
-        if (this.door)
-        {
-            this.door.celebrate();
-            this.particleManager.emitCelebration(this.door.x, this.door.y - 30);
-        }
-        else if (this.goalFlag)
-        {
-            this.goalFlag.celebrate();
-            this.particleManager.emitCelebration(this.goalFlag.x, this.goalFlag.y - 30);
-        }
-
-        if (this.damageTakenInLevel === 0 && this.currentLevelKey !== 'village')
-        {
-            trackAchievementUseCase(entities.achievementManager, 'untouchable', 1);
-        }
-        trackAchievementUseCase(
-            entities.achievementManager,
-            'arsenal-master',
-            Object.keys(WEAPON_CONFIGS).filter(id => entities.backpack.getItemCount(id) > 0).length,
-            true
-        );
-
-        completeLevelUseCase(this.levelProgress);
+        soundManager.stopBgm();
+        soundManager.playLevelComplete();
+        EventBus.emit('stage-cleared', { stageId: this.currentLevelKey });
     }
 
     private createVillageScenery ()
@@ -1537,7 +1274,7 @@ export class Game extends Scene
 
     private updateInteractionPrompt (): void
     {
-        if (!this.player || !this.interactionPromptText || this.isDialogueActive || this.lives.isDead)
+        if (!this.player || !this.interactionPromptText || this.isDialogueActive || this.health.isDead)
         {
             if (this.interactionPromptText) this.interactionPromptText.setVisible(false);
             this.activeInteraction = null;
@@ -1677,300 +1414,6 @@ export class Game extends Scene
         });
     }
 
-    private createPlainsScenery ()
-    {
-        const baseY = WORLD_HEIGHT - GROUND_HEIGHT;
-
-        // Rolling green background hills
-        const hillDefs = [
-            { x: 300, radius: 140, color: 0x166534 },
-            { x: 700, radius: 170, color: 0x15803d },
-            { x: 1150, radius: 150, color: 0x166534 },
-            { x: 1600, radius: 180, color: 0x15803d },
-        ];
-        for (const hill of hillDefs)
-        {
-            const g = this.add.graphics();
-            g.setDepth(1);
-            g.fillStyle(hill.color, 0.45);
-            g.fillCircle(hill.x, baseY + hill.radius - 40, hill.radius);
-        }
-
-        // Windmills with rotating blades at x = 720 and x = 1450
-        const windmillPositions = [720, 1450];
-        for (const wx of windmillPositions)
-        {
-            const tower = this.add.graphics();
-            tower.setDepth(1);
-            tower.fillStyle(0x334155, 0.9);
-            tower.beginPath();
-            tower.moveTo(wx - 18, baseY);
-            tower.lineTo(wx - 10, baseY - 90);
-            tower.lineTo(wx + 10, baseY - 90);
-            tower.lineTo(wx + 18, baseY);
-            tower.closePath();
-            tower.fillPath();
-
-            tower.fillStyle(0xd97706, 1);
-            tower.fillTriangle(wx - 14, baseY - 90, wx, baseY - 110, wx + 14, baseY - 90);
-
-            const rotor = this.add.container(wx, baseY - 90);
-            rotor.setDepth(2);
-            const blades = this.add.graphics();
-            blades.fillStyle(0xf8fafc, 0.85);
-            for (let i = 0; i < 4; i++)
-            {
-                const angle = (i * Math.PI) / 2;
-                const cos = Math.cos(angle);
-                const sin = Math.sin(angle);
-                blades.fillRoundedRect(cos * 4 - 3, sin * 4 - 3, 34 * (cos !== 0 ? Math.sign(cos) : 0.2), 6, 2);
-            }
-            rotor.add(blades);
-
-            this.tweens.add({
-                targets: rotor,
-                angle: 360,
-                duration: 7000,
-                repeat: -1,
-                ease: 'Linear',
-            });
-        }
-
-        // Wildflower patches along the pathway
-        const flowerX = [180, 260, 480, 560, 840, 920, 1220, 1340, 1680, 1760];
-        const flowerColors = [0x38bdf8, 0xfacc15, 0xf472b6, 0xa855f7];
-        for (let i = 0; i < flowerX.length; i++)
-        {
-            const fx = flowerX[i];
-            const flower = this.add.graphics();
-            flower.setDepth(2);
-            flower.fillStyle(0x16a34a, 1);
-            flower.fillRect(fx - 1, baseY - 12, 2, 12);
-            flower.fillStyle(flowerColors[i % flowerColors.length], 0.95);
-            flower.fillCircle(fx, baseY - 14, 4);
-        }
-
-        // Instructional Signposts
-        const startSign = this.add.text(140, baseY - 70, '🌿 ທົ່ງຫຍ້າ Green Plains\n[A] [D] ແລ່ນ | [Space] ໂດດ', {
-            fontFamily: '"Noto Sans Lao", sans-serif',
-            fontSize: '13px',
-            color: '#bbf7d0',
-            stroke: '#064e3b',
-            strokeThickness: 3,
-            align: 'center',
-        });
-        startSign.setOrigin(0.5, 0.5);
-        startSign.setDepth(2);
-
-        const midSign = this.add.text(820, baseY - 70, '⚔️ ລະວັງ Slime!\n(ໂດດຢຽບເພື່ອປາບ)', {
-            fontFamily: '"Noto Sans Lao", sans-serif',
-            fontSize: '13px',
-            color: '#fef08a',
-            stroke: '#713f12',
-            strokeThickness: 3,
-            align: 'center',
-        });
-        midSign.setOrigin(0.5, 0.5);
-        midSign.setDepth(2);
-    }
-
-    private createSkyIslandsScenery ()
-    {
-        const baseY = WORLD_HEIGHT - GROUND_HEIGHT;
-
-        // Distant floating islands with stalactite underside
-        const islands = [
-            { x: 380, y: baseY - 160, width: 140, height: 35 },
-            { x: 880, y: baseY - 220, width: 170, height: 42 },
-            { x: 1420, y: baseY - 190, width: 150, height: 38 },
-            { x: 1980, y: baseY - 240, width: 160, height: 40 },
-        ];
-
-        for (const isl of islands)
-        {
-            const g = this.add.graphics();
-            g.setDepth(1);
-
-            g.fillStyle(0x334155, 0.75);
-            g.fillRoundedRect(isl.x - isl.width / 2, isl.y, isl.width, isl.height, 10);
-
-            g.beginPath();
-            g.moveTo(isl.x - isl.width / 3, isl.y + isl.height);
-            g.lineTo(isl.x, isl.y + isl.height + 40);
-            g.lineTo(isl.x + isl.width / 3, isl.y + isl.height);
-            g.closePath();
-            g.fillPath();
-
-            g.fillStyle(0x22c55e, 0.85);
-            g.fillRect(isl.x - isl.width / 2, isl.y, isl.width, 6);
-
-            this.tweens.add({
-                targets: g,
-                y: g.y - 14,
-                duration: 2400 + Math.random() * 800,
-                yoyo: true,
-                repeat: -1,
-                ease: 'Sine.easeInOut',
-            });
-        }
-
-        // Hovering Floating Power Crystals
-        const crystalPositions = [
-            { x: 550, y: baseY - 260, color: 0x38bdf8 },
-            { x: 1050, y: baseY - 280, color: 0xa855f7 },
-            { x: 1550, y: baseY - 270, color: 0x38bdf8 },
-            { x: 2050, y: baseY - 290, color: 0xf59e0b },
-        ];
-
-        for (const cry of crystalPositions)
-        {
-            const crystal = this.add.graphics();
-            crystal.setDepth(2);
-            crystal.fillStyle(cry.color, 0.85);
-            crystal.beginPath();
-            crystal.moveTo(cry.x, cry.y - 20);
-            crystal.lineTo(cry.x + 10, cry.y - 6);
-            crystal.lineTo(cry.x + 7, cry.y + 14);
-            crystal.lineTo(cry.x, cry.y + 22);
-            crystal.lineTo(cry.x - 7, cry.y + 14);
-            crystal.lineTo(cry.x - 10, cry.y - 6);
-            crystal.closePath();
-            crystal.fillPath();
-
-            crystal.fillStyle(0xffffff, 0.9);
-            crystal.fillCircle(cry.x, cry.y, 4);
-
-            this.tweens.add({
-                targets: crystal,
-                y: cry.y - 12,
-                angle: 15,
-                duration: 1800,
-                yoyo: true,
-                repeat: -1,
-                ease: 'Sine.easeInOut',
-            });
-        }
-
-        // Signposts
-        const sign1 = this.add.text(160, baseY - 70, '☁️ ເກາະລອຍຟ້າ Sky Islands\n(ລະວັງຕົກເຫວ & ດົງໜາມ!)', {
-            fontFamily: '"Noto Sans Lao", sans-serif',
-            fontSize: '13px',
-            color: '#bae6fd',
-            stroke: '#0369a1',
-            strokeThickness: 3,
-            align: 'center',
-        });
-        sign1.setOrigin(0.5, 0.5);
-        sign1.setDepth(2);
-
-        const hazardSign = this.add.text(1050, baseY - 70, '⚠️ ດົງໜາມອັນຕະລາຍ!\n(ໂດດຂ້າມເທິງພື້ນເລື່ອນ)', {
-            fontFamily: '"Noto Sans Lao", sans-serif',
-            fontSize: '13px',
-            color: '#fca5a5',
-            stroke: '#991b1b',
-            strokeThickness: 3,
-            align: 'center',
-        });
-        hazardSign.setOrigin(0.5, 0.5);
-        hazardSign.setDepth(2);
-    }
-
-    private createBossArenaScenery ()
-    {
-        const baseY = WORLD_HEIGHT - GROUND_HEIGHT;
-
-        // Fortified Obsidian Arena Gate Towers at Left and Right edges
-        const gates = [
-            { x: 50, width: 80, height: 320 },
-            { x: 1550, width: 80, height: 320 },
-        ];
-
-        for (const gate of gates)
-        {
-            const g = this.add.graphics();
-            g.setDepth(2);
-
-            g.fillStyle(0x0f172a, 1);
-            g.fillRect(gate.x - gate.width / 2, baseY - gate.height, gate.width, gate.height);
-
-            g.fillStyle(0x1e293b, 1);
-            g.fillRect(gate.x - gate.width / 2 + 6, baseY - gate.height + 10, gate.width - 12, gate.height - 20);
-
-            g.fillStyle(0xef4444, 0.9);
-            for (let yOffset = 40; yOffset < gate.height - 30; yOffset += 45)
-            {
-                g.fillRect(gate.x - 16, baseY - gate.height + yOffset, 32, 6);
-            }
-
-            g.fillStyle(0x7c3aed, 1);
-            g.fillCircle(gate.x, baseY - gate.height - 8, 14);
-            g.fillStyle(0xa855f7, 0.9);
-            g.fillCircle(gate.x, baseY - gate.height - 8, 7);
-        }
-
-        // Royal Purple Torchstands with pulsating plasma flame
-        const torchX = [200, 520, 1080, 1400];
-        for (const tx of torchX)
-        {
-            const stand = this.add.graphics();
-            stand.setDepth(2);
-            stand.fillStyle(0x334155, 1);
-            stand.fillRect(tx - 4, baseY - 65, 8, 65);
-            stand.fillStyle(0xf59e0b, 1);
-            stand.fillRoundedRect(tx - 12, baseY - 78, 24, 14, 4);
-
-            const flame = this.add.graphics();
-            flame.setDepth(3);
-            flame.fillStyle(0xa855f7, 0.95);
-            flame.fillTriangle(tx - 8, baseY - 78, tx, baseY - 100, tx + 8, baseY - 78);
-            flame.fillStyle(0xfbbf24, 0.9);
-            flame.fillTriangle(tx - 4, baseY - 78, tx, baseY - 90, tx + 4, baseY - 78);
-
-            this.tweens.add({
-                targets: flame,
-                scaleY: 1.25,
-                scaleX: 0.88,
-                alpha: 0.8,
-                duration: 250 + Math.random() * 150,
-                yoyo: true,
-                repeat: -1,
-                ease: 'Sine.easeInOut',
-            });
-        }
-
-        // Grand Holographic Arena Banner
-        const bannerContainer = this.add.container(800, 115);
-        bannerContainer.setDepth(2);
-
-        const bannerBg = this.add.graphics();
-        bannerBg.fillStyle(0x0f172a, 0.88);
-        bannerBg.lineStyle(2, 0xf59e0b, 1);
-        bannerBg.fillRoundedRect(-220, -32, 440, 64, 12);
-        bannerBg.strokeRoundedRect(-220, -32, 440, 64, 12);
-
-        const bannerText = this.add.text(0, 0, '👑 ຫ້ອງສູ້ບອສໃຫຍ່: KING SLIME 👑\n(ຫຼົບການກະໂດດ & ໂດດຢຽບມົງກຸດ!)', {
-            fontFamily: '"Noto Sans Lao", sans-serif',
-            fontSize: '15px',
-            color: '#fef08a',
-            fontStyle: 'bold',
-            align: 'center',
-            stroke: '#7c3aed',
-            strokeThickness: 3,
-        });
-        bannerText.setOrigin(0.5, 0.5);
-
-        bannerContainer.add([bannerBg, bannerText]);
-
-        this.tweens.add({
-            targets: bannerContainer,
-            y: 122,
-            duration: 1200,
-            yoyo: true,
-            repeat: -1,
-            ease: 'Sine.easeInOut',
-        });
-    }
-
     private createSky ()
     {
         let bgKey = 'bg-plains';
@@ -1978,11 +1421,7 @@ export class Game extends Scene
         {
             bgKey = 'bg-village';
         }
-        else if (this.currentLevelKey === 'level-2' || this.level.scenery === 'sky-islands')
-        {
-            bgKey = 'bg-sky-islands';
-        }
-        else if (this.currentLevelKey === 'level-3' || this.level.scenery === 'boss-arena' || Boolean(this.level.boss))
+        else if (this.level.scenery === 'stage-ch1' || Boolean(this.level.boss))
         {
             bgKey = 'bg-boss-arena';
         }
@@ -2076,7 +1515,7 @@ export class Game extends Scene
 
     private handleEnemyDefeated (enemy: Enemy): void
     {
-        defeatEnemyUseCase(enemy.entity, this.score);
+        soundManager.playStomp();
 
         // Track achievements
         trackAchievementUseCase(entities.achievementManager, 'first-blood', 1);
@@ -2156,43 +1595,6 @@ export class Game extends Scene
         }
 
         return enemies;
-    }
-
-    private handleCollectPowerUp (powerUp: PowerUp)
-    {
-        const type = powerUp.powerUpType;
-        powerUp.collect();
-        this.particleManager.emitPowerUpBurst(powerUp.x, powerUp.y, type);
-
-        if (type === 'heart')
-        {
-            collectPowerUpUseCase(type, this.lives, this.powerUpState);
-        }
-        else if (type === 'star')
-        {
-            this.player.setStarPower(true);
-            collectPowerUpUseCase(type, this.lives, this.powerUpState);
-        }
-        else if (type === 'spring')
-        {
-            this.player.setSpringPower(true);
-            collectPowerUpUseCase(type, this.lives, this.powerUpState);
-        }
-    }
-
-    private createPowerUps ()
-    {
-        const powerUps = this.physics.add.staticGroup();
-
-        if (this.level.powerUps)
-        {
-            for (const item of this.level.powerUps)
-            {
-                powerUps.add(new PowerUp(this, item.x, item.y, item.type));
-            }
-        }
-
-        return powerUps;
     }
 
     private createSpikes ()

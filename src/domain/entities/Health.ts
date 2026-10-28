@@ -1,8 +1,8 @@
 /**
- * Domain entity representing the player's life count.
+ * Domain entity representing the player's hit points (hearts).
  * Pure non-spatial state and business rules — see "Domain layer" in CONTEXT.md.
  */
-export class Lives
+export class Health
 {
     private _current: number;
     private readonly _max: number;

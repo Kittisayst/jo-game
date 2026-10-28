@@ -1,17 +1,11 @@
 {
     "worldWidth": 1600,
-    "finishX": 1450,
-    "finishType": "door",
     "scenery": "village",
-    "trackTime": false,
     "spawn": {
         "x": 120,
         "y": 556
     },
-    "nextLevel": "level-1",
     "platforms": [],
-    "coins": [],
-    "powerUps": [],
     "enemies": [],
     "spikes": [],
     "movingPlatforms": []

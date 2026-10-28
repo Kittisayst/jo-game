@@ -9,7 +9,7 @@ Framework-agnostic core holding entities and business rules — health, score, f
 _Avoid_: core, engine, model layer
 
 **Entity** (domain):
-A plain TypeScript object with identity and non-spatial state — e.g. an Enemy's health/facingDirection/isDead, a Score, a LevelProgress. Position, velocity, and collision belong to the infrastructure layer's Phaser sprites, never to the entity.
+A plain TypeScript object with identity and non-spatial state — e.g. an Enemy's health/facingDirection/isDead, a Health, a Wallet. Position, velocity, and collision belong to the infrastructure layer's Phaser sprites, never to the entity.
 _Avoid_: model, game object
 
 **Application layer**:
@@ -48,12 +48,6 @@ _Avoid_: level, map
 **Zone**:
 One section of a Stage (forest, cavern, Broken Gate, boss arena), each with its own enemies and resources.
 
-**Level** (legacy):
-The older platformer-era term for a playable layout, still present in `LevelProgress` / `CompleteLevelUseCase`. New work uses **Stage**; the legacy names are to be migrated.
-
-**LevelProgress**:
-The domain Entity that tracks whether the current level has been completed. Holds no coordinates — infrastructure detects the finish and calls `CompleteLevelUseCase`, which emits the `level-complete` domain event. Legacy, see **Level**.
-
 **Credit**:
 The currency earned only by learning (passing a Book exam, Daily Practice, finishing a Chapter by answering the Boss question). Killing enemies never gives Credit, and there is no separate coin currency; the Wallet holds Credit only.
 _Avoid_: coins, money, gold
@@ -72,6 +66,3 @@ _Avoid_: lesson, course
 
 **Village Hub**:
 The safe place between Stages with no enemies; the player walks to buildings (Library, Academy, Workshop, Forge, World Gate) and returns here to heal and save.
-
-**GameSession**:
-The domain Aggregate Root entity that consolidates active gameplay state — `Score`, `Lives`, `PowerUpState`, coins collected, active level ID, and speedrun elapsed time. Advanced through `tickSessionUseCase(session, deltaMs)` in the Phaser engine's `update()` loop, ensuring that game speed, power-up timers, and HUD countdowns are driven by a single source of truth that pauses automatically when the game engine pauses.

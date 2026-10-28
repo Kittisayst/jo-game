@@ -1,5 +1,17 @@
-import { formatTime } from '../utils/formatTime';
 import { getLevelItem } from '../../phaser/levelCatalog';
+import { ObjectiveId } from '../../../domain/utils/nextObjective';
+
+const OBJECTIVE_TEXT: Record<ObjectiveId, string> = {
+    'buy-book': '📚 ຊື້ປຶ້ມຕຳລາບົດທີ 1 ທີ່ຫໍສະໝຸດ',
+    'read-book': '📖 ອ່ານປຶ້ມໃຫ້ຄົບທຸກໜ້າ',
+    'pass-exam': '📝 ໄປສອບເສັງທີ່ສະຖາບັນ',
+    'craft-pickaxe': '⛏️ ເກັບໄມ້ ແລະ ຫີນ ແລ້ວສ້າງຈົກທີ່ໂຮງຊ່າງ',
+    'craft-hammer': '🔨 ຂຸດແຮ່ເຫຼັກ ແລ້ວສ້າງຄ້ອນທີ່ໂຮງຊ່າງ',
+    'craft-repair-kit': '🧰 ປາບ Cave Guardian ເອົາຜລຶກ ແລ້ວສ້າງ Repair Kit',
+    'repair-gate': '🚪 ໄປສ້ອມປະຕູພັງໃນດ່ານບົດທີ 1',
+    'defeat-boss': '👑 ປາບ Boss ທີ່ລານ Boss',
+    'chapter-cleared': '🏆 ບົດທີ 1 ສຳເລັດ! ທົບທວນ ແລະ ຝຶກປະຈຳວັນຕໍ່ໄປ',
+};
 
 export interface EquippedWeaponView
 {
@@ -11,22 +23,17 @@ export interface EquippedWeaponView
 export interface HudProps
 {
     currentLevel: string;
-    lives: number;
-    maxLives: number;
-    score: number;
-    elapsedSeconds: number;
-    highScore: number;
-    starTimer: number;
-    springTimer: number;
+    health: number;
+    maxHealth: number;
     isGamePaused: boolean;
     bossHp: number | null;
     bossMaxHp: number;
     walletBalance: number;
     equippedWeapon: EquippedWeaponView;
+    /** What the player should do next, shown as a short hint. */
+    objective?: ObjectiveId;
     onTogglePause: () => void;
     onCycleWeapon: () => void;
-    onOpenAchievements?: () => void;
-    unclaimedAchievementsCount?: number;
     onOpenBackpack?: () => void;
     onOpenLibrary?: () => void;
     ownedBooksCount?: number;
@@ -36,22 +43,16 @@ export interface HudProps
 
 export function Hud ({
     currentLevel,
-    lives,
-    maxLives,
-    score,
-    elapsedSeconds,
-    highScore,
-    starTimer,
-    springTimer,
+    health,
+    maxHealth,
     isGamePaused,
     bossHp,
     bossMaxHp,
     walletBalance,
     equippedWeapon,
+    objective,
     onTogglePause,
     onCycleWeapon,
-    onOpenAchievements,
-    unclaimedAchievementsCount,
     onOpenBackpack,
     onOpenLibrary,
     ownedBooksCount = 0,
@@ -60,7 +61,6 @@ export function Hud ({
 }: HudProps)
 {
     const levelLabel = getLevelItem(currentLevel)?.hudLabel || currentLevel;
-    const isVillage = currentLevel === 'village';
 
     return (
         <>
@@ -72,11 +72,17 @@ export function Hud ({
                         <span className="badge-label">{levelLabel}</span>
                     </div>
 
-                    <div className="hud-badge lives-badge">
+                    <div className="hud-badge health-badge">
                         <span className="badge-icon">
-                            {'❤️'.repeat(Math.max(0, lives)) + '🖤'.repeat(Math.max(0, maxLives - lives))}
+                            {'❤️'.repeat(Math.max(0, health)) + '🖤'.repeat(Math.max(0, maxHealth - health))}
                         </span>
                     </div>
+
+                    {objective && (
+                        <div className="hud-badge objective-badge" title="ເປົ້າໝາຍຕໍ່ໄປ">
+                            <span className="badge-label">{OBJECTIVE_TEXT[objective]}</span>
+                        </div>
+                    )}
 
                     {/* Permanent Knowledge Credit balance */}
                     <div className="hud-badge wallet-hud-badge" title="ເຄຣດິດຄວາມຮູ້ (Credit - ໄດ້ຮັບຈາກການຮຽນ & ສອບເສັງ)">
@@ -139,68 +145,10 @@ export function Hud ({
                         <span className="badge-hint">[Q]</span>
                     </button>
 
-                    {!isVillage && (
-                        <>
-                            <div className="hud-badge score-badge">
-                                <span className="badge-icon">⭐</span>
-                                <span className="badge-label">Score</span>
-                                <span className="badge-value">{score}</span>
-                            </div>
-                            <div className="hud-badge timer-badge">
-                                <span className="badge-icon">⏱️</span>
-                                <span className="badge-value">{formatTime(elapsedSeconds)}</span>
-                            </div>
-                            <div className="hud-badge high-score-badge">
-                                <span className="badge-icon">🏆</span>
-                                <span className="badge-label">Best</span>
-                                <span className="badge-value">{highScore}</span>
-                            </div>
-                        </>
-                    )}
-                </div>
-
-                {/* Center Cluster: Active Timers & Buffs */}
-                <div className="hud-cluster-center">
-                    {starTimer > 0 && (
-                        <div className="hud-badge star-power-badge">
-                            <span className="badge-icon">⭐</span>
-                            <span className="badge-label">Star</span>
-                            <span className="badge-value">{starTimer}s</span>
-                        </div>
-                    )}
-
-                    {springTimer > 0 && (
-                        <div className="hud-badge spring-power-badge">
-                            <span className="badge-icon">⚡</span>
-                            <span className="badge-label">Jump+</span>
-                            <span className="badge-value">{springTimer}s</span>
-                        </div>
-                    )}
                 </div>
 
                 {/* Right Cluster: Utility Controls (Achievements, Shop & Pause) */}
                 <div className="hud-cluster-right">
-                    {onOpenAchievements && (
-                        <button
-                            id="hud-achievements-btn"
-                            className="hud-badge achievements-hud-btn"
-                            onClick={(e) =>
-                            {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                onOpenAchievements();
-                            }}
-                            title="ຜົນສຳເລັດ & ພາລະກິດ (Achievements)"
-                            type="button"
-                        >
-                            <span className="badge-icon">🏆</span>
-                            <span className="badge-label">ພາລະກິດ</span>
-                            {unclaimedAchievementsCount !== undefined && unclaimedAchievementsCount > 0 && (
-                                <span className="unclaimed-badge-count">{unclaimedAchievementsCount}</span>
-                            )}
-                        </button>
-                    )}
-
                     <button
                         id="hud-menu-btn"
                         className={`hud-badge hud-menu-btn ${isGamePaused ? 'paused-active' : ''}`}

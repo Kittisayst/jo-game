@@ -23,7 +23,6 @@ export interface SlotMetadata
     label: string;
     exists: boolean;
     timestamp: number | null;
-    highScore: number;
     completedStagesCount: number;
     activeSkinId: string;
     walletBalance: number;
@@ -119,7 +118,6 @@ export class SaveManager
                     label,
                     exists: false,
                     timestamp: null,
-                    highScore: 0,
                     completedStagesCount: 0,
                     activeSkinId: 'cyber-blue',
                     walletBalance: 0,
@@ -132,7 +130,6 @@ export class SaveManager
                 label,
                 exists: true,
                 timestamp: snap.timestamp,
-                highScore: snap.gameStats.highScore,
                 completedStagesCount: snap.stageProgression.completedStages.length,
                 activeSkinId: snap.activeSkinId,
                 walletBalance: snap.wallet.balance,
@@ -188,27 +185,24 @@ export class SaveManager
 
     private loadLegacyOrMigrate (slotId: SaveSlotId): SaveGameSnapshot
     {
-        const legacyStats = readJsonSafe<{ highScore?: number; bestTimeSeconds?: number | null }>('jo_game_stats_v1');
         const legacySkin = readString('jo_active_skin');
         const legacySettings = readJsonSafe<{ soundMuted?: boolean; musicMuted?: boolean }>('jo_settings_v1');
         const legacyProgression = readJsonSafe<{ unlockedStages?: string[]; completedStages?: string[] }>('jo_stage_progression_v1');
 
-        if (!legacyStats && !legacySkin && !legacySettings && !legacyProgression)
+        if (!legacySkin && !legacySettings && !legacyProgression)
         {
             return createDefaultSaveSnapshot(slotId);
         }
 
         const legacyRaw = {
             slotId,
-            highScore: legacyStats?.highScore ?? 0,
-            bestTimeSeconds: legacyStats?.bestTimeSeconds ?? null,
             activeSkinId: legacySkin ?? 'cyber-blue',
             settings: {
                 soundMuted: legacySettings?.soundMuted ?? false,
                 musicMuted: legacySettings?.musicMuted ?? false,
             },
             stageProgression: {
-                unlockedStages: legacyProgression?.unlockedStages ?? ['village', 'level-1'],
+                unlockedStages: legacyProgression?.unlockedStages ?? ['village', 'stage-ch1'],
                 completedStages: legacyProgression?.completedStages ?? [],
             },
         };

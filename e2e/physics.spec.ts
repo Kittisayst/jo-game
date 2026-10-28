@@ -13,13 +13,13 @@ test.describe('Phaser Arcade Physics Enhancements E2E', () => {
     await page.goto('/');
     await expect(page).toHaveTitle(/JO RUNNER/i);
 
-    // 2. Select Stage 1 (Green Plains) with platforms and slimes
+    // 2. Select Chapter 1 with platforms and slimes
     const stageSelectBtn = page.getByRole('button', { name: /ເລືອກດ່ານ/i });
     await stageSelectBtn.click();
 
-    const level1Card = page.locator('.stage-map-node').filter({ hasText: /Stage 1|Green Plains/i }).first();
-    await expect(level1Card).toBeVisible();
-    await level1Card.click();
+    const chapterCard = page.locator('.stage-map-node').filter({ hasText: /ບົດທີ 1|Chapter 1/i }).first();
+    await expect(chapterCard).toBeVisible();
+    await chapterCard.click();
 
     const canvas = page.locator('canvas');
     await expect(canvas).toBeVisible({ timeout: 10000 });

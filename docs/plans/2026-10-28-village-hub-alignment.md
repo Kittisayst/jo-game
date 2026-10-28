@@ -52,6 +52,8 @@
 
 **ສະຖານະ Phase 3 (ເຮັດແລ້ວ):** ລຶບຫຼຽນທັງໝົດ (Coin object, `CollectCoinUseCase`, coin drop, `GameSession.coins`, ຫຼຽນໃນ HUD/ເມນູ/Game Over/Level Complete, ການເອົາຫຼຽນເຂົ້າ Wallet), Shop (`ShopModal`, `PurchaseItem/Upgrade`, NPC ຮ້ານຄ້າ, `merchantDialogue`), upgrade ເກົ່າ (`Upgrade.ts`), Inventory ເກົ່າ (`Inventory.ts`, `UseItemUseCase`, hotbar 1-2-3), dash ແລະ bomb. ຊ່ອງທາງເຂົ້າ Achievements (ປຸ່ມ HUD/ເມນູ/toast) ຖືກເຊື່ອງ ເພື່ອບໍ່ໃຫ້ມີ Credit ຈາກການຂ້າສັດຕູ; ໂຄດ Achievement ຍັງຢູ່ (Phase 4). `upgrades`/`inventory` ຖືກເອົາອອກຈາກ save schema (save ເກົ່າຖືກເມີນ field ເຫຼົ່ານີ້).
 
+**ສະຖານະ Phase 4 (ເຮັດແລ້ວ):** ລຶບ Score/High Score/Best Time/ດາວ/ໂມງ, `GameSession`, `GameStats`, Power-ups, `Door`/`GoalFlag`/`Projectile`, `LevelProgress`/`CompleteLevelUseCase`, ໜ້າ Game Over ແລະ Level Complete, `WeaponLoadout`, `level-1/2/3` (catalog + JSON + scenery), ແລະ UI Skins/Achievements. `Lives` → `Health` (event `player-died`). ຕາຍ → ກັບໝູ່ບ້ານ (ເສຍວັດສະດຸ 50% ຍົກເວັ້ນຜລຶກ/Boss Core), ຊະນະ Boss → event `stage-cleared`. Save v6 (save ເກົ່າເລີ່ມໃໝ່ ແຕ່ເກັບ settings + skin). ເມນູຫຼັກ: ເຂົ້າເກມ / ແຜນທີ່ດ່ານ / ຕັ້ງຄ່າ; HUD ມີ hint ເປົ້າໝາຍຖັດໄປ (`getNextObjective`). **ຍັງຄ້າງ:** `Player.ts` ຍັງມີໂຄດ star/spring/dash ທີ່ບໍ່ຖືກເອີ້ນ; `SelectSkinUseCase`/`Skin` ຍັງຜູກກັບ score (ບໍ່ມີ UI); ໂຄດ Achievement ຍັງຢູ່ແຕ່ບໍ່ມີທາງເຂົ້າ; ຂໍ້ຄວາມ toast ຕອນຕາຍບໍ່ໄດ້ຢືນຢັນດ້ວຍຕາ.
+
 ## ແນວທາງ (Approach)
 
 - **ຕັດເປັນຂັ້ນນ້ອຍ**, ແຕ່ລະຂັ້ນ typecheck + lint + test ຜ່ານ ແລ້ວ commit ແຍກ (ຍ້ອນກັບງ່າຍ). ບໍ່ລວມຫຼາຍຂັ້ນໃນ commit ດຽວ.

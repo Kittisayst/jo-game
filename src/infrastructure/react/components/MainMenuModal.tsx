@@ -1,31 +1,18 @@
 import { useEffect } from 'react';
-import { formatTime } from '../utils/formatTime';
 
 export interface MainMenuModalProps
 {
-    highScore: number;
-    bestTime: number | null;
-    activeSkinName: string;
     walletBalance?: number;
     onStartGame: (stageKey?: string) => void;
     onOpenStageSelect: () => void;
-    onOpenSkinModal: () => void;
     onOpenSettings: () => void;
-    onOpenAchievements?: () => void;
-    unclaimedAchievementsCount?: number;
 }
 
 export function MainMenuModal ({
-    highScore,
-    bestTime,
-    activeSkinName,
     walletBalance = 0,
     onStartGame,
     onOpenStageSelect,
-    onOpenSkinModal,
     onOpenSettings,
-    onOpenAchievements,
-    unclaimedAchievementsCount = 0,
 }: MainMenuModalProps)
 {
     // Enable Enter / Space key to quick-start the game
@@ -57,20 +44,8 @@ export function MainMenuModal ({
                 {/* Player Stats Dock */}
                 <div className="menu-stats-bar">
                     <div className="menu-stat">
-                        <span className="menu-stat-label">🏆 High Score</span>
-                        <span className="menu-stat-val">{highScore}</span>
-                    </div>
-                    <div className="menu-stat">
-                        <span className="menu-stat-label">⏱️ Best Time</span>
-                        <span className="menu-stat-val">{formatTime(bestTime)}</span>
-                    </div>
-                    <div className="menu-stat">
                         <span className="menu-stat-label">🎓 Credit</span>
                         <span className="menu-stat-val text-gold">{walletBalance}</span>
-                    </div>
-                    <div className="menu-stat">
-                        <span className="menu-stat-label">🥋 ຊຸດ</span>
-                        <span className="menu-stat-val text-cyan">{activeSkinName}</span>
                     </div>
                 </div>
 
@@ -95,21 +70,6 @@ export function MainMenuModal ({
 
                     {/* Secondary Navigation Options Grid */}
                     <div className="menu-sub-grid">
-                        {onOpenAchievements && (
-                            <button
-                                id="menu-achievements-btn"
-                                className="menu-action-btn secondary achievements-menu-btn"
-                                onClick={onOpenAchievements}
-                                type="button"
-                            >
-                                <span className="btn-icon">🏆</span>
-                                <span>ຜົນສຳເລັດ (Achievements)</span>
-                                {unclaimedAchievementsCount > 0 && (
-                                    <span className="menu-unclaimed-badge">{unclaimedAchievementsCount}</span>
-                                )}
-                            </button>
-                        )}
-
                         <button
                             id="menu-stage-select-btn"
                             className="menu-action-btn secondary"
@@ -118,16 +78,6 @@ export function MainMenuModal ({
                         >
                             <span className="btn-icon">🚩</span>
                             <span>ເລືອກດ່ານ (Stage Map)</span>
-                        </button>
-
-                        <button
-                            id="menu-skins-btn"
-                            className="menu-action-btn secondary"
-                            onClick={onOpenSkinModal}
-                            type="button"
-                        >
-                            <span className="btn-icon">🥋</span>
-                            <span>ປ່ຽນຊຸດ (Skins)</span>
                         </button>
                     </div>
 

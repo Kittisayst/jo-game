@@ -2,31 +2,16 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { IRefPhaserGame, PhaserGame } from './PhaserGame';
 import { DomainEvents } from '../../domain/DomainEvents';
 import {
-    LEVEL_COMPLETE_EVENT,
-    LevelCompletePayload,
-} from '../../application/CompleteLevelUseCase';
-import {
-    ENEMY_DEFEATED_EVENT,
-    EnemyDefeatedPayload,
-} from '../../application/DefeatEnemyUseCase';
-import {
     PLAYER_DAMAGED_EVENT,
-    GAME_OVER_EVENT,
+    PLAYER_DIED_EVENT,
     PlayerDamagedPayload,
 } from '../../application/PlayerTakeDamageUseCase';
-import {
-    POWERUP_COLLECTED_EVENT,
-    PowerUpCollectedPayload,
-} from '../../application/CollectPowerUpUseCase';
 import {
     BOSS_DAMAGED_EVENT,
     BOSS_DEFEATED_EVENT,
     BossDamagedPayload,
     BossDefeatedPayload,
 } from '../../application/DamageBossUseCase';
-import { recordGameResultUseCase } from '../../application/SaveGameStatsUseCase';
-import { AVAILABLE_SKINS } from '../../domain/entities/Skin';
-import { selectSkinUseCase } from '../../application/SelectSkinUseCase';
 import { toggleSoundUseCase, toggleMusicUseCase, applySettingsUseCase } from '../../application/UpdateSettingsUseCase';
 import { resetSaveDataUseCase } from '../../application/ResetSaveDataUseCase';
 import { soundManager } from '../audio/SoundManager';
@@ -39,24 +24,15 @@ import {
     resumeGameUseCase,
     togglePauseUseCase,
 } from '../../application/TogglePauseUseCase';
-import {
-    POWERUP_EXPIRED_EVENT,
-    PowerUpExpiredPayload,
-    SESSION_TICK_EVENT,
-    SessionTickPayload,
-} from '../../application/TickSessionUseCase';
 import { EventBus } from '../EventBus';
 import { entities, repositories } from '../composition';
 import { Hud } from './components/Hud';
-import { GameOverModal } from './components/GameOverModal';
-import { LevelCompleteModal } from './components/LevelCompleteModal';
+import { getNextObjective } from '../../domain/utils/nextObjective';
+import { loadBooksData } from '../dataLoader';
 import { PauseMenuModal } from './components/PauseMenuModal';
-import { SkinModal } from './components/SkinModal';
 import { MainMenuModal } from './components/MainMenuModal';
 import { SettingsModal } from './components/SettingsModal';
 import { StageMapModal } from './components/StageMapModal';
-import { AchievementModal } from './components/AchievementModal';
-import { ACHIEVEMENT_UNLOCKED_EVENT } from '../../domain/entities/Achievement';
 import { DialogueChoice, DialogueNode } from '../../domain/entities/Dialogue';
 import { DialogueModal } from './components/DialogueModal';
 import { VirtualTouchControls } from './components/VirtualTouchControls';
@@ -97,45 +73,30 @@ function App ()
     const initialSession = readString(ACTIVE_SESSION_STORAGE_KEY);
     const shouldResumeInGame = initialSession !== null && initialSession !== 'title';
 
-    const [levelComplete, setLevelComplete] = useState(false);
-    const [gameOver, setGameOver] = useState(false);
     const [currentLevel, setCurrentLevel] = useState(() => (shouldResumeInGame ? initialSession : 'village'));
-    const [nextLevel, setNextLevel] = useState<string | null>(null);
-    const [score, setScore] = useState(0);
-    const [lives, setLives] = useState(3);
+    const [health, setHealth] = useState(3);
     const [walletBalance, setWalletBalance] = useState(() => entities.wallet.balance);
     const [equippedWeaponId, setEquippedWeaponId] = useState(() => entities.equipment.equippedWeaponId);
-    const [isAchievementsOpen, setIsAchievementsOpen] = useState(false);
-    const [unclaimedAchievementsCount, setUnclaimedAchievementsCount] = useState(() => entities.achievementManager.unclaimedCount);
-    const [gameStats] = useState(() => entities.gameStats);
     const [skinManager] = useState(() => entities.skinManager);
     const [settings] = useState(() => entities.settings);
     const [stageProgression] = useState(() => entities.stageProgression);
     const [pauseState] = useState(() => entities.pauseState);
     const [isMuted, setIsMuted] = useState(entities.settings.isSoundMuted);
     const [isMusicMuted, setIsMusicMuted] = useState(entities.settings.isMusicMuted);
-    const [starTimer, setStarTimer] = useState(0);
-    const [springTimer, setSpringTimer] = useState(0);
     const [bossHp, setBossHp] = useState<number | null>(null);
     const [bossMaxHp, setBossMaxHp] = useState(5);
     const [activeSkinId, setActiveSkinId] = useState(entities.skinManager.activeSkinId);
-    const [isSkinModalOpen, setIsSkinModalOpen] = useState(false);
     const [isMainMenuOpen, setIsMainMenuOpen] = useState(!shouldResumeInGame);
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
     const [isStageSelectOpen, setIsStageSelectOpen] = useState(false);
     const [isStageMapOpen, setIsStageMapOpen] = useState(false);
     const [isGamePaused, setIsGamePaused] = useState(false);
-    const [highScore, setHighScore] = useState(gameStats.highScore);
-    const [bestTime, setBestTime] = useState<number | null>(gameStats.bestTimeSeconds);
-    const [elapsedSeconds, setElapsedSeconds] = useState(0);
-    const [isNewHighScore, setIsNewHighScore] = useState(false);
-    const [isNewBestTime, setIsNewBestTime] = useState(false);
     const [villageWelcomeToast, setVillageWelcomeToast] = useState<string | null>(() =>
         shouldResumeInGame && initialSession === 'village'
             ? '🏡 ຍິນດີຕ້ອນຮັບສູ່ ໝູ່ບ້ານ Cyber Village! (ລົມກັບຫົວໜ້າໝູ່ບ້ານ ແລະ NPC Mina)'
             : null
     );
-    const maxLives = 3;
+    const maxHealth = 3;
 
     useEffect(() =>
     {
@@ -146,27 +107,15 @@ function App ()
         }
     }, [villageWelcomeToast]);
 
-    const scoreRef = useRef(score);
-    scoreRef.current = score;
-    const elapsedSecondsRef = useRef(elapsedSeconds);
-    elapsedSecondsRef.current = elapsedSeconds;
-    const gameStatsRef = useRef(gameStats);
-    gameStatsRef.current = gameStats;
     const pauseStateRef = useRef(pauseState);
     pauseStateRef.current = pauseState;
     const isMainMenuOpenRef = useRef(isMainMenuOpen);
     isMainMenuOpenRef.current = isMainMenuOpen;
-    const levelCompleteRef = useRef(levelComplete);
-    levelCompleteRef.current = levelComplete;
-    const gameOverRef = useRef(gameOver);
-    gameOverRef.current = gameOver;
     const [isDialogueOpen, setIsDialogueOpen] = useState(false);
     const [currentDialogueNode, setCurrentDialogueNode] = useState<DialogueNode | null>(null);
     const [dialogueChoices, setDialogueChoices] = useState<DialogueChoice[]>([]);
     const isDialogueOpenRef = useRef(isDialogueOpen);
     isDialogueOpenRef.current = isDialogueOpen;
-    const isSkinModalOpenRef = useRef(isSkinModalOpen);
-    isSkinModalOpenRef.current = isSkinModalOpen;
     const isSettingsOpenRef = useRef(isSettingsOpen);
     isSettingsOpenRef.current = isSettingsOpen;
     const isStageSelectOpenRef = useRef(isStageSelectOpen);
@@ -225,114 +174,45 @@ function App ()
 
     useEffect(() =>
     {
-        const handleUnlock = () =>
+        const onStageCleared = (payload: { stageId: string }) =>
         {
-            setUnclaimedAchievementsCount(entities.achievementManager.unclaimedCount);
-        };
-        DomainEvents.on(ACHIEVEMENT_UNLOCKED_EVENT, handleUnlock);
-        return () =>
-        {
-            DomainEvents.off(ACHIEVEMENT_UNLOCKED_EVENT, handleUnlock);
-        };
-    }, []);
-
-    useEffect(() =>
-    {
-        const onLevelComplete = (payload: LevelCompletePayload) =>
-        {
-            if (payload.levelId === 'stage-ch1')
-            {
-                // Beating the Chapter 1 Boss sends the player home to learn and craft, not to a score screen
-                const clear = completeStageUseCase(
-                    stageProgressionRef.current,
-                    repositories.stageProgression,
-                    payload.levelId,
-                    payload.nextLevel
-                );
-                const bonus = awardChapterClearUseCase(entities.wallet, clear.isFirstTimeClear);
-                setWalletBalance(entities.wallet.balance);
-                saveManager.autoSave(getCurrentSnapshot());
-                EventBus.emit('change-level', 'village');
-                const bonusText = bonus > 0 ? ` +${bonus} 🎓 Credit!` : '';
-                setTimeout(() => setVillageWelcomeToast(`🏆 ຊະນະ Boss ບົດທີ 1!${bonusText} ກັບມາໝູ່ບ້ານເພື່ອຮຽນ ແລະ ສ້າງອາວຸດຕໍ່ໄປ`), 300);
-                return;
-            }
-
-            levelCompleteRef.current = true;
-            setLevelComplete(true);
-            setNextLevel(payload.nextLevel);
-
-            completeStageUseCase(
+            // Beating a Chapter boss sends the player home to learn and craft, not to a score screen
+            const clear = completeStageUseCase(
                 stageProgressionRef.current,
                 repositories.stageProgression,
-                payload.levelId,
-                payload.nextLevel
+                payload.stageId,
+                null
             );
-
-            const result = recordGameResultUseCase(
-                gameStatsRef.current,
-                repositories.gameStats,
-                scoreRef.current,
-                !payload.nextLevel ? elapsedSecondsRef.current : undefined
-            );
-
-            setHighScore(result.highScore);
-            if (result.bestTimeSeconds !== null)
-            {
-                setBestTime(result.bestTimeSeconds);
-            }
-            setIsNewHighScore(result.isNewHighScore);
-            setIsNewBestTime(result.isNewBestTime);
-
+            const bonus = awardChapterClearUseCase(entities.wallet, clear.isFirstTimeClear);
+            setWalletBalance(entities.wallet.balance);
             saveManager.autoSave(getCurrentSnapshot());
-        };
-
-        const onEnemyDefeated = (payload: EnemyDefeatedPayload) =>
-        {
-            setScore(payload.totalScore);
+            EventBus.emit('change-level', 'village');
+            const bonusText = bonus > 0 ? ` +${bonus} 🎓 Credit!` : '';
+            setTimeout(() => setVillageWelcomeToast(`🏆 ຊະນະ Boss ບົດທີ 1!${bonusText} ກັບມາໝູ່ບ້ານເພື່ອຮຽນ ແລະ ສ້າງອາວຸດຕໍ່ໄປ`), 300);
         };
 
         const onPlayerDamaged = (payload: PlayerDamagedPayload) =>
         {
-            setLives(payload.currentLives);
+            setHealth(payload.currentHealth);
         };
 
         const onGameOver = () =>
         {
-            gameOverRef.current = true;
-            setGameOver(true);
-            const result = recordGameResultUseCase(
-                gameStatsRef.current,
-                repositories.gameStats,
-                scoreRef.current
-            );
-            setHighScore(result.highScore);
-            setIsNewHighScore(result.isNewHighScore);
-
-            // 50% material retreat penalty when falling in non-village stages
-            if (currentLevelRef.current !== 'village')
-            {
-                returnToVillageUseCase('death', entities.backpack);
-                setBackpackRevision(r => r + 1);
-            }
-
+            // Dying costs half the carried Materials, then the player wakes up healed in the village
+            const result = returnToVillageUseCase('death', entities.backpack);
+            setBackpackRevision(r => r + 1);
             saveManager.autoSave(getCurrentSnapshot());
-        };
 
-        const onPowerUpCollected = (payload: PowerUpCollectedPayload) =>
-        {
-            if (payload.type === 'heart' && typeof payload.currentLives === 'number')
+            const lostCount = result.lostMaterials.reduce((total, m) => total + m.count, 0);
+            setTimeout(() =>
             {
-                setLives(payload.currentLives);
-            }
-            else if (payload.type === 'star')
-            {
-                setStarTimer(Math.floor((payload.durationMs || 8000) / 1000));
-            }
-            else if (payload.type === 'spring')
-            {
-                setSpringTimer(Math.floor((payload.durationMs || 10000) / 1000));
-            }
+                EventBus.emit('change-level', 'village');
+                setTimeout(() => setVillageWelcomeToast(
+                    lostCount > 0
+                        ? `💀 ເຈົ້າສະຫຼົບ! ເສຍວັດສະດຸ ${lostCount} ຊິ້ນ ແຕ່ HP ຟື້ນເຕັມແລ້ວ`
+                        : '💀 ເຈົ້າສະຫຼົບ! ກັບມາໝູ່ບ້ານ HP ຟື້ນເຕັມແລ້ວ'
+                ), 300);
+            }, 1200);
         };
 
         const onBossDamaged = (payload: BossDamagedPayload) =>
@@ -341,10 +221,9 @@ function App ()
             setBossMaxHp(payload.maxHp);
         };
 
-        const onBossDefeated = (payload: BossDefeatedPayload) =>
+        const onBossDefeated = () =>
         {
             setBossHp(0);
-            setScore(payload.totalScore);
         };
 
         const onGamePaused = () =>
@@ -355,20 +234,6 @@ function App ()
         const onGameResumed = () =>
         {
             setIsGamePaused(false);
-        };
-
-        const onSessionTick = (payload: SessionTickPayload) =>
-        {
-            if (levelCompleteRef.current || gameOverRef.current) return;
-            setElapsedSeconds(payload.elapsedSeconds);
-            setStarTimer(payload.starTimer);
-            setSpringTimer(payload.springTimer);
-        };
-
-        const onPowerUpExpired = (payload: PowerUpExpiredPayload) =>
-        {
-            if (payload.type === 'star') setStarTimer(0);
-            if (payload.type === 'spring') setSpringTimer(0);
         };
 
         const handleKeyDown = (e: KeyboardEvent) =>
@@ -383,7 +248,7 @@ function App ()
             }
             else if (e.key === 'Escape' || e.key === 'p' || e.key === 'P')
             {
-                if (isMainMenuOpenRef.current || levelCompleteRef.current || gameOverRef.current) return;
+                if (isMainMenuOpenRef.current) return;
 
                 if (isDialogueOpenRef.current)
                 {
@@ -432,11 +297,6 @@ function App ()
                     return;
                 }
 
-                if (isSkinModalOpenRef.current)
-                {
-                    setIsSkinModalOpen(false);
-                    return;
-                }
                 if (isSettingsOpenRef.current)
                 {
                     setIsSettingsOpen(false);
@@ -457,14 +317,14 @@ function App ()
             }
             else if (e.key === 'i' || e.key === 'I')
             {
-                if (!isMainMenuOpenRef.current && !levelCompleteRef.current && !gameOverRef.current)
+                if (!isMainMenuOpenRef.current)
                 {
                     setIsBackpackOpen(prev => !prev);
                 }
             }
             else if (e.key === 'q' || e.key === 'Q')
             {
-                if (!isMainMenuOpenRef.current && !levelCompleteRef.current && !gameOverRef.current)
+                if (!isMainMenuOpenRef.current)
                 {
                     handleCycleWeapon();
                 }
@@ -555,17 +415,13 @@ function App ()
         EventBus.on('daily-practice-completed', onDailyPracticeCompleted);
         EventBus.on('backpack-item-used', onBackpackItemUsed);
         EventBus.on('backpack-changed', onBackpackChanged);
-        DomainEvents.on<LevelCompletePayload>(LEVEL_COMPLETE_EVENT, onLevelComplete);
-        DomainEvents.on<EnemyDefeatedPayload>(ENEMY_DEFEATED_EVENT, onEnemyDefeated);
+        EventBus.on('stage-cleared', onStageCleared);
         DomainEvents.on<PlayerDamagedPayload>(PLAYER_DAMAGED_EVENT, onPlayerDamaged);
-        DomainEvents.on(GAME_OVER_EVENT, onGameOver);
-        DomainEvents.on<PowerUpCollectedPayload>(POWERUP_COLLECTED_EVENT, onPowerUpCollected);
+        DomainEvents.on(PLAYER_DIED_EVENT, onGameOver);
         DomainEvents.on<BossDamagedPayload>(BOSS_DAMAGED_EVENT, onBossDamaged);
         DomainEvents.on<BossDefeatedPayload>(BOSS_DEFEATED_EVENT, onBossDefeated);
         DomainEvents.on(GAME_PAUSED_EVENT, onGamePaused);
         DomainEvents.on(GAME_RESUMED_EVENT, onGameResumed);
-        DomainEvents.on<SessionTickPayload>(SESSION_TICK_EVENT, onSessionTick);
-        DomainEvents.on<PowerUpExpiredPayload>(POWERUP_EXPIRED_EVENT, onPowerUpExpired);
         window.addEventListener('keydown', handleKeyDown);
 
         return () =>
@@ -586,17 +442,13 @@ function App ()
             EventBus.removeListener('daily-practice-completed', onDailyPracticeCompleted);
             EventBus.removeListener('backpack-item-used', onBackpackItemUsed);
             EventBus.removeListener('backpack-changed', onBackpackChanged);
-            DomainEvents.off<LevelCompletePayload>(LEVEL_COMPLETE_EVENT, onLevelComplete);
-            DomainEvents.off<EnemyDefeatedPayload>(ENEMY_DEFEATED_EVENT, onEnemyDefeated);
+            EventBus.removeListener('stage-cleared', onStageCleared);
             DomainEvents.off<PlayerDamagedPayload>(PLAYER_DAMAGED_EVENT, onPlayerDamaged);
-            DomainEvents.off(GAME_OVER_EVENT, onGameOver);
-            DomainEvents.off<PowerUpCollectedPayload>(POWERUP_COLLECTED_EVENT, onPowerUpCollected);
+            DomainEvents.off(PLAYER_DIED_EVENT, onGameOver);
             DomainEvents.off<BossDamagedPayload>(BOSS_DAMAGED_EVENT, onBossDamaged);
             DomainEvents.off<BossDefeatedPayload>(BOSS_DEFEATED_EVENT, onBossDefeated);
             DomainEvents.off(GAME_PAUSED_EVENT, onGamePaused);
             DomainEvents.off(GAME_RESUMED_EVENT, onGameResumed);
-            DomainEvents.off<SessionTickPayload>(SESSION_TICK_EVENT, onSessionTick);
-            DomainEvents.off<PowerUpExpiredPayload>(POWERUP_EXPIRED_EVENT, onPowerUpExpired);
             window.removeEventListener('keydown', handleKeyDown);
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -657,10 +509,6 @@ function App ()
             version: CURRENT_SAVE_VERSION,
             timestamp: Date.now(),
             slotId: slotId ?? saveManager.getActiveSlot(),
-            gameStats: {
-                highScore: gameStats.highScore,
-                bestTimeSeconds: gameStats.bestTimeSeconds,
-            },
             activeSkinId: skinManager.activeSkinId,
             settings: {
                 soundMuted: settings.isSoundMuted,
@@ -673,7 +521,6 @@ function App ()
             wallet: {
                 balance: entities.wallet.balance,
             },
-            weapons: entities.weaponLoadout.serialize(),
             achievements: entities.achievementManager.serialize(),
 
             // Version 4 Knowledge Quest fields
@@ -688,10 +535,6 @@ function App ()
 
     const applyLoadedSnapshot = (snap: SaveGameSnapshot) =>
     {
-        gameStats.loadFrom(snap.gameStats.highScore, snap.gameStats.bestTimeSeconds);
-        repositories.gameStats.save(gameStats);
-        setHighScore(gameStats.highScore);
-        setBestTime(gameStats.bestTimeSeconds);
 
         skinManager.setActiveSkin(snap.activeSkinId);
         repositories.skin.saveActiveSkinId(snap.activeSkinId);
@@ -715,7 +558,6 @@ function App ()
         if (snap.achievements)
         {
             entities.achievementManager.loadFrom(snap.achievements);
-            setUnclaimedAchievementsCount(entities.achievementManager.unclaimedCount);
         }
 
         // Version 5 Knowledge Quest fields restoration
@@ -779,11 +621,8 @@ function App ()
         {
             phaserRef.current.scene.scene.restart({
                 levelKey: currentLevel,
-                score: 0,
-                lives: maxLives,
                 skinId: snapshot.activeSkinId,
                 coins: 0,
-                elapsedMs: 0,
             });
         }
     };
@@ -817,7 +656,7 @@ function App ()
 
     const handlePauseGame = () =>
     {
-        if (isMainMenuOpen || levelComplete || gameOver) return;
+        if (isMainMenuOpen) return;
         pauseGameUseCase(pauseState);
         setIsGamePaused(true);
     };
@@ -851,18 +690,9 @@ function App ()
         setIsStageSelectOpen(false);
         setIsStageMapOpen(false);
         setIsSettingsOpen(false);
-        setLevelComplete(false);
-        setGameOver(false);
-        setScore(0);
-        setLives(maxLives);
-        setElapsedSeconds(0);
+        setHealth(maxHealth);
         setCurrentLevel(stageKey);
-        setNextLevel(null);
-        setStarTimer(0);
-        setSpringTimer(0);
         setBossHp(null);
-        setIsNewHighScore(false);
-        setIsNewBestTime(false);
 
         writeString(ACTIVE_SESSION_STORAGE_KEY, stageKey);
 
@@ -884,11 +714,8 @@ function App ()
             soundManager.playGameStart();
             const startData = {
                 levelKey: stageKey,
-                score: 0,
-                lives: maxLives,
                 skinId: activeSkinId,
                 coins: 0,
-                elapsedMs: 0,
             };
             if (game)
             {
@@ -908,10 +735,8 @@ function App ()
         setIsGamePaused(false);
         setIsMainMenuOpen(true);
         setIsSettingsOpen(false);
-        setIsSkinModalOpen(false);
         setIsStageSelectOpen(false);
         setIsStageMapOpen(false);
-        setIsAchievementsOpen(false);
         setVillageWelcomeToast(null);
         soundManager.stopBgm();
 
@@ -930,24 +755,12 @@ function App ()
         }
     };
 
-    const handleCloseAchievements = () =>
-    {
-        setIsAchievementsOpen(false);
-    };
-
-    const handleRewardClaimed = (newBalance: number) =>
-    {
-        setWalletBalance(newBalance);
-        setUnclaimedAchievementsCount(entities.achievementManager.unclaimedCount);
-        saveManager.autoSave(getCurrentSnapshot());
-    };
-
     const handleClearAllData = () =>
     {
         if (typeof window !== 'undefined' && window.confirm('Are you sure you want to reset all High Scores and saved data?'))
         {
             resetSaveDataUseCase(
-                { gameStats, skinManager, settings, stageProgression },
+                { skinManager, settings, stageProgression },
                 repositories
             );
             saveManager.clearSlot(saveManager.getActiveSlot());
@@ -961,51 +774,15 @@ function App ()
             entities.backpack.loadFromSnapshot([]);
             entities.repairedGates.clear();
             entities.forgeUnlocked = false;
-            setWalletBalance(50);
+            setWalletBalance(20);
             setBooksRevision(r => r + 1);
             setBackpackRevision(r => r + 1);
-            setUnclaimedAchievementsCount(0);
-            setHighScore(0);
-            setBestTime(null);
             setActiveSkinId('cyber-blue');
             setIsMuted(settings.isSoundMuted);
             setIsMusicMuted(settings.isMusicMuted);
-            setIsNewHighScore(false);
-            setIsNewBestTime(false);
             removeKey(ACTIVE_SESSION_STORAGE_KEY);
             soundManager.playCoin();
         }
-    };
-
-    const handleNextLevel = () =>
-    {
-        if (!nextLevel) return;
-
-        resumeGameUseCase(pauseState);
-        setIsGamePaused(false);
-        const target = nextLevel;
-        writeString(ACTIVE_SESSION_STORAGE_KEY, target);
-        setCurrentLevel(target);
-        setLevelComplete(false);
-        setNextLevel(null);
-        setStarTimer(0);
-        setSpringTimer(0);
-        setBossHp(null);
-
-        const isFromVillage = currentLevel === 'village';
-        const nextElapsedMs = isFromVillage ? 0 : Math.round(elapsedSeconds * 1000);
-        if (isFromVillage)
-        {
-            setElapsedSeconds(0);
-        }
-
-        phaserRef.current?.scene?.scene.restart({
-            levelKey: target,
-            score,
-            lives,
-            skinId: activeSkinId,
-            elapsedMs: nextElapsedMs,
-        });
     };
 
     const handleRestart = (resetToStart = false) =>
@@ -1017,42 +794,17 @@ function App ()
 
         if (resetToStart)
         {
-            setScore(0);
-            setLives(maxLives);
-            setElapsedSeconds(0);
-            setIsNewHighScore(false);
-            setIsNewBestTime(false);
+            setHealth(maxHealth);
         }
 
         setCurrentLevel(target);
-        setLevelComplete(false);
-        setGameOver(false);
-        setNextLevel(null);
-        setStarTimer(0);
-        setSpringTimer(0);
         setBossHp(null);
 
         phaserRef.current?.scene?.scene.restart({
             levelKey: target,
-            score: resetToStart ? 0 : score,
-            lives: resetToStart ? maxLives : lives,
             skinId: activeSkinId,
-            elapsedMs: resetToStart ? 0 : Math.round(elapsedSeconds * 1000),
         });
     };
-
-    const handleEquipSkin = (skinId: string) =>
-    {
-        const success = selectSkinUseCase(skinManager, skinId, score, highScore, repositories.skin);
-        if (success)
-        {
-            setActiveSkinId(skinId);
-            saveManager.autoSave(getCurrentSnapshot());
-        }
-    };
-
-    const activeSkinName =
-        AVAILABLE_SKINS.find(s => s.id === activeSkinId)?.name.split(' ')[0] || 'Cyber';
 
     const equippedWeaponDef = {
         id: equippedWeaponId,
@@ -1064,6 +816,33 @@ function App ()
         void backpackRevision;
         return entities.backpack.usedSlotsCount;
     }, [backpackRevision]);
+
+    const [ch1PageCount, setCh1PageCount] = useState(0);
+    useEffect(() =>
+    {
+        loadBooksData()
+            .then(books => setCh1PageCount(books.find(b => b.id === 'book-ch1')?.pages.length ?? 0))
+            .catch(console.error);
+    }, []);
+
+    const objective = useMemo(() => {
+        void booksRevision;
+        void backpackRevision;
+        void walletBalance;
+        const book = entities.books['book-ch1'];
+        const count = (id: string) => entities.backpack.getItemCount(id);
+        return getNextObjective({
+            ownsBook: Boolean(book?.isUnlocked),
+            bookFullyRead: Boolean(book && ch1PageCount > 0 && book.isFullyRead(ch1PageCount)),
+            examPassed: Boolean(book?.examPassed),
+            hasPickaxe: count('pickaxe-t1') > 0,
+            hasHammer: count('hammer-t1') > 0,
+            hasRepairKit: count('repair-kit') > 0,
+            gateRepaired: entities.repairedGates.has('gate-ch1'),
+            bossCleared: stageProgression.isStageCompleted('stage-ch1'),
+        });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [booksRevision, backpackRevision, walletBalance, ch1PageCount, currentLevel]);
 
     const ownedBooksCount = useMemo(() => {
         void booksRevision;
@@ -1081,16 +860,15 @@ function App ()
                     bossHp={bossHp}
                     bossMaxHp={bossMaxHp}
                     currentLevel={currentLevel}
-                    elapsedSeconds={elapsedSeconds}
+                    objective={objective}
                     equippedWeapon={{
                         id: equippedWeaponDef.id,
                         name: equippedWeaponDef.name,
                         icon: equippedWeaponDef.icon,
                     }}
-                    highScore={highScore}
                     isGamePaused={isGamePaused}
-                    lives={lives}
-                    maxLives={maxLives}
+                    health={health}
+                    maxHealth={maxHealth}
                     onCycleWeapon={handleCycleWeapon}
                     onOpenBackpack={() => setIsBackpackOpen(true)}
                     onOpenLibrary={() =>
@@ -1104,87 +882,32 @@ function App ()
                     backpackCount={backpackSlotsUsed}
                     maxBackpackSlots={entities.backpack.maxSlots}
                     onTogglePause={handleTogglePause}
-                    score={score}
-                    springTimer={springTimer}
-                    starTimer={starTimer}
-                    unclaimedAchievementsCount={unclaimedAchievementsCount}
                     walletBalance={walletBalance}
                 />
             )}
 
             <PhaserGame ref={phaserRef} />
 
-            {gameOver && (
-                <GameOverModal
-                    currentLevel={currentLevel}
-                    elapsedSeconds={elapsedSeconds}
-                    highScore={highScore}
-                    onRestart={() => handleRestart(true)}
-                    score={score}
-                />
-            )}
-
-            {levelComplete && (
-                <LevelCompleteModal
-                    bestTime={bestTime}
-                    currentLevel={currentLevel}
-                    elapsedSeconds={elapsedSeconds}
-                    isNewBestTime={isNewBestTime}
-                    isNewHighScore={isNewHighScore}
-                    nextLevel={nextLevel}
-                    onNextLevel={handleNextLevel}
-                    onOpenWorldMap={() =>
-                    {
-                        setLevelComplete(false);
-                        setIsStageMapOpen(true);
-                    }}
-                    onPlayAgainFromStart={() => handleRestart(true)}
-                    onRestartLevel={() => handleRestart(false)}
-                    score={score}
-                />
-            )}
-
-            {isGamePaused && !isMainMenuOpen && !levelComplete && !gameOver && (
+            {isGamePaused && !isMainMenuOpen && (
                 <PauseMenuModal
-                    activeSkinName={activeSkinName}
                     currentLevel={currentLevel}
-                    elapsedSeconds={elapsedSeconds}
                     isMusicMuted={isMusicMuted}
                     isMuted={isMuted}
                     onExitToMainMenu={handleOpenMainMenu}
                     onOpenSettings={() => setIsSettingsOpen(true)}
-                    onOpenSkinModal={() => setIsSkinModalOpen(true)}
                     onRestartLevel={() => handleRestart(false)}
                     onResume={handleResumeGame}
                     onToggleMusic={handleToggleMusic}
                     onToggleMute={handleToggleMute}
-                    score={score}
-                    unclaimedAchievementsCount={unclaimedAchievementsCount}
-                />
-            )}
-
-            {isSkinModalOpen && (
-                <SkinModal
-                    activeSkinId={activeSkinId}
-                    highScore={highScore}
-                    onClose={() => setIsSkinModalOpen(false)}
-                    onEquipSkin={handleEquipSkin}
-                    score={score}
-                    skinManager={skinManager}
                 />
             )}
 
             {isMainMenuOpen && (
                 <MainMenuModal
-                    activeSkinName={activeSkinName}
-                    bestTime={bestTime}
-                    highScore={highScore}
                     walletBalance={walletBalance}
                     onOpenSettings={() => setIsSettingsOpen(true)}
-                    onOpenSkinModal={() => setIsSkinModalOpen(true)}
                     onOpenStageSelect={() => setIsStageMapOpen(true)}
                     onStartGame={handleStartGame}
-                    unclaimedAchievementsCount={unclaimedAchievementsCount}
                 />
             )}
 
@@ -1222,15 +945,6 @@ function App ()
                     onAdvance={handleAdvanceDialogue}
                     onChoose={handleSelectDialogueChoice}
                     onClose={handleCloseDialogue}
-                />
-            )}
-
-            {isAchievementsOpen && (
-                <AchievementModal
-                    achievementManager={entities.achievementManager}
-                    onClose={handleCloseAchievements}
-                    onRewardClaimed={handleRewardClaimed}
-                    wallet={entities.wallet}
                 />
             )}
 
@@ -1326,7 +1040,7 @@ function App ()
                 {
                     if (itemId === 'herb-potion')
                     {
-                        setLives(prev => Math.min(maxLives, prev + 1));
+                        setHealth(prev => Math.min(maxHealth, prev + 1));
                     }
                     setBackpackRevision(r => r + 1);
                     saveManager.autoSave(getCurrentSnapshot());
@@ -1352,7 +1066,7 @@ function App ()
                 onReturnConfirmed={() =>
                 {
                     setIsWaypointOpen(false);
-                    setLives(maxLives);
+                    setHealth(maxHealth);
                     handleStartGame('village');
                 }}
             />
@@ -1378,12 +1092,8 @@ function App ()
                 visible={
                     !isMainMenuOpen &&
                     !isGamePaused &&
-                    !levelComplete &&
-                    !gameOver &&
                     !isDialogueOpen &&
                     !isSettingsOpen &&
-                    !isSkinModalOpen &&
-                    !isAchievementsOpen &&
                     !(isStageMapOpen || isStageSelectOpen) &&
                     !isLibraryOpen &&
                     !isAcademyOpen &&

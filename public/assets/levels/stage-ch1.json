@@ -1,14 +1,10 @@
 {
     "worldWidth": 3200,
-    "finishX": 3100,
-    "finishType": "goal",
     "scenery": "stage-ch1",
-    "trackTime": true,
     "spawn": {
         "x": 80,
         "y": 556
     },
-    "nextLevel": "village",
     "platforms": [
         { "x": 300, "y": 480, "width": 120, "height": 20 },
         { "x": 580, "y": 420, "width": 140, "height": 20 },
@@ -19,8 +15,6 @@
         { "x": 2450, "y": 460, "width": 160, "height": 20 },
         { "x": 2850, "y": 420, "width": 160, "height": 20 }
     ],
-    "coins": [],
-    "powerUps": [],
     "enemies": [
         { "x": 480, "y": 580, "type": "slime", "enemyId": "forest-slime", "patrolDistance": 100, "speed": 50 },
         { "x": 750, "y": 580, "type": "slime", "enemyId": "forest-slime", "patrolDistance": 120, "speed": 60 },

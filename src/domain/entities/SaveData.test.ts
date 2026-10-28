@@ -7,31 +7,25 @@ import {
 
 describe('SaveData Domain Entity & Migration', () =>
 {
-    it('creates a clean default snapshot with CURRENT_SAVE_VERSION (v5)', () =>
+    it('creates a clean default snapshot with CURRENT_SAVE_VERSION (v6)', () =>
     {
         const defaultSave = createDefaultSaveSnapshot('slot_1');
         expect(defaultSave.version).toBe(CURRENT_SAVE_VERSION);
-        expect(defaultSave.version).toBe(5);
+        expect(defaultSave.version).toBe(6);
         expect(defaultSave.slotId).toBe('slot_1');
-        expect(defaultSave.gameStats.highScore).toBe(0);
-        expect(defaultSave.gameStats.bestTimeSeconds).toBeNull();
         expect(defaultSave.activeSkinId).toBe('cyber-blue');
         expect(defaultSave.settings.soundMuted).toBe(false);
-        expect(defaultSave.stageProgression.unlockedStages).toEqual(['village', 'level-1']);
+        expect(defaultSave.stageProgression.unlockedStages).toEqual(['village', 'stage-ch1']);
         expect(defaultSave.stageProgression.completedStages).toEqual([]);
 
-        // Legacy properties
+        // Exactly enough Credit for the first textbook; books start unpurchased
         expect(defaultSave.wallet.balance).toBe(20);
-        expect(defaultSave.weapons.owned).toEqual(['cyber-saber']);
-        expect(defaultSave.weapons.equippedId).toBe('cyber-saber');
-
-        // v5 Buy-to-Read properties (books start unpurchased)
-        expect(defaultSave.books?.['book-ch1']?.unlocked).toBe(false);
+        expect(defaultSave.books['book-ch1'].unlocked).toBe(false);
         expect(defaultSave.backpack).toEqual([
             { slotIndex: 0, itemId: 'wooden-sword', count: 1 },
             { slotIndex: 1, itemId: 'axe-t1', count: 1 },
         ]);
-        expect(defaultSave.equipment?.equippedWeaponId).toBe('wooden-sword');
+        expect(defaultSave.equipment.equippedWeaponId).toBe('wooden-sword');
         expect(defaultSave.forgeUnlocked).toBe(false);
     });
 
@@ -43,132 +37,91 @@ describe('SaveData Domain Entity & Migration', () =>
 
         const saveFromString = migrateSaveSnapshot('corrupted_string', 'slot_3');
         expect(saveFromString.slotId).toBe('slot_3');
-        expect(saveFromString.gameStats.highScore).toBe(0);
         expect(saveFromString.wallet.balance).toBe(20);
     });
 
-    it('migrates legacy flat schema to version 4 successfully', () =>
+    it('starts older platformer saves fresh but keeps settings and the chosen skin', () =>
     {
-        const legacyData = {
+        const legacy = {
+            version: 5,
             highScore: 1250,
-            unlockedStages: ['village', 'level-1', 'level-2'],
-            completedStages: ['level-1'],
-            soundMuted: true,
+            gameStats: { highScore: 1250, bestTimeSeconds: 30 },
+            wallet: { balance: 900 },
+            weapons: { owned: ['cyber-saber', 'thunder-hammer'], equippedId: 'thunder-hammer' },
+            settings: { soundMuted: true, musicMuted: false },
             activeSkinId: 'neon-ninja',
+            books: { 'book-ch1': { bookId: 'book-ch1', unlocked: true, readPages: [1, 2], examPassed: true } },
         };
 
-        const migrated = migrateSaveSnapshot(legacyData, 'slot_1');
+        const migrated = migrateSaveSnapshot(legacy, 'slot_1');
 
         expect(migrated.version).toBe(CURRENT_SAVE_VERSION);
-        expect(migrated.gameStats.highScore).toBe(1250);
-        expect(migrated.activeSkinId).toBe('neon-ninja');
         expect(migrated.settings.soundMuted).toBe(true);
-        expect(migrated.settings.musicMuted).toBe(false);
-        expect(migrated.stageProgression.unlockedStages).toContain('level-2');
-        expect(migrated.stageProgression.completedStages).toContain('level-1');
-
-        // v3 migration bonus: 50 + 1250/5 = 300
-        expect(migrated.wallet.balance).toBe(300);
-        expect(migrated.weapons.owned).toContain('cyber-saber');
-        expect(migrated.weapons.equippedId).toBe('cyber-saber');
-
-        // v5 properties initialized safely (books start unpurchased)
-        expect(migrated.books?.['book-ch1']?.unlocked).toBe(false);
-        expect(migrated.equipment?.equippedWeaponId).toBe('wooden-sword');
+        expect(migrated.activeSkinId).toBe('neon-ninja');
+        expect(migrated.wallet.balance).toBe(20);
+        expect(migrated.books['book-ch1'].unlocked).toBe(false);
+        expect(migrated.equipment.equippedWeaponId).toBe('wooden-sword');
+        expect('weapons' in migrated).toBe(false);
+        expect('gameStats' in migrated).toBe(false);
     });
 
-    it('migrates v4 untouched book-ch1 to unpurchased and enforces >= 20 Credit softlock guard', () =>
+    it('keeps v6 progress and enforces the starter-book Credit guard only while the book is unbought', () =>
     {
-        const v4Untouched = {
-            version: 4,
+        const untouched = migrateSaveSnapshot({ version: 6, wallet: { balance: 5 } }, 'slot_1');
+        expect(untouched.books['book-ch1'].unlocked).toBe(false);
+        expect(untouched.wallet.balance).toBe(20);
+
+        const bought = migrateSaveSnapshot({
+            version: 6,
             wallet: { balance: 5 },
-            books: {
-                'book-ch1': {
-                    bookId: 'book-ch1',
-                    unlocked: true,
-                    readPages: [],
-                    examPassed: false,
-                    bestScore: 0,
-                    attempts: 0,
-                },
-            },
-        };
-
-        const migratedUntouched = migrateSaveSnapshot(v4Untouched, 'slot_1');
-        expect(migratedUntouched.version).toBe(5);
-        expect(migratedUntouched.books?.['book-ch1']?.unlocked).toBe(false);
-        expect(migratedUntouched.wallet.balance).toBe(20); // topped up to starter book reserve
-
-        // Whereas if player already read pages or passed exam in v4, keep unlocked = true
-        const v4Active = {
-            version: 4,
-            wallet: { balance: 5 },
-            books: {
-                'book-ch1': {
-                    bookId: 'book-ch1',
-                    unlocked: true,
-                    readPages: [1, 2],
-                    examPassed: false,
-                    bestScore: 0,
-                    attempts: 0,
-                },
-            },
-        };
-
-        const migratedActive = migrateSaveSnapshot(v4Active, 'slot_1');
-        expect(migratedActive.books?.['book-ch1']?.unlocked).toBe(true);
-        expect(migratedActive.wallet.balance).toBe(5);
-
-        // And if version === 5 and book-ch1 was just purchased (unlocked: true, readPages: []), preserve unlocked: true
-        const v5JustBought = {
-            version: 5,
-            wallet: { balance: 30 },
-            books: {
-                'book-ch1': {
-                    bookId: 'book-ch1',
-                    unlocked: true,
-                    readPages: [],
-                    examPassed: false,
-                    bestScore: 0,
-                    attempts: 0,
-                },
-            },
-        };
-
-        const migratedV5 = migrateSaveSnapshot(v5JustBought, 'slot_1');
-        expect(migratedV5.books?.['book-ch1']?.unlocked).toBe(true);
-        expect(migratedV5.wallet.balance).toBe(30);
+            books: { 'book-ch1': { bookId: 'book-ch1', unlocked: true, readPages: [1, 2], examPassed: false } },
+        }, 'slot_1');
+        expect(bought.books['book-ch1'].unlocked).toBe(true);
+        expect(bought.books['book-ch1'].readPages).toEqual([1, 2]);
+        expect(bought.wallet.balance).toBe(5);
     });
 
-    it('filters out invalid skins, weapons, and invalid stage keys defensively', () =>
+    it('keeps the daily resit reward date and gate repairs', () =>
+    {
+        const migrated = migrateSaveSnapshot({
+            version: 6,
+            books: {
+                'book-ch1': { bookId: 'book-ch1', unlocked: true, examPassed: true, lastResitRewardDate: '2026-10-28' },
+            },
+            repairedGates: ['gate-ch1', 42],
+        }, 'slot_1');
+
+        expect(migrated.books['book-ch1'].lastResitRewardDate).toBe('2026-10-28');
+        expect(migrated.repairedGates).toEqual(['gate-ch1']);
+        expect(migrated.forgeUnlocked).toBe(true);
+    });
+
+    it('filters out invalid skins, stage keys and equipment defensively', () =>
     {
         const maliciousData = {
+            version: 6,
             activeSkinId: 'hacked_skin',
             stageProgression: {
                 unlockedStages: ['village', 'level-1', 'invalid_debug_stage'],
-                completedStages: ['unknown_stage'],
+                completedStages: ['unknown_stage', 'stage-ch1'],
             },
-            gameStats: {
-                highScore: -999,
-                bestTimeSeconds: -10,
-            },
-            weapons: {
-                owned: ['hacked_laser_death_ray'],
-                equippedId: 'hacked_laser_death_ray',
-            },
+            wallet: { balance: -50 },
+            equipment: { equippedWeaponId: 'hacked_laser_death_ray', upgradeLevels: { 'iron-sword': -3, x: 'bad' } },
+            backpack: [
+                { slotIndex: 0, itemId: 'wood', count: 5.9 },
+                { slotIndex: 1, itemId: 'stone', count: 0 },
+                'junk',
+            ],
         };
 
         const sanitized = migrateSaveSnapshot(maliciousData);
 
         expect(sanitized.activeSkinId).toBe('cyber-blue');
-        expect(sanitized.stageProgression.unlockedStages).toEqual(['village', 'level-1']);
-        expect(sanitized.stageProgression.completedStages).toEqual([]);
-        expect(sanitized.gameStats.highScore).toBe(0);
-        expect(sanitized.gameStats.bestTimeSeconds).toBeNull();
-
-        // Weapons sanitized
-        expect(sanitized.weapons.owned).toEqual(['cyber-saber']);
-        expect(sanitized.weapons.equippedId).toBe('cyber-saber');
-
+        expect(sanitized.stageProgression.unlockedStages).toEqual(['village', 'stage-ch1']);
+        expect(sanitized.stageProgression.completedStages).toEqual(['stage-ch1']);
+        expect(sanitized.wallet.balance).toBe(20);
+        expect(sanitized.equipment.equippedWeaponId).toBe('wooden-sword');
+        expect(sanitized.equipment.upgradeLevels).toEqual({ 'iron-sword': 0 });
+        expect(sanitized.backpack).toEqual([{ slotIndex: 0, itemId: 'wood', count: 5 }]);
     });
 });
