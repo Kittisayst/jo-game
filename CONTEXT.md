@@ -26,7 +26,7 @@ _Avoid_: repository (reserve "repository" for the concrete infrastructure implem
 
 **Domain event**:
 A notification emitted through a small custom emitter that lives in the domain layer (not `Phaser.Events.EventEmitter`), so both the Phaser scene and the React UI can react to the same state change without either depending on the other's framework.
-_Avoid_: EventBus (that name is reserved for the existing Phaser↔React bridge in `src/game/EventBus.ts`, which is a separate, infrastructure-only concern)
+_Avoid_: EventBus (that name is reserved for the existing Phaser↔React bridge in `src/infrastructure/EventBus.ts`, which is a separate, infrastructure-only concern)
 
 **Spatial ownership**:
 Only infrastructure (Phaser Arcade Physics sprites) ever tracks x/y position or performs collision/overlap detection. When physics detects something meaningful (wall hit, overlap with a goal zone), infrastructure translates that into a use-case call — the domain is told *what happened*, never *where*.
@@ -38,12 +38,40 @@ _Avoid_: entity ID, entity registry/lookup (for gameplay entities — reserve ID
 **Pairing is optional, not automatic**:
 Not every infrastructure game object needs a paired domain Entity. A pairing exists only when there's an actual rule or piece of state for the domain to own — health, AI decisions, scoring, and the like. A game object that is pure geometry with no rules (e.g. a static floating platform — just a position and a collision box) stays entirely inside infrastructure, with nothing in `domain/` or `application/` for it at all. Don't create an Entity speculatively "because this is a game object" — wait until a real rule shows up.
 
-**Level**:
-The infrastructure-owned data describing one playable layout — spawn point, platform positions, world width, and the finish line x-coordinate. Pure spatial data with no rules of its own, so it has no domain Entity (see "Pairing is optional, not automatic"); it's loaded from a JSON file, not hand-written as a paired object.
-_Avoid_: stage, map (this project says "level")
+**Chapter**:
+One lesson of the curriculum: one Textbook, one Stage, one Boss. Beating the Boss for the first time completes the Chapter.
+
+**Stage**:
+The explorable run of a Chapter, walked left to right and divided into Zones. Its layout is infrastructure-owned spatial data loaded from `stages.json` (spawn points, resource nodes, world width); that layout has no domain Entity (see "Pairing is optional, not automatic"). Enemies and Resource nodes respawn each time the player enters.
+_Avoid_: level, map
+
+**Zone**:
+One section of a Stage (forest, cavern, Broken Gate, boss arena), each with its own enemies and resources.
+
+**Level** (legacy):
+The older platformer-era term for a playable layout, still present in `LevelProgress` / `CompleteLevelUseCase`. New work uses **Stage**; the legacy names are to be migrated.
 
 **LevelProgress**:
-The domain Entity that tracks whether the current level has been completed. Holds no coordinates — infrastructure alone knows the finish line's x-coordinate and detects when the player has reached it, then calls `CompleteLevelUseCase` to mark the `LevelProgress` complete and emit the `level-complete` domain event. `Level` (the layout data) and `LevelProgress` (the domain state) are deliberately separate: one is infrastructure config, the other is the one piece of state this feature actually needed a domain Entity for.
+The domain Entity that tracks whether the current level has been completed. Holds no coordinates — infrastructure detects the finish and calls `CompleteLevelUseCase`, which emits the `level-complete` domain event. Legacy, see **Level**.
+
+**Credit**:
+The currency earned only by learning (passing a Book exam, Daily Practice, finishing a Chapter by answering the Boss question). Killing enemies never gives Credit, and there is no separate coin currency; the Wallet holds Credit only.
+_Avoid_: coins, money, gold
+
+**Health**:
+The player's hit points, shown as hearts. Dropping to zero sends the player back to the Village Hub (with the Material loss rule), not to a game-over screen. There are no extra lives, scores, or star ratings.
+_Avoid_: lives, score, game over
+
+**Material**:
+A resource gathered only by exploring a Stage (wood, stone, iron ore, herb, fiber, crystal, boss core). Lost 50% on death or emergency retreat, except story Materials (crystal, boss core), which are always kept.
+_Avoid_: resource (for the item; "Resource node" is the place it is harvested from)
+
+**Textbook**:
+A purchasable Book of short pages for one Chapter. Passing its exam unlocks the Recipes tied to it.
+_Avoid_: lesson, course
+
+**Village Hub**:
+The safe place between Stages with no enemies; the player walks to buildings (Library, Academy, Workshop, Forge, World Gate) and returns here to heal and save.
 
 **GameSession**:
 The domain Aggregate Root entity that consolidates active gameplay state — `Score`, `Lives`, `PowerUpState`, coins collected, active level ID, and speedrun elapsed time. Advanced through `tickSessionUseCase(session, deltaMs)` in the Phaser engine's `update()` loop, ensuring that game speed, power-up timers, and HUD countdowns are driven by a single source of truth that pauses automatically when the game engine pauses.
