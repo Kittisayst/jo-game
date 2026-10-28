@@ -4,13 +4,14 @@ import { BookProgressSnapshot } from './Book';
 import { BackpackSlotSnapshot } from './Backpack';
 import { EquipmentSnapshot, WEAPON_CONFIGS } from './EquipmentState';
 import { DailyPracticeProgressSnapshot } from './Quiz';
+import { AVAILABLE_SKINS } from './Skin';
 import { ALWAYS_UNLOCKED_STAGES } from './StageProgression';
 
 export const CURRENT_SAVE_VERSION = 6;
 export const STARTER_BOOK_CREDIT_RESERVE = 20;
 
 const VALID_STAGE_KEYS = ['village', 'stage-ch1'];
-const VALID_SKIN_IDS = ['cyber-blue', 'neon-ninja', 'cyber-knight', 'golden-runner'];
+const VALID_SKIN_IDS = AVAILABLE_SKINS.map(skin => skin.id);
 const DEFAULT_SKIN_ID = 'cyber-blue';
 const DEFAULT_WEAPON_ID = 'wooden-sword';
 
@@ -20,6 +21,8 @@ export interface SaveGameSnapshot
     timestamp: number;
     slotId: string;
     activeSkinId: string;
+    /** Skins bought with Credit. The free default skin is always owned. */
+    ownedSkins: string[];
     settings: SettingsData;
     stageProgression: StageProgressionData;
     wallet: {
@@ -41,6 +44,7 @@ export function createDefaultSaveSnapshot (slotId = 'slot_1'): SaveGameSnapshot
         timestamp: Date.now(),
         slotId,
         activeSkinId: DEFAULT_SKIN_ID,
+        ownedSkins: [DEFAULT_SKIN_ID],
         settings: {
             soundMuted: false,
             musicMuted: false,
@@ -96,7 +100,7 @@ function wholeNumber (value: unknown, fallback = 0): number
 /**
  * Validates an unknown input into a clean, verified SaveGameSnapshot (version 6).
  * Saves older than v6 come from the platformer prototype (coins, score, shop, old weapons) and
- * are intentionally not carried over: only settings and the chosen skin survive.
+ * are intentionally not carried over: only the settings survive.
  */
 export function migrateSaveSnapshot (raw: unknown, fallbackSlotId = 'slot_1'): SaveGameSnapshot
 {
@@ -113,9 +117,6 @@ export function migrateSaveSnapshot (raw: unknown, fallbackSlotId = 'slot_1'): S
     const slotId = typeof data.slotId === 'string' && data.slotId.trim() ? data.slotId.trim() : fallbackSlotId;
     const timestamp = typeof data.timestamp === 'number' && data.timestamp > 0 ? data.timestamp : Date.now();
 
-    const activeSkinId = typeof data.activeSkinId === 'string' && VALID_SKIN_IDS.includes(data.activeSkinId)
-        ? data.activeSkinId
-        : DEFAULT_SKIN_ID;
 
     const rawSettings = asRecord(data.settings);
     const settings: SettingsData = {
@@ -125,8 +126,15 @@ export function migrateSaveSnapshot (raw: unknown, fallbackSlotId = 'slot_1'): S
 
     if (rawVersion < CURRENT_SAVE_VERSION)
     {
-        return { ...createDefaultSaveSnapshot(slotId), timestamp, activeSkinId, settings };
+        return { ...createDefaultSaveSnapshot(slotId), timestamp, settings };
     }
+
+    // Skins are bought with Credit, so only owned skins can be worn
+    const ownedSkins = Array.from(new Set([DEFAULT_SKIN_ID, ...(Array.isArray(data.ownedSkins) ? data.ownedSkins : [])
+        .filter((id): id is string => typeof id === 'string' && VALID_SKIN_IDS.includes(id))]));
+    const activeSkinId = typeof data.activeSkinId === 'string' && ownedSkins.includes(data.activeSkinId)
+        ? data.activeSkinId
+        : DEFAULT_SKIN_ID;
 
     // Stage progression
     const rawProg = asRecord(data.stageProgression);
@@ -229,6 +237,7 @@ export function migrateSaveSnapshot (raw: unknown, fallbackSlotId = 'slot_1'): S
         timestamp,
         slotId,
         activeSkinId,
+        ownedSkins,
         settings,
         stageProgression: { unlockedStages, completedStages },
         wallet: { balance },

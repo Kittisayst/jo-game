@@ -40,7 +40,7 @@ if (!initialBooks['book-ch1'])
 }
 
 export const entities = {
-    skinManager: new SkinManager(initialSave.activeSkinId),
+    skinManager: new SkinManager(initialSave.activeSkinId, initialSave.ownedSkins),
     settings: new Settings(initialSave.settings.soundMuted, initialSave.settings.musicMuted),
     stageProgression: new StageProgression(initialSave.stageProgression.unlockedStages, initialSave.stageProgression.completedStages),
     pauseState: new GamePauseState(false),

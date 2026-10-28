@@ -66,7 +66,8 @@ test.describe('Knowledge Quest — Buy-to-Read Textbook & Chapter 1 Loop E2E', (
     await expect(libraryStoreHeader).not.toBeVisible();
 
     await page.keyboard.down('KeyD');
-    await page.waitForTimeout(1050);
+    // Walk far enough to stand at the Academy (x=600), past the elder NPC (x=460) who would otherwise take the E key
+    await page.waitForTimeout(1400);
     await page.keyboard.up('KeyD');
     await page.waitForTimeout(150);
     await page.keyboard.press('KeyE');

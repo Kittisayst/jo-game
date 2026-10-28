@@ -27,6 +27,10 @@ import {
 import { EventBus } from '../EventBus';
 import { entities, repositories } from '../composition';
 import { Hud } from './components/Hud';
+import { SkinModal } from './components/SkinModal';
+import { purchaseSkinUseCase } from '../../application/PurchaseSkinUseCase';
+import { selectSkinUseCase } from '../../application/SelectSkinUseCase';
+import { STARTER_BOOK_CREDIT_RESERVE } from '../../domain/entities/SaveData';
 import { getNextObjective } from '../../domain/utils/nextObjective';
 import { loadBooksData } from '../dataLoader';
 import { PauseMenuModal } from './components/PauseMenuModal';
@@ -86,6 +90,8 @@ function App ()
     const [bossHp, setBossHp] = useState<number | null>(null);
     const [bossMaxHp, setBossMaxHp] = useState(5);
     const [activeSkinId, setActiveSkinId] = useState(entities.skinManager.activeSkinId);
+    const [isSkinModalOpen, setIsSkinModalOpen] = useState(false);
+    const [skinNotice, setSkinNotice] = useState<string | null>(null);
     const [isMainMenuOpen, setIsMainMenuOpen] = useState(!shouldResumeInGame);
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
     const [isStageSelectOpen, setIsStageSelectOpen] = useState(false);
@@ -510,6 +516,7 @@ function App ()
             timestamp: Date.now(),
             slotId: slotId ?? saveManager.getActiveSlot(),
             activeSkinId: skinManager.activeSkinId,
+            ownedSkins: skinManager.ownedSkinIds,
             settings: {
                 soundMuted: settings.isSoundMuted,
                 musicMuted: settings.isMusicMuted,
@@ -536,9 +543,9 @@ function App ()
     const applyLoadedSnapshot = (snap: SaveGameSnapshot) =>
     {
 
-        skinManager.setActiveSkin(snap.activeSkinId);
-        repositories.skin.saveActiveSkinId(snap.activeSkinId);
-        setActiveSkinId(snap.activeSkinId);
+        skinManager.restore(snap.activeSkinId, snap.ownedSkins);
+        repositories.skin.saveActiveSkinId(skinManager.activeSkinId);
+        setActiveSkinId(skinManager.activeSkinId);
 
         settings.setSoundMuted(snap.settings.soundMuted);
         settings.setMusicMuted(snap.settings.musicMuted);
@@ -806,6 +813,40 @@ function App ()
         });
     };
 
+    const handleBuySkin = (skinId: string) =>
+    {
+        // Until the first textbook is bought, its price stays untouchable
+        const reserve = entities.books['book-ch1']?.isUnlocked ? 0 : STARTER_BOOK_CREDIT_RESERVE;
+        const result = purchaseSkinUseCase(entities.wallet, skinManager, skinId, reserve);
+
+        if (result.success)
+        {
+            setWalletBalance(entities.wallet.balance);
+            setSkinNotice('🎉 ຊື້ຊຸດສຳເລັດ! ກົດ "ໃສ່" ເພື່ອໃສ່ຊຸດນີ້');
+            soundManager.playBuy();
+            saveManager.autoSave(getCurrentSnapshot());
+            return;
+        }
+
+        soundManager.playHurt();
+        const reasons: Record<typeof result.reason, string> = {
+            unknown_skin: '❌ ບໍ່ພົບຊຸດນີ້',
+            already_owned: 'ເຈົ້າມີຊຸດນີ້ແລ້ວ',
+            insufficient_credit: '❌ Credit ບໍ່ພໍ — ຮຽນ ແລະ ສອບເພື່ອຫາ Credit ເພີ່ມ',
+            reserved_for_textbook: `📚 ເກັບ ${STARTER_BOOK_CREDIT_RESERVE} Credit ໄວ້ຊື້ປຶ້ມຕຳລາບົດທີ 1 ກ່ອນ`,
+        };
+        setSkinNotice(reasons[result.reason]);
+    };
+
+    const handleEquipSkin = (skinId: string) =>
+    {
+        if (selectSkinUseCase(skinManager, skinId, repositories.skin))
+        {
+            setActiveSkinId(skinId);
+            saveManager.autoSave(getCurrentSnapshot());
+        }
+    };
+
     const equippedWeaponDef = {
         id: equippedWeaponId,
         name: WEAPON_CONFIGS[equippedWeaponId]?.name ?? WEAPON_CONFIGS['wooden-sword'].name,
@@ -895,6 +936,7 @@ function App ()
                     isMuted={isMuted}
                     onExitToMainMenu={handleOpenMainMenu}
                     onOpenSettings={() => setIsSettingsOpen(true)}
+                    onOpenSkinModal={() => setIsSkinModalOpen(true)}
                     onRestartLevel={() => handleRestart(false)}
                     onResume={handleResumeGame}
                     onToggleMusic={handleToggleMusic}
@@ -902,10 +944,23 @@ function App ()
                 />
             )}
 
+            {isSkinModalOpen && (
+                <SkinModal
+                    activeSkinId={activeSkinId}
+                    walletBalance={walletBalance}
+                    skinManager={skinManager}
+                    notice={skinNotice}
+                    onClose={() => { setIsSkinModalOpen(false); setSkinNotice(null); }}
+                    onBuySkin={handleBuySkin}
+                    onEquipSkin={handleEquipSkin}
+                />
+            )}
+
             {isMainMenuOpen && (
                 <MainMenuModal
                     walletBalance={walletBalance}
                     onOpenSettings={() => setIsSettingsOpen(true)}
+                    onOpenSkinModal={() => setIsSkinModalOpen(true)}
                     onOpenStageSelect={() => setIsStageMapOpen(true)}
                     onStartGame={handleStartGame}
                 />

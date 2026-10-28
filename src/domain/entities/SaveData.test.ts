@@ -14,6 +14,7 @@ describe('SaveData Domain Entity & Migration', () =>
         expect(defaultSave.version).toBe(6);
         expect(defaultSave.slotId).toBe('slot_1');
         expect(defaultSave.activeSkinId).toBe('cyber-blue');
+        expect(defaultSave.ownedSkins).toEqual(['cyber-blue']);
         expect(defaultSave.settings.soundMuted).toBe(false);
         expect(defaultSave.stageProgression.unlockedStages).toEqual(['village', 'stage-ch1']);
         expect(defaultSave.stageProgression.completedStages).toEqual([]);
@@ -40,7 +41,7 @@ describe('SaveData Domain Entity & Migration', () =>
         expect(saveFromString.wallet.balance).toBe(20);
     });
 
-    it('starts older platformer saves fresh but keeps settings and the chosen skin', () =>
+    it('starts older platformer saves fresh but keeps the settings', () =>
     {
         const legacy = {
             version: 5,
@@ -57,7 +58,8 @@ describe('SaveData Domain Entity & Migration', () =>
 
         expect(migrated.version).toBe(CURRENT_SAVE_VERSION);
         expect(migrated.settings.soundMuted).toBe(true);
-        expect(migrated.activeSkinId).toBe('neon-ninja');
+        expect(migrated.activeSkinId).toBe('cyber-blue');
+        expect(migrated.ownedSkins).toEqual(['cyber-blue']);
         expect(migrated.wallet.balance).toBe(20);
         expect(migrated.books['book-ch1'].unlocked).toBe(false);
         expect(migrated.equipment.equippedWeaponId).toBe('wooden-sword');
@@ -123,5 +125,16 @@ describe('SaveData Domain Entity & Migration', () =>
         expect(sanitized.equipment.equippedWeaponId).toBe('wooden-sword');
         expect(sanitized.equipment.upgradeLevels).toEqual({ 'iron-sword': 0 });
         expect(sanitized.backpack).toEqual([{ slotIndex: 0, itemId: 'wood', count: 5 }]);
+    });
+
+    it('only lets the player wear skins they own', () =>
+    {
+        const owned = migrateSaveSnapshot({ version: 6, activeSkinId: 'neon-ninja', ownedSkins: ['neon-ninja', 'bogus', 7] });
+        expect(owned.ownedSkins).toEqual(['cyber-blue', 'neon-ninja']);
+        expect(owned.activeSkinId).toBe('neon-ninja');
+
+        const notBought = migrateSaveSnapshot({ version: 6, activeSkinId: 'golden-runner' });
+        expect(notBought.ownedSkins).toEqual(['cyber-blue']);
+        expect(notBought.activeSkinId).toBe('cyber-blue');
     });
 });

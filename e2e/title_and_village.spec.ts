@@ -32,8 +32,8 @@ test.describe('Title Start Screen and Village Hub Transition E2E', () => {
     const stageBtn = page.locator('#menu-stage-select-btn');
     await expect(stageBtn).toBeVisible();
 
-    // Skins are hidden until cosmetics return
-    await expect(page.locator('#menu-skins-btn')).toHaveCount(0);
+    // Skins are cosmetics bought with Credit
+    await expect(page.locator('#menu-skins-btn')).toBeVisible();
 
     const settingsBtn = page.locator('#menu-settings-btn');
     await expect(settingsBtn).toBeVisible();

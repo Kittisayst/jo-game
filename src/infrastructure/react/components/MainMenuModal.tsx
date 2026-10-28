@@ -6,6 +6,7 @@ export interface MainMenuModalProps
     onStartGame: (stageKey?: string) => void;
     onOpenStageSelect: () => void;
     onOpenSettings: () => void;
+    onOpenSkinModal: () => void;
 }
 
 export function MainMenuModal ({
@@ -13,6 +14,7 @@ export function MainMenuModal ({
     onStartGame,
     onOpenStageSelect,
     onOpenSettings,
+    onOpenSkinModal,
 }: MainMenuModalProps)
 {
     // Enable Enter / Space key to quick-start the game
@@ -78,6 +80,16 @@ export function MainMenuModal ({
                         >
                             <span className="btn-icon">🚩</span>
                             <span>ເລືອກດ່ານ (Stage Map)</span>
+                        </button>
+
+                        <button
+                            id="menu-skins-btn"
+                            className="menu-action-btn secondary"
+                            onClick={onOpenSkinModal}
+                            type="button"
+                        >
+                            <span className="btn-icon">🥋</span>
+                            <span>ຮ້ານຊຸດ (Skins)</span>
                         </button>
                     </div>
 

@@ -18,9 +18,9 @@ class MockSkinRepository implements SkinPort
 
 describe('selectSkinUseCase', () =>
 {
-    it('selects a skin, persists it and emits SKIN_CHANGED_EVENT', () =>
+    it('equips an owned skin, persists it and emits SKIN_CHANGED_EVENT', () =>
     {
-        const manager = new SkinManager('cyber-blue');
+        const manager = new SkinManager('cyber-blue', ['neon-ninja']);
         const repo = new MockSkinRepository();
         const listener = vi.fn();
 
@@ -34,14 +34,14 @@ describe('selectSkinUseCase', () =>
         expect(listener).toHaveBeenCalledWith({ skinId: 'neon-ninja' });
     });
 
-    it('does not select, persist or emit for an unknown skin', () =>
+    it('does not equip, persist or emit for a skin that is unknown or not bought', () =>
     {
         const manager = new SkinManager('cyber-blue');
         const repo = new MockSkinRepository();
         const listener = vi.fn();
 
         DomainEvents.on<SkinChangedPayload>(SKIN_CHANGED_EVENT, listener);
-        const success = selectSkinUseCase(manager, 'bogus-skin', repo);
+        const success = selectSkinUseCase(manager, 'bogus-skin', repo) || selectSkinUseCase(manager, 'golden-runner', repo);
         DomainEvents.off<SkinChangedPayload>(SKIN_CHANGED_EVENT, listener);
 
         expect(success).toBe(false);

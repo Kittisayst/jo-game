@@ -9,6 +9,7 @@ export interface PauseMenuModalProps
     onToggleMute: () => void;
     onToggleMusic: () => void;
     onOpenSettings: () => void;
+    onOpenSkinModal: () => void;
     onRestartLevel: () => void;
     onExitToMainMenu: () => void;
 }
@@ -21,6 +22,7 @@ export function PauseMenuModal ({
     onToggleMute,
     onToggleMusic,
     onOpenSettings,
+    onOpenSkinModal,
     onRestartLevel,
     onExitToMainMenu,
 }: PauseMenuModalProps)
@@ -92,6 +94,14 @@ export function PauseMenuModal ({
                         type="button"
                     >
                         ▶️ ສືບຕໍ່ຫຼິ້ນ (Resume Game)
+                    </button>
+
+                    <button
+                        className="menu-action-btn secondary"
+                        onClick={onOpenSkinModal}
+                        type="button"
+                    >
+                        🥋 ຮ້ານຊຸດ (Skins)
                     </button>
 
                     <button

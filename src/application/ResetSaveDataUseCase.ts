@@ -31,7 +31,7 @@ export interface ResetSaveDataPorts
  */
 export function resetSaveDataUseCase (entities: ResetSaveDataEntities, ports: ResetSaveDataPorts): void
 {
-    entities.skinManager.forceEquip(DEFAULT_SKIN_ID);
+    entities.skinManager.reset();
     entities.settings.reset();
     entities.stageProgression?.reset();
 
