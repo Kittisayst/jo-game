@@ -88,6 +88,17 @@ export class Boss
         };
     }
 
+    heal (amount: number): number
+    {
+        const valid = Math.max(0, Math.floor(amount));
+        this._currentHp = Math.min(this._maxHp, this._currentHp + valid);
+        if (this._currentHp > 0)
+        {
+            this._isDefeated = false;
+        }
+        return this._currentHp;
+    }
+
     reset (): void
     {
         this._currentHp = this._maxHp;

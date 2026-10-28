@@ -79,6 +79,18 @@ import { completeStageUseCase } from '../../application/CompleteStageUseCase';
 import { selectStageUseCase } from '../../application/SelectStageUseCase';
 import { useItemUseCase as executeUseItemUseCase } from '../../application/UseItemUseCase';
 import { WEAPON_CATALOG } from '../../domain/entities/Weapon';
+import { TextbookModal } from './components/TextbookModal';
+import { AcademyModal } from './components/AcademyModal';
+import { WorkshopModal } from './components/WorkshopModal';
+import { ForgeModal } from './components/ForgeModal';
+import { BackpackModal } from './components/BackpackModal';
+import { GateRepairModal } from './components/GateRepairModal';
+import { WaypointModal } from './components/WaypointModal';
+import { QuizFinisherModal } from './components/QuizFinisherModal';
+import { returnToVillageUseCase } from '../../application/ReturnToVillageUseCase';
+import { BookProgress } from '../../domain/entities/Book';
+import { EquipmentState } from '../../domain/entities/EquipmentState';
+import { SpacedRepetitionSystem } from '../../domain/entities/Quiz';
 import {
     ACTIVE_SESSION_STORAGE_KEY,
     readString,
@@ -182,6 +194,39 @@ function App ()
     const settingsRef = useRef(settings);
     settingsRef.current = settings;
 
+    // Knowledge Quest v4 States
+    const [isLibraryOpen, setIsLibraryOpen] = useState(false);
+    const [isAcademyOpen, setIsAcademyOpen] = useState(false);
+    const [isWorkshopOpen, setIsWorkshopOpen] = useState(false);
+    const [isForgeOpen, setIsForgeOpen] = useState(false);
+    const [isBackpackOpen, setIsBackpackOpen] = useState(false);
+    const [isGateRepairOpen, setIsGateRepairOpen] = useState(false);
+    const [activeGateId, setActiveGateId] = useState('gate-ch1');
+    const [isWaypointOpen, setIsWaypointOpen] = useState(false);
+    const [waypointName, setWaypointName] = useState('ຈຸດວາບປອດໄພ');
+    const [isQuizFinisherOpen, setIsQuizFinisherOpen] = useState(false);
+    const [activeExamBookId, setActiveExamBookId] = useState('book-ch1');
+    const [backpackRevision, setBackpackRevision] = useState(0);
+
+    const isLibraryOpenRef = useRef(isLibraryOpen);
+    isLibraryOpenRef.current = isLibraryOpen;
+    const isAcademyOpenRef = useRef(isAcademyOpen);
+    isAcademyOpenRef.current = isAcademyOpen;
+    const isWorkshopOpenRef = useRef(isWorkshopOpen);
+    isWorkshopOpenRef.current = isWorkshopOpen;
+    const isForgeOpenRef = useRef(isForgeOpen);
+    isForgeOpenRef.current = isForgeOpen;
+    const isBackpackOpenRef = useRef(isBackpackOpen);
+    isBackpackOpenRef.current = isBackpackOpen;
+    const isGateRepairOpenRef = useRef(isGateRepairOpen);
+    isGateRepairOpenRef.current = isGateRepairOpen;
+    const isWaypointOpenRef = useRef(isWaypointOpen);
+    isWaypointOpenRef.current = isWaypointOpen;
+    const isQuizFinisherOpenRef = useRef(isQuizFinisherOpen);
+    isQuizFinisherOpenRef.current = isQuizFinisherOpen;
+    const currentLevelRef = useRef(currentLevel);
+    currentLevelRef.current = currentLevel;
+
     useEffect(() =>
     {
         // Ensure legacy local storage keys are migrated into active save slot on startup
@@ -265,6 +310,13 @@ function App ()
             );
             setHighScore(result.highScore);
             setIsNewHighScore(result.isNewHighScore);
+
+            // 50% material retreat penalty when falling in non-village stages
+            if (currentLevelRef.current !== 'village')
+            {
+                returnToVillageUseCase('death', entities.backpack);
+                setBackpackRevision(r => r + 1);
+            }
 
             // Retain 50% of coins earned this run
             const earnedCoins = Math.floor(coinsCountRef.current / 2);
@@ -355,6 +407,47 @@ function App ()
                     return;
                 }
 
+                if (isLibraryOpenRef.current)
+                {
+                    setIsLibraryOpen(false);
+                    return;
+                }
+                if (isAcademyOpenRef.current)
+                {
+                    setIsAcademyOpen(false);
+                    return;
+                }
+                if (isWorkshopOpenRef.current)
+                {
+                    setIsWorkshopOpen(false);
+                    return;
+                }
+                if (isForgeOpenRef.current)
+                {
+                    setIsForgeOpen(false);
+                    return;
+                }
+                if (isBackpackOpenRef.current)
+                {
+                    setIsBackpackOpen(false);
+                    return;
+                }
+                if (isGateRepairOpenRef.current)
+                {
+                    setIsGateRepairOpen(false);
+                    return;
+                }
+                if (isWaypointOpenRef.current)
+                {
+                    setIsWaypointOpen(false);
+                    return;
+                }
+                if (isQuizFinisherOpenRef.current)
+                {
+                    setIsQuizFinisherOpen(false);
+                    return;
+                }
+
                 if (isSkinModalOpenRef.current)
                 {
                     setIsSkinModalOpen(false);
@@ -377,6 +470,13 @@ function App ()
                 }
 
                 togglePauseUseCase(pauseStateRef.current);
+            }
+            else if (e.key === 'i' || e.key === 'I')
+            {
+                if (!isMainMenuOpenRef.current && !levelCompleteRef.current && !gameOverRef.current)
+                {
+                    setIsBackpackOpen(prev => !prev);
+                }
             }
             else if (e.key === '1')
             {
@@ -429,9 +529,60 @@ function App ()
             setEquippedWeaponId(weapon.id);
         };
 
+        // Knowledge Quest Event Handlers
+        const onOpenLibrary = () => setIsLibraryOpen(true);
+        const onOpenAcademy = (bookId?: string) =>
+        {
+            if (bookId) setActiveExamBookId(bookId);
+            setIsAcademyOpen(true);
+        };
+        const onOpenWorkshop = () => setIsWorkshopOpen(true);
+        const onOpenForge = () => setIsForgeOpen(true);
+        const onOpenBackpack = () => setIsBackpackOpen(true);
+        const onOpenGateRepair = (gateId?: string) =>
+        {
+            if (gateId) setActiveGateId(gateId);
+            setIsGateRepairOpen(true);
+        };
+        const onOpenWaypoint = (name?: string) =>
+        {
+            if (name) setWaypointName(name);
+            setIsWaypointOpen(true);
+        };
+        const onOpenQuizFinisher = () => setIsQuizFinisherOpen(true);
+        const onChangeLevel = (levelKey: string) => handleStartGame(levelKey);
+        const onBookExamPassed = () =>
+        {
+            setWalletBalance(entities.wallet.balance);
+            setBackpackRevision(r => r + 1);
+            saveManager.autoSave(getCurrentSnapshot());
+        };
+        const onDailyPracticeCompleted = () =>
+        {
+            setWalletBalance(entities.wallet.balance);
+            saveManager.autoSave(getCurrentSnapshot());
+        };
+        const onBackpackItemUsed = () =>
+        {
+            setBackpackRevision(r => r + 1);
+            saveManager.autoSave(getCurrentSnapshot());
+        };
+
         EventBus.on('start-dialogue', onStartDialogue);
         EventBus.on('open-stage-map', onOpenStageMap);
         EventBus.on('weapon-changed', onWeaponChanged);
+        EventBus.on('open-library', onOpenLibrary);
+        EventBus.on('open-academy', onOpenAcademy);
+        EventBus.on('open-workshop', onOpenWorkshop);
+        EventBus.on('open-forge', onOpenForge);
+        EventBus.on('open-backpack', onOpenBackpack);
+        EventBus.on('open-gate-repair', onOpenGateRepair);
+        EventBus.on('open-waypoint', onOpenWaypoint);
+        EventBus.on('open-quiz-finisher', onOpenQuizFinisher);
+        EventBus.on('change-level', onChangeLevel);
+        EventBus.on('book-exam-passed', onBookExamPassed);
+        EventBus.on('daily-practice-completed', onDailyPracticeCompleted);
+        EventBus.on('backpack-item-used', onBackpackItemUsed);
         DomainEvents.on<LevelCompletePayload>(LEVEL_COMPLETE_EVENT, onLevelComplete);
         DomainEvents.on<CoinCollectedPayload>(COIN_COLLECTED_EVENT, onCoinCollected);
         DomainEvents.on<EnemyDefeatedPayload>(ENEMY_DEFEATED_EVENT, onEnemyDefeated);
@@ -451,6 +602,18 @@ function App ()
             EventBus.removeListener('start-dialogue', onStartDialogue);
             EventBus.removeListener('open-stage-map', onOpenStageMap);
             EventBus.removeListener('weapon-changed', onWeaponChanged);
+            EventBus.removeListener('open-library', onOpenLibrary);
+            EventBus.removeListener('open-academy', onOpenAcademy);
+            EventBus.removeListener('open-workshop', onOpenWorkshop);
+            EventBus.removeListener('open-forge', onOpenForge);
+            EventBus.removeListener('open-backpack', onOpenBackpack);
+            EventBus.removeListener('open-gate-repair', onOpenGateRepair);
+            EventBus.removeListener('open-waypoint', onOpenWaypoint);
+            EventBus.removeListener('open-quiz-finisher', onOpenQuizFinisher);
+            EventBus.removeListener('change-level', onChangeLevel);
+            EventBus.removeListener('book-exam-passed', onBookExamPassed);
+            EventBus.removeListener('daily-practice-completed', onDailyPracticeCompleted);
+            EventBus.removeListener('backpack-item-used', onBackpackItemUsed);
             DomainEvents.off<LevelCompletePayload>(LEVEL_COMPLETE_EVENT, onLevelComplete);
             DomainEvents.off<CoinCollectedPayload>(COIN_COLLECTED_EVENT, onCoinCollected);
             DomainEvents.off<EnemyDefeatedPayload>(ENEMY_DEFEATED_EVENT, onEnemyDefeated);
@@ -559,6 +722,12 @@ function App ()
 
     const getCurrentSnapshot = (slotId?: SaveSlotId): SaveGameSnapshot =>
     {
+        const bookSnapshots: Record<string, any> = {};
+        for (const [key, val] of Object.entries(entities.books))
+        {
+            bookSnapshots[key] = val.toSnapshot();
+        }
+
         return {
             version: CURRENT_SAVE_VERSION,
             timestamp: Date.now(),
@@ -583,6 +752,14 @@ function App ()
             upgrades: entities.upgradeTree.serialize(),
             inventory: entities.inventory.serialize(),
             achievements: entities.achievementManager.serialize(),
+
+            // Version 4 Knowledge Quest fields
+            books: bookSnapshots,
+            backpack: entities.backpack.toSnapshot(),
+            equipment: entities.equipment.toSnapshot(),
+            practiceStats: entities.spacedRepetition.toSnapshot(),
+            repairedGates: Array.from(entities.repairedGates),
+            forgeUnlocked: entities.forgeUnlocked,
         };
     };
 
@@ -630,6 +807,36 @@ function App ()
         {
             entities.achievementManager.loadFrom(snap.achievements);
             setUnclaimedAchievementsCount(entities.achievementManager.unclaimedCount);
+        }
+
+        // Version 4 Knowledge Quest fields restoration
+        if (snap.books)
+        {
+            for (const [key, val] of Object.entries(snap.books))
+            {
+                entities.books[key] = BookProgress.fromSnapshot(val);
+            }
+        }
+        if (snap.backpack)
+        {
+            entities.backpack.loadFromSnapshot(snap.backpack);
+            setBackpackRevision(r => r + 1);
+        }
+        if (snap.equipment)
+        {
+            entities.equipment = EquipmentState.fromSnapshot(snap.equipment);
+        }
+        if (snap.practiceStats)
+        {
+            entities.spacedRepetition = SpacedRepetitionSystem.fromSnapshot(snap.practiceStats);
+        }
+        if (snap.repairedGates)
+        {
+            entities.repairedGates = new Set(snap.repairedGates);
+        }
+        if (typeof snap.forgeUnlocked === 'boolean')
+        {
+            entities.forgeUnlocked = snap.forgeUnlocked;
         }
 
         soundManager.playPowerUp();
@@ -935,6 +1142,11 @@ function App ()
     const equippedWeaponDef =
         WEAPON_CATALOG.find(w => w.id === equippedWeaponId) || WEAPON_CATALOG[0];
 
+    const backpackSlotsUsed = useMemo(() => {
+        void backpackRevision;
+        return entities.backpack.usedSlotsCount;
+    }, [backpackRevision]);
+
     return (
         <div id="app">
             <AchievementToast />
@@ -962,6 +1174,10 @@ function App ()
                     onCycleWeapon={handleCycleWeapon}
                     onOpenAchievements={handleOpenAchievements}
                     onOpenShop={() => setIsShopOpen(true)}
+                    onOpenBackpack={() => setIsBackpackOpen(true)}
+                    onOpenLibrary={() => setIsLibraryOpen(true)}
+                    backpackCount={backpackSlotsUsed}
+                    maxBackpackSlots={entities.backpack.maxSlots}
                     onTogglePause={handleTogglePause}
                     onUseItem={handleUseItem}
                     score={score}
@@ -1110,6 +1326,103 @@ function App ()
                 />
             )}
 
+            {/* Knowledge Quest Modals */}
+            <TextbookModal
+                isOpen={isLibraryOpen}
+                onClose={() => setIsLibraryOpen(false)}
+                onGoToExam={(bookId) =>
+                {
+                    setIsLibraryOpen(false);
+                    setActiveExamBookId(bookId);
+                    setIsAcademyOpen(true);
+                }}
+            />
+
+            <AcademyModal
+                isOpen={isAcademyOpen}
+                initialBookId={activeExamBookId}
+                onClose={() => setIsAcademyOpen(false)}
+                onExamPassed={() =>
+                {
+                    setWalletBalance(entities.wallet.balance);
+                    setBackpackRevision(r => r + 1);
+                    saveManager.autoSave(getCurrentSnapshot());
+                }}
+            />
+
+            <WorkshopModal
+                isOpen={isWorkshopOpen}
+                onClose={() =>
+                {
+                    setIsWorkshopOpen(false);
+                    setBackpackRevision(r => r + 1);
+                }}
+            />
+
+            <ForgeModal
+                isOpen={isForgeOpen}
+                onClose={() =>
+                {
+                    setIsForgeOpen(false);
+                    setBackpackRevision(r => r + 1);
+                }}
+            />
+
+            <BackpackModal
+                isOpen={isBackpackOpen}
+                onClose={() => setIsBackpackOpen(false)}
+                onUseItem={(itemId) =>
+                {
+                    if (itemId === 'herb-potion')
+                    {
+                        setLives(prev => Math.min(maxLives, prev + 1));
+                    }
+                    setBackpackRevision(r => r + 1);
+                    saveManager.autoSave(getCurrentSnapshot());
+                }}
+            />
+
+            <GateRepairModal
+                isOpen={isGateRepairOpen}
+                gateId={activeGateId}
+                onClose={() => setIsGateRepairOpen(false)}
+                onGateRepaired={() =>
+                {
+                    setIsGateRepairOpen(false);
+                    setBackpackRevision(r => r + 1);
+                    saveManager.autoSave(getCurrentSnapshot());
+                }}
+            />
+
+            <WaypointModal
+                isOpen={isWaypointOpen}
+                waypointName={waypointName}
+                onClose={() => setIsWaypointOpen(false)}
+                onReturnConfirmed={() =>
+                {
+                    setIsWaypointOpen(false);
+                    setLives(maxLives);
+                    handleStartGame('village');
+                }}
+            />
+
+            <QuizFinisherModal
+                isOpen={isQuizFinisherOpen}
+                onClose={() => setIsQuizFinisherOpen(false)}
+                onPass={() =>
+                {
+                    setIsQuizFinisherOpen(false);
+                    EventBus.emit('quiz-finisher-passed');
+                    setBackpackRevision(r => r + 1);
+                    saveManager.autoSave(getCurrentSnapshot());
+                }}
+                onFail={() =>
+                {
+                    setIsQuizFinisherOpen(false);
+                    EventBus.emit('quiz-finisher-failed');
+                }}
+            />
+
             <VirtualTouchControls
                 visible={
                     !isMainMenuOpen &&
@@ -1121,7 +1434,15 @@ function App ()
                     !isSettingsOpen &&
                     !isSkinModalOpen &&
                     !isAchievementsOpen &&
-                    !(isStageMapOpen || isStageSelectOpen)
+                    !(isStageMapOpen || isStageSelectOpen) &&
+                    !isLibraryOpen &&
+                    !isAcademyOpen &&
+                    !isWorkshopOpen &&
+                    !isForgeOpen &&
+                    !isBackpackOpen &&
+                    !isGateRepairOpen &&
+                    !isWaypointOpen &&
+                    !isQuizFinisherOpen
                 }
             />
         </div>

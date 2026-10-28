@@ -1,0 +1,73 @@
+[
+  {
+    "id": "stage-ch1",
+    "chapter": 1,
+    "name": "ປ່າແຫ່ງຄວາມຮູ້ ແລະ ຖ້ຳສາຍແຮ່",
+    "nameEn": "Forest of Knowledge & Mineral Cavern",
+    "width": 3200,
+    "height": 600,
+    "zones": [
+      {
+        "id": "zone-a",
+        "name": "ເຂດປ່າໄມ້ (Zone A - Forest)",
+        "startX": 0,
+        "endX": 1000,
+        "waypoint": { "x": 120, "y": 480, "name": "ຈຸດວາບປອດໄພ ປາກທາງເຂົ້າ" },
+        "resourceNodes": [
+          { "id": "tree-1", "type": "tree", "requiredTool": "axe", "toolTier": 1, "x": 300, "y": 480, "hp": 3, "drops": [{ "itemId": "wood", "count": 3 }] },
+          { "id": "tree-2", "type": "tree", "requiredTool": "axe", "toolTier": 1, "x": 550, "y": 480, "hp": 3, "drops": [{ "itemId": "wood", "count": 3 }] },
+          { "id": "herb-1", "type": "herb", "requiredTool": null, "toolTier": 0, "x": 420, "y": 480, "hp": 1, "drops": [{ "itemId": "herb", "count": 2 }] },
+          { "id": "herb-2", "type": "herb", "requiredTool": null, "toolTier": 0, "x": 780, "y": 480, "hp": 1, "drops": [{ "itemId": "herb", "count": 2 }] }
+        ],
+        "enemySpawns": [
+          { "enemyId": "forest-slime", "x": 450, "y": 480 },
+          { "enemyId": "forest-slime", "x": 700, "y": 480 },
+          { "enemyId": "forest-slime", "x": 900, "y": 480 }
+        ]
+      },
+      {
+        "id": "zone-b",
+        "name": "ເຂດຖ້ຳສາຍແຮ່ (Zone B - Cavern)",
+        "startX": 1000,
+        "endX": 2000,
+        "resourceNodes": [
+          { "id": "stone-1", "type": "stone", "requiredTool": "pickaxe", "toolTier": 1, "x": 1150, "y": 480, "hp": 3, "drops": [{ "itemId": "stone", "count": 3 }] },
+          { "id": "iron-1", "type": "iron-vein", "requiredTool": "pickaxe", "toolTier": 1, "x": 1350, "y": 480, "hp": 4, "drops": [{ "itemId": "iron-ore", "count": 3 }] },
+          { "id": "iron-2", "type": "iron-vein", "requiredTool": "pickaxe", "toolTier": 1, "x": 1600, "y": 480, "hp": 4, "drops": [{ "itemId": "iron-ore", "count": 3 }] }
+        ],
+        "enemySpawns": [
+          { "enemyId": "rock-golem", "x": 1250, "y": 480 },
+          { "enemyId": "rock-golem", "x": 1500, "y": 480 },
+          { "enemyId": "cave-guardian", "x": 1850, "y": 480 }
+        ]
+      },
+      {
+        "id": "zone-gate",
+        "name": "ປະຕູໃຫຍ່ທີ່ຫັກພັງ (Broken Gate)",
+        "startX": 2000,
+        "endX": 2300,
+        "gate": {
+          "x": 2150,
+          "y": 420,
+          "requiredTool": "hammer",
+          "requiredItem": "repair-kit",
+          "requiresQuiz": true,
+          "quizBookId": "book-ch1"
+        },
+        "waypoint": { "x": 2050, "y": 480, "name": "ຈຸດວາບປອດໄພ ໜ້າປະຕູໃຫຍ່" }
+      },
+      {
+        "id": "zone-c",
+        "name": "ລານປະລອງບອສໃຫຍ່ (Zone C - Boss Arena)",
+        "startX": 2300,
+        "endX": 3200,
+        "bossSpawn": {
+          "enemyId": "stage-ch1-boss",
+          "x": 2800,
+          "y": 450
+        }
+      }
+    ]
+  }
+]
+

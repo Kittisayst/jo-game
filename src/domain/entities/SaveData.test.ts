@@ -7,11 +7,11 @@ import {
 
 describe('SaveData Domain Entity & Migration', () =>
 {
-    it('creates a clean default snapshot with CURRENT_SAVE_VERSION (v3)', () =>
+    it('creates a clean default snapshot with CURRENT_SAVE_VERSION (v4)', () =>
     {
         const defaultSave = createDefaultSaveSnapshot('slot_1');
         expect(defaultSave.version).toBe(CURRENT_SAVE_VERSION);
-        expect(defaultSave.version).toBe(3);
+        expect(defaultSave.version).toBe(4);
         expect(defaultSave.slotId).toBe('slot_1');
         expect(defaultSave.gameStats.highScore).toBe(0);
         expect(defaultSave.gameStats.bestTimeSeconds).toBeNull();
@@ -20,12 +20,18 @@ describe('SaveData Domain Entity & Migration', () =>
         expect(defaultSave.stageProgression.unlockedStages).toEqual(['village', 'level-1']);
         expect(defaultSave.stageProgression.completedStages).toEqual([]);
 
-        // v3 properties
+        // Legacy properties
         expect(defaultSave.wallet.balance).toBe(50);
         expect(defaultSave.weapons.owned).toEqual(['cyber-saber']);
         expect(defaultSave.weapons.equippedId).toBe('cyber-saber');
         expect(defaultSave.upgrades.maxHp).toBe(0);
         expect(defaultSave.inventory).toEqual({});
+
+        // v4 Knowledge Quest properties
+        expect(defaultSave.books?.['book-ch1']?.unlocked).toBe(true);
+        expect(defaultSave.backpack).toEqual([]);
+        expect(defaultSave.equipment?.equippedWeaponId).toBe('wooden-sword');
+        expect(defaultSave.forgeUnlocked).toBe(false);
     });
 
     it('returns default snapshot when given null or non-object input', () =>
@@ -40,7 +46,7 @@ describe('SaveData Domain Entity & Migration', () =>
         expect(saveFromString.wallet.balance).toBe(50);
     });
 
-    it('migrates legacy flat schema to version 3 successfully', () =>
+    it('migrates legacy flat schema to version 4 successfully', () =>
     {
         const legacyData = {
             highScore: 1250,
@@ -64,6 +70,10 @@ describe('SaveData Domain Entity & Migration', () =>
         expect(migrated.wallet.balance).toBe(300);
         expect(migrated.weapons.owned).toContain('cyber-saber');
         expect(migrated.weapons.equippedId).toBe('cyber-saber');
+
+        // v4 properties initialized safely
+        expect(migrated.books?.['book-ch1']?.unlocked).toBe(true);
+        expect(migrated.equipment?.equippedWeaponId).toBe('wooden-sword');
     });
 
     it('filters out invalid skins, weapons, and invalid stage keys defensively', () =>

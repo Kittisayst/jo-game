@@ -45,6 +45,7 @@ import { Projectile } from '../objects/Projectile';
 import { entities } from '../../composition';
 import { performAttackUseCase } from '../../../application/PerformAttackUseCase';
 import { trackAchievementUseCase } from '../../../application/TrackAchievementUseCase';
+import { harvestResourceNodeUseCase } from '../../../application/HarvestResourceNodeUseCase';
 
 const WORLD_HEIGHT = 720;
 const GROUND_HEIGHT = 64;
@@ -89,6 +90,26 @@ export class Game extends Scene
     private damageTakenInLevel = 0;
     private tickCache = createTickEmitterCache();
 
+    // Knowledge Quest: Village Hub & 4-Zone Stage fields
+    private interactiveBuildings: { x: number; label: string; action: () => void }[] = [];
+    private resourceNodes: {
+        id: string;
+        type: string;
+        requiredTool: string | null;
+        toolTier: number;
+        drops: { itemId: string; count: number }[];
+        x: number;
+        y: number;
+        graphic: Phaser.GameObjects.Graphics;
+        label: string;
+        harvested: boolean;
+    }[] = [];
+    private waypoints: { x: number; y: number; name: string }[] = [];
+    private brokenGate?: { x: number; y: number; gateId: string; graphic: Phaser.GameObjects.Graphics; labelText: Phaser.GameObjects.Text };
+    private brokenGateWall?: Phaser.Physics.Arcade.StaticGroup;
+    private interactionPromptText?: Phaser.GameObjects.Text;
+    private activeInteraction: (() => void) | null = null;
+
     constructor ()
     {
         super('Game');
@@ -118,6 +139,14 @@ export class Game extends Scene
         this.currentSkinId = data?.skinId ?? 'cyber-blue';
         this.initialCoinsValue = typeof data?.coins === 'number' ? data.coins : 0;
         this.initialElapsedMs = typeof data?.elapsedMs === 'number' ? data.elapsedMs : 0;
+
+        this.interactiveBuildings = [];
+        this.resourceNodes = [];
+        this.waypoints = [];
+        this.brokenGate = undefined;
+        this.brokenGateWall = undefined;
+        this.interactionPromptText = undefined;
+        this.activeInteraction = null;
     }
 
     preload ()
@@ -245,7 +274,7 @@ export class Game extends Scene
 
         this.particleManager = new ParticleManager(this);
 
-        if (this.level.scenery === 'village')
+        if (this.level.scenery === 'village' || this.currentLevelKey === 'village')
         {
             this.createVillageScenery();
             const baseY = WORLD_HEIGHT - GROUND_HEIGHT - 24;
@@ -255,11 +284,15 @@ export class Game extends Scene
                 EventBus.emit('start-dialogue', 'village_elder');
             };
 
-            this.merchantNpc = new NPC(this, 820, baseY, 'npc-merchant', '🛒 [E] ຮ້ານຄ້າ (Shop)');
+            this.merchantNpc = new NPC(this, 1000, baseY, 'npc-merchant', '🛒 [E] ຮ້ານຄ້າ (Shop)');
             this.merchantNpc.onInteract = () =>
             {
                 EventBus.emit('start-dialogue', 'cyber_merchant');
             };
+        }
+        else if (this.level.scenery === 'stage-ch1' || this.currentLevelKey === 'stage-ch1')
+        {
+            this.createStageCh1Scenery();
         }
         else if (this.level.scenery === 'sky-islands' || this.currentLevelKey === 'level-2')
         {
@@ -274,18 +307,42 @@ export class Game extends Scene
             this.createPlainsScenery();
         }
 
-        const eKey = this.input.keyboard?.addKey('E');
-        eKey?.on('down', () =>
+        // Floating interaction prompt text
+        this.interactionPromptText = this.add.text(0, 0, '', {
+            fontFamily: '"Noto Sans Lao", sans-serif',
+            fontSize: '13px',
+            color: '#fef08a',
+            stroke: '#0f172a',
+            strokeThickness: 3,
+            backgroundColor: 'rgba(15, 23, 42, 0.85)',
+            padding: { x: 8, y: 4 },
+        });
+        this.interactionPromptText.setOrigin(0.5, 1);
+        this.interactionPromptText.setDepth(30);
+        this.interactionPromptText.setVisible(false);
+
+        const handleInteract = () =>
         {
-            if (this.elderNpc && this.elderNpc.isInteractable && !this.isDialogueActive)
+            if (this.isDialogueActive) return;
+
+            if (this.activeInteraction)
+            {
+                this.activeInteraction();
+                return;
+            }
+
+            if (this.elderNpc && this.elderNpc.isInteractable)
             {
                 this.elderNpc.triggerInteraction();
             }
-            else if (this.merchantNpc && this.merchantNpc.isInteractable && !this.isDialogueActive)
+            else if (this.merchantNpc && this.merchantNpc.isInteractable)
             {
                 this.merchantNpc.triggerInteraction();
             }
-        });
+        };
+
+        const eKey = this.input.keyboard?.addKey('E');
+        eKey?.on('down', handleInteract);
 
         const onDialogueState = (isActive: boolean) =>
         {
@@ -386,14 +443,21 @@ export class Game extends Scene
             };
             this.boss.onDefeated = (x, y) =>
             {
-                trackAchievementUseCase(entities.achievementManager, 'boss-slayer', 1);
-                this.particleManager.emitCelebration(x, y);
-                this.cameras.main.shake(450, 0.018);
-                this.cameras.main.flash(200, 255, 255, 255, true);
-                this.time.delayedCall(1200, () =>
+                if (this.currentLevelKey === 'stage-ch1')
                 {
-                    this.handleGoalReached();
-                });
+                    EventBus.emit('open-quiz-finisher');
+                }
+                else
+                {
+                    trackAchievementUseCase(entities.achievementManager, 'boss-slayer', 1);
+                    this.particleManager.emitCelebration(x, y);
+                    this.cameras.main.shake(450, 0.018);
+                    this.cameras.main.flash(200, 255, 255, 255, true);
+                    this.time.delayedCall(1200, () =>
+                    {
+                        this.handleGoalReached();
+                    });
+                }
             };
             this.boss.onSummonMinion = (x, y) =>
             {
@@ -530,23 +594,54 @@ export class Game extends Scene
             if (typeof inputs.up === 'boolean') this.touchControls.up = inputs.up;
         };
 
-        const onVirtualInteract = () =>
-        {
-            if (this.elderNpc && this.elderNpc.isInteractable && !this.isDialogueActive)
-            {
-                this.elderNpc.triggerInteraction();
-            }
-            else if (this.merchantNpc && this.merchantNpc.isInteractable && !this.isDialogueActive)
-            {
-                this.merchantNpc.triggerInteraction();
-            }
-        };
+        const onVirtualInteract = () => handleInteract();
 
         const onVirtualAttack = () => this.handlePlayerAttack();
         const onVirtualCycleWeapon = () => this.handleCycleWeapon();
         const onVirtualDash = () => this.handlePlayerDash();
         const onTriggerBomb = () => this.handleTriggerBombAoE(2);
         const onTogglePhysicsDebug = () => this.togglePhysicsDebug();
+
+        const onQuizFinisherPassed = () =>
+        {
+            entities.backpack.addItem('boss-core', 1);
+            entities.backpack.addItem('crystal', 3);
+            this.showLootNotification(this.player.x, this.player.y - 40, '+1 🔮 Boss Core & +3 💎 Crystal!', '#a855f7');
+            trackAchievementUseCase(entities.achievementManager, 'boss-slayer', 1);
+            this.particleManager.emitCelebration(this.player.x, this.player.y);
+            this.cameras.main.shake(450, 0.018);
+            this.cameras.main.flash(200, 255, 255, 255, true);
+            this.time.delayedCall(1500, () =>
+            {
+                this.handleGoalReached();
+            });
+        };
+
+        const onQuizFinisherFailed = () =>
+        {
+            if (this.boss)
+            {
+                this.boss.entity.heal(2);
+                this.boss.isInvulnerable = false;
+                this.particleManager.emitSpikeHit(this.boss.x, this.boss.y);
+                this.showLootNotification(this.boss.x, this.boss.y - 30, '⚠️ Boss ຟື້ນຟູ 2 HP!', '#ef4444');
+                soundManager.playPowerUp();
+            }
+        };
+
+        const onGateRepaired = (gateId: string) =>
+        {
+            if (this.brokenGate && this.brokenGate.gateId === gateId)
+            {
+                if (this.brokenGateWall)
+                {
+                    this.brokenGateWall.clear(true, true);
+                }
+                this.redrawBrokenGate(true);
+                this.particleManager.emitCelebration(this.brokenGate.x, this.brokenGate.y - 40);
+                soundManager.playPowerUp();
+            }
+        };
 
         EventBus.on('virtual-input', onVirtualInput);
         EventBus.on('virtual-interact', onVirtualInteract);
@@ -555,6 +650,9 @@ export class Game extends Scene
         EventBus.on('virtual-dash', onVirtualDash);
         EventBus.on('trigger-bomb', onTriggerBomb);
         EventBus.on('toggle-physics-debug', onTogglePhysicsDebug);
+        EventBus.on('quiz-finisher-passed', onQuizFinisherPassed);
+        EventBus.on('quiz-finisher-failed', onQuizFinisherFailed);
+        EventBus.on('gate-repaired', onGateRepaired);
 
         // Start BGM (boss theme for level-3, adventure theme for levels 1 & 2)
         const isBossStage = this.currentLevelKey === 'level-3' || Boolean(this.level.boss);
@@ -608,6 +706,9 @@ export class Game extends Scene
             EventBus.removeListener('virtual-dash', onVirtualDash);
             EventBus.removeListener('trigger-bomb', onTriggerBomb);
             EventBus.removeListener('toggle-physics-debug', onTogglePhysicsDebug);
+            EventBus.removeListener('quiz-finisher-passed', onQuizFinisherPassed);
+            EventBus.removeListener('quiz-finisher-failed', onQuizFinisherFailed);
+            EventBus.removeListener('gate-repaired', onGateRepaired);
             soundManager.stopBgm();
             this.boss = undefined;
             this.door = undefined;
@@ -649,6 +750,8 @@ export class Game extends Scene
         {
             this.merchantNpc.updateProximity(this.player.x, this.player.y);
         }
+
+        this.updateInteractionPrompt();
 
         const tickResult = tickSessionUseCase(this.session, delta, this.tickCache);
 
@@ -1124,18 +1227,26 @@ export class Game extends Scene
 
     private createVillageScenery ()
     {
-        const housePositions = [
-            { x: 340, width: 140, height: 160, roofColor: 0xd97706, bodyColor: 0x334155 },
-            { x: 580, width: 150, height: 140, roofColor: 0x0284c7, bodyColor: 0x1e293b },
-            { x: 820, width: 170, height: 190, roofColor: 0xb91c1c, bodyColor: 0x334155 },
-            { x: 1060, width: 150, height: 150, roofColor: 0x15803d, bodyColor: 0x1e293b },
-            { x: 1260, width: 140, height: 160, roofColor: 0x7c3aed, bodyColor: 0x334155 },
-        ];
-
         const baseY = WORLD_HEIGHT - GROUND_HEIGHT;
 
-        // Village background trees & shrubs
-        const treeXPositions = [220, 460, 700, 940, 1160];
+        const buildings = [
+            { x: 320, width: 140, height: 160, roofColor: 0x6366f1, bodyColor: 0x1e293b, icon: '📚', name: 'ຫໍສະໝຸດ (Library)', sub: 'ອ່ານຕຳລາ' },
+            { x: 600, width: 160, height: 180, roofColor: 0x3b82f6, bodyColor: 0x0f172a, icon: '🏛️', name: 'ສະຖາບັນ (Academy)', sub: 'ສອບເສັງ & ຝຶກຝົນ' },
+            { x: 880, width: 150, height: 150, roofColor: 0x10b981, bodyColor: 0x1e293b, icon: '🔨', name: 'ໂຮງຊ່າງ (Workshop)', sub: 'ສ້າງເຄື່ອງມື' },
+            {
+                x: 1140,
+                width: 150,
+                height: 160,
+                roofColor: (entities.forgeUnlocked || entities.books['book-ch1']?.examPassed) ? 0xf97316 : 0x475569,
+                bodyColor: 0x1e293b,
+                icon: (entities.forgeUnlocked || entities.books['book-ch1']?.examPassed) ? '⚔️' : '🔒',
+                name: (entities.forgeUnlocked || entities.books['book-ch1']?.examPassed) ? 'ໂຮງຕີເຫຼັກ (Forge)' : 'ໂຮງຕີເຫຼັກ (ລັອກ)',
+                sub: (entities.forgeUnlocked || entities.books['book-ch1']?.examPassed) ? 'ອັບເກຣດອາວຸດ' : 'ສອບຜ່ານບົດທີ 1 ກ່ອນ',
+            },
+        ];
+
+        // Background trees
+        const treeXPositions = [180, 460, 740, 1020, 1280];
         for (const tx of treeXPositions)
         {
             const tree = this.add.graphics();
@@ -1148,63 +1259,64 @@ export class Game extends Scene
             tree.fillCircle(tx - 6, baseY - 76, 18);
         }
 
-        for (const house of housePositions)
+        for (const b of buildings)
         {
-            const graphics = this.add.graphics();
-            graphics.setDepth(1);
+            const g = this.add.graphics();
+            g.setDepth(1);
 
             // House body
-            graphics.fillStyle(house.bodyColor, 0.9);
-            graphics.fillRect(house.x - house.width / 2, baseY - house.height, house.width, house.height);
+            g.fillStyle(b.bodyColor, 0.92);
+            g.fillRoundedRect(b.x - b.width / 2, baseY - b.height, b.width, b.height, 8);
 
             // Roof
-            graphics.fillStyle(house.roofColor, 1);
-            graphics.beginPath();
-            graphics.moveTo(house.x - house.width / 2 - 16, baseY - house.height);
-            graphics.lineTo(house.x, baseY - house.height - 45);
-            graphics.lineTo(house.x + house.width / 2 + 16, baseY - house.height);
-            graphics.closePath();
-            graphics.fillPath();
+            g.fillStyle(b.roofColor, 1);
+            g.beginPath();
+            g.moveTo(b.x - b.width / 2 - 16, baseY - b.height);
+            g.lineTo(b.x, baseY - b.height - 45);
+            g.lineTo(b.x + b.width / 2 + 16, baseY - b.height);
+            g.closePath();
+            g.fillPath();
 
-            // Chimney
-            graphics.fillStyle(0x475569, 1);
-            graphics.fillRect(house.x + house.width / 4, baseY - house.height - 35, 18, 25);
+            // Windows
+            g.fillStyle(0xfef08a, 0.9);
+            g.fillRect(b.x - b.width / 3, baseY - b.height + 30, 24, 24);
+            g.fillRect(b.x + b.width / 3 - 24, baseY - b.height + 30, 24, 24);
 
-            // Windows with warm amber light
-            graphics.fillStyle(0xfef08a, 0.95);
-            graphics.fillRect(house.x - house.width / 3, baseY - house.height + 30, 24, 24);
-            graphics.fillRect(house.x + house.width / 3 - 24, baseY - house.height + 30, 24, 24);
+            // Door
+            g.fillStyle(0x78350f, 1);
+            g.fillRoundedRect(b.x - 14, baseY - 48, 28, 48, 4);
 
-            // Window frames
-            graphics.lineStyle(2, 0x78350f, 1);
-            graphics.strokeRect(house.x - house.width / 3, baseY - house.height + 30, 24, 24);
-            graphics.strokeRect(house.x + house.width / 3 - 24, baseY - house.height + 30, 24, 24);
-
-            // Wooden door
-            graphics.fillStyle(0x78350f, 1);
-            graphics.fillRoundedRect(house.x - 14, baseY - 48, 28, 48, 4);
+            // Sign banner above roof
+            const sign = this.add.text(b.x, baseY - b.height - 60, `${b.icon} ${b.name}\n(${b.sub})`, {
+                fontFamily: '"Noto Sans Lao", sans-serif',
+                fontSize: '12px',
+                color: '#fef08a',
+                stroke: '#0f172a',
+                strokeThickness: 3,
+                align: 'center',
+            });
+            sign.setOrigin(0.5, 0.5);
+            sign.setDepth(2);
         }
 
-        // Fences and Lanterns along the pathway
-        const lanternXPositions = [280, 520, 760, 1000, 1200, 1370];
-        for (const lx of lanternXPositions)
+        // Lanterns along pathway
+        const lanternX = [220, 500, 780, 1060, 1340];
+        for (const lx of lanternX)
         {
             const post = this.add.graphics();
             post.setDepth(2);
-            // Iron pole
             post.fillStyle(0x1e293b, 1);
             post.fillRect(lx - 2, baseY - 50, 4, 50);
-            // Lantern head
             post.fillStyle(0xf59e0b, 1);
             post.fillCircle(lx, baseY - 54, 7);
             post.fillStyle(0xfef08a, 0.9);
             post.fillCircle(lx, baseY - 54, 3);
         }
 
-        // Welcome Signpost at spawn
-        const welcomeSign = this.add.text(120, baseY - 80, '🏡 ໝູ່ບ້ານ JO RUNNER\n(ຍິນດີຕ້ອນຮັບ!)', {
+        // Welcome sign
+        const welcomeSign = this.add.text(120, baseY - 80, '🏡 ໝູ່ບ້ານແຫ່ງປັນຍາ\n(Knowledge Village)', {
             fontFamily: '"Noto Sans Lao", sans-serif',
-            fontSize: '14px',
+            fontSize: '13px',
             color: '#fef08a',
             stroke: '#0f172a',
             strokeThickness: 3,
@@ -1213,26 +1325,465 @@ export class Game extends Scene
         welcomeSign.setOrigin(0.5, 0.5);
         welcomeSign.setDepth(2);
 
-        // Signpost pointing to Level 1 Door
-        const doorSign = this.add.text(1380, baseY - 85, '🚪 ປະຕູສູ່ Level 1 ➡️\n(Green Plains)', {
+        // World Gate Portal at x = 1420
+        const portalSign = this.add.text(1420, baseY - 90, '🌀 ປະຕູມິຕິ (World Gate)\n[E] ເປີດແຜນທີ່ດ່ານ ➡️', {
             fontFamily: '"Noto Sans Lao", sans-serif',
-            fontSize: '15px',
+            fontSize: '14px',
             color: '#38bdf8',
             stroke: '#0284c7',
             strokeThickness: 3,
             align: 'center',
         });
-        doorSign.setOrigin(0.5, 0.5);
-        doorSign.setDepth(2);
+        portalSign.setOrigin(0.5, 0.5);
+        portalSign.setDepth(2);
 
-        // Floating pulse on door sign
         this.tweens.add({
-            targets: doorSign,
-            y: baseY - 92,
-            duration: 800,
+            targets: portalSign,
+            y: baseY - 96,
+            duration: 900,
             yoyo: true,
             repeat: -1,
             ease: 'Sine.easeInOut',
+        });
+
+        // Register interactive zones for buildings
+        this.interactiveBuildings = [
+            { x: 320, label: '📚 [E] ເຂົ້າຫໍສະໝຸດ (Library)', action: () => EventBus.emit('open-library') },
+            { x: 600, label: '🏛️ [E] ເຂົ້າສະຖາບັນ (Academy)', action: () => EventBus.emit('open-academy') },
+            { x: 880, label: '🔨 [E] ເຂົ້າໂຮງຊ່າງ (Workshop)', action: () => EventBus.emit('open-workshop') },
+            {
+                x: 1140,
+                label: (entities.forgeUnlocked || entities.books['book-ch1']?.examPassed)
+                    ? '⚔️ [E] ເຂົ້າໂຮງຕີເຫຼັກ (Forge)'
+                    : '🔒 [E] ໂຮງຕີເຫຼັກ (ຕ້ອງສອບເສັງບົດທີ 1 ຜ່ານກ່ອນ)',
+                action: () => EventBus.emit('open-forge'),
+            },
+            { x: 1420, label: '🌀 [E] ເລືອກດ່ານຜະຈົນໄພ (World Map)', action: () => EventBus.emit('open-stage-map') },
+        ];
+    }
+
+    private createStageCh1Scenery ()
+    {
+        const baseY = WORLD_HEIGHT - GROUND_HEIGHT;
+
+        this.resourceNodes = [];
+        this.waypoints = [];
+
+        // 1. Zone A: Forest (0 .. 1000)
+        const wp1Graphics = this.add.graphics();
+        wp1Graphics.setDepth(2);
+        wp1Graphics.fillStyle(0x06b6d4, 0.85);
+        wp1Graphics.fillCircle(120, baseY - 35, 18);
+        wp1Graphics.lineStyle(2, 0x67e8f9, 1);
+        wp1Graphics.strokeCircle(120, baseY - 35, 22);
+
+        const wp1Label = this.add.text(120, baseY - 70, '🌀 ຈຸດວາບປອດໄພ 1\n(Zone A Entrance)', {
+            fontFamily: '"Noto Sans Lao", sans-serif',
+            fontSize: '11px',
+            color: '#67e8f9',
+            stroke: '#083344',
+            strokeThickness: 3,
+            align: 'center',
+        }).setOrigin(0.5, 0.5).setDepth(2);
+
+        this.tweens.add({
+            targets: [wp1Graphics, wp1Label],
+            y: '-=6',
+            duration: 1000,
+            yoyo: true,
+            repeat: -1,
+            ease: 'Sine.easeInOut',
+        });
+
+        this.waypoints.push({ x: 120, y: baseY - 35, name: 'ຈຸດວາບປອດໄພ ປາກທາງເຂົ້າ (Zone A)' });
+
+        const zoneANodes = [
+            { id: 'tree-1', type: 'tree', requiredTool: 'axe', toolTier: 1, drops: [{ itemId: 'wood', count: 3 }], x: 300, label: '🪵 [E] ຕັດຕົ້ນໄມ້ (+3 Wood)' },
+            { id: 'herb-1', type: 'herb', requiredTool: null, toolTier: 0, drops: [{ itemId: 'herb', count: 2 }], x: 420, label: '🌿 [E] ເກັບສະໝຸນໄພ (+2 Herb)' },
+            { id: 'tree-2', type: 'tree', requiredTool: 'axe', toolTier: 1, drops: [{ itemId: 'wood', count: 3 }], x: 550, label: '🪵 [E] ຕັດຕົ້ນໄມ້ (+3 Wood)' },
+            { id: 'herb-2', type: 'herb', requiredTool: null, toolTier: 0, drops: [{ itemId: 'herb', count: 2 }], x: 780, label: '🌿 [E] ເກັບສະໝຸນໄພ (+2 Herb)' },
+        ];
+
+        for (const n of zoneANodes)
+        {
+            const g = this.add.graphics();
+            g.setDepth(2);
+            if (n.type === 'tree')
+            {
+                g.fillStyle(0x78350f, 1);
+                g.fillRect(n.x - 10, baseY - 70, 20, 70);
+                g.fillStyle(0x16a34a, 0.95);
+                g.fillCircle(n.x, baseY - 90, 36);
+                g.fillStyle(0x22c55e, 0.9);
+                g.fillCircle(n.x - 8, baseY - 100, 24);
+            }
+            else
+            {
+                g.fillStyle(0x16a34a, 1);
+                g.fillRect(n.x - 2, baseY - 20, 4, 20);
+                g.fillStyle(0x4ade80, 0.95);
+                g.fillCircle(n.x, baseY - 24, 12);
+                g.fillCircle(n.x - 6, baseY - 20, 8);
+                g.fillCircle(n.x + 6, baseY - 20, 8);
+            }
+
+            this.resourceNodes.push({
+                ...n,
+                y: baseY - 30,
+                graphic: g,
+                harvested: false,
+            });
+        }
+
+        this.add.text(240, baseY - 110, '🌲 ເຂດປ່າໄມ້ (Zone A - Forest)\n[E] ເກັບກ່ຽວຊັບພະຍາກອນ', {
+            fontFamily: '"Noto Sans Lao", sans-serif',
+            fontSize: '13px',
+            color: '#86efac',
+            stroke: '#064e3b',
+            strokeThickness: 3,
+            align: 'center',
+        }).setOrigin(0.5, 0.5).setDepth(2);
+
+        // 2. Zone B: Mineral Cavern (1000 .. 2000)
+        this.add.text(1100, baseY - 110, '⛏️ ເຂດຖ້ຳສາຍແຮ່ (Zone B - Cavern)\nຕ້ອງໃຊ້ Pickaxe ຂຸດແຮ່ເຫຼັກ', {
+            fontFamily: '"Noto Sans Lao", sans-serif',
+            fontSize: '13px',
+            color: '#cbd5e1',
+            stroke: '#1e293b',
+            strokeThickness: 3,
+            align: 'center',
+        }).setOrigin(0.5, 0.5).setDepth(2);
+
+        const zoneBNodes = [
+            { id: 'stone-1', type: 'stone', requiredTool: 'pickaxe', toolTier: 1, drops: [{ itemId: 'stone', count: 3 }], x: 1150, label: '🪨 [E] ທຸບຫີນ (+3 Stone)' },
+            { id: 'iron-1', type: 'iron-vein', requiredTool: 'pickaxe', toolTier: 1, drops: [{ itemId: 'iron-ore', count: 3 }], x: 1350, label: '⛏️ [E] ຂຸດແຮ່ເຫຼັກ (+3 Iron Ore)' },
+            { id: 'iron-2', type: 'iron-vein', requiredTool: 'pickaxe', toolTier: 1, drops: [{ itemId: 'iron-ore', count: 3 }], x: 1600, label: '⛏️ [E] ຂຸດແຮ່ເຫຼັກ (+3 Iron Ore)' },
+        ];
+
+        for (const n of zoneBNodes)
+        {
+            const g = this.add.graphics();
+            g.setDepth(2);
+            if (n.type === 'stone')
+            {
+                g.fillStyle(0x64748b, 1);
+                g.fillCircle(n.x, baseY - 20, 22);
+                g.fillStyle(0x94a3b8, 0.9);
+                g.fillCircle(n.x - 5, baseY - 24, 12);
+            }
+            else
+            {
+                g.fillStyle(0x475569, 1);
+                g.fillCircle(n.x, baseY - 24, 26);
+                g.fillStyle(0xd97706, 1);
+                g.fillTriangle(n.x - 12, baseY - 32, n.x - 2, baseY - 48, n.x + 8, baseY - 32);
+                g.fillStyle(0xf59e0b, 1);
+                g.fillTriangle(n.x, baseY - 24, n.x + 12, baseY - 40, n.x + 18, baseY - 24);
+            }
+
+            this.resourceNodes.push({
+                ...n,
+                y: baseY - 30,
+                graphic: g,
+                harvested: false,
+            });
+        }
+
+        // Mini-boss marker at x = 1850
+        const minibossSign = this.add.text(1850, baseY - 80, '⚠️ ຜູ້ພິທັກຖ້ຳ Cave Guardian\n(ປາບເພື່ອຮັບຜລຶກແກ້ວ 💎)', {
+            fontFamily: '"Noto Sans Lao", sans-serif',
+            fontSize: '12px',
+            color: '#f87171',
+            stroke: '#450a0a',
+            strokeThickness: 3,
+            align: 'center',
+        }).setOrigin(0.5, 0.5).setDepth(2);
+
+        this.tweens.add({
+            targets: minibossSign,
+            y: baseY - 86,
+            duration: 700,
+            yoyo: true,
+            repeat: -1,
+            ease: 'Sine.easeInOut',
+        });
+
+        // 3. Broken Gate Zone (2000 .. 2300)
+        const wp2Graphics = this.add.graphics();
+        wp2Graphics.setDepth(2);
+        wp2Graphics.fillStyle(0x06b6d4, 0.85);
+        wp2Graphics.fillCircle(2050, baseY - 35, 18);
+        wp2Graphics.lineStyle(2, 0x67e8f9, 1);
+        wp2Graphics.strokeCircle(2050, baseY - 35, 22);
+
+        const wp2Label = this.add.text(2050, baseY - 70, '🌀 ຈຸດວາບປອດໄພ 2\n(Gate Waypoint)', {
+            fontFamily: '"Noto Sans Lao", sans-serif',
+            fontSize: '11px',
+            color: '#67e8f9',
+            stroke: '#083344',
+            strokeThickness: 3,
+            align: 'center',
+        }).setOrigin(0.5, 0.5).setDepth(2);
+
+        this.tweens.add({
+            targets: [wp2Graphics, wp2Label],
+            y: '-=6',
+            duration: 1000,
+            yoyo: true,
+            repeat: -1,
+            ease: 'Sine.easeInOut',
+        });
+
+        this.waypoints.push({ x: 2050, y: baseY - 35, name: 'ຈຸດວາບປອດໄພ ໜ້າປະຕູໃຫຍ່ (Broken Gate)' });
+
+        const isGateRepaired = entities.repairedGates.has('gate-ch1');
+        const gateGraphic = this.add.graphics();
+        gateGraphic.setDepth(2);
+
+        const gateLabel = this.add.text(2150, baseY - 130, '', {
+            fontFamily: '"Noto Sans Lao", sans-serif',
+            fontSize: '13px',
+            color: '#fde047',
+            stroke: '#713f12',
+            strokeThickness: 3,
+            align: 'center',
+        }).setOrigin(0.5, 0.5).setDepth(3);
+
+        this.brokenGate = {
+            x: 2150,
+            y: baseY - 70,
+            gateId: 'gate-ch1',
+            graphic: gateGraphic,
+            labelText: gateLabel,
+        };
+
+        this.redrawBrokenGate(isGateRepaired);
+
+        // 4. Zone C: Boss Arena (2300 .. 3200)
+        const bossBanner = this.add.text(2800, 115, '👑 ຈອມມານຮາດແວບູຮານ (Hardware Overlord) 👑\n(ຫຼົບກະແສໄຟຟ້າ & ໂຈມຕີປິດສາກດ້ວຍຄວາມຮູ້!)', {
+            fontFamily: '"Noto Sans Lao", sans-serif',
+            fontSize: '15px',
+            color: '#fef08a',
+            fontStyle: 'bold',
+            align: 'center',
+            stroke: '#7c3aed',
+            strokeThickness: 3,
+            backgroundColor: 'rgba(15, 23, 42, 0.88)',
+            padding: { x: 14, y: 6 },
+        }).setOrigin(0.5, 0.5).setDepth(2);
+
+        this.tweens.add({
+            targets: bossBanner,
+            y: 122,
+            duration: 1200,
+            yoyo: true,
+            repeat: -1,
+            ease: 'Sine.easeInOut',
+        });
+    }
+
+    private redrawBrokenGate (isRepaired: boolean): void
+    {
+        if (!this.brokenGate) return;
+        const baseY = WORLD_HEIGHT - GROUND_HEIGHT;
+        const gx = this.brokenGate.x;
+        const g = this.brokenGate.graphic;
+        g.clear();
+
+        if (!isRepaired)
+        {
+            g.fillStyle(0x78350f, 1);
+            g.fillRect(gx - 30, baseY - 120, 60, 120);
+            g.fillStyle(0x334155, 1);
+            g.fillRect(gx - 26, baseY - 110, 52, 12);
+            g.fillRect(gx - 26, baseY - 60, 52, 12);
+            g.lineStyle(3, 0xf59e0b, 1);
+            g.strokeRect(gx - 30, baseY - 120, 60, 120);
+
+            g.fillStyle(0xef4444, 1);
+            g.fillCircle(gx, baseY - 70, 12);
+
+            this.brokenGate.labelText.setText('🚪 ປະຕູຫັກພັງ (Broken Gate)\n[E] ໃຊ້ຄ້ອນ + ຊຸດສ້ອມແປງ');
+
+            if (!this.brokenGateWall)
+            {
+                this.brokenGateWall = this.physics.add.staticGroup();
+                const wallSprite = this.physics.add.staticSprite(gx, baseY - 60, '');
+                wallSprite.setSize(40, 120);
+                wallSprite.setVisible(false);
+                this.brokenGateWall.add(wallSprite);
+                this.physics.add.collider(this.player, this.brokenGateWall);
+            }
+        }
+        else
+        {
+            g.fillStyle(0x1e293b, 0.9);
+            g.fillRect(gx - 40, baseY - 140, 18, 140);
+            g.fillRect(gx + 22, baseY - 140, 18, 140);
+            g.fillStyle(0x10b981, 1);
+            g.fillRoundedRect(gx - 44, baseY - 150, 88, 16, 4);
+
+            this.brokenGate.labelText.setText('✨ ປະຕູສ້ອມແປງແລ້ວ! (Open)\nທາງຜ່ານສູ່ Zone C');
+            this.brokenGate.labelText.setColor('#86efac');
+        }
+    }
+
+    private updateInteractionPrompt (): void
+    {
+        if (!this.player || !this.interactionPromptText || this.isDialogueActive || this.lives.isDead)
+        {
+            if (this.interactionPromptText) this.interactionPromptText.setVisible(false);
+            this.activeInteraction = null;
+            return;
+        }
+
+        const px = this.player.x;
+        const py = this.player.y;
+
+        // 1. Check Village Buildings
+        if (this.currentLevelKey === 'village')
+        {
+            for (const b of this.interactiveBuildings)
+            {
+                if (Math.abs(px - b.x) < 70)
+                {
+                    this.interactionPromptText.setText(b.label);
+                    this.interactionPromptText.setPosition(b.x, py - 40);
+                    this.interactionPromptText.setVisible(true);
+                    this.activeInteraction = b.action;
+                    return;
+                }
+            }
+        }
+
+        // 2. Check Stage Ch1 Waypoints
+        for (const wp of this.waypoints)
+        {
+            if (Math.abs(px - wp.x) < 70)
+            {
+                this.interactionPromptText.setText(`🌀 [E] ${wp.name}`);
+                this.interactionPromptText.setPosition(wp.x, py - 40);
+                this.interactionPromptText.setVisible(true);
+                this.activeInteraction = () => EventBus.emit('open-waypoint', wp.name);
+                return;
+            }
+        }
+
+        // 3. Check Broken Gate
+        if (this.brokenGate && !entities.repairedGates.has(this.brokenGate.gateId))
+        {
+            if (Math.abs(px - this.brokenGate.x) < 80)
+            {
+                this.interactionPromptText.setText('🚪 [E] ສ້ອມແປງປະຕູໃຫຍ່ (Repair Gate)');
+                this.interactionPromptText.setPosition(this.brokenGate.x, py - 40);
+                this.interactionPromptText.setVisible(true);
+                this.activeInteraction = () => EventBus.emit('open-gate-repair', this.brokenGate!.gateId);
+                return;
+            }
+        }
+
+        // 4. Check Resource Nodes
+        for (const node of this.resourceNodes)
+        {
+            if (!node.harvested && Math.abs(px - node.x) < 65)
+            {
+                this.interactionPromptText.setText(node.label);
+                this.interactionPromptText.setPosition(node.x, py - 40);
+                this.interactionPromptText.setVisible(true);
+                this.activeInteraction = () => this.handleHarvestResourceNode(node);
+                return;
+            }
+        }
+
+        // 5. Check NPCs
+        if (this.elderNpc && this.elderNpc.isInteractable)
+        {
+            this.interactionPromptText.setText('💬 [E] ລົມກັບຫົວໜ້າໝູ່ບ້ານ');
+            this.interactionPromptText.setPosition(this.elderNpc.x, py - 40);
+            this.interactionPromptText.setVisible(true);
+            this.activeInteraction = () => this.elderNpc!.triggerInteraction();
+            return;
+        }
+
+        if (this.merchantNpc && this.merchantNpc.isInteractable)
+        {
+            this.interactionPromptText.setText('🛒 [E] ຮ້ານຄ້າ (Shop)');
+            this.interactionPromptText.setPosition(this.merchantNpc.x, py - 40);
+            this.interactionPromptText.setVisible(true);
+            this.activeInteraction = () => this.merchantNpc!.triggerInteraction();
+            return;
+        }
+
+        this.interactionPromptText.setVisible(false);
+        this.activeInteraction = null;
+    }
+
+    private handleHarvestResourceNode (node: {
+        id: string;
+        type: string;
+        requiredTool: string | null;
+        toolTier: number;
+        drops: { itemId: string; count: number }[];
+        x: number;
+        y: number;
+        graphic: Phaser.GameObjects.Graphics;
+        label: string;
+        harvested: boolean;
+    }): void
+    {
+        const result = harvestResourceNodeUseCase(node, entities.backpack);
+        if (result.success)
+        {
+            soundManager.playCoin();
+            node.harvested = true;
+            node.graphic.clear();
+            this.particleManager.emitCelebration(node.x, node.y - 20);
+
+            const itemEmojiMap: Record<string, string> = {
+                'wood': '🪵',
+                'stone': '🪨',
+                'iron-ore': '⛏️',
+                'herb': '🌿',
+                'fiber': '🌾',
+                'crystal': '💎',
+            };
+
+            const dropTexts = result.drops.map(d => `+${d.count} ${itemEmojiMap[d.itemId] || '📦'} ${d.itemId}`).join(', ');
+            this.showLootNotification(node.x, node.y - 30, `🎒 ${dropTexts}`, '#22c55e');
+        }
+        else
+        {
+            soundManager.playClink();
+            if (result.reason === 'missing_tool')
+            {
+                this.showLootNotification(node.x, node.y - 30, `⚠️ ຕ້ອງການ ${node.requiredTool?.toUpperCase()}!`, '#f59e0b');
+            }
+            else if (result.reason === 'backpack_full')
+            {
+                this.showLootNotification(node.x, node.y - 30, '⚠️ ກະເປົາເຕັມ (20/20)!', '#ef4444');
+            }
+        }
+    }
+
+    showLootNotification (x: number, y: number, textStr: string, color = '#22c55e'): void
+    {
+        const text = this.add.text(x, y - 24, textStr, {
+            fontFamily: '"Noto Sans Lao", sans-serif',
+            fontSize: '14px',
+            fontStyle: 'bold',
+            color,
+            stroke: '#000000',
+            strokeThickness: 3,
+        }).setDepth(26).setOrigin(0.5);
+
+        this.tweens.add({
+            targets: text,
+            y: y - 60,
+            alpha: 0,
+            scale: 1.15,
+            duration: 1200,
+            ease: 'Cubic.easeOut',
+            onComplete: () => text.destroy(),
         });
     }
 

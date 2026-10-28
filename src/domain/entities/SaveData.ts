@@ -3,8 +3,12 @@ import { DEFAULT_WEAPON_ID, WEAPON_CATALOG } from './Weapon';
 import { UPGRADE_CATALOG, UpgradeType } from './Upgrade';
 import { getItemDefinition } from './Inventory';
 import { AchievementProgress } from './Achievement';
+import { BookProgressSnapshot } from './Book';
+import { BackpackSlotSnapshot } from './Backpack';
+import { EquipmentSnapshot } from './EquipmentState';
+import { DailyPracticeProgressSnapshot } from './Quiz';
 
-export const CURRENT_SAVE_VERSION = 3;
+export const CURRENT_SAVE_VERSION = 4;
 
 export interface SaveGameSnapshot
 {
@@ -25,6 +29,14 @@ export interface SaveGameSnapshot
     upgrades: Record<string, number>;
     inventory: Record<string, number>;
     achievements?: Record<string, AchievementProgress>;
+
+    // Version 4 Knowledge Quest fields
+    books?: Record<string, BookProgressSnapshot>;
+    backpack?: BackpackSlotSnapshot[];
+    equipment?: EquipmentSnapshot;
+    practiceStats?: DailyPracticeProgressSnapshot;
+    repairedGates?: string[];
+    forgeUnlocked?: boolean;
 }
 
 export function createDefaultSaveSnapshot (slotId = 'slot_1'): SaveGameSnapshot
@@ -47,7 +59,7 @@ export function createDefaultSaveSnapshot (slotId = 'slot_1'): SaveGameSnapshot
             completedStages: [],
         },
         wallet: {
-            balance: 50, // Starting gift
+            balance: 50,
         },
         weapons: {
             owned: [DEFAULT_WEAPON_ID],
@@ -62,12 +74,36 @@ export function createDefaultSaveSnapshot (slotId = 'slot_1'): SaveGameSnapshot
         },
         inventory: {},
         achievements: {},
+
+        // Version 4 Knowledge Quest defaults
+        books: {
+            'book-ch1': {
+                bookId: 'book-ch1',
+                unlocked: true,
+                readPages: [],
+                examPassed: false,
+                bestScore: 0,
+                attempts: 0,
+            },
+        },
+        backpack: [],
+        equipment: {
+            equippedWeaponId: 'wooden-sword',
+            upgradeLevels: {},
+        },
+        practiceStats: {
+            lastPracticeDate: '',
+            practiceCountToday: 0,
+            questionStats: {},
+        },
+        repairedGates: [],
+        forgeUnlocked: false,
     };
 }
 
 /**
- * Validates and migrates an unknown input data into a clean, verified SaveGameSnapshot (version 3).
- * Defensively converts legacy v1 & v2 snapshots to v3 without data loss.
+ * Validates and migrates an unknown input data into a clean, verified SaveGameSnapshot (version 4).
+ * Defensively converts legacy v1, v2 & v3 snapshots to v4 without data loss.
  */
 export function migrateSaveSnapshot (raw: unknown, fallbackSlotId = 'slot_1'): SaveGameSnapshot
 {
@@ -109,30 +145,34 @@ export function migrateSaveSnapshot (raw: unknown, fallbackSlotId = 'slot_1'): S
         ? rawProg.completedStages
         : (Array.isArray(data.completedStages) ? data.completedStages : []);
 
-    const validStageKeys = ['village', 'level-1', 'level-2', 'level-3'];
+    const validStageKeys = ['village', 'level-1', 'level-2', 'level-3', 'stage-ch1'];
     const unlockedStages = Array.from(new Set(
-        ['village', 'level-1', ...unlockedRaw.filter((s): s is string => typeof s === 'string' && validStageKeys.includes(s))]
+        ['village', ...unlockedRaw.filter((s): s is string => typeof s === 'string' && validStageKeys.includes(s))]
     ));
+    if (!unlockedStages.includes('level-1'))
+    {
+        unlockedStages.push('level-1');
+    }
+
     const completedStages = Array.from(new Set(
         completedRaw.filter((s): s is string => typeof s === 'string' && validStageKeys.includes(s))
     ));
 
-    // 5. Validate or migrate Wallet (v3)
+    // 5. Validate or migrate Wallet (v3 legacy bonus: 50 + highScore/5)
     const rawWallet = (data.wallet && typeof data.wallet === 'object' ? data.wallet : {}) as Record<string, unknown>;
-    let balance = 0;
+    let balance = 50;
     if (typeof rawWallet.balance === 'number' && !isNaN(rawWallet.balance))
     {
         balance = Math.max(0, Math.floor(rawWallet.balance));
     }
     else
     {
-        // Conversion bonus for existing legacy players: starting 50 + 20% of their highScore
         balance = 50 + Math.floor(highScore / 5);
     }
 
-    // 6. Validate or migrate Weapons (v3)
+    // 6. Validate or migrate Weapons
     const rawWeapons = (data.weapons && typeof data.weapons === 'object' ? data.weapons : {}) as Record<string, unknown>;
-    const validWeaponIds = WEAPON_CATALOG.map(w => w.id);
+    const validWeaponIds = [...WEAPON_CATALOG.map(w => w.id), 'wooden-sword', 'iron-sword', 'crystal-sword'];
     const ownedWeaponsRaw = Array.isArray(rawWeapons.owned) ? rawWeapons.owned : [DEFAULT_WEAPON_ID];
     const owned = Array.from(new Set(
         [DEFAULT_WEAPON_ID, ...ownedWeaponsRaw.filter((id): id is string => typeof id === 'string' && validWeaponIds.includes(id))]
@@ -144,7 +184,7 @@ export function migrateSaveSnapshot (raw: unknown, fallbackSlotId = 'slot_1'): S
         equippedId = DEFAULT_WEAPON_ID;
     }
 
-    // 7. Validate or migrate Upgrades (v3)
+    // 7. Validate or migrate Upgrades
     const rawUpgrades = (data.upgrades && typeof data.upgrades === 'object' ? data.upgrades : {}) as Record<string, unknown>;
     const upgrades: Record<string, number> = {};
     for (const def of UPGRADE_CATALOG)
@@ -154,7 +194,7 @@ export function migrateSaveSnapshot (raw: unknown, fallbackSlotId = 'slot_1'): S
         upgrades[def.id] = Math.max(0, Math.min(def.maxLevel, num));
     }
 
-    // 8. Validate or migrate Inventory (v3)
+    // 8. Validate or migrate Inventory
     const rawInventory = (data.inventory && typeof data.inventory === 'object' ? data.inventory : {}) as Record<string, unknown>;
     const inventory: Record<string, number> = {};
     for (const [key, val] of Object.entries(rawInventory))
@@ -182,6 +222,85 @@ export function migrateSaveSnapshot (raw: unknown, fallbackSlotId = 'slot_1'): S
             };
         }
     }
+
+    // 10. Validate or migrate Books (v4)
+    const rawBooks = (data.books && typeof data.books === 'object' ? data.books : {}) as Record<string, unknown>;
+    const books: Record<string, BookProgressSnapshot> = {};
+
+    books['book-ch1'] = {
+        bookId: 'book-ch1',
+        unlocked: true,
+        readPages: [],
+        examPassed: false,
+        bestScore: 0,
+        attempts: 0,
+    };
+
+    for (const [bId, bVal] of Object.entries(rawBooks))
+    {
+        if (bVal && typeof bVal === 'object')
+        {
+            const b = bVal as Record<string, unknown>;
+            books[bId] = {
+                bookId: bId,
+                unlocked: Boolean(b.unlocked ?? (bId === 'book-ch1')),
+                readPages: Array.isArray(b.readPages) ? b.readPages.filter(p => typeof p === 'number') : [],
+                examPassed: Boolean(b.examPassed),
+                bestScore: typeof b.bestScore === 'number' ? Math.max(0, Math.floor(b.bestScore)) : 0,
+                attempts: typeof b.attempts === 'number' ? Math.max(0, Math.floor(b.attempts)) : 0,
+            };
+        }
+    }
+
+    // 11. Validate or migrate Backpack (v4)
+    const backpackRaw = Array.isArray(data.backpack) ? data.backpack : [];
+    const backpack: BackpackSlotSnapshot[] = [];
+    for (const slot of backpackRaw)
+    {
+        if (slot && typeof slot === 'object')
+        {
+            const s = slot as Record<string, unknown>;
+            if (typeof s.slotIndex === 'number' && typeof s.itemId === 'string' && typeof s.count === 'number' && s.count > 0)
+            {
+                backpack.push({
+                    slotIndex: s.slotIndex,
+                    itemId: s.itemId,
+                    count: Math.floor(s.count),
+                });
+            }
+        }
+    }
+
+    // 12. Validate or migrate Equipment (v4)
+    const rawEquip = (data.equipment && typeof data.equipment === 'object' ? data.equipment : {}) as Record<string, unknown>;
+    const equippedWeaponId = typeof rawEquip.equippedWeaponId === 'string' ? rawEquip.equippedWeaponId : 'wooden-sword';
+    const upgradeLevelsRaw = (rawEquip.upgradeLevels && typeof rawEquip.upgradeLevels === 'object' ? rawEquip.upgradeLevels : {}) as Record<string, unknown>;
+    const upgradeLevels: Record<string, number> = {};
+    for (const [wId, lv] of Object.entries(upgradeLevelsRaw))
+    {
+        if (typeof lv === 'number' && !isNaN(lv))
+        {
+            upgradeLevels[wId] = Math.max(0, Math.floor(lv));
+        }
+    }
+    const equipment: EquipmentSnapshot = {
+        equippedWeaponId,
+        upgradeLevels,
+    };
+
+    // 13. Validate or migrate Practice Stats (v4)
+    const rawPractice = (data.practiceStats && typeof data.practiceStats === 'object' ? data.practiceStats : {}) as Record<string, unknown>;
+    const practiceStats: DailyPracticeProgressSnapshot = {
+        lastPracticeDate: typeof rawPractice.lastPracticeDate === 'string' ? rawPractice.lastPracticeDate : '',
+        practiceCountToday: typeof rawPractice.practiceCountToday === 'number' ? Math.max(0, Math.floor(rawPractice.practiceCountToday)) : 0,
+        questionStats: (rawPractice.questionStats && typeof rawPractice.questionStats === 'object' ? rawPractice.questionStats : {}) as DailyPracticeProgressSnapshot['questionStats'],
+    };
+
+    // 14. Repaired gates and forge status (v4)
+    const repairedGates = Array.isArray(data.repairedGates)
+        ? data.repairedGates.filter((g): g is string => typeof g === 'string')
+        : [];
+    const forgeUnlocked = Boolean(data.forgeUnlocked ?? books['book-ch1']?.examPassed ?? false);
 
     const slotId = typeof data.slotId === 'string' && data.slotId.trim() ? data.slotId.trim() : fallbackSlotId;
     const timestamp = typeof data.timestamp === 'number' && data.timestamp > 0 ? data.timestamp : Date.now();
@@ -213,5 +332,12 @@ export function migrateSaveSnapshot (raw: unknown, fallbackSlotId = 'slot_1'): S
         upgrades: upgrades as Record<UpgradeType, number>,
         inventory,
         achievements,
+
+        books,
+        backpack,
+        equipment,
+        practiceStats,
+        repairedGates,
+        forgeUnlocked,
     };
 }

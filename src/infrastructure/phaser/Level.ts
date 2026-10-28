@@ -60,7 +60,7 @@ export interface Level
     movingPlatforms?: MovingPlatformSpawnData[];
     boss?: BossSpawnData;
     finishType?: 'flag' | 'door';
-    scenery?: 'village' | 'default' | 'plains' | 'sky-islands' | 'boss-arena';
+    scenery?: 'village' | 'default' | 'plains' | 'sky-islands' | 'boss-arena' | 'stage-ch1';
     nextLevel?: string | null;
     trackTime?: boolean;
 }

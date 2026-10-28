@@ -1,0 +1,263 @@
+[
+  {
+    "id": "q-ch1-p1-1",
+    "bookId": "book-ch1",
+    "pageNumber": 1,
+    "question": "ອົງປະກອບໃດຂອງຄອມພິວເຕີທີ່ສາມາດຈັບຕ້ອງໄດ້?",
+    "options": ["ຊອບແວ (Software)", "ຮາດແວ (Hardware)", "ບຸກຄະລາກອນ (Peopleware)", "ດາຕ້າ (Data)"],
+    "correctIndex": 1,
+    "explanation": "ຮາດແວ (Hardware) ແມ່ນອຸປະກອນທາງກາຍະພາບທີ່ສາມາດຈັບຕ້ອງ ແລະ ເບິ່ງເຫັນໄດ້ ເຊັ່ນ ຈໍພາບ, ຄີບອດ."
+  },
+  {
+    "id": "q-ch1-p1-2",
+    "bookId": "book-ch1",
+    "pageNumber": 1,
+    "question": "Windows ແລະ ເວັບບຣາວເຊີ (Web Browser) ຈັດຢູ່ໃນອົງປະກອບໃດ?",
+    "options": ["ຮາດແວ", "ຊອບແວ (Software)", "ພີເພິນແວ", "ເນັດເວີກ"],
+    "correctIndex": 1,
+    "explanation": "ຊອບແວ (Software) ແມ່ນຊຸດຄຳສັ່ງ ຫຼື ໂປຣແກຣມທີ່ສັ່ງໃຫ້ຮາດແວເຮັດວຽກ."
+  },
+  {
+    "id": "q-ch1-p1-3",
+    "bookId": "book-ch1",
+    "pageNumber": 1,
+    "question": "ຜູ້ຂຽນໂປຣແກຣມ ຫຼື ຜູ້ໃຊ້ງານຄອມພິວເຕີ ເອີ້ນວ່າຫຍັງ?",
+    "options": ["Hardware", "Software", "Peopleware", "Firmware"],
+    "correctIndex": 2,
+    "explanation": "Peopleware (ບຸກຄະລາກອນ) ໝາຍເຖິງບຸກຄົນທີ່ມີສ່ວນກ່ຽວຂ້ອງກັບການນຳໃຊ້ ແລະ ພັດທະນາລະບົບຄອມພິວເຕີ."
+  },
+  {
+    "id": "q-ch1-p1-4",
+    "bookId": "book-ch1",
+    "pageNumber": 1,
+    "question": "ຂໍ້ໃດຕໍ່ໄປນີ້ແມ່ນ ຮາດແວ (Hardware) ທັງໝົດ?",
+    "options": ["ເມົາສ໌, ຄີບອດ, ຈໍພາບ", "Windows, Word, Excel", "ໂປຣແກຣມເມີ, ຜູ້ໃຊ້, ໄອທີ", "Google Chrome, YouTube, Facebook"],
+    "correctIndex": 0,
+    "explanation": "ເມົາສ໌, ຄີບອດ ແລະ ຈໍພາບ ແມ່ນອຸປະກອນທີ່ຈັບຕ້ອງໄດ້ທັງໝົດ."
+  },
+  {
+    "id": "q-ch1-p2-1",
+    "bookId": "book-ch1",
+    "pageNumber": 2,
+    "question": "ອຸປະກອນປ້ອນຂໍ້ມູນ (Input Device) ມີໜ້າທີ່ຫຼັກຄືຫຍັງ?",
+    "options": ["ສະແດງຜົນການເຮັດວຽກ", "ຮັບຂໍ້ມູນ ຫຼື ຄຳສັ່ງຈາກມະນຸດເຂົ້າສູ່ຄອມພິວເຕີ", "ເກັບຮັກສາໄຟລ໌ງານຖາວອນ", "ຈ່າຍກະແສໄຟຟ້າ"],
+    "correctIndex": 1,
+    "explanation": "Input Device ເຮັດໜ້າທີ່ຮັບຂໍ້ມູນ ຫຼື ຄຳສັ່ງຈາກພາຍນອກສົ່ງເຂົ້າໄປຫາໜ່ວຍປະມວນຜົນ."
+  },
+  {
+    "id": "q-ch1-p2-2",
+    "bookId": "book-ch1",
+    "pageNumber": 2,
+    "question": "ອຸປະກອນໃດຕໍ່ໄປນີ້ ເປັນອຸປະກອນ Input?",
+    "options": ["ລຳໂພງ (Speaker)", "ເຄື່ອງພິມ (Printer)", "ຄີບອດ (Keyboard)", "ຈໍພາບ (Monitor)"],
+    "correctIndex": 2,
+    "explanation": "ຄີບອດ (Keyboard) ໃຊ້ປ້ອນຕົວອັກສອນ ແລະ ຄຳສັ່ງ ເປັນ Input Device."
+  },
+  {
+    "id": "q-ch1-p2-3",
+    "bookId": "book-ch1",
+    "pageNumber": 2,
+    "question": "ຖ້າຕ້ອງການອັດສຽງເວົ້າເຂົ້າຄອມພິວເຕີ ຕ້ອງໃຊ້ອຸປະກອນໃດ?",
+    "options": ["ລຳໂພງ", "ໄມໂຄຣໂຟນ (Microphone)", "ໂປຣເຈັກເຕີ", "ເຄື່ອງສະແກນ"],
+    "correctIndex": 1,
+    "explanation": "ໄມໂຄຣໂຟນ (Microphone) ເປັນອຸປະກອນ Input ທີ່ປ່ຽນຄື້ນສຽງເປັນສັນຍານດິຈິທອນ."
+  },
+  {
+    "id": "q-ch1-p2-4",
+    "bookId": "book-ch1",
+    "pageNumber": 2,
+    "question": "ຂໍ້ໃດ ບໍ່ແມ່ນ ອຸປະກອນ Input?",
+    "options": ["ເມົາສ໌ (Mouse)", "ກ້ອງເວັບແຄມ (Webcam)", "ເຄື່ອງພິມ (Printer)", "ສະແກນເນີ (Scanner)"],
+    "correctIndex": 2,
+    "explanation": "ເຄື່ອງພິມ (Printer) ເປັນອຸປະກອນ Output ເພາະສົ່ງຂໍ້ມູນອອກມາເປັນເອກະສານເຈ້ຍ."
+  },
+  {
+    "id": "q-ch1-p3-1",
+    "bookId": "book-ch1",
+    "pageNumber": 3,
+    "question": "ອຸປະກອນໃດເຮັດໜ້າທີ່ສະແດງພາບ ແລະ ຂໍ້ຄວາມໃຫ້ຜູ້ໃຊ້ເຫັນ?",
+    "options": ["ຈໍພາບ (Monitor)", "ເມົາສ໌ (Mouse)", "RAM", "CPU"],
+    "correctIndex": 0,
+    "explanation": "ຈໍພາບ (Monitor) ແມ່ນ Output Device ທີ່ສະແດງພາບ ແລະ ຂໍ້ຄວາມສູ່ສາຍຕາຜູ້ໃຊ້."
+  },
+  {
+    "id": "q-ch1-p3-2",
+    "bookId": "book-ch1",
+    "pageNumber": 3,
+    "question": "ຖ້າຕ້ອງການຟັງສຽງເພງຈາກຄອມພິວເຕີ ຕ້ອງໃຊ້ອຸປະກອນ Output ໃດ?",
+    "options": ["ໄມໂຄຣໂຟນ", "ລຳໂພງ ຫຼື ຫູຟັງ (Speaker / Headphones)", "ເຄື່ອງພິມ", "ຄີບອດ"],
+    "correctIndex": 1,
+    "explanation": "ລຳໂພງ ຫຼື ຫູຟັງ ເຮັດໜ້າທີ່ແປງສັນຍານດິຈິທອນເປັນຄື້ນສຽງອອກມາ."
+  },
+  {
+    "id": "q-ch1-p3-3",
+    "bookId": "book-ch1",
+    "pageNumber": 3,
+    "question": "ອຸປະກອນໃດໃຊ້ຂະຫຍາຍພາບຈາກຄອມພິວເຕີຂຶ້ນສູ່ສາກໃຫຍ່ໃນຫ້ອງປະຊຸມ?",
+    "options": ["ສະແກນເນີ", "ໂປຣເຈັກເຕີ (Projector)", "ເວັບແຄມ", "SSD"],
+    "correctIndex": 1,
+    "explanation": "ໂປຣເຈັກເຕີ (Projector) ເປັນອຸປະກອນ Output ສາຍພາບຂະໜາດໃຫຍ່."
+  },
+  {
+    "id": "q-ch1-p3-4",
+    "bookId": "book-ch1",
+    "pageNumber": 3,
+    "question": "ຂໍ້ໃດຄືຄວາມແຕກຕ່າງລະຫວ່າງ Input ແລະ Output?",
+    "options": [
+      "Input ນຳຂໍ້ມູນເຂົ້າ, Output ສົ່ງຜົນອອກມາ",
+      "Input ເກັບຂໍ້ມູນ, Output ລຶບຂໍ້ມູນ",
+      "Input ຈັບຕ້ອງບໍ່ໄດ້, Output ຈັບຕ້ອງໄດ້",
+      "Input ແມ່ນຊອບແວ, Output ແມ່ນຮາດແວ"
+    ],
+    "correctIndex": 0,
+    "explanation": "Input ຄືການຮັບຂໍ້ມູນເຂົ້າສູ່ລະບົບ, ສ່ວນ Output ຄືການສະແດງຜົນລັບອອກມາ."
+  },
+  {
+    "id": "q-ch1-p4-1",
+    "bookId": "book-ch1",
+    "pageNumber": 4,
+    "question": "ອຸປະກອນໃດປຽບເໝືອນ \"ສະໝອງ\" ຂອງຄອມພິວເຕີ?",
+    "options": ["RAM", "CPU (Central Processing Unit)", "HDD", "Power Supply"],
+    "correctIndex": 1,
+    "explanation": "CPU ເຮັດໜ້າທີ່ຄຳນວນ ແລະ ປະມວນຜົນຄຳສັ່ງຕ່າງໆ ເໝືອນສະໝອງຂອງຄອມພິວເຕີ."
+  },
+  {
+    "id": "q-ch1-p4-2",
+    "bookId": "book-ch1",
+    "pageNumber": 4,
+    "question": "ຄຸນລັກສະນະຫຼັກຂອງ RAM ແມ່ນຫຍັງ?",
+    "options": [
+      "ເກັບຂໍ້ມູນຖາວອນຕະຫຼອດໄປ",
+      "ເປັນໜ່ວຍຄວາມຈຳຊົ່ວຄາວ ເມື່ອປິດເຄື່ອງຂໍ້ມູນຈະສູນຫາຍ",
+      "ໃຊ້ພິມເອກະສານລົງເຈ້ຍ",
+      "ປ້ອງກັນໄວຣັສຄອມພິວເຕີ"
+    ],
+    "correctIndex": 1,
+    "explanation": "RAM (Random Access Memory) ເປັນໜ່ວຍຄວາມຈຳຫຼັກແບບ Volatile ເຊິ່ງຕ້ອງການໄຟລ້ຽງ, ເມື່ອປິດເຄື່ອງຂໍ້ມູນຈະຫາຍ."
+  },
+  {
+    "id": "q-ch1-p4-3",
+    "bookId": "book-ch1",
+    "pageNumber": 4,
+    "question": "ຖ້າຕ້ອງການເກັບຮັກສາໄຟລ໌ຮູບພາບ ແລະ ວິດີໂອໄວ້ໃຊ້ຍາວນານ ຄວນບັນທຶກລົງບ່ອນໃດ?",
+    "options": ["RAM", "Cache Memory", "Storage (SSD / Hard Disk)", "CPU Register"],
+    "correctIndex": 2,
+    "explanation": "SSD ຫຼື Hard Disk ເປັນໜ່ວຍເກັບຂໍ້ມູນຖາວອນ (Non-volatile Storage) ທີ່ເກັບຂໍ້ມູນໄດ້ເຖິງວ່າຈະປິດເຄື່ອງ."
+  },
+  {
+    "id": "q-ch1-p4-4",
+    "bookId": "book-ch1",
+    "pageNumber": 4,
+    "question": "SSD ດີກວ່າ Hard Disk (HDD) ແບບດັ້ງເດີມແນວໃດ?",
+    "options": [
+      "ອ່ານ-ຂຽນຂໍ້ມູນໄດ້ໄວກວ່າຫຼາຍ ແລະ ບໍ່ມີຊິ້ນສ່ວນໝູນ",
+      "ລາຄາຖືກກວ່າຫຼາຍ",
+      "ໃຊ້ນ້ຳມັນລໍ່ລື່ນ",
+      "ບໍ່ຕ້ອງໃຊ້ໄຟຟ້າ"
+    ],
+    "correctIndex": 0,
+    "explanation": "SSD ໃຊ້ຊິບ Flash Memory ເຮັດໃຫ້ອ່ານຂຽນໄວສູງຫຼາຍ ແລະ ທົນທານຕໍ່ແຮງສັ່ນສະເທືອນ."
+  },
+  {
+    "id": "q-ch1-p5-1",
+    "bookId": "book-ch1",
+    "pageNumber": 5,
+    "question": "ລະບົບປະຕິບັດການ (Operating System) ເຊັ່ນ Windows, Linux ຈັດເປັນຊອບແວປະເພດໃດ?",
+    "options": [
+      "ຊອບແວລະບົບ (System Software)",
+      "ຊອບແວປະຍຸກ (Application Software)",
+      "ເກມອອນລາຍ",
+      "ຮາດແວພື້ນຖານ"
+    ],
+    "correctIndex": 0,
+    "explanation": "ລະບົບປະຕິບັດການເປັນ System Software ທີ່ຄອຍຄຸມການເຮັດວຽກຂອງຮາດແວ ແລະ ເປັນພື້ນຖານໃຫ້ແອັບອື່ນໆ."
+  },
+  {
+    "id": "q-ch1-p5-2",
+    "bookId": "book-ch1",
+    "pageNumber": 5,
+    "question": "Microsoft Word ແລະ Photoshop ຈັດເປັນຊອບແວປະເພດໃດ?",
+    "options": [
+      "System Software",
+      "Application Software (ຊອບແວປະຍຸກ)",
+      "Firmware",
+      "Device Driver"
+    ],
+    "correctIndex": 1,
+    "explanation": "Application Software ຄືໂປຣແກຣມທີ່ອອກແບບມາເພື່ອເຮັດວຽກສະເພາະດ້ານ ເຊັ່ນ ພິມເອກະສານ ຫຼື ແຕ່ງຮູບ."
+  },
+  {
+    "id": "q-ch1-p5-3",
+    "bookId": "book-ch1",
+    "pageNumber": 5,
+    "question": "ຖ້າຄອມພິວເຕີບໍ່ມີ System Software (OS) ຈະເກີດຫຍັງຂຶ້ນ?",
+    "options": [
+      "ຄອມພິວເຕີຈະເຮັດວຽກໄວຂຶ້ນ",
+      "ບໍ່ສາມາດເປີດໃຊ້ງານ ຫຼື ຄວບຄຸມຮາດແວ ແລະ ໂປຣແກຣມອື່ນໆໄດ້",
+      "ສາມາດຫຼິ້ນເກມໄດ້ປົກກະຕິ",
+      "ຈໍພາບຈະປ່ຽນເປັນສີຂຽວ"
+    ],
+    "correctIndex": 1,
+    "explanation": "ຖ້າບໍ່ມີ OS ຄອມພິວເຕີຈະບໍ່ສາມາດຕິດຕໍ່ສື່ສານກັບຮາດແວ ຫຼື ຣັນແອັບພລິເຄຊັນໃດໆໄດ້."
+  },
+  {
+    "id": "q-ch1-p5-4",
+    "bookId": "book-ch1",
+    "pageNumber": 5,
+    "question": "ຂໍ້ໃດແມ່ນຕົວຢ່າງຂອງ ລະບົບປະຕິບັດການໃນໂທລະສັບມືຖື?",
+    "options": ["Android ແລະ iOS", "Microsoft Excel", "Google Chrome", "Adobe Acrobat"],
+    "correctIndex": 0,
+    "explanation": "Android ແລະ iOS ເປັນ Mobile Operating Systems (System Software) ທີ່ໃຊ້ໃນສະມາດໂຟນ."
+  },
+  {
+    "id": "q-ch2-p1-1",
+    "bookId": "book-ch2",
+    "pageNumber": 1,
+    "question": "LAN (Local Area Network) ເໝາະສົມກັບການນຳໃຊ້ໃນລັກສະນະໃດ?",
+    "options": [
+      "ເຊື່ອມຕໍ່ຄອມພິວເຕີພາຍໃນຫ້ອງຮຽນ ຫຼື ອາຄານດຽວກັນ",
+      "ເຊື່ອມຕໍ່ລະຫວ່າງທະວີບຕ່າງໆ",
+      "ເຊື່ອມຕໍ່ກັບດາວທຽມນອກໂລກ",
+      "ບໍ່ຕ້ອງໃຊ້ອຸປະກອນໃດໆ"
+    ],
+    "correctIndex": 0,
+    "explanation": "LAN ເປັນເຄືອຂ່າຍໄລຍະໃກ້ ໃຊ້ເຊື່ອມຕໍ່ອຸປະກອນພາຍໃນພື້ນທີ່ດຽວກັນ ເຊັ່ນ ຫ້ອງ ຫຼື ຕຶກ."
+  },
+  {
+    "id": "q-ch2-p1-2",
+    "bookId": "book-ch2",
+    "pageNumber": 1,
+    "question": "ເຄືອຂ່າຍ WAN ທີ່ໃຫຍ່ທີ່ສຸດໃນໂລກແມ່ນຫຍັງ?",
+    "options": ["Bluetooth", "ອິນເຕີເນັດ (Internet)", "Hotspot ມືຖື", "AirDrop"],
+    "correctIndex": 1,
+    "explanation": "Internet ແມ່ນເຄືອຂ່າຍ WAN ທີ່ເຊື່ອມຕໍ່ທົ່ວໂລກເຂົ້າຫາກັນ."
+  },
+  {
+    "id": "q-ch2-p2-1",
+    "bookId": "book-ch2",
+    "pageNumber": 2,
+    "question": "IP Address ປຽບທຽບໄດ້ກັບສິ່ງໃດໃນຊີວິດປະຈຳວັນ?",
+    "options": ["ບ້ານເລກທີ ຫຼື ທີ່ຢູ່ປະຈຳເຄື່ອງ", "ສີຂອງລົດ", "ຊື່ສັດລ້ຽງ", "ຂະໜາດເກີບ"],
+    "correctIndex": 0,
+    "explanation": "IP Address ເປັນໝາຍເລກລະບຸຕົວຕົນສະເພາະຂອງອຸປະກອນໃນເຄືອຂ່າຍ ຄ້າຍກັບບ້ານເລກທີ."
+  },
+  {
+    "id": "q-ch2-p2-2",
+    "bookId": "book-ch2",
+    "pageNumber": 2,
+    "question": "ອຸປະກອນໃດເຮັດໜ້າທີ່ຊອກຫາເສັ້ນທາງ ແລະ ສົ່ງຕໍ່ຂໍ້ມູນລະຫວ່າງເຄືອຂ່າຍ?",
+    "options": ["Router", "Webcam", "Mouse", "Speaker"],
+    "correctIndex": 0,
+    "explanation": "Router ເປັນອຸປະກອນຫຼັກໃນການກຳນົດເສັ້ນທາງ ແລະ ສົ່ງຂໍ້ມູນລະຫວ່າງເຄືອຂ່າຍ."
+  },
+  {
+    "id": "q-ch2-p3-1",
+    "bookId": "book-ch2",
+    "pageNumber": 3,
+    "question": "ການຫຼອກລວງເອົາລະຫັດຜ່ານຜ່ານທາງອີເມວ ຫຼື ເວັບໄຊປອມ ເອີ້ນວ່າຫຍັງ?",
+    "options": ["Phishing", "Spam", "Firewall", "Router"],
+    "correctIndex": 0,
+    "explanation": "Phishing ແມ່ນການສ້າງອີເມວ ຫຼື ໜ້າເວັບປອມເພື່ອຫຼອກເອົາຂໍ້ມູນສ່ວນຕົວ ແລະ ລະຫັດຜ່ານ."
+  }
+]
+

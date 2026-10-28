@@ -39,6 +39,10 @@ export interface HudProps
     onOpenShop?: () => void;
     onOpenAchievements?: () => void;
     unclaimedAchievementsCount?: number;
+    onOpenBackpack?: () => void;
+    onOpenLibrary?: () => void;
+    backpackCount?: number;
+    maxBackpackSlots?: number;
 }
 
 export function Hud ({
@@ -63,6 +67,10 @@ export function Hud ({
     onOpenShop,
     onOpenAchievements,
     unclaimedAchievementsCount,
+    onOpenBackpack,
+    onOpenLibrary,
+    backpackCount = 0,
+    maxBackpackSlots = 20,
 }: HudProps)
 {
     const levelLabel = getLevelItem(currentLevel)?.hudLabel || currentLevel;
@@ -84,11 +92,49 @@ export function Hud ({
                         </span>
                     </div>
 
-                    {/* Permanent Wallet balance */}
-                    <div className="hud-badge wallet-hud-badge" title="ເງິນໃນກະເປົາ (Wallet)">
-                        <span className="badge-icon">🪙</span>
+                    {/* Permanent Knowledge Credit balance */}
+                    <div className="hud-badge wallet-hud-badge" title="ເຄຣດິດຄວາມຮູ້ (Credit - ໄດ້ຮັບຈາກການຮຽນ & ສອບເສັງ)">
+                        <span className="badge-icon">🎓</span>
                         <span className="badge-value">{walletBalance}</span>
                     </div>
+
+                    {/* Quick Backpack Button */}
+                    {onOpenBackpack && (
+                        <button
+                            id="hud-backpack-btn"
+                            className="hud-badge backpack-hud-btn"
+                            onClick={(e) =>
+                            {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                onOpenBackpack();
+                            }}
+                            title="ເປີດກະເປົາ (Backpack)"
+                            type="button"
+                        >
+                            <span className="badge-icon">🎒</span>
+                            <span className="badge-label">{backpackCount}/{maxBackpackSlots}</span>
+                        </button>
+                    )}
+
+                    {/* Quick Textbook Button */}
+                    {onOpenLibrary && (
+                        <button
+                            id="hud-library-btn"
+                            className="hud-badge library-hud-btn"
+                            onClick={(e) =>
+                            {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                onOpenLibrary();
+                            }}
+                            title="ອ່ານຕຳລາຮຽນ (Textbook)"
+                            type="button"
+                        >
+                            <span className="badge-icon">📚</span>
+                            <span className="badge-label">ຕຳລາ</span>
+                        </button>
+                    )}
 
                     {/* Equipped Weapon Badge with Cycle button */}
                     <button
@@ -228,16 +274,18 @@ export function Hud ({
             </div>
 
             {/* Boss Bar */}
-            {(currentLevel === 'level-3' || bossHp !== null) && (
+            {(currentLevel === 'level-3' || currentLevel === 'stage-ch1' || bossHp !== null) && bossHp !== null && (
                 <div className="boss-hud-container">
                     <div className="boss-hud-header">
-                        <span className="boss-title">👑 KING SLIME</span>
-                        <span className="boss-hp-number">{(bossHp ?? 5)} / {bossMaxHp} HP</span>
+                        <span className="boss-title">
+                            {currentLevel === 'stage-ch1' ? '⚡ ຈອມມານຮາດແວບູຮານ (Hardware Overlord)' : '👑 KING SLIME'}
+                        </span>
+                        <span className="boss-hp-number">{bossHp} / {bossMaxHp} HP</span>
                     </div>
                     <div className="boss-hp-bar">
                         <div
                             className="boss-hp-fill"
-                            style={{ width: `${Math.max(0, ((bossHp ?? 5) / bossMaxHp) * 100)}%` }}
+                            style={{ width: `${Math.max(0, (bossHp / bossMaxHp) * 100)}%` }}
                         />
                     </div>
                 </div>

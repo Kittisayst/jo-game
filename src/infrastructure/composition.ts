@@ -10,6 +10,10 @@ import { UpgradeTree } from '../domain/entities/Upgrade';
 import { Inventory } from '../domain/entities/Inventory';
 import { AttackCooldown } from '../domain/entities/Combat';
 import { AchievementManager } from '../domain/entities/Achievement';
+import { BookProgress } from '../domain/entities/Book';
+import { Backpack } from '../domain/entities/Backpack';
+import { EquipmentState } from '../domain/entities/EquipmentState';
+import { SpacedRepetitionSystem } from '../domain/entities/Quiz';
 import { applySettingsUseCase } from '../application/UpdateSettingsUseCase';
 import { localStorageGameStatsRepository } from './storage/LocalStorageGameStatsRepository';
 import { localStorageSkinRepository } from './storage/LocalStorageSkinRepository';
@@ -18,11 +22,6 @@ import { localStorageStageProgressionRepository } from './storage/LocalStorageSt
 import { saveManager } from './storage/SaveManager';
 import './audio/SoundManager';
 
-/**
- * Composition Root — the single place that wires concrete repositories (infrastructure)
- * to long-lived domain entities. UI and scenes import from here instead of calling
- * `new Entity()` or `localStorage` themselves. See "Port" in CONTEXT.md.
- */
 export const repositories = {
     gameStats: localStorageGameStatsRepository,
     skin: localStorageSkinRepository,
@@ -31,6 +30,20 @@ export const repositories = {
 };
 
 const initialSave = saveManager.load();
+
+// Initialize Books
+const initialBooks: Record<string, BookProgress> = {};
+if (initialSave.books)
+{
+    for (const [bId, snap] of Object.entries(initialSave.books))
+    {
+        initialBooks[bId] = BookProgress.fromSnapshot(snap);
+    }
+}
+if (!initialBooks['book-ch1'])
+{
+    initialBooks['book-ch1'] = new BookProgress('book-ch1', true);
+}
 
 export const entities = {
     gameStats: new GameStats(initialSave.gameStats.highScore, initialSave.gameStats.bestTimeSeconds),
@@ -45,7 +58,19 @@ export const entities = {
     inventory: new Inventory(initialSave.inventory),
     attackCooldown: new AttackCooldown(),
     achievementManager: new AchievementManager(initialSave.achievements),
+
+    // Version 4 Knowledge Quest entities
+    backpack: new Backpack(initialSave.backpack || []),
+    equipment: EquipmentState.fromSnapshot(initialSave.equipment),
+    spacedRepetition: SpacedRepetitionSystem.fromSnapshot(initialSave.practiceStats || {
+        lastPracticeDate: '',
+        practiceCountToday: 0,
+        questionStats: {},
+    }),
+    books: initialBooks,
+    repairedGates: new Set<string>(initialSave.repairedGates || []),
+    forgeUnlocked: Boolean(initialSave.forgeUnlocked ?? initialBooks['book-ch1']?.examPassed ?? false),
 };
 
-// Push persisted audio preferences into SoundManager (it listens for SETTINGS_CHANGED_EVENT).
+// Push persisted audio preferences into SoundManager
 applySettingsUseCase(entities.settings);

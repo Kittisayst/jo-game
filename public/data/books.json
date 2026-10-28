@@ -1,0 +1,104 @@
+[
+  {
+    "id": "book-ch1",
+    "chapter": 1,
+    "title": "ພື້ນຖານລະບົບຄອມພິວເຕີ",
+    "titleEn": "Computer Fundamentals",
+    "description": "ຮຽນຮູ້ກ່ຽວກັບອົງປະກອບພື້ນຖານຂອງຄອມພິວເຕີ, ອຸປະກອນ Input/Output, CPU ແລະ ໜ່ວຍຄວາມຈຳ",
+    "price": 0,
+    "unlockedRecipes": ["pickaxe-t1", "hammer-t1", "repair-kit", "iron-sword"],
+    "pages": [
+      {
+        "pageNumber": 1,
+        "title": "ອົງປະກອບຂອງລະບົບຄອມພິວເຕີ",
+        "content": "ຄອມພິວເຕີເຮັດວຽກປະສານກັນ 3 ສ່ວນຫຼັກຄື:\n1. ຮາດແວ (Hardware): ອຸປະກອນທີ່ຈັບຕ້ອງໄດ້ ເຊັ່ນ ຈໍພາບ, ຄີບອດ, ເຄສ.\n2. ຊອບແວ (Software): ໂປຣແກຣມ ຫຼື ຊຸດຄຳສັ່ງທີ່ສັ່ງໃຫ້ຮາດແວເຮັດວຽກ ເຊັ່ນ Windows, Browser.\n3. ບຸກຄະລາກອນ (Peopleware): ຜູ້ໃຊ້ງານ, ຜູ້ພັດທະນາໂປຣແກຣມ ຫຼື ຊ່າງເຕັກນິກ.",
+        "keyPoints": [
+          "Hardware = ຈັບຕ້ອງໄດ້",
+          "Software = ຊຸດຄຳສັ່ງ/ໂປຣແກຣມ",
+          "Peopleware = ຜູ້ໃຊ້ງານ/ຜູ້ຄວບຄຸມ"
+        ]
+      },
+      {
+        "pageNumber": 2,
+        "title": "ອຸປະກອນປ້ອນຂໍ້ມູນ (Input Devices)",
+        "content": "ອຸປະກອນ Input ເຮັດໜ້າທີ່ຮັບຂໍ້ມູນ ຫຼື ຄຳສັ່ງຈາກມະນຸດເຂົ້າສູ່ຄອມພິວເຕີ:\n- ຄີບອດ (Keyboard): ປ້ອນຕົວອັກສອນ ແລະ ຕົວເລກ\n- ເມົາສ໌ (Mouse): ຊີ້ຕຳແໜ່ງ ແລະ ຄລິກເລືອກຄຳສັ່ງ\n- ໄມໂຄຣໂຟນ (Microphone): ຮັບສັນຍານສຽງ\n- ສະແກນເນີ (Scanner) & ກ້ອງ (Webcam): ຮັບພາບ ແລະ ເອກະສານ.",
+        "keyPoints": [
+          "Input = ນຳຂໍ້ມູນເຂົ້າ",
+          "ຕົວຢ່າງ: Keyboard, Mouse, Microphone, Webcam, Scanner",
+          "Monitor ແລະ Printer ບໍ່ແມ່ນ Input"
+        ]
+      },
+      {
+        "pageNumber": 3,
+        "title": "ອຸປະກອນສະແດງຜົນ (Output Devices)",
+        "content": "ອຸປະກອນ Output ເຮັດໜ້າທີ່ນຳຜົນການປະມວນຜົນມາສະແດງໃຫ້ຜູ້ໃຊ້ຮັບຮູ້:\n- ຈໍພາບ (Monitor): ສະແດງພາບ ແລະ ຂໍ້ຄວາມ\n- ເຄື່ອງພິມ (Printer): ພິມຂໍ້ຄວາມ/ຮູບພາບລົງເຈ້ຍ\n- ລຳໂພງ (Speaker) & ຫູຟັງ (Headphones): ສົ່ງສັນຍານສຽງອອກມາ\n- ໂປຣເຈັກເຕີ (Projector): ຂະຫຍາຍພາບສູ່ສາກໃຫຍ່.",
+        "keyPoints": [
+          "Output = ສົ່ງຜົນຮັບອອກມາໃຫ້ຄົນເຫັນ/ໄດ້ຍິນ",
+          "ຕົວຢ່າງ: Monitor, Printer, Speaker, Projector",
+          "Keyboard ແລະ Mouse ບໍ່ແມ່ນ Output"
+        ]
+      },
+      {
+        "pageNumber": 4,
+        "title": "CPU ແລະ ໜ່ວຍຄວາມຈຳ (Memory & Storage)",
+        "content": "ການປະມວນຜົນ ແລະ ເກັບກຳຂໍ້ມູນ:\n- CPU (Central Processing Unit): ສະໝອງຂອງຄອມພິວເຕີ ເຮັດໜ້າທີ່ຄຳນວນ ແລະ ປະມວນຜົນຄຳສັ່ງທັງໝົດ\n- RAM (Random Access Memory): ໜ່ວຍຄວາມຈຳຫຼັກຊົ່ວຄາວ ໄວສູງ ຖ້າປິດເຄື່ອງຂໍ້ມູນຈະຫາຍ\n- Storage (SSD / HDD): ໜ່ວຍເກັບຂໍ້ມູນຖາວອນ ປິດເຄື່ອງຂໍ້ມູນກໍຍັງຢູ່ ເຊັ່ນ ໄຟລ໌ງານ, ລະບົບປະຕິບັດການ.",
+        "keyPoints": [
+          "CPU = ສະໝອງປະມວນຜົນຄຳນວນ",
+          "RAM = ຄວາມຈຳຊົ່ວຄາວ (ໄຟດັບຂໍ້ມູນຫາຍ)",
+          "SSD / HDD = ເກັບຂໍ້ມູນຖາວອນ"
+        ]
+      },
+      {
+        "pageNumber": 5,
+        "title": "ປະເພດຂອງຊອບແວ (Software Types)",
+        "content": "ຊອບແວແບ່ງອອກເປັນ 2 ປະເພດຫຼັກ:\n1. ຊອບແວລະບົບ (System Software): ຄວບຄຸມຮາດແວ ແລະ ເປັນພື້ນຖານໃຫ້ໂປຣແກຣມອື່ນ ເຊັ່ນ Windows, Linux, macOS, Android.\n2. ຊອບແວປະຍຸກ (Application Software): ໂປຣແກຣມທີ່ສ້າງຂຶ້ນເພື່ອເຮັດວຽກສະເພາະດ້ານ ເຊັ່ນ Microsoft Word, Web Browser, ເກມ, Photoshop.",
+        "keyPoints": [
+          "System Software = ລະບົບປະຕິບັດການ (OS)",
+          "Application Software = ແອັບ/ໂປຣແກຣມເຮັດວຽກສະເພາະດ້ານ",
+          "Windows ເປັນ System Software; Word ເປັນ Application Software"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "book-ch2",
+    "chapter": 2,
+    "title": "ເຄືອຂ່າຍຄອມພິວເຕີ ແລະ ອິນເຕີເນັດ",
+    "titleEn": "Computer Networking & Internet",
+    "description": "ຮຽນຮູ້ກ່ຽວກັບການເຊື່ອມຕໍ່ເຄືອຂ່າຍ LAN, WAN, IP Address ແລະ ຄວາມປອດໄພເທິງອິນເຕີເນັດ",
+    "price": 60,
+    "unlockedRecipes": ["crystal-sword"],
+    "pages": [
+      {
+        "pageNumber": 1,
+        "title": "ເຄືອຂ່າຍ LAN ແລະ WAN",
+        "content": "ເຄືອຂ່າຍຄອມພິວເຕີຄືການນຳເອົາອຸປະກອນມາເຊື່ອມຕໍ່ກັນ:\n- LAN (Local Area Network): ເຄືອຂ່າຍໄລຍະໃກ້ ເຊັ່ນ ໃນຫ້ອງຮຽນ, ໃນອາຄານ.\n- WAN (Wide Area Network): ເຄືອຂ່າຍໄລຍະໄກ ເຊື່ອມຕໍ່ຂ້າມເມືອງ ຫຼື ຂ້າມປະເທດ ເຊິ່ງ ອິນເຕີເນັດ (Internet) ແມ່ນເຄືອຂ່າຍ WAN ທີ່ໃຫຍ່ທີ່ສຸດໃນໂລກ.",
+        "keyPoints": [
+          "LAN = ເຄືອຂ່າຍພາຍໃນອາຄານ/ໄລຍະໃກ້",
+          "WAN = ເຄືອຂ່າຍໄລຍະໄກ",
+          "Internet = ເຄືອຂ່າຍ WAN ທີ່ໃຫຍ່ທີ່ສຸດ"
+        ]
+      },
+      {
+        "pageNumber": 2,
+        "title": "IP Address ແລະ Router",
+        "content": "ການສົ່ງຂໍ້ມູນໃນເຄືອຂ່າຍ:\n- IP Address: ໝາຍເລກປະຈຳຕົວຂອງອຸປະກອນໃນເຄືອຂ່າຍ ຄ້າຍກັບບ້ານເລກທີ.\n- Router: ອຸປະກອນທີ່ເຮັດໜ້າທີ່ຊອກຫາເສັ້ນທາງ ແລະ ສົ່ງຕໍ່ຂໍ້ມູນລະຫວ່າງເຄືອຂ່າຍຕ່າງໆ.\n- Wi-Fi: ການເຊື່ອມຕໍ່ເຄືອຂ່າຍແບບໄຮ້ສາຍໂດຍໃຊ້ຄື້ນວິທະຍຸ.",
+        "keyPoints": [
+          "IP Address = ໝາຍເລກປະຈຳເຄື່ອງໃນເຄືອຂ່າຍ",
+          "Router = ອຸປະກອນກຳນົດເສັ້ນທາງສົ່ງຂໍ້ມູນ"
+        ]
+      },
+      {
+        "pageNumber": 3,
+        "title": "ຄວາມປອດໄພ ແລະ ໄພຄຸກຄາມທາງໄຊເບີ",
+        "content": "ການປ້ອງກັນຕົວເອງໃນໂລກດິຈິທອນ:\n- ລະຫັດຜ່ານ (Password): ຄວນຕັ້ງໃຫ້ຍາວ ແລະ ປະສົມຕົວເລກ/ອັກສອນພິເສດ.\n- Phishing: ການຫຼອກລວງເອົາຂໍ້ມູນຜ່ານອີເມວ ຫຼື ເວັບໄຊປອມ.\n- Firewall: ລະບົບປ້ອງກັນການບຸກລຸກລະຫວ່າງເຄືອຂ່າຍ.",
+        "keyPoints": [
+          "ຢ່າບອກລະຫັດຜ່ານກັບໃຜ",
+          "ລະວັງ Phishing ເວັບໄຊປອມ",
+          "Firewall ຊ່ວຍກັ່ນຕອງຂໍ້ມູນທີ່ບໍ່ປອດໄພ"
+        ]
+      }
+    ]
+  }
+]
+
