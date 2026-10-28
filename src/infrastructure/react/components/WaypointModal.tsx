@@ -37,7 +37,7 @@ export const WaypointModal: React.FC<WaypointModalProps> = ({
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4 animate-fade-in">
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/75 backdrop-blur-sm p-4 animate-fade-in">
             <div className="relative w-full max-w-md rounded-2xl bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 border-2 border-cyan-500/50 shadow-2xl p-6 space-y-4 text-center">
                 <span className="text-5xl animate-bounce">🌀</span>
                 <h3 className="text-xl font-bold text-cyan-300">{waypointName}</h3>

@@ -192,7 +192,7 @@ export const BackpackModal: React.FC<BackpackModalProps> = ({ isOpen, onClose, o
         : 0;
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-3 sm:p-5 animate-fade-in">
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/80 backdrop-blur-md p-3 sm:p-5 animate-fade-in">
             <div className="relative w-full max-w-4xl rounded-2xl bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 border-2 border-cyan-500/50 shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
 
                 {/* Header with Title and Capacity Gauge */}

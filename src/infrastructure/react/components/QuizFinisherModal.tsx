@@ -74,7 +74,7 @@ export const QuizFinisherModal: React.FC<QuizFinisherModalProps> = ({
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-4 animate-fade-in">
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/85 backdrop-blur-md p-4 animate-fade-in">
             <div className="relative w-full max-w-lg rounded-2xl bg-gradient-to-b from-purple-950 via-slate-900 to-slate-950 border-2 border-purple-500 shadow-2xl p-6 space-y-5 text-center">
                 <span className="text-5xl animate-pulse">⚡</span>
                 <div>
