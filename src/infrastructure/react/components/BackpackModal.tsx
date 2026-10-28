@@ -85,6 +85,7 @@ export const BackpackModal: React.FC<BackpackModalProps> = ({ isOpen, onClose, o
         else if (selectedItemDef.category === 'weapon')
         {
             entities.equipment.equipWeapon(selectedSlot.itemId);
+            EventBus.emit('weapon-changed', selectedSlot.itemId);
             soundManager.playSelect();
             setRevision(r => r + 1);
         }

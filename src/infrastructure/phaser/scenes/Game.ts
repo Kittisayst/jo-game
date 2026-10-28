@@ -44,6 +44,10 @@ import {
 import { Projectile } from '../objects/Projectile';
 import { entities } from '../../composition';
 import { performAttackUseCase } from '../../../application/PerformAttackUseCase';
+import { cycleEquippedWeaponUseCase } from '../../../application/CycleEquippedWeaponUseCase';
+import { collectEnemyDropsUseCase } from '../../../application/CollectEnemyDropsUseCase';
+import { WEAPON_CONFIGS } from '../../../domain/entities/EquipmentState';
+import { EnemyDefinition } from '../../../domain/entities/Enemy';
 import { trackAchievementUseCase } from '../../../application/TrackAchievementUseCase';
 import { harvestResourceNodeUseCase } from '../../../application/HarvestResourceNodeUseCase';
 
@@ -152,6 +156,10 @@ export class Game extends Scene
     preload ()
     {
         // Fallback load in case Game scene is loaded directly without Preloader
+        if (!this.cache.json.exists('enemies'))
+        {
+            this.load.json('enemies', 'data/enemies.json');
+        }
         for (const item of LEVEL_CATALOG)
         {
             if (!this.cache.json.exists(item.key))
@@ -435,7 +443,8 @@ export class Game extends Scene
         // Spawn Boss if defined for this level
         if (this.level.boss)
         {
-            this.boss = new Boss(this, this.level.boss.x, this.level.boss.y, this.level.boss.hp ?? 5);
+            const bossDefinition = this.level.boss.enemyId ? this.getEnemyDefinition(this.level.boss.enemyId) : undefined;
+            this.boss = new Boss(this, this.level.boss.x, this.level.boss.y, bossDefinition?.maxHp ?? this.level.boss.hp ?? 5);
             this.boss.onLanding = (x, y) =>
             {
                 this.particleManager.emitLandingDust(x, y);
@@ -621,10 +630,11 @@ export class Game extends Scene
         {
             if (this.boss)
             {
-                this.boss.entity.heal(2);
+                const healAmount = Math.ceil(this.boss.entity.maxHp * 0.15);
+                this.boss.entity.heal(healAmount);
                 this.boss.isInvulnerable = false;
                 this.particleManager.emitSpikeHit(this.boss.x, this.boss.y);
-                this.showLootNotification(this.boss.x, this.boss.y - 30, '⚠️ Boss ຟື້ນຟູ 2 HP!', '#ef4444');
+                this.showLootNotification(this.boss.x, this.boss.y - 30, `⚠️ Boss ຟື້ນຟູ ${healAmount} HP!`, '#ef4444');
                 soundManager.playPowerUp();
             }
         };
@@ -837,30 +847,14 @@ export class Game extends Scene
     {
         if (this.isDialogueActive || this.lives.isDead || this.levelProgress.isComplete) return;
 
-        const attack = performAttackUseCase(
-            entities.weaponLoadout,
-            entities.upgradeTree,
-            entities.attackCooldown
-        );
+        const attack = performAttackUseCase(entities.equipment, entities.attackCooldown);
 
         if (!attack) return;
 
-        const { weapon, damage } = attack;
-        this.player.triggerSlashVfx(weapon.id);
-
-        if (weapon.id === 'cyber-saber') soundManager.playSlash();
-        else if (weapon.id === 'thunder-hammer') soundManager.playHammer();
-        else if (weapon.id === 'plasma-blaster') soundManager.playBlaster();
-        else if (weapon.id === 'boomerang-disc') soundManager.playDisc();
-
-        if (weapon.type === 'melee')
-        {
-            this.resolveMeleeAttack(weapon.id, damage, weapon.range);
-        }
-        else if (weapon.type === 'ranged')
-        {
-            this.spawnPlayerProjectile(weapon.id, damage, weapon.projectileSpeed ?? 520);
-        }
+        const { weaponId, damage, range } = attack;
+        this.player.triggerSlashVfx(weaponId);
+        soundManager.playSlash();
+        this.resolveMeleeAttack(weaponId, damage, range);
     }
 
     private resolveMeleeAttack (weaponId: string, damage: number, range: number): void
@@ -932,23 +926,6 @@ export class Game extends Scene
         }
     }
 
-    private spawnPlayerProjectile (weaponId: string, damage: number, speed: number): void
-    {
-        const dir = this.player.facingDir;
-        const spawnX = this.player.x + (dir * 26);
-        const spawnY = this.player.y;
-
-        const proj = new Projectile(this, spawnX, spawnY, {
-            weaponId,
-            damage,
-            dir,
-            speed,
-            isBoomerang: weaponId === 'boomerang-disc',
-        });
-
-        this.playerProjectiles.add(proj);
-    }
-
     private handleProjectileEnemyHit (proj: Projectile, enemy: Enemy): void
     {
         if (!proj.active || !enemy.active || enemy.entity.isDefeated) return;
@@ -985,7 +962,7 @@ export class Game extends Scene
 
     private handleCycleWeapon (): void
     {
-        const nextWeapon = entities.weaponLoadout.cycleNext();
+        const nextWeapon = cycleEquippedWeaponUseCase(entities.equipment, entities.backpack);
         soundManager.playSelect();
         EventBus.emit('weapon-changed', nextWeapon);
     }
@@ -1099,12 +1076,16 @@ export class Game extends Scene
             }
 
             // Stomp victory: bounce, emit particle burst, freeze frame, camera shake, and defeat enemy
+            const stompDamage = entities.equipment.equippedStats.damage;
             player.setVelocityY(-340);
             this.particleManager.emitStompBurst(enemy.x, enemy.y);
             this.triggerHitStop(45);
             this.cameras.main.shake(100, 0.0035);
-            this.handleEnemyDefeated(enemy);
-            enemy.squashAndDefeat();
+            this.showDamageNumber(enemy.x, enemy.y, stompDamage, false);
+            if (enemy.takeDamage(stompDamage, 0).defeated)
+            {
+                this.handleEnemyDefeated(enemy);
+            }
         }
         else
         {
@@ -1143,7 +1124,7 @@ export class Game extends Scene
             this.particleManager.emitStompBurst(boss.x, boss.y);
             this.triggerHitStop(60);
             this.cameras.main.shake(160, 0.008);
-            boss.takeDamage(this.score);
+            boss.takeDamage(this.score, entities.equipment.equippedStats.damage);
             return;
         }
 
@@ -1160,7 +1141,7 @@ export class Game extends Scene
             this.cameras.main.shake(200, 0.012);
             this.cameras.main.flash(70, 255, 255, 255, true);
             soundManager.playStomp();
-            boss.takeDamage(this.score);
+            boss.takeDamage(this.score, entities.equipment.equippedStats.damage);
         }
         else
         {
@@ -1218,7 +1199,7 @@ export class Game extends Scene
         trackAchievementUseCase(
             entities.achievementManager,
             'arsenal-master',
-            entities.weaponLoadout.ownedWeapons.length,
+            Object.keys(WEAPON_CONFIGS).filter(id => entities.backpack.getItemCount(id) > 0).length,
             true
         );
 
@@ -1739,16 +1720,7 @@ export class Game extends Scene
             node.graphic.clear();
             this.particleManager.emitCelebration(node.x, node.y - 20);
 
-            const itemEmojiMap: Record<string, string> = {
-                'wood': '🪵',
-                'stone': '🪨',
-                'iron-ore': '⛏️',
-                'herb': '🌿',
-                'fiber': '🌾',
-                'crystal': '💎',
-            };
-
-            const dropTexts = result.drops.map(d => `+${d.count} ${itemEmojiMap[d.itemId] || '📦'} ${d.itemId}`).join(', ');
+            const dropTexts = result.drops.map(d => `+${d.count} ${this.getItemEmoji(d.itemId)} ${d.itemId}`).join(', ');
             this.showLootNotification(node.x, node.y - 30, `🎒 ${dropTexts}`, '#22c55e');
         }
         else
@@ -2186,6 +2158,20 @@ export class Game extends Scene
         return coins;
     }
 
+    private getItemEmoji (itemId: string): string
+    {
+        const itemEmojiMap: Record<string, string> = {
+            'wood': '🪵',
+            'stone': '🪨',
+            'iron-ore': '⛏️',
+            'herb': '🌿',
+            'fiber': '🌾',
+            'crystal': '💎',
+            'boss-core': '🔮',
+        };
+        return itemEmojiMap[itemId] || '📦';
+    }
+
     private handleEnemyDefeated (enemy: Enemy): void
     {
         defeatEnemyUseCase(enemy.entity, this.score);
@@ -2202,8 +2188,18 @@ export class Game extends Scene
             trackAchievementUseCase(entities.achievementManager, 'tank-breaker', 1);
         }
 
-        // Roll dynamic coin drops based on archetype
-        if (Math.random() <= enemy.entity.coinDropChance)
+        // Materials from the enemy's drop table go straight into the backpack
+        const drops = collectEnemyDropsUseCase(enemy.entity, entities.backpack);
+        if (drops.collected.length > 0 || drops.overflow.length > 0)
+        {
+            const parts = drops.collected.map(d => `+${d.count} ${this.getItemEmoji(d.itemId)} ${d.itemId}`);
+            if (drops.overflow.length > 0) parts.push('🎒 ກະເປົາເຕັມ!');
+            this.showLootNotification(enemy.x, enemy.y - 30, parts.join(', '), drops.overflow.length > 0 ? '#f59e0b' : '#22c55e');
+            soundManager.playCoin();
+        }
+
+        // Roll dynamic coin drops based on archetype (legacy enemies only)
+        if (enemy.entity.coinDropChance > 0 && Math.random() <= enemy.entity.coinDropChance)
         {
             const amount = enemy.entity.coinDropAmount;
             for (let i = 0; i < amount; i++)
@@ -2234,6 +2230,12 @@ export class Game extends Scene
         });
     }
 
+    private getEnemyDefinition (enemyId: string): EnemyDefinition | undefined
+    {
+        const all = this.cache.json.get('enemies') as EnemyDefinition[] | undefined;
+        return all?.find(e => e.id === enemyId);
+    }
+
     private createEnemies ()
     {
         const enemies = this.physics.add.group();
@@ -2242,6 +2244,7 @@ export class Game extends Scene
         {
             for (const item of this.level.enemies)
             {
+                const definition = item.enemyId ? this.getEnemyDefinition(item.enemyId) : undefined;
                 const enemy = new Enemy(
                     this,
                     item.x,
@@ -2249,8 +2252,10 @@ export class Game extends Scene
                     item.patrolDistance,
                     item.speed,
                     undefined,
-                    item.type ?? 'slime'
+                    item.type ?? 'slime',
+                    definition
                 );
+                if (item.scale) enemy.setScale(item.scale);
                 enemy.onSpit = (x, y, dirX, dirY) =>
                 {
                     this.spawnEnemySpit(x, y, dirX, dirY);

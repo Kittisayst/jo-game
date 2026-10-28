@@ -48,6 +48,8 @@
 
 **Phase 2 ຖືກຂະຫຍາຍເປັນ "Phase 2: Combat ຂັບດ້ວຍຂໍ້ມູນ":** ຮວມອາວຸດ (EquipmentState) + ໃຫ້ສັດຕູ/Boss ອ່ານ HP/damage/drops ຈາກ `enemies.json` + ສ້າງ Mini-boss (cave-guardian) ຈິງທີ່ drop ຜລຶກ + ວັດສະດຸຈາກສັດຕູຕາມ drop table. ຕ້ອງເຮັດພ້ອມກັນເພື່ອບໍ່ໃຫ້ balance ພັງ.
 
+**ສະຖານະ Phase 2 (ເຮັດແລ້ວ):** ການໂຈມຕີ/stomp/Boss ໃຊ້ດາເມດຈາກ `EquipmentState`; ສັດຕູ `stage-ch1` ອ່ານ HP/drops ຈາກ `enemies.json` (forest-slime ×3, rock-golem ×2, **cave-guardian** Mini-boss ×1 drop ຜລຶກ 2 + ແຮ່ເຫຼັກ); Boss HP 300 ຈາກຂໍ້ມູນ, phase ຕາມອັດຕາສ່ວນ HP; ຕອບຜິດ Boss ຟື້ນ 15% ຂອງ HP ສູງສຸດ; Q ສັບດາບທີ່ມີໃນກະເປົາ; ລຶບ `PurchaseWeapon`/`EquipWeapon` use case + tab ອາວຸດໃນ Shop. **ຍັງຄ້າງ:** ຍັງບໍ່ໄດ້ຫຼິ້ນ `stage-ch1` ຈິງ (ກວດແຕ່ typecheck/test/build ແລະໂຫຼດ level-1 ໃນ browser ໂດຍບໍ່ມີ error); Mini-boss ຍັງເປັນ armored slime ຂະໜາດ ×1.8 (ບໍ່ມີ 2 ທ່າໂຈມຕີ); `Weapon.ts`/`WeaponLoadout` ຍັງຢູ່ເພື່ອ save compat (ລຶບໃນ Phase 4 ພ້ອມ save v6); `Projectile`/bomb/dash/`StageMapModal` ຍັງສະແດງ level-1/2/3 ເກົ່າ; HP ສັດຕູ vs ດາເມດ ຍັງບໍ່ໄດ້ playtest ປັບ.
+
 ## ແນວທາງ (Approach)
 
 - **ຕັດເປັນຂັ້ນນ້ອຍ**, ແຕ່ລະຂັ້ນ typecheck + lint + test ຜ່ານ ແລ້ວ commit ແຍກ (ຍ້ອນກັບງ່າຍ). ບໍ່ລວມຫຼາຍຂັ້ນໃນ commit ດຽວ.

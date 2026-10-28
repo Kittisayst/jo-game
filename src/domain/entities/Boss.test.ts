@@ -102,4 +102,18 @@ describe('Boss entity', () =>
         expect(boss.isEnraged).toBe(true);
         expect(boss.isBerserk).toBe(true);
     });
+
+    it('derives phases from the remaining HP ratio so any max HP works', () =>
+    {
+        const boss = new Boss(300);
+        expect(boss.phase).toBe(1);
+
+        boss.takeDamage(120); // 180/300 = 60%
+        expect(boss.phase).toBe(2);
+        expect(boss.isEnraged).toBe(true);
+
+        boss.takeDamage(120); // 60/300 = 20%
+        expect(boss.phase).toBe(3);
+        expect(boss.isBerserk).toBe(true);
+    });
 });

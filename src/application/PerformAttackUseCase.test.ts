@@ -1,32 +1,37 @@
 import { describe, expect, it } from 'vitest';
 import { AttackCooldown } from '../domain/entities/Combat';
-import { UpgradeTree } from '../domain/entities/Upgrade';
-import { WeaponLoadout } from '../domain/entities/Weapon';
+import { EquipmentState } from '../domain/entities/EquipmentState';
 import { performAttackUseCase } from './PerformAttackUseCase';
 
 describe('PerformAttackUseCase', () =>
 {
-    it('executes attack when cooldown is ready and applies stats', () =>
+    it('deals the equipped sword damage and starts its cooldown', () =>
     {
-        const loadout = new WeaponLoadout();
-        const tree = new UpgradeTree({ weaponPower: 3, attackSpeed: 2 }); // +2 damage, 24% faster
+        const equipment = new EquipmentState();
         const cooldown = new AttackCooldown();
 
-        const result = performAttackUseCase(loadout, tree, cooldown);
-        expect(result).not.toBeNull();
-        expect(result?.damage).toBe(3); // base 1 + 2 bonus
-        expect(result?.weapon.id).toBe('cyber-saber');
+        const result = performAttackUseCase(equipment, cooldown);
+        expect(result).toEqual({ weaponId: 'wooden-sword', damage: 12, range: 48, effectiveCooldown: 380 });
         expect(cooldown.canAttack()).toBe(false);
+    });
+
+    it('gets stronger with sword tier and upgrade level', () =>
+    {
+        const equipment = new EquipmentState('iron-sword');
+        const wooden = performAttackUseCase(new EquipmentState(), new AttackCooldown());
+        const iron = performAttackUseCase(equipment, new AttackCooldown());
+        equipment.upgradeWeapon('iron-sword');
+        const ironPlusOne = performAttackUseCase(equipment, new AttackCooldown());
+
+        expect(iron!.damage).toBeGreaterThan(wooden!.damage);
+        expect(ironPlusOne!.damage).toBe(27);
     });
 
     it('returns null if attack cooldown is not ready', () =>
     {
-        const loadout = new WeaponLoadout();
-        const tree = new UpgradeTree();
         const cooldown = new AttackCooldown();
-
         cooldown.trigger(300);
-        const result = performAttackUseCase(loadout, tree, cooldown);
-        expect(result).toBeNull();
+
+        expect(performAttackUseCase(new EquipmentState(), cooldown)).toBeNull();
     });
 });

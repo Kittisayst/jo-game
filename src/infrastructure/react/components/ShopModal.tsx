@@ -1,11 +1,8 @@
 import React, { useState } from 'react';
-import { WEAPON_CATALOG, WeaponDefinition } from '../../../domain/entities/Weapon';
 import { UPGRADE_CATALOG, UpgradeDefinition } from '../../../domain/entities/Upgrade';
 import { ITEM_CATALOG, ItemDefinition } from '../../../domain/entities/Inventory';
-import { purchaseWeaponUseCase } from '../../../application/PurchaseWeaponUseCase';
 import { purchaseUpgradeUseCase } from '../../../application/PurchaseUpgradeUseCase';
 import { purchaseItemUseCase } from '../../../application/PurchaseItemUseCase';
-import { equipWeaponUseCase } from '../../../application/EquipWeaponUseCase';
 import { STARTER_BOOK_CREDIT_RESERVE } from '../../../domain/entities/SaveData';
 import { entities } from '../../composition';
 import { soundManager } from '../../audio/SoundManager';
@@ -13,21 +10,17 @@ import { soundManager } from '../../audio/SoundManager';
 export interface ShopModalProps
 {
     walletBalance: number;
-    equippedWeaponId: string;
     onClose: () => void;
     onUpdateWallet: (balance: number) => void;
-    onUpdateWeapon: (weaponId: string) => void;
 }
 
 export const ShopModal: React.FC<ShopModalProps> = ({
     walletBalance,
-    equippedWeaponId,
     onClose,
     onUpdateWallet,
-    onUpdateWeapon,
 }) =>
 {
-    const [activeTab, setActiveTab] = useState<'weapons' | 'upgrades' | 'items'>('weapons');
+    const [activeTab, setActiveTab] = useState<'upgrades' | 'items'>('upgrades');
     const [toastMessage, setToastMessage] = useState<string | null>(null);
 
     const showToast = (msg: string) =>
@@ -40,40 +33,6 @@ export const ShopModal: React.FC<ShopModalProps> = ({
     {
         if (entities.books['book-ch1']?.isUnlocked) return false;
         return entities.wallet.balance - cost < STARTER_BOOK_CREDIT_RESERVE;
-    };
-
-    const handleBuyWeapon = (weapon: WeaponDefinition) =>
-    {
-        if (wouldBreakStarterBookReserve(weapon.price))
-        {
-            soundManager.playHurt();
-            showToast(`📚 ກະລຸນາສະຫງວນ ${STARTER_BOOK_CREDIT_RESERVE} Credit ໄວ້ຊື້ປຶ້ມຕຳລາບົດທີ 1 ທີ່ຫໍສະໝຸດກ່ອນ!`);
-            return;
-        }
-        const success = purchaseWeaponUseCase(entities.wallet, entities.weaponLoadout, weapon.id);
-        if (success)
-        {
-            soundManager.playBuy();
-            onUpdateWallet(entities.wallet.balance);
-            onUpdateWeapon(entities.weaponLoadout.equippedId);
-            showToast(`🎉 ໄດ້ຮັບອາວຸດ: ${weapon.name}!`);
-        }
-        else
-        {
-            soundManager.playHurt();
-            showToast('❌ ບໍ່ສາມາດຊື້ໄດ້ (ຫຼຽນບໍ່ພໍ ຫຼື ມີແລ້ວ)');
-        }
-    };
-
-    const handleEquipWeapon = (weaponId: string) =>
-    {
-        const success = equipWeaponUseCase(entities.weaponLoadout, weaponId);
-        if (success)
-        {
-            soundManager.playSelect();
-            onUpdateWeapon(weaponId);
-            showToast(`⚔️ ຕິດຕັ້ງອາວຸດຮຽບຮ້ອຍ!`);
-        }
     };
 
     const handleBuyUpgrade = (upgrade: UpgradeDefinition) =>
@@ -157,15 +116,8 @@ export const ShopModal: React.FC<ShopModalProps> = ({
                 {/* Tabs */}
                 <div className="shop-tabs">
                     <button
-                        autoFocus
-                        className={`shop-tab-btn ${activeTab === 'weapons' ? 'is-active' : ''}`}
-                        onClick={() => setActiveTab('weapons')}
-                        type="button"
-                    >
-                        ⚔️ ອາວຸດ (Weapons)
-                    </button>
-                    <button
                         className={`shop-tab-btn ${activeTab === 'upgrades' ? 'is-active' : ''}`}
+                        autoFocus
                         onClick={() => setActiveTab('upgrades')}
                         type="button"
                     >
@@ -182,58 +134,6 @@ export const ShopModal: React.FC<ShopModalProps> = ({
 
                 {/* Tab Content */}
                 <div className="shop-content-panel">
-                    {/* Weapons Tab */}
-                    {activeTab === 'weapons' && (
-                        <div className="shop-grid">
-                            {WEAPON_CATALOG.map((weapon) =>
-                            {
-                                const isOwned = entities.weaponLoadout.hasWeapon(weapon.id);
-                                const isEquipped = equippedWeaponId === weapon.id;
-                                const canAfford = walletBalance >= weapon.price;
-
-                                return (
-                                    <div
-                                        key={weapon.id}
-                                        className={`shop-item-card ${isEquipped ? 'is-equipped' : ''}`}
-                                    >
-                                        <div className="shop-item-icon">{weapon.icon}</div>
-                                        <div className="shop-item-info">
-                                            <h3 className="shop-item-name">{weapon.name}</h3>
-                                            <p className="shop-item-desc">{weapon.description}</p>
-                                            <div className="shop-item-stats">
-                                                <span>⚔️ ພະລັງ: {weapon.baseDamage} DMG</span>
-                                                <span>⏱️ ຄູລດາວ: {weapon.cooldownMs}ms</span>
-                                                <span>🎯 ໄລຍະ: {weapon.range}px</span>
-                                            </div>
-                                        </div>
-
-                                        <div className="shop-item-action">
-                                            {isOwned ? (
-                                                <button
-                                                    className={`shop-btn ${isEquipped ? 'btn-equipped' : 'btn-equip'}`}
-                                                    disabled={isEquipped}
-                                                    onClick={() => handleEquipWeapon(weapon.id)}
-                                                    type="button"
-                                                >
-                                                    {isEquipped ? '✓ ຕິດຕັ້ງແລ້ວ' : 'ຕິດຕັ້ງ (Equip)'}
-                                                </button>
-                                            ) : (
-                                                <button
-                                                    className={`shop-btn btn-buy ${!canAfford ? 'btn-disabled' : ''}`}
-                                                    disabled={!canAfford}
-                                                    onClick={() => handleBuyWeapon(weapon)}
-                                                    type="button"
-                                                >
-                                                    🪙 {weapon.price} (ຊື້)
-                                                </button>
-                                            )}
-                                        </div>
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    )}
-
                     {/* Upgrades Tab */}
                     {activeTab === 'upgrades' && (
                         <div className="shop-grid">

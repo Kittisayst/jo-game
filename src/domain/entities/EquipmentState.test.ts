@@ -52,5 +52,17 @@ describe('EquipmentState Entity', () =>
         expect(restored.getUpgradeLevel('crystal-sword')).toBe(1);
         expect(restored.currentAttackPower).toBe(46); // 38 + 8
     });
-});
 
+    it('exposes combat stats of the equipped sword, scaling with tier and range', () =>
+    {
+        const equip = new EquipmentState();
+        const wooden = equip.equippedStats;
+        expect(wooden).toEqual({ id: 'wooden-sword', damage: 12, cooldownMs: 380, range: 48 });
+
+        equip.equipWeapon('crystal-sword');
+        const crystal = equip.equippedStats;
+        expect(crystal.damage).toBe(38);
+        expect(crystal.range).toBeGreaterThan(wooden.range);
+        expect(crystal.cooldownMs).toBeLessThan(wooden.cooldownMs);
+    });
+});

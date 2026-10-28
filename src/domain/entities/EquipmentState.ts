@@ -3,6 +3,8 @@ export interface WeaponConfig
     id: string;
     name: string;
     baseDamage: number;
+    cooldownMs: number;
+    range: number;
     maxLevel: number;
     upgradeBonuses: number[]; // Index corresponds to level: 0 = +0, 1 = +5, 2 = +10, 3 = +16
 }
@@ -12,6 +14,8 @@ export const WEAPON_CONFIGS: Record<string, WeaponConfig> = {
         id: 'wooden-sword',
         name: 'ດາບໄມ້ຝຶກຫັດ',
         baseDamage: 12,
+        cooldownMs: 380,
+        range: 48,
         maxLevel: 0,
         upgradeBonuses: [0],
     },
@@ -19,6 +23,8 @@ export const WEAPON_CONFIGS: Record<string, WeaponConfig> = {
         id: 'iron-sword',
         name: 'ດາບເຫຼັກກ້າ',
         baseDamage: 22,
+        cooldownMs: 360,
+        range: 52,
         maxLevel: 3,
         upgradeBonuses: [0, 5, 10, 16], // 22 -> 27 -> 32 -> 38
     },
@@ -26,6 +32,8 @@ export const WEAPON_CONFIGS: Record<string, WeaponConfig> = {
         id: 'crystal-sword',
         name: 'ດາບຜລຶກແກ້ວມົນຕາ',
         baseDamage: 38,
+        cooldownMs: 340,
+        range: 56,
         maxLevel: 3,
         upgradeBonuses: [0, 8, 16, 26], // 38 -> 46 -> 54 -> 64
     },
@@ -97,6 +105,18 @@ export class EquipmentState
         const level = Math.min(config.maxLevel, this.getUpgradeLevel(weaponId));
         const bonus = config.upgradeBonuses[level] ?? 0;
         return config.baseDamage + bonus;
+    }
+
+    /** Combat stats of the equipped sword, including its upgrade bonus. */
+    get equippedStats (): { id: string; damage: number; cooldownMs: number; range: number }
+    {
+        const config = WEAPON_CONFIGS[this._equippedWeaponId];
+        return {
+            id: this._equippedWeaponId,
+            damage: this.getWeaponDamage(this._equippedWeaponId),
+            cooldownMs: config.cooldownMs,
+            range: config.range,
+        };
     }
 
     get currentAttackPower (): number

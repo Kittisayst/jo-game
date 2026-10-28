@@ -78,7 +78,8 @@ import {
 import { completeStageUseCase } from '../../application/CompleteStageUseCase';
 import { selectStageUseCase } from '../../application/SelectStageUseCase';
 import { useItemUseCase as executeUseItemUseCase } from '../../application/UseItemUseCase';
-import { WEAPON_CATALOG } from '../../domain/entities/Weapon';
+import { WEAPON_CONFIGS } from '../../domain/entities/EquipmentState';
+import { cycleEquippedWeaponUseCase } from '../../application/CycleEquippedWeaponUseCase';
 import { TextbookModal, TextbookModalMode } from './components/TextbookModal';
 import { AcademyModal } from './components/AcademyModal';
 import { WorkshopModal } from './components/WorkshopModal';
@@ -112,7 +113,7 @@ function App ()
     const [coinsCount, setCoinsCount] = useState(0);
     const [lives, setLives] = useState(3);
     const [walletBalance, setWalletBalance] = useState(() => entities.wallet.balance);
-    const [equippedWeaponId, setEquippedWeaponId] = useState(() => entities.weaponLoadout.equippedId);
+    const [equippedWeaponId, setEquippedWeaponId] = useState(() => entities.equipment.equippedWeaponId);
     const [isShopOpen, setIsShopOpen] = useState(false);
     const [isAchievementsOpen, setIsAchievementsOpen] = useState(false);
     const [unclaimedAchievementsCount, setUnclaimedAchievementsCount] = useState(() => entities.achievementManager.unclaimedCount);
@@ -527,9 +528,9 @@ function App ()
             setIsStageMapOpen(true);
         };
 
-        const onWeaponChanged = (weapon: { id: string }) =>
+        const onWeaponChanged = (weaponId: string) =>
         {
-            setEquippedWeaponId(weapon.id);
+            setEquippedWeaponId(weaponId);
         };
 
         // Knowledge Quest Event Handlers (Village Library building opens Bookstore mode)
@@ -688,7 +689,7 @@ function App ()
 
     const handleCycleWeapon = () =>
     {
-        const nextId = entities.weaponLoadout.cycleNext();
+        const nextId = cycleEquippedWeaponUseCase(entities.equipment, entities.backpack);
         soundManager.playSelect();
         setEquippedWeaponId(nextId);
         saveManager.autoSave(getCurrentSnapshot());
@@ -797,11 +798,6 @@ function App ()
             entities.wallet.setBalance(snap.wallet.balance);
             setWalletBalance(snap.wallet.balance);
         }
-        if (snap.weapons)
-        {
-            entities.weaponLoadout.loadFrom(snap.weapons);
-            setEquippedWeaponId(entities.weaponLoadout.equippedId);
-        }
         if (snap.upgrades)
         {
             entities.upgradeTree.loadFrom(snap.upgrades);
@@ -842,6 +838,7 @@ function App ()
         if (snap.equipment)
         {
             entities.equipment = EquipmentState.fromSnapshot(snap.equipment);
+            setEquippedWeaponId(entities.equipment.equippedWeaponId);
         }
         if (snap.practiceStats)
         {
@@ -1168,8 +1165,11 @@ function App ()
     // eslint-disable-next-line react-hooks/exhaustive-deps
     ], [inventoryRevision]);
 
-    const equippedWeaponDef =
-        WEAPON_CATALOG.find(w => w.id === equippedWeaponId) || WEAPON_CATALOG[0];
+    const equippedWeaponDef = {
+        id: equippedWeaponId,
+        name: WEAPON_CONFIGS[equippedWeaponId]?.name ?? WEAPON_CONFIGS['wooden-sword'].name,
+        icon: '🗡️',
+    };
 
     const backpackSlotsUsed = useMemo(() => {
         void backpackRevision;
@@ -1349,10 +1349,8 @@ function App ()
 
             {isShopOpen && (
                 <ShopModal
-                    equippedWeaponId={equippedWeaponId}
                     onClose={() => setIsShopOpen(false)}
                     onUpdateWallet={(bal) => setWalletBalance(bal)}
-                    onUpdateWeapon={(wId) => setEquippedWeaponId(wId)}
                     walletBalance={walletBalance}
                 />
             )}

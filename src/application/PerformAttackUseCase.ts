@@ -1,21 +1,19 @@
-import { AttackCooldown, calculateDamage, calculateEffectiveCooldown } from '../domain/entities/Combat';
-import { UpgradeTree } from '../domain/entities/Upgrade';
-import { WeaponDefinition, WeaponLoadout } from '../domain/entities/Weapon';
+import { AttackCooldown } from '../domain/entities/Combat';
+import { EquipmentState } from '../domain/entities/EquipmentState';
 
 export interface AttackResult
 {
+    weaponId: string;
     damage: number;
     range: number;
     effectiveCooldown: number;
-    weapon: WeaponDefinition;
 }
 
 /**
- * Executes a player attack if cooldown allows, computing damage and attack range.
+ * Executes a player attack if cooldown allows, using the equipped sword and its upgrade level.
  */
 export function performAttackUseCase (
-    weaponLoadout: WeaponLoadout,
-    upgradeTree: UpgradeTree,
+    equipment: EquipmentState,
     cooldown: AttackCooldown
 ): AttackResult | null
 {
@@ -24,21 +22,13 @@ export function performAttackUseCase (
         return null;
     }
 
-    const weapon = weaponLoadout.equippedDefinition;
-    const stats = upgradeTree.computeStats();
-
-    const damage = calculateDamage(weapon.baseDamage, stats.bonusDamage);
-    const effectiveCooldown = calculateEffectiveCooldown(
-        weapon.cooldownMs,
-        stats.cooldownReductionFactor
-    );
-
-    cooldown.trigger(effectiveCooldown);
+    const { id, damage, range, cooldownMs } = equipment.equippedStats;
+    cooldown.trigger(cooldownMs);
 
     return {
+        weaponId: id,
         damage,
-        range: weapon.range,
-        effectiveCooldown,
-        weapon,
+        range,
+        effectiveCooldown: cooldownMs,
     };
 }

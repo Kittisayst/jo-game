@@ -2,6 +2,25 @@ export type EnemyState = 'patrol' | 'alert' | 'chase' | 'return';
 
 export type EnemyType = 'slime' | 'slime-flying' | 'slime-armored' | 'slime-spitter';
 
+export type EnemyKind = 'normal' | 'elite' | 'miniboss' | 'boss';
+
+export interface EnemyDrop
+{
+    itemId: string;
+    chance: number;
+    count: number;
+}
+
+/** Data-driven enemy stats loaded from `enemies.json`. */
+export interface EnemyDefinition
+{
+    id: string;
+    kind: EnemyKind;
+    maxHp: number;
+    damage: number;
+    drops: EnemyDrop[];
+}
+
 export interface EnemyArchetype
 {
     type: EnemyType;
@@ -72,6 +91,23 @@ export class Enemy
     private readonly _canStomp: boolean;
     private readonly _coinDropChance: number;
     private readonly _coinDropAmount: number;
+    private _definitionId: string | null = null;
+    private _kind: EnemyKind = 'normal';
+    private _drops: EnemyDrop[] = [];
+
+    /**
+     * Builds an enemy whose HP and drops come from data. Behaviour (patrol, hop, spit) still
+     * comes from the archetype. Definition enemies never drop coins: Credit is learned, not farmed.
+     */
+    static fromDefinition (definition: EnemyDefinition, archetype: EnemyType = 'slime'): Enemy
+    {
+        const base = ENEMY_ARCHETYPES[archetype] ?? ENEMY_ARCHETYPES['slime'];
+        const enemy = new Enemy(archetype, undefined, Math.max(1, definition.maxHp), base.canStomp);
+        enemy._definitionId = definition.id;
+        enemy._kind = definition.kind;
+        enemy._drops = definition.drops.map(d => ({ ...d }));
+        return enemy;
+    }
 
     constructor (
         typeOrPoints: EnemyType | number = 'slime',
@@ -109,6 +145,21 @@ export class Enemy
         return this._type;
     }
 
+    get definitionId (): string | null
+    {
+        return this._definitionId;
+    }
+
+    get kind (): EnemyKind
+    {
+        return this._kind;
+    }
+
+    get drops (): EnemyDrop[]
+    {
+        return this._drops;
+    }
+
     get canStomp (): boolean
     {
         return this._canStomp;
@@ -116,7 +167,7 @@ export class Enemy
 
     get coinDropChance (): number
     {
-        return this._coinDropChance;
+        return this._definitionId ? 0 : this._coinDropChance;
     }
 
     get coinDropAmount (): number

@@ -1,5 +1,5 @@
 import { Physics, Scene } from 'phaser';
-import { Enemy as EnemyEntity, EnemyState, EnemyType, ENEMY_ARCHETYPES } from '../../../domain/entities/Enemy';
+import { Enemy as EnemyEntity, EnemyDefinition, EnemyState, EnemyType, ENEMY_ARCHETYPES } from '../../../domain/entities/Enemy';
 import { soundManager } from '../../audio/SoundManager';
 
 const WIDTH = 32;
@@ -50,7 +50,8 @@ export class Enemy extends Physics.Arcade.Sprite
         patrolDistance = 160,
         speed?: number,
         points?: number,
-        type: EnemyType = 'slime'
+        type: EnemyType = 'slime',
+        definition?: EnemyDefinition
     )
     {
         const archetype = ENEMY_ARCHETYPES[type] ?? ENEMY_ARCHETYPES['slime'];
@@ -60,7 +61,7 @@ export class Enemy extends Physics.Arcade.Sprite
         super(scene, x, y, texKey);
 
         this.enemyType = type;
-        this.entity = new EnemyEntity(type, points);
+        this.entity = definition ? EnemyEntity.fromDefinition(definition, type) : new EnemyEntity(type, points);
 
         scene.add.existing(this);
         scene.physics.add.existing(this);
@@ -576,8 +577,8 @@ export class Enemy extends Physics.Arcade.Sprite
             }
             this.scene.tweens.add({
                 targets: this,
-                scaleX: 1.25,
-                scaleY: 0.8,
+                scaleX: this.scaleX * 1.25,
+                scaleY: this.scaleY * 0.8,
                 duration: 80,
                 yoyo: true,
                 onComplete: () =>

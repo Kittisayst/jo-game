@@ -22,12 +22,12 @@
     "coins": [],
     "powerUps": [],
     "enemies": [
-        { "x": 480, "y": 580, "type": "walker", "patrolDistance": 100, "speed": 50 },
-        { "x": 750, "y": 580, "type": "walker", "patrolDistance": 120, "speed": 60 },
-        { "x": 920, "y": 580, "type": "jumper", "patrolDistance": 80, "speed": 40 },
-        { "x": 1300, "y": 580, "type": "walker", "patrolDistance": 140, "speed": 45 },
-        { "x": 1550, "y": 580, "type": "spitter", "patrolDistance": 90, "speed": 35 },
-        { "x": 1850, "y": 580, "type": "jumper", "patrolDistance": 100, "speed": 55 }
+        { "x": 480, "y": 580, "type": "slime", "enemyId": "forest-slime", "patrolDistance": 100, "speed": 50 },
+        { "x": 750, "y": 580, "type": "slime", "enemyId": "forest-slime", "patrolDistance": 120, "speed": 60 },
+        { "x": 920, "y": 580, "type": "slime", "enemyId": "forest-slime", "patrolDistance": 80, "speed": 40 },
+        { "x": 1300, "y": 580, "type": "slime-armored", "enemyId": "rock-golem", "patrolDistance": 140, "speed": 45 },
+        { "x": 1550, "y": 580, "type": "slime-armored", "enemyId": "rock-golem", "patrolDistance": 90, "speed": 35 },
+        { "x": 1850, "y": 560, "type": "slime-armored", "enemyId": "cave-guardian", "scale": 1.8, "patrolDistance": 160, "speed": 40 }
     ],
     "spikes": [
         { "x": 680, "y": 624 },
@@ -39,7 +39,7 @@
     "boss": {
         "x": 2850,
         "y": 400,
-        "hp": 10
+        "enemyId": "stage-ch1-boss"
     }
 }
 

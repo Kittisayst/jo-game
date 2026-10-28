@@ -16,6 +16,9 @@ export interface EnemySpawnData
     patrolDistance?: number;
     speed?: number;
     type?: EnemyType;
+    /** Key into `enemies.json`; supplies HP and drops. */
+    enemyId?: string;
+    scale?: number;
 }
 
 export interface PowerUpSpawnData
@@ -45,6 +48,7 @@ export interface BossSpawnData
     x: number;
     y: number;
     hp?: number;
+    enemyId?: string;
 }
 
 export interface Level

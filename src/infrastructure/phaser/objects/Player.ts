@@ -371,15 +371,20 @@ export class Player extends Physics.Arcade.Sprite
 
     triggerSlashVfx (weaponId: string): void
     {
+        const swordColors: Record<string, number> = {
+            'wooden-sword': 0xd4a373,
+            'iron-sword': 0xe2e8f0,
+            'crystal-sword': 0xa855f7,
+        };
         const slashX = this.x + (this.facingDir * 30);
         const slashY = this.y;
 
         const slash = this.scene.add.graphics({ x: slashX, y: slashY });
         slash.setDepth(15);
 
-        if (weaponId === 'cyber-saber')
+        if (weaponId === 'cyber-saber' || swordColors[weaponId] !== undefined)
         {
-            const color = 0x06b6d4;
+            const color = swordColors[weaponId] ?? 0x06b6d4;
             slash.lineStyle(4, color, 1);
             slash.beginPath();
             slash.arc(0, 0, 26, this.facingDir > 0 ? -Math.PI / 3 : (4 * Math.PI) / 3, this.facingDir > 0 ? Math.PI / 3 : (2 * Math.PI) / 3, false);

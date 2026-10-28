@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { Enemy } from './Enemy';
+import { Enemy, EnemyDefinition } from './Enemy';
 
 describe('Enemy entity', () =>
 {
@@ -90,5 +90,32 @@ describe('Enemy entity', () =>
         expect(spitter.points).toBe(200);
         expect(spitter.maxHp).toBe(2);
         expect(spitter.canStomp).toBe(true);
+    });
+
+    describe('fromDefinition', () =>
+    {
+        const golem: EnemyDefinition = {
+            id: 'rock-golem',
+            kind: 'normal',
+            maxHp: 80,
+            damage: 15,
+            drops: [{ itemId: 'stone', chance: 1, count: 2 }],
+        };
+
+        it('takes HP and drops from data and never drops coins', () =>
+        {
+            const enemy = Enemy.fromDefinition(golem, 'slime-armored');
+            expect(enemy.maxHp).toBe(80);
+            expect(enemy.definitionId).toBe('rock-golem');
+            expect(enemy.drops).toEqual([{ itemId: 'stone', chance: 1, count: 2 }]);
+            expect(enemy.coinDropChance).toBe(0);
+        });
+
+        it('survives hits until total damage reaches its HP', () =>
+        {
+            const enemy = Enemy.fromDefinition(golem);
+            expect(enemy.takeDamage(12).defeated).toBe(false);
+            expect(enemy.takeDamage(68).defeated).toBe(true);
+        });
     });
 });

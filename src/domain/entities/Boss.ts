@@ -39,18 +39,19 @@ export class Boss
     }
 
     /**
-     * Determines current combat phase based on remaining HP:
-     * - Phase 1: High HP (>= 4 / 5) - Regal & methodical attacks
-     * - Phase 2: Mid HP (2 - 3 / 5) - Enraged dash charges
-     * - Phase 3: Critical HP (1 / 5) - Berserk frenzy & frantic double slams
+     * Determines current combat phase based on the remaining HP ratio, so any max HP works:
+     * - Phase 1: above 60% - Regal & methodical attacks
+     * - Phase 2: above 20% up to 60% - Enraged dash charges
+     * - Phase 3: 20% or less - Berserk frenzy & frantic double slams
      */
     get phase (): BossPhase
     {
-        if (this._currentHp >= 4)
+        const ratio = this._currentHp / this._maxHp;
+        if (ratio > 0.6)
         {
             return 1;
         }
-        if (this._currentHp >= 2)
+        if (ratio > 0.2)
         {
             return 2;
         }
@@ -59,12 +60,12 @@ export class Boss
 
     get isEnraged (): boolean
     {
-        return this._currentHp <= 3;
+        return this._currentHp / this._maxHp <= 0.6;
     }
 
     get isBerserk (): boolean
     {
-        return this._currentHp === 1;
+        return this._currentHp > 0 && this._currentHp / this._maxHp <= 0.2;
     }
 
     takeDamage (amount = 1): { defeated: boolean; currentHp: number }
