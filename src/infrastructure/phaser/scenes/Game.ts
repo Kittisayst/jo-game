@@ -1,13 +1,15 @@
 import { EventBus } from '../../EventBus';
-import { Geom, Input, Scene } from 'phaser';
+import { Input, Scene } from 'phaser';
 import { Player } from '../objects/Player';
-import { Platform } from '../objects/Platform';
-import { Enemy, SPIT_PROJECTILE_KEY } from '../objects/Enemy';
+import { Enemy } from '../objects/Enemy';
 import { Spike } from '../objects/Spike';
 import { MovingPlatform } from '../objects/MovingPlatform';
 import { Boss } from '../objects/Boss';
 import { NPC } from '../objects/NPC';
 import { ParticleManager } from '../effects/ParticleManager';
+import { describeDrops, showLootNotification } from '../effects/FloatingText';
+import { CombatController } from '../controllers/CombatController';
+import { InteractionController } from '../controllers/InteractionController';
 import { soundManager } from '../../audio/SoundManager';
 import { Level } from '../Level';
 import { getGameContent } from '../../content/ContentCatalog';
@@ -17,42 +19,33 @@ import {
     getStageEnemySpawns,
     StageDefinition,
 } from '../stages/StageDefinition';
-import {
-    BrokenGate,
-    buildStageScenery,
-    ResourceNodeView,
-    WaypointView,
-} from '../scenery/StageBuilder';
+import { buildStageScenery, BrokenGate, ResourceNodeView, WaypointView } from '../scenery/StageBuilder';
 import { buildVillageScenery, InteractiveBuilding } from '../scenery/VillageBuilder';
+import {
+    createGround,
+    createMovingPlatforms,
+    createPlatforms,
+    createSky,
+    createSpikes,
+    GROUND_HEIGHT,
+    GROUND_Y,
+    WORLD_HEIGHT,
+} from '../scenery/WorldBuilder';
 import { LEVEL_CATALOG } from '../levelCatalog';
 import { DomainEvents } from '../../../domain/DomainEvents';
 import { Health } from '../../../domain/entities/Health';
-import {
-    playerTakeDamageUseCase,
-    PLAYER_DIED_EVENT,
-} from '../../../application/PlayerTakeDamageUseCase';
-import {
-    SKIN_CHANGED_EVENT,
-    SkinChangedPayload,
-} from '../../../application/SelectSkinUseCase';
-import {
-    GAME_PAUSED_EVENT,
-    GAME_RESUMED_EVENT,
-} from '../../../application/TogglePauseUseCase';
+import { PLAYER_DIED_EVENT } from '../../../application/PlayerTakeDamageUseCase';
+import { SKIN_CHANGED_EVENT, SkinChangedPayload } from '../../../application/SelectSkinUseCase';
+import { GAME_PAUSED_EVENT, GAME_RESUMED_EVENT } from '../../../application/TogglePauseUseCase';
 import { entities } from '../../composition';
-import { performAttackUseCase } from '../../../application/PerformAttackUseCase';
-import { cycleEquippedWeaponUseCase } from '../../../application/CycleEquippedWeaponUseCase';
-import { collectEnemyDropsUseCase } from '../../../application/CollectEnemyDropsUseCase';
 import { EnemyDefinition } from '../../../domain/entities/Enemy';
 import { awardBossRewardUseCase, reviveBossAfterFailedFinisherUseCase } from '../../../application/AwardBossRewardUseCase';
-import { harvestResourceNodeUseCase } from '../../../application/HarvestResourceNodeUseCase';
 
-const WORLD_HEIGHT = 720;
-const GROUND_HEIGHT = 64;
-/** Top of the ground: where buildings, trees and nodes stand. */
-const GROUND_Y = WORLD_HEIGHT - GROUND_HEIGHT;
-const GROUND_TILE_SIZE = 64;
-
+/**
+ * Hosts both the Village Hub and a Stage (chosen by `levelKey`). The scene builds the world,
+ * wires physics and events, and runs the frame loop; fighting and "press E" interactions live
+ * in `CombatController` and `InteractionController`.
+ */
 export class Game extends Scene
 {
     camera: Phaser.Cameras.Scene2D.Camera;
@@ -80,13 +73,12 @@ export class Game extends Scene
     currentLevelKey = 'village';
     currentSkinId = 'cyber-blue';
 
-    // Knowledge Quest: Village Hub & 4-Zone Stage fields
+    private combat: CombatController;
+    private interaction: InteractionController;
     private interactiveBuildings: InteractiveBuilding[] = [];
     private resourceNodes: ResourceNodeView[] = [];
     private waypoints: WaypointView[] = [];
     private brokenGate?: BrokenGate;
-    private interactionPromptText?: Phaser.GameObjects.Text;
-    private activeInteraction: (() => void) | null = null;
 
     constructor ()
     {
@@ -115,8 +107,6 @@ export class Game extends Scene
         this.waypoints = [];
         this.brokenGate = undefined;
         this.stage = undefined;
-        this.interactionPromptText = undefined;
-        this.activeInteraction = null;
     }
 
     preload ()
@@ -212,23 +202,26 @@ export class Game extends Scene
         this.health = entities.health;
         this.health.reset();
 
+        this.combat = new CombatController(this);
+
         this.physics.world.setBounds(0, 0, this.level.worldWidth, WORLD_HEIGHT);
 
         this.camera = this.cameras.main;
         this.camera.setBackgroundColor(0x87ceeb);
         this.camera.setBounds(0, 0, this.level.worldWidth, WORLD_HEIGHT);
 
-        this.createSky();
+        const isVillage = this.level.scenery === 'village' || this.currentLevelKey === 'village';
+        this.bgTileSprite = createSky(this, this.level, isVillage ? 'bg-village' : (this.stage ? 'bg-boss-arena' : 'bg-plains'));
 
-        this.ground = this.createGround();
-        this.platforms = this.createPlatforms();
-        this.movingPlatforms = this.createMovingPlatforms();
-        this.spikes = this.createSpikes();
+        this.ground = createGround(this, this.level);
+        this.platforms = createPlatforms(this, this.level);
+        this.movingPlatforms = createMovingPlatforms(this, this.level);
+        this.spikes = createSpikes(this, this.level);
         this.enemies = this.createEnemies();
 
         this.particleManager = new ParticleManager(this);
 
-        if (this.level.scenery === 'village' || this.currentLevelKey === 'village')
+        if (isVillage)
         {
             this.interactiveBuildings = buildVillageScenery(
                 this,
@@ -250,38 +243,16 @@ export class Game extends Scene
             this.brokenGate = built.brokenGate;
         }
 
-        // Floating interaction prompt text
-        this.interactionPromptText = this.add.text(0, 0, '', {
-            fontFamily: '"Noto Sans Lao", sans-serif',
-            fontSize: '13px',
-            color: '#fef08a',
-            stroke: '#0f172a',
-            strokeThickness: 3,
-            backgroundColor: 'rgba(15, 23, 42, 0.85)',
-            padding: { x: 8, y: 4 },
+        this.interaction = new InteractionController(this, {
+            buildings: this.interactiveBuildings,
+            waypoints: this.waypoints,
+            resourceNodes: this.resourceNodes,
+            brokenGate: this.brokenGate,
+            elderNpc: this.elderNpc,
         });
-        this.interactionPromptText.setOrigin(0.5, 1);
-        this.interactionPromptText.setDepth(30);
-        this.interactionPromptText.setVisible(false);
-
-        const handleInteract = () =>
-        {
-            if (this.isDialogueActive) return;
-
-            if (this.activeInteraction)
-            {
-                this.activeInteraction();
-                return;
-            }
-
-            if (this.elderNpc && this.elderNpc.isInteractable)
-            {
-                this.elderNpc.triggerInteraction();
-            }
-        };
 
         const eKey = this.input.keyboard?.addKey('E');
-        eKey?.on('down', handleInteract);
+        eKey?.on('down', () => this.interaction.interact());
 
         const onDialogueState = (isActive: boolean) =>
         {
@@ -325,12 +296,12 @@ export class Game extends Scene
         // Overlaps
         this.physics.add.overlap(this.player, this.spikes, (_player, spikeObj) =>
         {
-            this.handlePlayerSpikeCollision(spikeObj as Spike);
+            this.combat.onPlayerTouchesSpike(spikeObj as Spike);
         });
 
         this.physics.add.overlap(this.player, this.enemies, (playerObj, enemyObj) =>
         {
-            this.handlePlayerEnemyCollision(playerObj as Player, enemyObj as Enemy);
+            this.combat.onPlayerTouchesEnemy(playerObj as Player, enemyObj as Enemy);
         });
 
         // Spawn Boss if the stage has one
@@ -340,41 +311,13 @@ export class Game extends Scene
             const bossDefinition = this.getEnemyDefinition(bossSpawn.enemyId);
             this.boss = new Boss(this, bossSpawn.x, bossSpawn.y, bossDefinition?.maxHp ?? 5);
             this.boss.awaitFinisher = this.currentLevelKey === 'stage-ch1';
-            this.boss.onLanding = (x, y) =>
-            {
-                this.particleManager.emitLandingDust(x, y);
-                this.cameras.main.shake(140, 0.007);
-            };
-            this.boss.onDefeated = () =>
+            this.combat.bindBoss(this.boss, () =>
             {
                 if (this.currentLevelKey === 'stage-ch1')
                 {
                     EventBus.emit('open-quiz-finisher');
                 }
-            };
-            this.boss.onSummonMinion = (x, y) =>
-            {
-                if (this.enemies.countActive(true) < 3)
-                {
-                    const minion = new Enemy(this, x, y, 140, 85);
-                    minion.setScale(0.75);
-                    this.enemies.add(minion);
-                    this.particleManager.emitCelebration(x, y);
-                    soundManager.playPowerUp();
-                }
-            };
-            this.boss.onPhaseChanged = (newPhase) =>
-            {
-                soundManager.playStomp();
-                if (newPhase === 2)
-                {
-                    this.particleManager.emitSpikeHit(this.boss!.x, this.boss!.y);
-                }
-                else if (newPhase === 3)
-                {
-                    this.particleManager.emitCelebration(this.boss!.x, this.boss!.y);
-                }
-            };
+            });
 
             this.physics.add.collider(this.boss, this.ground);
             this.physics.add.collider(this.boss, this.platforms);
@@ -382,37 +325,24 @@ export class Game extends Scene
 
             this.physics.add.overlap(this.player, this.boss, (playerObj, bossObj) =>
             {
-                this.handlePlayerBossCollision(playerObj as Player, bossObj as Boss);
+                this.combat.onPlayerTouchesBoss(playerObj as Player, bossObj as Boss);
             });
         }
 
-        // Setup player projectile pool & collisions
+        // Enemy spit: breaks on terrain, hurts the hero on contact
         this.enemyProjectiles = this.physics.add.group();
 
-        this.physics.add.collider(this.enemyProjectiles, this.ground, (proj) =>
+        const destroyOnHit = (proj: unknown) =>
         {
             (proj as Phaser.Physics.Arcade.Sprite).destroy();
-        });
-        this.physics.add.collider(this.enemyProjectiles, this.platforms, (proj) =>
-        {
-            (proj as Phaser.Physics.Arcade.Sprite).destroy();
-        });
-        this.physics.add.collider(this.enemyProjectiles, this.movingPlatforms, (proj) =>
-        {
-            (proj as Phaser.Physics.Arcade.Sprite).destroy();
-        });
+        };
+        this.physics.add.collider(this.enemyProjectiles, this.ground, destroyOnHit);
+        this.physics.add.collider(this.enemyProjectiles, this.platforms, destroyOnHit);
+        this.physics.add.collider(this.enemyProjectiles, this.movingPlatforms, destroyOnHit);
 
-        // Player takes damage on enemy spit contact
         this.physics.add.overlap(this.player, this.enemyProjectiles, (_player, proj) =>
         {
-            (proj as Phaser.Physics.Arcade.Sprite).destroy();
-            if (this.player.isInvincible) return;
-
-            this.player.triggerDamage(this.player.x);
-            this.particleManager.emitSpikeHit(this.player.x, this.player.y);
-            this.cameras.main.shake(150, 0.007);
-            this.cameras.main.flash(100, 34, 197, 94, true);
-            playerTakeDamageUseCase(this.health);
+            this.combat.onSpitHitsPlayer(proj as Phaser.Physics.Arcade.Sprite);
         });
 
         this.camera.startFollow(this.player, true, 0.1, 0.1);
@@ -431,9 +361,9 @@ export class Game extends Scene
         const qKey = this.input.keyboard?.addKey('Q');
         const f2Key = this.input.keyboard?.addKey(Input.Keyboard.KeyCodes.F2);
 
-        jKey?.on('down', () => this.handlePlayerAttack());
-        zKey?.on('down', () => this.handlePlayerAttack());
-        qKey?.on('down', () => this.handleCycleWeapon());
+        jKey?.on('down', () => this.combat.attack());
+        zKey?.on('down', () => this.combat.attack());
+        qKey?.on('down', () => this.combat.cycleWeapon());
         f2Key?.on('down', () => this.togglePhysicsDebug());
 
         const onVirtualInput = (inputs: { left?: boolean; right?: boolean; up?: boolean }) =>
@@ -443,10 +373,9 @@ export class Game extends Scene
             if (typeof inputs.up === 'boolean') this.touchControls.up = inputs.up;
         };
 
-        const onVirtualInteract = () => handleInteract();
-
-        const onVirtualAttack = () => this.handlePlayerAttack();
-        const onVirtualCycleWeapon = () => this.handleCycleWeapon();
+        const onVirtualInteract = () => this.interaction.interact();
+        const onVirtualAttack = () => this.combat.attack();
+        const onVirtualCycleWeapon = () => this.combat.cycleWeapon();
         const onTogglePhysicsDebug = () => this.togglePhysicsDebug();
 
         const onQuizFinisherPassed = () =>
@@ -454,8 +383,14 @@ export class Game extends Scene
             this.boss?.playDefeatTween();
             const reward = awardBossRewardUseCase(entities.backpack);
             EventBus.emit('backpack-changed');
-            const rewardText = reward.collected.map(d => `+${d.count} ${this.getItemEmoji(d.itemId)} ${d.itemId}`).join(' & ');
-            this.showLootNotification(this.player.x, this.player.y - 40, reward.overflow.length > 0 ? `${rewardText} 🎒 ກະເປົາເຕັມ!` : rewardText, '#a855f7');
+            const rewardText = describeDrops(reward.collected, ' & ');
+            showLootNotification(
+                this,
+                this.player.x,
+                this.player.y - 40,
+                reward.overflow.length > 0 ? `${rewardText} 🎒 ກະເປົາເຕັມ!` : rewardText,
+                '#a855f7'
+            );
             this.particleManager.emitCelebration(this.player.x, this.player.y);
             this.cameras.main.shake(450, 0.018);
             this.cameras.main.flash(200, 255, 255, 255, true);
@@ -472,7 +407,7 @@ export class Game extends Scene
                 const healAmount = reviveBossAfterFailedFinisherUseCase(this.boss.entity);
                 this.boss.reviveAfterFailedFinisher();
                 this.particleManager.emitSpikeHit(this.boss.x, this.boss.y);
-                this.showLootNotification(this.boss.x, this.boss.y - 30, `⚠️ Boss ຟື້ນຟູ ${healAmount} HP!`, '#ef4444');
+                showLootNotification(this, this.boss.x, this.boss.y - 30, `⚠️ Boss ຟື້ນຟູ ${healAmount} HP!`, '#ef4444');
                 soundManager.playPowerUp();
             }
         };
@@ -496,9 +431,8 @@ export class Game extends Scene
         EventBus.on('quiz-finisher-failed', onQuizFinisherFailed);
         EventBus.on('gate-repaired', onGateRepaired);
 
-        // Start BGM (boss theme for level-3, adventure theme for levels 1 & 2)
-        const isBossStage = Boolean(bossSpawn);
-        soundManager.startBgm(isBossStage ? 'boss' : 'adventure');
+        // Boss theme in a stage with a boss, adventure theme everywhere else
+        soundManager.startBgm(bossSpawn ? 'boss' : 'adventure');
 
         const onSkinChanged = (payload: SkinChangedPayload) =>
         {
@@ -584,7 +518,7 @@ export class Game extends Scene
             this.elderNpc.updateProximity(this.player.x, this.player.y);
         }
 
-        this.updateInteractionPrompt();
+        this.interaction.update();
 
         const isLeft = Boolean(this.cursors.left.isDown || this.wasdKeys?.left?.isDown || this.touchControls.left);
         const isRight = Boolean(this.cursors.right.isDown || this.wasdKeys?.right?.isDown || this.touchControls.right);
@@ -626,117 +560,6 @@ export class Game extends Scene
 
     }
 
-    showDamageNumber (x: number, y: number, amount: number, isCrit = false): void
-    {
-        const text = this.add.text(x, y - 24, isCrit ? `-${amount} CRIT!` : `-${amount}`, {
-            fontFamily: 'monospace, sans-serif',
-            fontSize: isCrit ? '18px' : '15px',
-            fontStyle: 'bold',
-            color: isCrit ? '#ef4444' : '#facc15',
-            stroke: '#000000',
-            strokeThickness: 3,
-        }).setDepth(25).setOrigin(0.5);
-
-        this.tweens.add({
-            targets: text,
-            y: y - 56,
-            alpha: 0,
-            scale: isCrit ? 1.3 : 1.1,
-            duration: 480,
-            ease: 'Cubic.easeOut',
-            onComplete: () => text.destroy(),
-        });
-    }
-
-    handlePlayerAttack (): void
-    {
-        if (this.isDialogueActive || this.health.isDead || this.isStageCleared) return;
-
-        const attack = performAttackUseCase(entities.equipment, entities.attackCooldown);
-
-        if (!attack) return;
-
-        const { weaponId, damage, range } = attack;
-        this.player.triggerSlashVfx(weaponId);
-        soundManager.playSlash();
-        this.resolveMeleeAttack(weaponId, damage, range);
-    }
-
-    private resolveMeleeAttack (weaponId: string, damage: number, range: number): void
-    {
-        const dir = this.player.facingDir;
-        const hitBoxX = this.player.x + (dir * (range / 2 + 10));
-        const hitBoxY = this.player.y;
-        const hitBoxWidth = range + 24;
-        const hitBoxHeight = 56;
-
-        const bounds = new Geom.Rectangle(
-            hitBoxX - hitBoxWidth / 2,
-            hitBoxY - hitBoxHeight / 2,
-            hitBoxWidth,
-            hitBoxHeight
-        );
-
-        let hitAny = false;
-
-        // Melee slash destroys incoming enemy projectiles
-        for (const child of this.enemyProjectiles.getChildren())
-        {
-            const spit = child as Phaser.Physics.Arcade.Sprite;
-            if (!spit.active) continue;
-            if (Geom.Intersects.RectangleToRectangle(bounds, spit.getBounds()))
-            {
-                spit.destroy();
-                this.particleManager.emitStompBurst(spit.x, spit.y);
-            }
-        }
-
-        const isHeavyWeapon = weaponId === 'thunder-hammer';
-
-        for (const child of this.enemies.getChildren())
-        {
-            const enemy = child as Enemy;
-            if (!enemy.active || enemy.entity.isDefeated) continue;
-
-            if (Geom.Intersects.RectangleToRectangle(bounds, enemy.getBounds()))
-            {
-                hitAny = true;
-                const res = enemy.takeDamage(damage, dir, isHeavyWeapon);
-                this.showDamageNumber(enemy.x, enemy.y, damage, isHeavyWeapon);
-                this.particleManager.emitStompBurst(enemy.x, enemy.y);
-
-                if (res.defeated)
-                {
-                    this.handleEnemyDefeated(enemy);
-                }
-            }
-        }
-
-        if (this.boss && this.boss.active && !this.boss.entity.isDefeated && !this.boss.isInvulnerable)
-        {
-            if (Geom.Intersects.RectangleToRectangle(bounds, this.boss.getBounds()))
-            {
-                hitAny = true;
-                this.boss.takeDamage(damage);
-                this.showDamageNumber(this.boss.x, this.boss.y, damage, weaponId === 'thunder-hammer');
-                this.particleManager.emitStompBurst(this.boss.x, this.boss.y);
-            }
-        }
-
-        if (hitAny)
-        {
-            this.triggerHitStop(weaponId === 'thunder-hammer' ? 65 : 45);
-            this.cameras.main.shake(120, weaponId === 'thunder-hammer' ? 0.008 : 0.004);
-        }
-    }
-
-    private handleCycleWeapon (): void
-    {
-        const nextWeapon = cycleEquippedWeaponUseCase(entities.equipment, entities.backpack);
-        soundManager.playSelect();
-        EventBus.emit('weapon-changed', nextWeapon);
-    }
-
     togglePhysicsDebug (): void
     {
         const world = this.physics.world;
@@ -753,116 +576,6 @@ export class Game extends Scene
         soundManager.playSelect();
     }
 
-    private hitStopCounter = 0;
-
-    private triggerHitStop (durationMs = 50): void
-    {
-        this.hitStopCounter++;
-        const currentId = this.hitStopCounter;
-        this.physics.world.isPaused = true;
-        this.time.delayedCall(durationMs, () =>
-        {
-            if (currentId === this.hitStopCounter && !this.isDialogueActive && !this.scene.isPaused())
-            {
-                this.physics.world.isPaused = false;
-            }
-        });
-    }
-
-    private handlePlayerEnemyCollision (player: Player, enemy: Enemy)
-    {
-        if (enemy.entity.isDefeated) return;
-
-        const playerBody = player.body as Phaser.Physics.Arcade.Body;
-        const isFalling = playerBody.velocity.y > 0;
-        const isAbove = player.y < enemy.y - 4;
-
-        if (isFalling && isAbove)
-        {
-            // Armored slime stomp immunity check
-            if (!enemy.entity.canStomp)
-            {
-                soundManager.playClink();
-                this.particleManager.emitSpikeHit(enemy.x, enemy.y - 12);
-                player.setVelocityY(-240);
-                this.cameras.main.shake(130, 0.006);
-                if (!player.isInvincible)
-                {
-                    player.triggerDamage(enemy.x);
-                    this.cameras.main.flash(100, 239, 68, 68, true);
-                    playerTakeDamageUseCase(this.health);
-                }
-                return;
-            }
-
-            // Stomp victory: bounce, emit particle burst, freeze frame, camera shake, and defeat enemy
-            const stompDamage = entities.equipment.equippedStats.damage;
-            player.setVelocityY(-340);
-            this.particleManager.emitStompBurst(enemy.x, enemy.y);
-            this.triggerHitStop(45);
-            this.cameras.main.shake(100, 0.0035);
-            this.showDamageNumber(enemy.x, enemy.y, stompDamage, false);
-            if (enemy.takeDamage(stompDamage, 0).defeated)
-            {
-                this.handleEnemyDefeated(enemy);
-            }
-        }
-        else
-        {
-            // Player hit by enemy
-            if (!player.isInvincible)
-            {
-                player.triggerDamage(enemy.x);
-                this.cameras.main.shake(160, 0.008);
-                this.cameras.main.flash(110, 239, 68, 68, true);
-                playerTakeDamageUseCase(this.health);
-            }
-        }
-    }
-
-    private handlePlayerSpikeCollision (spike: Spike)
-    {
-        if (this.player.isInvincible) return;
-
-        this.player.triggerDamage(spike.x);
-        this.particleManager.emitSpikeHit(spike.x, spike.y);
-        this.cameras.main.shake(180, 0.009);
-        this.cameras.main.flash(110, 239, 68, 68, true);
-        playerTakeDamageUseCase(this.health);
-    }
-
-    private handlePlayerBossCollision (player: Player, boss: Boss)
-    {
-        if (boss.entity.isDefeated) return;
-
-        const playerBody = player.body as Phaser.Physics.Arcade.Body;
-        const isFalling = playerBody.velocity.y > 0;
-        const isAbove = player.y < boss.y - 8;
-
-        if (isFalling && isAbove && !boss.isInvulnerable)
-        {
-            // High bounce when stomping boss with impact hit-stop, punchy camera shake, and impact flash
-            player.setVelocityY(-420);
-            this.particleManager.emitStompBurst(boss.x, boss.y);
-            this.triggerHitStop(75);
-            this.cameras.main.shake(200, 0.012);
-            this.cameras.main.flash(70, 255, 255, 255, true);
-            soundManager.playStomp();
-            boss.takeDamage(entities.equipment.equippedStats.damage);
-        }
-        else
-        {
-            // Player hit by boss
-            if (!player.isInvincible)
-            {
-                player.triggerDamage(boss.x);
-                this.cameras.main.shake(220, 0.012);
-                this.cameras.main.flash(140, 239, 68, 68, true);
-                playerTakeDamageUseCase(this.health);
-            }
-        }
-    }
-
     private handleStageCleared ()
     {
         if (this.isStageCleared) return;
@@ -872,271 +585,6 @@ export class Game extends Scene
         soundManager.stopBgm();
         soundManager.playLevelComplete();
         EventBus.emit('stage-cleared', { stageId: this.currentLevelKey });
-    }
-
-    private updateInteractionPrompt (): void
-    {
-        if (!this.player || !this.interactionPromptText || this.isDialogueActive || this.health.isDead)
-        {
-            if (this.interactionPromptText) this.interactionPromptText.setVisible(false);
-            this.activeInteraction = null;
-            return;
-        }
-
-        const px = this.player.x;
-        const py = this.player.y;
-
-        // 1. Check Village Buildings
-        if (this.currentLevelKey === 'village')
-        {
-            for (const b of this.interactiveBuildings)
-            {
-                if (Math.abs(px - b.x) < 70)
-                {
-                    this.interactionPromptText.setText(b.label);
-                    this.interactionPromptText.setPosition(b.x, py - 40);
-                    this.interactionPromptText.setVisible(true);
-                    this.activeInteraction = b.action;
-                    return;
-                }
-            }
-        }
-
-        // 2. Check Stage Ch1 Waypoints
-        for (const wp of this.waypoints)
-        {
-            if (Math.abs(px - wp.x) < 70)
-            {
-                this.interactionPromptText.setText(`🌀 [E] ${wp.name}`);
-                this.interactionPromptText.setPosition(wp.x, py - 40);
-                this.interactionPromptText.setVisible(true);
-                this.activeInteraction = () => EventBus.emit('open-waypoint', wp.name);
-                return;
-            }
-        }
-
-        // 3. Check Broken Gate
-        if (this.brokenGate && !entities.repairedGates.has(this.brokenGate.gateId))
-        {
-            if (Math.abs(px - this.brokenGate.x) < 80)
-            {
-                this.interactionPromptText.setText('🚪 [E] ສ້ອມແປງປະຕູໃຫຍ່ (Repair Gate)');
-                this.interactionPromptText.setPosition(this.brokenGate.x, py - 40);
-                this.interactionPromptText.setVisible(true);
-                this.activeInteraction = () => EventBus.emit('open-gate-repair', this.brokenGate!.gateId, this.brokenGate!.requirements);
-                return;
-            }
-        }
-
-        // 4. Check Resource Nodes
-        for (const node of this.resourceNodes)
-        {
-            if (!node.harvested && Math.abs(px - node.x) < 65)
-            {
-                this.interactionPromptText.setText(node.label);
-                this.interactionPromptText.setPosition(node.x, py - 40);
-                this.interactionPromptText.setVisible(true);
-                this.activeInteraction = () => this.handleHarvestResourceNode(node);
-                return;
-            }
-        }
-
-        // 5. Check NPCs
-        if (this.elderNpc && this.elderNpc.isInteractable)
-        {
-            this.interactionPromptText.setText('💬 [E] ລົມກັບຫົວໜ້າໝູ່ບ້ານ');
-            this.interactionPromptText.setPosition(this.elderNpc.x, py - 40);
-            this.interactionPromptText.setVisible(true);
-            this.activeInteraction = () => this.elderNpc!.triggerInteraction();
-            return;
-        }
-
-        this.interactionPromptText.setVisible(false);
-        this.activeInteraction = null;
-    }
-
-    private handleHarvestResourceNode (node: ResourceNodeView): void
-    {
-        const result = harvestResourceNodeUseCase(node, entities.backpack);
-        if (result.success)
-        {
-            soundManager.playCoin();
-            node.harvested = true;
-            node.graphic.clear();
-            this.particleManager.emitCelebration(node.x, node.y - 20);
-
-            EventBus.emit('backpack-changed');
-            const dropTexts = result.drops.map(d => `+${d.count} ${this.getItemEmoji(d.itemId)} ${d.itemId}`).join(', ');
-            this.showLootNotification(node.x, node.y - 30, `🎒 ${dropTexts}`, '#22c55e');
-        }
-        else
-        {
-            soundManager.playClink();
-            if (result.reason === 'missing_tool')
-            {
-                this.showLootNotification(node.x, node.y - 30, `⚠️ ຕ້ອງການ ${node.requiredTool?.toUpperCase()}!`, '#f59e0b');
-            }
-            else if (result.reason === 'backpack_full')
-            {
-                this.showLootNotification(node.x, node.y - 30, '⚠️ ກະເປົາເຕັມ (20/20)!', '#ef4444');
-            }
-        }
-    }
-
-    showLootNotification (x: number, y: number, textStr: string, color = '#22c55e'): void
-    {
-        const text = this.add.text(x, y - 24, textStr, {
-            fontFamily: '"Noto Sans Lao", sans-serif',
-            fontSize: '14px',
-            fontStyle: 'bold',
-            color,
-            stroke: '#000000',
-            strokeThickness: 3,
-        }).setDepth(26).setOrigin(0.5);
-
-        this.tweens.add({
-            targets: text,
-            y: y - 60,
-            alpha: 0,
-            scale: 1.15,
-            duration: 1200,
-            ease: 'Cubic.easeOut',
-            onComplete: () => text.destroy(),
-        });
-    }
-
-    private createSky ()
-    {
-        let bgKey = 'bg-plains';
-        if (this.currentLevelKey === 'village' || this.level.scenery === 'village')
-        {
-            bgKey = 'bg-village';
-        }
-        else if (this.stage)
-        {
-            bgKey = 'bg-boss-arena';
-        }
-
-        if (this.textures.exists(bgKey))
-        {
-            // TileSprite pinned to camera viewport with parallax scrolling in update
-            const bg = this.add.tileSprite(0, 0, 1280, WORLD_HEIGHT, bgKey);
-            bg.setOrigin(0, 0);
-            bg.setScrollFactor(0);
-            bg.setDepth(-10);
-            this.bgTileSprite = bg;
-        }
-        else
-        {
-            const textureKey = 'sky-tile';
-            const tileSize = 256;
-
-            if (!this.textures.exists(textureKey))
-            {
-                const graphics = this.make.graphics({ x: 0, y: 0 });
-                graphics.fillStyle(0x87ceeb, 1);
-                graphics.fillRect(0, 0, tileSize, tileSize);
-                graphics.fillStyle(0xffffff, 0.6);
-                graphics.fillEllipse(64, 70, 70, 26);
-                graphics.fillEllipse(190, 150, 90, 30);
-                graphics.generateTexture(textureKey, tileSize, tileSize);
-                graphics.destroy();
-            }
-
-            const sky = this.add.tileSprite(this.level.worldWidth / 2, WORLD_HEIGHT / 2, this.level.worldWidth, WORLD_HEIGHT, textureKey);
-            sky.setScrollFactor(0.3);
-            sky.setDepth(-10);
-        }
-    }
-
-    private createGround ()
-    {
-        const textureKey = 'ground-tile';
-
-        if (!this.textures.exists(textureKey))
-        {
-            const graphics = this.make.graphics({ x: 0, y: 0 });
-            graphics.fillStyle(0x4a7c2a, 1);
-            graphics.fillRect(0, 0, GROUND_TILE_SIZE, GROUND_HEIGHT);
-            graphics.fillStyle(0x3f6b23, 1);
-            graphics.fillRect(0, 0, GROUND_TILE_SIZE, 6);
-            graphics.fillRect(0, 0, 2, GROUND_HEIGHT);
-            graphics.generateTexture(textureKey, GROUND_TILE_SIZE, GROUND_HEIGHT);
-            graphics.destroy();
-        }
-
-        const groundY = WORLD_HEIGHT - GROUND_HEIGHT / 2;
-        const tileSprite = this.add.tileSprite(this.level.worldWidth / 2, groundY, this.level.worldWidth, GROUND_HEIGHT, textureKey);
-        tileSprite.setDepth(4);
-
-        this.physics.add.existing(tileSprite, true);
-
-        const ground = this.physics.add.staticGroup();
-        ground.add(tileSprite);
-
-        return ground;
-    }
-
-    private createPlatforms ()
-    {
-        // Pure geometry — no domain entity, see "Pairing is optional, not automatic" in CONTEXT.md.
-        const platforms = this.physics.add.staticGroup();
-
-        for (const { x, y } of this.level.platforms)
-        {
-            platforms.add(new Platform(this, x, y));
-        }
-
-        return platforms;
-    }
-
-    private getItemEmoji (itemId: string): string
-    {
-        const itemEmojiMap: Record<string, string> = {
-            'wood': '🪵',
-            'stone': '🪨',
-            'iron-ore': '⛏️',
-            'herb': '🌿',
-            'fiber': '🌾',
-            'crystal': '💎',
-            'boss-core': '🔮',
-        };
-        return itemEmojiMap[itemId] || '📦';
-    }
-
-    private handleEnemyDefeated (enemy: Enemy): void
-    {
-        soundManager.playStomp();
-
-        // Materials from the enemy's drop table go straight into the backpack
-        const drops = collectEnemyDropsUseCase(enemy.entity, entities.backpack);
-        if (drops.collected.length > 0 || drops.overflow.length > 0)
-        {
-            const parts = drops.collected.map(d => `+${d.count} ${this.getItemEmoji(d.itemId)} ${d.itemId}`);
-            if (drops.overflow.length > 0) parts.push('🎒 ກະເປົາເຕັມ!');
-            this.showLootNotification(enemy.x, enemy.y - 30, parts.join(', '), drops.overflow.length > 0 ? '#f59e0b' : '#22c55e');
-            soundManager.playCoin();
-            EventBus.emit('backpack-changed');
-        }
-
-    }
-
-    private spawnEnemySpit (x: number, y: number, dirX: number, dirY = 0): void
-    {
-        const spit = this.physics.add.sprite(x, y, SPIT_PROJECTILE_KEY);
-        this.enemyProjectiles.add(spit);
-
-        const body = spit.body as Phaser.Physics.Arcade.Body;
-        if (body)
-        {
-            body.allowGravity = false;
-            spit.setVelocity(dirX * 220, dirY * 220);
-        }
-
-        this.time.delayedCall(3500, () =>
-        {
-            if (spit.active) spit.destroy();
-        });
     }
 
     private getEnemyDefinition (enemyId: string): EnemyDefinition | undefined
@@ -1162,46 +610,11 @@ export class Game extends Scene
             if (spawn.scale) enemy.setScale(spawn.scale);
             enemy.onSpit = (x, y, dirX, dirY) =>
             {
-                this.spawnEnemySpit(x, y, dirX, dirY);
+                this.combat.spawnEnemySpit(x, y, dirX, dirY);
             };
             enemies.add(enemy);
         }
 
         return enemies;
-    }
-
-    private createSpikes ()
-    {
-        const spikes = this.physics.add.staticGroup();
-
-        if (this.level.spikes)
-        {
-            for (const item of this.level.spikes)
-            {
-                spikes.add(new Spike(this, item.x, item.y));
-            }
-        }
-
-        return spikes;
-    }
-
-    private createMovingPlatforms ()
-    {
-        const movingPlatforms = this.physics.add.group();
-
-        if (this.level.movingPlatforms)
-        {
-            for (const item of this.level.movingPlatforms)
-            {
-                const mp = new MovingPlatform(this, item.x, item.y, {
-                    distanceX: item.distanceX,
-                    distanceY: item.distanceY,
-                    speed: item.speed,
-                });
-                movingPlatforms.add(mp);
-            }
-        }
-
-        return movingPlatforms;
     }
 }
