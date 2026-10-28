@@ -79,7 +79,7 @@ import { completeStageUseCase } from '../../application/CompleteStageUseCase';
 import { selectStageUseCase } from '../../application/SelectStageUseCase';
 import { useItemUseCase as executeUseItemUseCase } from '../../application/UseItemUseCase';
 import { WEAPON_CATALOG } from '../../domain/entities/Weapon';
-import { TextbookModal } from './components/TextbookModal';
+import { TextbookModal, TextbookModalMode } from './components/TextbookModal';
 import { AcademyModal } from './components/AcademyModal';
 import { WorkshopModal } from './components/WorkshopModal';
 import { ForgeModal } from './components/ForgeModal';
@@ -194,8 +194,11 @@ function App ()
     const settingsRef = useRef(settings);
     settingsRef.current = settings;
 
-    // Knowledge Quest v4 States
+    // Knowledge Quest v5 States
     const [isLibraryOpen, setIsLibraryOpen] = useState(false);
+    const [textbookModalMode, setTextbookModalMode] = useState<TextbookModalMode>('reader');
+    const [activeReaderBookId, setActiveReaderBookId] = useState<string | undefined>(undefined);
+    const [booksRevision, setBooksRevision] = useState(0);
     const [isAcademyOpen, setIsAcademyOpen] = useState(false);
     const [isWorkshopOpen, setIsWorkshopOpen] = useState(false);
     const [isForgeOpen, setIsForgeOpen] = useState(false);
@@ -529,8 +532,13 @@ function App ()
             setEquippedWeaponId(weapon.id);
         };
 
-        // Knowledge Quest Event Handlers
-        const onOpenLibrary = () => setIsLibraryOpen(true);
+        // Knowledge Quest Event Handlers (Village Library building opens Bookstore mode)
+        const onOpenLibrary = (bookId?: string) =>
+        {
+            setActiveReaderBookId(bookId);
+            setTextbookModalMode('library-store');
+            setIsLibraryOpen(true);
+        };
         const onOpenAcademy = (bookId?: string) =>
         {
             if (bookId) setActiveExamBookId(bookId);
@@ -809,7 +817,11 @@ function App ()
             setUnclaimedAchievementsCount(entities.achievementManager.unclaimedCount);
         }
 
-        // Version 4 Knowledge Quest fields restoration
+        // Version 5 Knowledge Quest fields restoration
+        for (const existingKey of Object.keys(entities.books))
+        {
+            delete entities.books[existingKey];
+        }
         if (snap.books)
         {
             for (const [key, val] of Object.entries(snap.books))
@@ -817,6 +829,11 @@ function App ()
                 entities.books[key] = BookProgress.fromSnapshot(val);
             }
         }
+        if (!entities.books['book-ch1'])
+        {
+            entities.books['book-ch1'] = new BookProgress('book-ch1', false);
+        }
+        setBooksRevision(r => r + 1);
         if (snap.backpack)
         {
             entities.backpack.loadFromSnapshot(snap.backpack);
@@ -1039,6 +1056,18 @@ function App ()
             );
             saveManager.clearSlot(saveManager.getActiveSlot());
             entities.achievementManager.reset();
+            entities.wallet.setBalance(50);
+            for (const existingKey of Object.keys(entities.books))
+            {
+                delete entities.books[existingKey];
+            }
+            entities.books['book-ch1'] = new BookProgress('book-ch1', false);
+            entities.backpack.loadFromSnapshot([]);
+            entities.repairedGates.clear();
+            entities.forgeUnlocked = false;
+            setWalletBalance(50);
+            setBooksRevision(r => r + 1);
+            setBackpackRevision(r => r + 1);
             setUnclaimedAchievementsCount(0);
             setHighScore(0);
             setBestTime(null);
@@ -1147,6 +1176,11 @@ function App ()
         return entities.backpack.usedSlotsCount;
     }, [backpackRevision]);
 
+    const ownedBooksCount = useMemo(() => {
+        void booksRevision;
+        return Object.values(entities.books).filter(b => b.isUnlocked).length;
+    }, [booksRevision]);
+
     return (
         <div id="app">
             <AchievementToast />
@@ -1175,7 +1209,13 @@ function App ()
                     onOpenAchievements={handleOpenAchievements}
                     onOpenShop={() => setIsShopOpen(true)}
                     onOpenBackpack={() => setIsBackpackOpen(true)}
-                    onOpenLibrary={() => setIsLibraryOpen(true)}
+                    onOpenLibrary={() =>
+                    {
+                        setActiveReaderBookId(undefined);
+                        setTextbookModalMode('reader');
+                        setIsLibraryOpen(true);
+                    }}
+                    ownedBooksCount={ownedBooksCount}
                     backpackCount={backpackSlotsUsed}
                     maxBackpackSlots={entities.backpack.maxSlots}
                     onTogglePause={handleTogglePause}
@@ -1329,7 +1369,21 @@ function App ()
             {/* Knowledge Quest Modals */}
             <TextbookModal
                 isOpen={isLibraryOpen}
+                mode={textbookModalMode}
+                isInVillage={currentLevel === 'village'}
+                initialBookId={activeReaderBookId}
                 onClose={() => setIsLibraryOpen(false)}
+                onBookPurchased={(_bookId, newBalance) =>
+                {
+                    setWalletBalance(newBalance);
+                    setBooksRevision(r => r + 1);
+                    saveManager.autoSave(getCurrentSnapshot());
+                }}
+                onPageRead={() =>
+                {
+                    setBooksRevision(r => r + 1);
+                    saveManager.autoSave(getCurrentSnapshot());
+                }}
                 onGoToExam={(bookId) =>
                 {
                     setIsLibraryOpen(false);
@@ -1342,9 +1396,29 @@ function App ()
                 isOpen={isAcademyOpen}
                 initialBookId={activeExamBookId}
                 onClose={() => setIsAcademyOpen(false)}
+                onCreditChanged={(newBalance) =>
+                {
+                    setWalletBalance(newBalance);
+                    saveManager.autoSave(getCurrentSnapshot());
+                }}
+                onOpenLibraryStore={() =>
+                {
+                    if (currentLevel === 'village')
+                    {
+                        setTextbookModalMode('library-store');
+                        setIsLibraryOpen(true);
+                    }
+                }}
+                onOpenReader={(bookId) =>
+                {
+                    setActiveReaderBookId(bookId);
+                    setTextbookModalMode('reader');
+                    setIsLibraryOpen(true);
+                }}
                 onExamPassed={() =>
                 {
                     setWalletBalance(entities.wallet.balance);
+                    setBooksRevision(r => r + 1);
                     setBackpackRevision(r => r + 1);
                     saveManager.autoSave(getCurrentSnapshot());
                 }}
@@ -1371,6 +1445,12 @@ function App ()
             <BackpackModal
                 isOpen={isBackpackOpen}
                 onClose={() => setIsBackpackOpen(false)}
+                onOpenBooks={() =>
+                {
+                    setActiveReaderBookId(undefined);
+                    setTextbookModalMode('reader');
+                    setIsLibraryOpen(true);
+                }}
                 onUseItem={(itemId) =>
                 {
                     if (itemId === 'herb-potion')

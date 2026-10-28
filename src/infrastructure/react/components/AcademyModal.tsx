@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { BookDefinition } from '../../../domain/entities/Book';
+import { BookDefinition, BookProgress } from '../../../domain/entities/Book';
 import { QuestionData, QuizExamSession } from '../../../domain/entities/Quiz';
 import { loadBooksData, loadQuestionsData } from '../../dataLoader';
 import { entities } from '../../composition';
@@ -14,6 +14,9 @@ interface AcademyModalProps
     onClose: () => void;
     initialBookId?: string;
     onExamPassed?: (bookId: string) => void;
+    onCreditChanged?: (newBalance: number) => void;
+    onOpenLibraryStore?: () => void;
+    onOpenReader?: (bookId: string) => void;
 }
 
 export const AcademyModal: React.FC<AcademyModalProps> = ({
@@ -21,6 +24,9 @@ export const AcademyModal: React.FC<AcademyModalProps> = ({
     onClose,
     initialBookId = 'book-ch1',
     onExamPassed,
+    onCreditChanged,
+    onOpenLibraryStore,
+    onOpenReader,
 }) =>
 {
     const [activeTab, setActiveTab] = useState<'exam' | 'practice'>('exam');
@@ -56,13 +62,36 @@ export const AcademyModal: React.FC<AcademyModalProps> = ({
 
     if (!isOpen) return null;
 
+    const ensureBookProgress = (bookId: string): BookProgress =>
+    {
+        let bp = entities.books[bookId];
+        if (!bp)
+        {
+            bp = new BookProgress(bookId, false);
+            entities.books[bookId] = bp;
+        }
+        return bp;
+    };
+
     const currentBook = books.find(b => b.id === selectedBookId) || books[0];
-    const bookProgress = currentBook ? entities.books[currentBook.id] : null;
+    const bookProgress = currentBook ? ensureBookProgress(currentBook.id) : null;
+    const readProgress = currentBook && bookProgress
+        ? bookProgress.getReadProgress(currentBook.pages.length)
+        : { readCount: 0, totalPages: 0, percentage: 0, isComplete: false };
+    const canStartCurrentExam = Boolean(
+        currentBook && bookProgress && bookProgress.canTakeExam(currentBook.pages.length)
+    );
+    const hasAnyOwnedBook = books.some(b => entities.books[b.id]?.isUnlocked);
+    const canAccessDailyPractice = hasAnyOwnedBook || entities.wallet.balance < 20;
 
     // --- Start Exam ---
     const handleStartExam = () =>
     {
-        if (!currentBook) return;
+        if (!currentBook || !bookProgress || !bookProgress.canTakeExam(currentBook.pages.length))
+        {
+            soundManager.playHurt();
+            return;
+        }
         const bookQuestions = allQuestions.filter(q => q.bookId === currentBook.id);
         if (bookQuestions.length === 0) return;
 
@@ -86,13 +115,19 @@ export const AcademyModal: React.FC<AcademyModalProps> = ({
 
     const handleSubmitExam = () =>
     {
-        if (!examSession || !bookProgress) return;
-        const result = submitBookExamUseCase(examSession, bookProgress, entities.wallet);
+        if (!examSession || !bookProgress || !currentBook) return;
+        const result = submitBookExamUseCase(
+            examSession,
+            bookProgress,
+            entities.wallet,
+            currentBook.pages.length
+        );
         setExamResults(result);
 
         if (result.passed)
         {
             soundManager.playPowerUp();
+            onCreditChanged?.(entities.wallet.balance);
             if (onExamPassed) onExamPassed(bookProgress.bookId);
             EventBus.emit('book-exam-passed', bookProgress.bookId);
         }
@@ -105,6 +140,11 @@ export const AcademyModal: React.FC<AcademyModalProps> = ({
     // --- Daily Practice ---
     const handleStartDailyPractice = () =>
     {
+        if (!canAccessDailyPractice)
+        {
+            soundManager.playHurt();
+            return;
+        }
         const eligibleQuestions = allQuestions.filter(q =>
         {
             const bp = entities.books[q.bookId];
@@ -112,7 +152,7 @@ export const AcademyModal: React.FC<AcademyModalProps> = ({
         });
 
         const selected = entities.spacedRepetition.selectQuestions(
-            eligibleQuestions.length > 0 ? eligibleQuestions : allQuestions,
+            eligibleQuestions.length > 0 ? eligibleQuestions : allQuestions.filter(q => q.bookId === 'book-ch1'),
             3
         );
         setPracticeQuestions(selected);
@@ -145,6 +185,7 @@ export const AcademyModal: React.FC<AcademyModalProps> = ({
         if (result.success && result.correctCount > 0)
         {
             soundManager.playPowerUp();
+            onCreditChanged?.(entities.wallet.balance);
         }
     };
 
@@ -207,19 +248,25 @@ export const AcademyModal: React.FC<AcademyModalProps> = ({
                                 <div className="space-y-6">
                                     {/* Book Selector */}
                                     <div className="flex gap-2 overflow-x-auto pb-2">
-                                        {books.map(b => (
-                                            <button
-                                                key={b.id}
-                                                onClick={() => setSelectedBookId(b.id)}
-                                                className={`px-4 py-2 rounded-xl text-sm font-semibold transition border ${
-                                                    selectedBookId === b.id
-                                                        ? 'bg-indigo-600/30 border-indigo-400 text-indigo-200'
-                                                        : 'bg-slate-800/60 border-slate-700 text-slate-400 hover:text-white'
-                                                }`}
-                                            >
-                                                ບົດທີ {b.chapter}: {b.title}
-                                            </button>
-                                        ))}
+                                        {books.map(b =>
+                                        {
+                                            const bp = ensureBookProgress(b.id);
+                                            const icon = bp.examPassed ? '⭐' : bp.isUnlocked ? '📖' : '🔒';
+                                            return (
+                                                <button
+                                                    key={b.id}
+                                                    onClick={() => setSelectedBookId(b.id)}
+                                                    className={`px-4 py-2 rounded-xl text-sm font-semibold transition border flex items-center gap-1.5 ${
+                                                        selectedBookId === b.id
+                                                            ? 'bg-indigo-500/20 border-indigo-500/50 text-indigo-300'
+                                                            : 'bg-slate-800/60 border-slate-700 text-slate-400 hover:text-white'
+                                                    }`}
+                                                >
+                                                    <span>{icon}</span>
+                                                    <span>ບົດທີ {b.chapter}: {b.title}</span>
+                                                </button>
+                                            );
+                                        })}
                                     </div>
 
                                     {currentBook && bookProgress && (
@@ -233,9 +280,13 @@ export const AcademyModal: React.FC<AcademyModalProps> = ({
                                                     <span className="px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 font-bold text-xs border border-emerald-500/40">
                                                         ✓ ສອບຜ່ານແລ້ວ (ຄະແນນສູງສຸດ: {bookProgress.bestScore}/5)
                                                     </span>
+                                                ) : !bookProgress.isUnlocked ? (
+                                                    <span className="px-3 py-1 rounded-full bg-rose-950/40 text-rose-300 font-bold text-xs border border-rose-500/50">
+                                                        🔒 ຍັງບໍ່ໄດ້ຊື້ປຶ້ມ
+                                                    </span>
                                                 ) : (
                                                     <span className="px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 font-bold text-xs border border-amber-500/40">
-                                                        ຍັງບໍ່ທັນຜ່ານ (ເກນຜ່ານ: 4/5)
+                                                        📖 ອ່ານແລ້ວ {readProgress.readCount}/{readProgress.totalPages} ໜ້າ (ເກນສອບຜ່ານ: 4/5)
                                                     </span>
                                                 )}
                                             </div>
@@ -261,13 +312,54 @@ export const AcademyModal: React.FC<AcademyModalProps> = ({
                                                 </div>
                                             </div>
 
-                                            <button
-                                                onClick={handleStartExam}
-                                                className="w-full py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold text-base shadow-lg shadow-indigo-600/30 transition flex items-center justify-center gap-2"
-                                            >
-                                                <span>✍️</span>
-                                                <span>ເລີ່ມສອບເສັງ (Start Exam)</span>
-                                            </button>
+                                            {/* Gate 1: Book Not Purchased */}
+                                            {!bookProgress.isUnlocked ? (
+                                                <div className="p-4 rounded-xl bg-rose-950/40 border border-rose-500/50 space-y-3 text-center">
+                                                    <p className="text-sm font-bold text-rose-300">
+                                                        🔒 ບໍ່ສາມາດເຂົ້າສອບເສັງໄດ້ — ທ່ານຍັງບໍ່ໄດ້ຊື້ປຶ້ມຕຳລາ "{currentBook.title}"
+                                                    </p>
+                                                    <p className="text-xs text-slate-300">
+                                                        ກະລຸນາໄປຊື້ປຶ້ມຕຳລາທີ່ອາຄານ <strong>🏛️ ຫໍສະໝຸດ (Library)</strong> (ລາຄາ {currentBook.price} 🎓 Credit) ແລະ ເປີດອ່ານໃຫ້ຄົບທຸກໜ້າກ່ອນ.
+                                                    </p>
+                                                    <button
+                                                        onClick={() =>
+                                                        {
+                                                            onClose();
+                                                            if (onOpenLibraryStore) onOpenLibraryStore();
+                                                            else EventBus.emit('open-library');
+                                                        }}
+                                                        className="px-5 py-2.5 rounded-xl bg-amber-600 hover:bg-cyan-500 text-white font-bold text-sm shadow transition"
+                                                    >
+                                                        🏛️ ໄປຊື້ປຶ້ມທີ່ຫໍສະໝຸດ (Library)
+                                                    </button>
+                                                </div>
+                                            ) : !canStartCurrentExam ? (
+                                                /* Gate 2: Book Purchased, Not Fully Read Yet */
+                                                <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/40 space-y-3 text-center">
+                                                    <p className="text-sm font-bold text-amber-300">
+                                                        📖 ກະລຸນາອ່ານປຶ້ມຕຳລາໃຫ້ຄົບທຸກໜ້າກ່ອນເຂົ້າສອບເສັງ ({readProgress.readCount}/{readProgress.totalPages} ໜ້າ)
+                                                    </p>
+                                                    <button
+                                                        onClick={() =>
+                                                        {
+                                                            onClose();
+                                                            if (onOpenReader) onOpenReader(currentBook.id);
+                                                        }}
+                                                        className="px-5 py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-sm shadow transition"
+                                                    >
+                                                        📖 ເປີດອ່ານປຶ້ມຕຳລາຕໍ່ ({readProgress.readCount}/{readProgress.totalPages})
+                                                    </button>
+                                                </div>
+                                            ) : (
+                                                /* Unlocked & Fully Read -> Start Exam! */
+                                                <button
+                                                    onClick={handleStartExam}
+                                                    className="w-full py-3 rounded-xl bg-indigo-500/20 border-2 border-indigo-500/50 hover:bg-cyan-500 text-white font-bold text-base shadow-lg shadow-indigo-600/30 transition flex items-center justify-center gap-2"
+                                                >
+                                                    <span>✍️</span>
+                                                    <span>ເລີ່ມສອບເສັງ (Start Exam)</span>
+                                                </button>
+                                            )}
                                         </div>
                                     )}
                                 </div>
@@ -388,14 +480,20 @@ export const AcademyModal: React.FC<AcademyModalProps> = ({
                                             ຕອບຖືກແຕ່ລະຂໍ້ຮັບທັນທີ <span className="text-amber-400 font-bold">+5 🎓 Credit</span>!
                                         </p>
 
-                                        {practiceQuestions.length === 0 ? (
+                                        {!canAccessDailyPractice ? (
+                                            <div className="p-4 rounded-xl bg-rose-950/40 border border-rose-500/50 text-center space-y-2">
+                                                <p className="text-sm font-bold text-rose-300">
+                                                    🔒 ກະລຸນາໄປຊື້ປຶ້ມຕຳລາທີ່ຫໍສະໝຸດ (Library) ຢ່າງໜ້ອຍ 1 ເຫຼັ້ມກ່ອນເລີ່ມຝຶກຝົນປະຈຳວັນ
+                                                </p>
+                                            </div>
+                                        ) : practiceQuestions.length === 0 ? (
                                             <button
                                                 onClick={handleStartDailyPractice}
                                                 disabled={!canPracticeToday}
                                                 className={`w-full py-3 rounded-xl font-bold transition shadow-lg ${
                                                     canPracticeToday
-                                                        ? 'bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 text-white'
-                                                        : 'bg-slate-800 text-slate-500 cursor-not-allowed'
+                                                        ? 'bg-emerald-600 hover:bg-emerald-500 text-white'
+                                                        : 'bg-slate-800 text-slate-500'
                                                 }`}
                                             >
                                                 ເລີ່ມຝຶກຝົນ 3 ຂໍ້ປະຈຳວັນ

@@ -8,7 +8,8 @@ import { BackpackSlotSnapshot } from './Backpack';
 import { EquipmentSnapshot } from './EquipmentState';
 import { DailyPracticeProgressSnapshot } from './Quiz';
 
-export const CURRENT_SAVE_VERSION = 4;
+export const CURRENT_SAVE_VERSION = 5;
+export const STARTER_BOOK_CREDIT_RESERVE = 20;
 
 export interface SaveGameSnapshot
 {
@@ -75,11 +76,11 @@ export function createDefaultSaveSnapshot (slotId = 'slot_1'): SaveGameSnapshot
         inventory: {},
         achievements: {},
 
-        // Version 4 Knowledge Quest defaults
+        // Version 5 Knowledge Quest defaults (Buy-to-Read: books start unpurchased)
         books: {
             'book-ch1': {
                 bookId: 'book-ch1',
-                unlocked: true,
+                unlocked: false,
                 readPages: [],
                 examPassed: false,
                 bestScore: 0,
@@ -113,6 +114,9 @@ export function migrateSaveSnapshot (raw: unknown, fallbackSlotId = 'slot_1'): S
     }
 
     const data = raw as Record<string, unknown>;
+    const rawVersion = typeof data.version === 'number' && !isNaN(data.version)
+        ? Math.floor(data.version)
+        : 1;
 
     // 1. Validate or extract GameStats
     const rawStats = (data.gameStats && typeof data.gameStats === 'object' ? data.gameStats : {}) as Record<string, unknown>;
@@ -223,13 +227,13 @@ export function migrateSaveSnapshot (raw: unknown, fallbackSlotId = 'slot_1'): S
         }
     }
 
-    // 10. Validate or migrate Books (v4)
+    // 10. Validate or migrate Books (v5 Buy-to-Read)
     const rawBooks = (data.books && typeof data.books === 'object' ? data.books : {}) as Record<string, unknown>;
     const books: Record<string, BookProgressSnapshot> = {};
 
     books['book-ch1'] = {
         bookId: 'book-ch1',
-        unlocked: true,
+        unlocked: false,
         readPages: [],
         examPassed: false,
         bestScore: 0,
@@ -241,15 +245,33 @@ export function migrateSaveSnapshot (raw: unknown, fallbackSlotId = 'slot_1'): S
         if (bVal && typeof bVal === 'object')
         {
             const b = bVal as Record<string, unknown>;
+            const readPages = Array.isArray(b.readPages)
+                ? b.readPages.filter((p): p is number => typeof p === 'number' && p > 0)
+                : [];
+            const examPassed = Boolean(b.examPassed);
+
+            // v4 -> v5 migration: reset untouched free-default book-ch1 to unpurchased
+            let unlocked = Boolean(b.unlocked);
+            if (rawVersion < 5 && bId === 'book-ch1' && !examPassed && readPages.length === 0)
+            {
+                unlocked = false;
+            }
+
             books[bId] = {
                 bookId: bId,
-                unlocked: Boolean(b.unlocked ?? (bId === 'book-ch1')),
-                readPages: Array.isArray(b.readPages) ? b.readPages.filter(p => typeof p === 'number') : [],
-                examPassed: Boolean(b.examPassed),
+                unlocked,
+                readPages,
+                examPassed,
                 bestScore: typeof b.bestScore === 'number' ? Math.max(0, Math.floor(b.bestScore)) : 0,
                 attempts: typeof b.attempts === 'number' ? Math.max(0, Math.floor(b.attempts)) : 0,
             };
         }
+    }
+
+    // Softlock guard: ensure player has enough Credit (>= 20) to buy starter textbook if unpurchased
+    if (!books['book-ch1']?.unlocked && balance < STARTER_BOOK_CREDIT_RESERVE)
+    {
+        balance = STARTER_BOOK_CREDIT_RESERVE;
     }
 
     // 11. Validate or migrate Backpack (v4)

@@ -14,8 +14,18 @@ export interface BookDefinition
     titleEn: string;
     description: string;
     price: number;
+    prerequisiteBookId?: string | null;
+    requiredCompletedStageId?: string | null;
     unlockedRecipes: string[];
     pages: BookPage[];
+}
+
+export interface BookReadProgress
+{
+    readCount: number;
+    totalPages: number;
+    percentage: number;
+    isComplete: boolean;
 }
 
 export interface BookProgressSnapshot
@@ -84,21 +94,25 @@ export class BookProgress
         this._unlocked = true;
     }
 
-    markPageRead (pageNumber: number): void
+    markPageRead (pageNumber: number): boolean
     {
-        if (pageNumber > 0)
+        if (!this._unlocked || pageNumber <= 0)
         {
-            this._readPages.add(pageNumber);
+            return false;
         }
+        const alreadyRead = this._readPages.has(pageNumber);
+        this._readPages.add(pageNumber);
+        return !alreadyRead;
     }
 
     hasReadPage (pageNumber: number): boolean
     {
-        return this._readPages.has(pageNumber);
+        return this._unlocked && this._readPages.has(pageNumber);
     }
 
     isFullyRead (totalPages: number): boolean
     {
+        if (!this._unlocked) return false;
         if (totalPages <= 0) return true;
         for (let i = 1; i <= totalPages; i++)
         {
@@ -108,6 +122,41 @@ export class BookProgress
             }
         }
         return true;
+    }
+
+    getReadProgress (totalPages: number): BookReadProgress
+    {
+        const safeTotal = Math.max(0, Math.floor(totalPages));
+        if (!this._unlocked || safeTotal === 0)
+        {
+            return {
+                readCount: 0,
+                totalPages: safeTotal,
+                percentage: 0,
+                isComplete: false,
+            };
+        }
+
+        let readCount = 0;
+        for (let i = 1; i <= safeTotal; i++)
+        {
+            if (this._readPages.has(i))
+            {
+                readCount++;
+            }
+        }
+
+        return {
+            readCount,
+            totalPages: safeTotal,
+            percentage: Math.round((readCount / safeTotal) * 100),
+            isComplete: readCount >= safeTotal,
+        };
+    }
+
+    canTakeExam (totalPages: number): boolean
+    {
+        return this._unlocked && this.isFullyRead(totalPages);
     }
 
     /**

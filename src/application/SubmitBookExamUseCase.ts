@@ -25,16 +25,45 @@ export interface SubmitBookExamResult
     score: number;
     total: number;
     forgeUnlocked: boolean;
+    rejectedReason?: 'book_not_purchased' | 'book_not_fully_read';
 }
 
 export function submitBookExamUseCase (
     examSession: QuizExamSession,
     bookProgress: BookProgress,
-    wallet: Wallet
+    wallet: Wallet,
+    requiredBookPages = 0
 ): SubmitBookExamResult
 {
-    const score = examSession.score;
     const total = examSession.totalQuestions;
+
+    if (!bookProgress.isUnlocked)
+    {
+        return {
+            passed: false,
+            firstTime: false,
+            creditReward: 0,
+            score: 0,
+            total,
+            forgeUnlocked: false,
+            rejectedReason: 'book_not_purchased',
+        };
+    }
+
+    if (requiredBookPages > 0 && !bookProgress.isFullyRead(requiredBookPages))
+    {
+        return {
+            passed: false,
+            firstTime: false,
+            creditReward: 0,
+            score: 0,
+            total,
+            forgeUnlocked: false,
+            rejectedReason: 'book_not_fully_read',
+        };
+    }
+
+    const score = examSession.score;
     const examRecord = bookProgress.recordExamResult(score, total);
 
     let forgeUnlocked = false;

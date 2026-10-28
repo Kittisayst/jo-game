@@ -68,5 +68,35 @@ describe('SubmitBookExamUseCase', () =>
         expect(result.creditReward).toBe(5);
         expect(wallet.balance).toBe(65);
     });
+
+    it('rejects exam submission if book has not been purchased', () =>
+    {
+        const exam = new QuizExamSession(questions);
+        for (let i = 0; i < 5; i++) exam.answerQuestion(i, 0);
+
+        const unpurchasedBook = new BookProgress('book-ch1', false);
+        const wallet = new Wallet(30);
+
+        const result = submitBookExamUseCase(exam, unpurchasedBook, wallet, 5);
+        expect(result.passed).toBe(false);
+        expect(result.rejectedReason).toBe('book_not_purchased');
+        expect(unpurchasedBook.attempts).toBe(0);
+        expect(wallet.balance).toBe(30);
+    });
+
+    it('rejects exam submission if book pages have not been fully read', () =>
+    {
+        const exam = new QuizExamSession(questions);
+        for (let i = 0; i < 5; i++) exam.answerQuestion(i, 0);
+
+        const partiallyReadBook = new BookProgress('book-ch1', true, [1, 2]);
+        const wallet = new Wallet(30);
+
+        const result = submitBookExamUseCase(exam, partiallyReadBook, wallet, 5);
+        expect(result.passed).toBe(false);
+        expect(result.rejectedReason).toBe('book_not_fully_read');
+        expect(partiallyReadBook.attempts).toBe(0);
+        expect(wallet.balance).toBe(30);
+    });
 });
 

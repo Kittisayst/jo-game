@@ -42,7 +42,7 @@ if (initialSave.books)
 }
 if (!initialBooks['book-ch1'])
 {
-    initialBooks['book-ch1'] = new BookProgress('book-ch1', true);
+    initialBooks['book-ch1'] = new BookProgress('book-ch1', false);
 }
 
 export const entities = {

@@ -14,21 +14,51 @@ describe('BookProgress Entity', () =>
         expect(book.attempts).toBe(0);
     });
 
-    it('tracks read pages accurately', () =>
+    it('blocks marking pages read or taking exam before purchase (unlocked = false)', () =>
+    {
+        const book = new BookProgress('book-ch1', false);
+        expect(book.markPageRead(1)).toBe(false);
+        expect(book.readPages).toEqual([]);
+        expect(book.hasReadPage(1)).toBe(false);
+        expect(book.isFullyRead(3)).toBe(false);
+        expect(book.canTakeExam(3)).toBe(false);
+        expect(book.getReadProgress(3)).toEqual({
+            readCount: 0,
+            totalPages: 3,
+            percentage: 0,
+            isComplete: false,
+        });
+    });
+
+    it('tracks read pages accurately and unlocks exam only when fully read', () =>
     {
         const book = new BookProgress('book-ch1', true);
-        book.markPageRead(1);
-        book.markPageRead(3);
-        book.markPageRead(1); // duplicate
+        expect(book.markPageRead(1)).toBe(true);
+        expect(book.markPageRead(3)).toBe(true);
+        expect(book.markPageRead(1)).toBe(false); // duplicate
 
         expect(book.readPages).toEqual([1, 3]);
         expect(book.hasReadPage(1)).toBe(true);
         expect(book.hasReadPage(2)).toBe(false);
         expect(book.hasReadPage(3)).toBe(true);
         expect(book.isFullyRead(3)).toBe(false);
+        expect(book.canTakeExam(3)).toBe(false);
+        expect(book.getReadProgress(3)).toEqual({
+            readCount: 2,
+            totalPages: 3,
+            percentage: 67,
+            isComplete: false,
+        });
 
         book.markPageRead(2);
         expect(book.isFullyRead(3)).toBe(true);
+        expect(book.canTakeExam(3)).toBe(true);
+        expect(book.getReadProgress(3)).toEqual({
+            readCount: 3,
+            totalPages: 3,
+            percentage: 100,
+            isComplete: true,
+        });
     });
 
     it('handles exam failure (score < 4/5)', () =>

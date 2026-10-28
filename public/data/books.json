@@ -5,7 +5,9 @@
     "title": "ພື້ນຖານລະບົບຄອມພິວເຕີ",
     "titleEn": "Computer Fundamentals",
     "description": "ຮຽນຮູ້ກ່ຽວກັບອົງປະກອບພື້ນຖານຂອງຄອມພິວເຕີ, ອຸປະກອນ Input/Output, CPU ແລະ ໜ່ວຍຄວາມຈຳ",
-    "price": 0,
+    "price": 20,
+    "prerequisiteBookId": null,
+    "requiredCompletedStageId": null,
     "unlockedRecipes": ["pickaxe-t1", "hammer-t1", "repair-kit", "iron-sword"],
     "pages": [
       {
@@ -67,6 +69,8 @@
     "titleEn": "Computer Networking & Internet",
     "description": "ຮຽນຮູ້ກ່ຽວກັບການເຊື່ອມຕໍ່ເຄືອຂ່າຍ LAN, WAN, IP Address ແລະ ຄວາມປອດໄພເທິງອິນເຕີເນັດ",
     "price": 60,
+    "prerequisiteBookId": "book-ch1",
+    "requiredCompletedStageId": "stage-ch1",
     "unlockedRecipes": ["crystal-sword"],
     "pages": [
       {

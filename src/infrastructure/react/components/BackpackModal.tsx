@@ -10,11 +10,12 @@ interface BackpackModalProps
     isOpen: boolean;
     onClose: () => void;
     onUseItem?: (itemId: string) => void;
+    onOpenBooks?: () => void;
 }
 
 type FilterCategory = 'all' | 'gear' | 'material' | 'consumable';
 
-export const BackpackModal: React.FC<BackpackModalProps> = ({ isOpen, onClose, onUseItem }) =>
+export const BackpackModal: React.FC<BackpackModalProps> = ({ isOpen, onClose, onUseItem, onOpenBooks }) =>
 {
     const [items, setItems] = useState<ItemData[]>([]);
     const [selectedSlotIndex, setSelectedSlotIndex] = useState<number>(0);
@@ -275,14 +276,32 @@ export const BackpackModal: React.FC<BackpackModalProps> = ({ isOpen, onClose, o
                         </button>
                     </div>
 
-                    <button
-                        onClick={handleSortBackpack}
-                        className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-cyan-300 font-bold border border-slate-700 transition flex items-center gap-1.5 shadow-sm active:scale-95"
-                        title="ຈັດລຽງໄອເທັມຕາມໝວດໝູ່"
-                    >
-                        <span>🔄</span>
-                        <span>ຈັດລຽງ (Sort)</span>
-                    </button>
+                    <div className="flex items-center gap-2">
+                        {onOpenBooks && (
+                            <button
+                                onClick={() =>
+                                {
+                                    soundManager.playSelect();
+                                    onClose();
+                                    onOpenBooks();
+                                }}
+                                className="px-3 py-1.5 rounded-lg bg-amber-500/20 hover:bg-cyan-500 text-amber-300 hover:text-white font-bold border border-amber-500/40 transition flex items-center gap-1.5 shadow-sm active:scale-95"
+                                title="ເປີດຊັ້ນປຶ້ມຕຳລາສ່ວນຕົວ (ບໍ່ກິນຊ່ອງກະເປົາ)"
+                            >
+                                <span>📚</span>
+                                <span>ຊັ້ນປຶ້ມ ({Object.values(entities.books).filter(b => b.isUnlocked).length})</span>
+                            </button>
+                        )}
+
+                        <button
+                            onClick={handleSortBackpack}
+                            className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-cyan-300 font-bold border border-slate-700 transition flex items-center gap-1.5 shadow-sm active:scale-95"
+                            title="ຈັດລຽງໄອເທັມຕາມໝວດໝູ່"
+                        >
+                            <span>🔄</span>
+                            <span>ຈັດລຽງ (Sort)</span>
+                        </button>
+                    </div>
                 </div>
 
                 {/* 2-Pane Body: Left Grid (60%), Right Inspector (40%) */}

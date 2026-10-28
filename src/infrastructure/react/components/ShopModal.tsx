@@ -6,6 +6,7 @@ import { purchaseWeaponUseCase } from '../../../application/PurchaseWeaponUseCas
 import { purchaseUpgradeUseCase } from '../../../application/PurchaseUpgradeUseCase';
 import { purchaseItemUseCase } from '../../../application/PurchaseItemUseCase';
 import { equipWeaponUseCase } from '../../../application/EquipWeaponUseCase';
+import { STARTER_BOOK_CREDIT_RESERVE } from '../../../domain/entities/SaveData';
 import { entities } from '../../composition';
 import { soundManager } from '../../audio/SoundManager';
 
@@ -35,8 +36,20 @@ export const ShopModal: React.FC<ShopModalProps> = ({
         setTimeout(() => setToastMessage(null), 2500);
     };
 
+    const wouldBreakStarterBookReserve = (cost: number): boolean =>
+    {
+        if (entities.books['book-ch1']?.isUnlocked) return false;
+        return entities.wallet.balance - cost < STARTER_BOOK_CREDIT_RESERVE;
+    };
+
     const handleBuyWeapon = (weapon: WeaponDefinition) =>
     {
+        if (wouldBreakStarterBookReserve(weapon.price))
+        {
+            soundManager.playHurt();
+            showToast(`📚 ກະລຸນາສະຫງວນ ${STARTER_BOOK_CREDIT_RESERVE} Credit ໄວ້ຊື້ປຶ້ມຕຳລາບົດທີ 1 ທີ່ຫໍສະໝຸດກ່ອນ!`);
+            return;
+        }
         const success = purchaseWeaponUseCase(entities.wallet, entities.weaponLoadout, weapon.id);
         if (success)
         {
@@ -65,6 +78,13 @@ export const ShopModal: React.FC<ShopModalProps> = ({
 
     const handleBuyUpgrade = (upgrade: UpgradeDefinition) =>
     {
+        const nextCost = entities.upgradeTree.getNextCost(upgrade.id);
+        if (nextCost !== null && wouldBreakStarterBookReserve(nextCost))
+        {
+            soundManager.playHurt();
+            showToast(`📚 ກະລຸນາສະຫງວນ ${STARTER_BOOK_CREDIT_RESERVE} Credit ໄວ້ຊື້ປຶ້ມຕຳລາບົດທີ 1 ທີ່ຫໍສະໝຸດກ່ອນ!`);
+            return;
+        }
         const success = purchaseUpgradeUseCase(entities.wallet, entities.upgradeTree, upgrade.id);
         if (success)
         {
@@ -81,6 +101,12 @@ export const ShopModal: React.FC<ShopModalProps> = ({
 
     const handleBuyItem = (item: ItemDefinition) =>
     {
+        if (wouldBreakStarterBookReserve(item.price))
+        {
+            soundManager.playHurt();
+            showToast(`📚 ກະລຸນາສະຫງວນ ${STARTER_BOOK_CREDIT_RESERVE} Credit ໄວ້ຊື້ປຶ້ມຕຳລາບົດທີ 1 ທີ່ຫໍສະໝຸດກ່ອນ!`);
+            return;
+        }
         const success = purchaseItemUseCase(entities.wallet, entities.inventory, item.id);
         if (success)
         {

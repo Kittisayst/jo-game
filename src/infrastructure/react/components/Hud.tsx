@@ -41,6 +41,7 @@ export interface HudProps
     unclaimedAchievementsCount?: number;
     onOpenBackpack?: () => void;
     onOpenLibrary?: () => void;
+    ownedBooksCount?: number;
     backpackCount?: number;
     maxBackpackSlots?: number;
 }
@@ -69,6 +70,7 @@ export function Hud ({
     unclaimedAchievementsCount,
     onOpenBackpack,
     onOpenLibrary,
+    ownedBooksCount = 0,
     backpackCount = 0,
     maxBackpackSlots = 20,
 }: HudProps)
@@ -117,7 +119,7 @@ export function Hud ({
                         </button>
                     )}
 
-                    {/* Quick Textbook Button */}
+                    {/* Quick Personal Textbook Reader Button */}
                     {onOpenLibrary && (
                         <button
                             id="hud-library-btn"
@@ -128,11 +130,11 @@ export function Hud ({
                                 e.stopPropagation();
                                 onOpenLibrary();
                             }}
-                            title="ອ່ານຕຳລາຮຽນ (Textbook)"
+                            title="ເປີດອ່ານປຶ້ມຕຳລາທີ່ຊື້ແລ້ວ (ຊື້ປຶ້ມໄດ້ທີ່ອາຄານຫໍສະໝຸດໃນໝູ່ບ້ານ)"
                             type="button"
                         >
                             <span className="badge-icon">📚</span>
-                            <span className="badge-label">ຕຳລາ</span>
+                            <span className="badge-label">ຕຳລາ ({ownedBooksCount})</span>
                         </button>
                     )}
 
