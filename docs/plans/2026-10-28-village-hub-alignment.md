@@ -36,6 +36,18 @@
 
 **ສິ່ງທີ່ເຮັດຖືກແລ້ວ (ບໍ່ແຕະ):** ກົດສອບ 4/5 (+50/+5), ປະຕູພັງບໍ່ເສຍ Kit ເມື່ອຕອບຜິດ, repairedGates persist, ກະເປົາ 20 ຊ່ອງ, `LEVEL_CATALOG` ເຫຼືອ village + stage-ch1, ຊັ້ນ domain/application ບໍ່ import phaser/react.
 
+## ຂໍ້ແກ້ໄຂແຜນ (ພົບຕອນກຽມ Phase 2, 2026-10-28)
+
+ການອ່ານໂຄດເລິກຂຶ້ນພົບວ່າ Context ຂ້າງເທິງ ແລະບາງຂັ້ນຕອນຜິດ/ບໍ່ຄົບ:
+
+1. **`enemies.json` ບໍ່ຖືກໃຊ້ເລີຍ.** ສັດຕູໃນ `stage-ch1.json` ເປັນປະເພດເກົ່າ (`walker`/`jumper`/`spitter`, HP 1–3 ຈາກ `ENEMY_ARCHETYPES`), Boss `hp: 10`. ຂໍ້ມູນ GDD (forest-slime 40 HP, rock-golem 80, cave-guardian 180, boss 300, drop table) ບໍ່ຢູ່ໃນເກມ. ຜົນ: ດາເມດດາບ GDD (12–64) ຈະເຮັດໃຫ້ສັດຕູທຸກໂຕຕາຍດ້ວຍ 1 ຕີ ຖ້າຮວມອາວຸດໂດຍບໍ່ປ່ຽນ HP ພ້ອມກັນ.
+2. **ບໍ່ມີ Mini-boss ຈິງ.** `Game.ts:1493` ມີແຕ່ປ້າຍຂໍ້ຄວາມ "Cave Guardian". ສັດຕູບໍ່ drop ວັດສະດຸ (drop ແຕ່ຫຼຽນ).
+3. **Repair Kit ບໍ່ສາມາດສ້າງໄດ້ໃນການຫຼິ້ນປົກກະຕິ** ທັງກ່ອນ ແລະຫຼັງ Phase 1: ເສັ້ນໃຍ (ສູດເກົ່າ) ບໍ່ມີແຫຼ່ງ; ຜລຶກ (ສູດໃໝ່) ມີແຫຼ່ງດຽວຄືລາງວັນຫຼັງ Boss ເຊິ່ງຢູ່ຫຼັງປະຕູທີ່ຕ້ອງໃຊ້ Kit. ຕ້ອງມີ Mini-boss ຈິງ ເກມຈຶ່ງຈົບໄດ້.
+4. **`stage-ch1.json` ໃຊ້ Spike (2) ແລະ MovingPlatform (1) ຢູ່.** ການເວົ້າກ່ອນໜ້າວ່າບໍ່ໃຊ້ຜິດ → **Step 18 ຕ້ອງເກັບ `Spike` ແລະ `MovingPlatform`** (ຍັງລຶບ PowerUp/Door/GoalFlag/`level-1/2/3.json` ໄດ້ຫຼັງກວດ usage).
+5. Credit ເລີ່ມເກມໃນໂຄດເປັນ 50 → ແກ້ເປັນ 20 ແລ້ວ (commit `fix(economy)`).
+
+**Phase 2 ຖືກຂະຫຍາຍເປັນ "Phase 2: Combat ຂັບດ້ວຍຂໍ້ມູນ":** ຮວມອາວຸດ (EquipmentState) + ໃຫ້ສັດຕູ/Boss ອ່ານ HP/damage/drops ຈາກ `enemies.json` + ສ້າງ Mini-boss (cave-guardian) ຈິງທີ່ drop ຜລຶກ + ວັດສະດຸຈາກສັດຕູຕາມ drop table. ຕ້ອງເຮັດພ້ອມກັນເພື່ອບໍ່ໃຫ້ balance ພັງ.
+
 ## ແນວທາງ (Approach)
 
 - **ຕັດເປັນຂັ້ນນ້ອຍ**, ແຕ່ລະຂັ້ນ typecheck + lint + test ຜ່ານ ແລ້ວ commit ແຍກ (ຍ້ອນກັບງ່າຍ). ບໍ່ລວມຫຼາຍຂັ້ນໃນ commit ດຽວ.
