@@ -50,6 +50,15 @@ test.describe('Hero Attack Controls (J / Z) & Combat Verification', () => {
     await page.keyboard.press('KeyZ');
     await page.waitForTimeout(350);
 
+    // Test 5 consecutive attacks in a row to verify attack cooldown ticks down reliably
+    console.log('Testing 5 consecutive attacks in a row...');
+    for (let i = 1; i <= 5; i++) {
+      const key = i % 2 === 0 ? 'KeyZ' : 'KeyJ';
+      console.log(`Attack #${i} with [${key}]...`);
+      await page.keyboard.press(key);
+      await page.waitForTimeout(350);
+    }
+
     // 5. Walk right towards the first slime enemy
     console.log('Moving right towards Slime patrol zone...');
     for (let i = 0; i < 4; i++) {

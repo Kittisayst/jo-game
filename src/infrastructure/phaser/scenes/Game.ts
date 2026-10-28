@@ -615,13 +615,18 @@ export class Game extends Scene
             this.elderNpc = undefined;
             this.merchantNpc = undefined;
             this.bgTileSprite = undefined;
+            entities.attackCooldown.reset();
+            this.input.keyboard?.removeAllKeys(true);
         });
 
+        entities.attackCooldown.reset();
         EventBus.emit('current-scene-ready', this);
     }
 
     update (_time: number, delta: number)
     {
+        entities.attackCooldown.tick(delta);
+
         if (this.levelProgress.isComplete || this.lives.isDead)
         {
             return;
