@@ -102,5 +102,29 @@ describe('Backpack Entity', () =>
         expect(restored.getItemCount('iron-ore')).toBe(12);
         expect(restored.usedSlotsCount).toBe(2);
     });
+
+    it('removes slot directly and sorts slots cleanly', () =>
+    {
+        const backpack = new Backpack();
+        backpack.addItem('wood', 10);
+        backpack.addItem('stone', 20);
+        backpack.addItem('iron-ore', 5);
+
+        expect(backpack.usedSlotsCount).toBe(3);
+
+        // Remove stone at slot 1
+        const removed = backpack.removeSlot(1);
+        expect(removed).toBe(true);
+        expect(backpack.getItemCount('stone')).toBe(0);
+        expect(backpack.usedSlotsCount).toBe(2);
+
+        // Sort items
+        backpack.addItem('crystal', 2);
+        backpack.sortSlots();
+        const slots = backpack.getAllSlots().filter((s): s is NonNullable<typeof s> => s !== null);
+        expect(slots[0].itemId).toBe('crystal');
+        expect(slots[1].itemId).toBe('iron-ore');
+        expect(slots[2].itemId).toBe('wood');
+    });
 });
 

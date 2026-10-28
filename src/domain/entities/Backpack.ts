@@ -277,6 +277,36 @@ export class Backpack
         this._slots = new Array(BACKPACK_MAX_SLOTS).fill(null);
     }
 
+    removeSlot (index: number): boolean
+    {
+        if (index < 0 || index >= BACKPACK_MAX_SLOTS || this._slots[index] === null)
+        {
+            return false;
+        }
+        this._slots[index] = null;
+        return true;
+    }
+
+    sortSlots (): void
+    {
+        const occupied = this._slots.filter((s): s is BackpackSlot => s !== null);
+        occupied.sort((a, b) =>
+        {
+            if (a.itemId === b.itemId) return b.count - a.count;
+            return a.itemId.localeCompare(b.itemId);
+        });
+
+        this.clear();
+        for (let i = 0; i < occupied.length; i++)
+        {
+            this._slots[i] = {
+                slotIndex: i,
+                itemId: occupied[i].itemId,
+                count: occupied[i].count,
+            };
+        }
+    }
+
     toSnapshot (): BackpackSlotSnapshot[]
     {
         const snapshots: BackpackSlotSnapshot[] = [];
