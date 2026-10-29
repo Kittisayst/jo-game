@@ -1,6 +1,8 @@
-import { LEVEL_CATALOG, LevelCatalogItem } from '../../phaser/levelCatalog';
 import { StageProgression } from '../../../domain/entities/StageProgression';
+import { BOSS_STAGE_IN_REALM, MINIBOSS_STAGE_IN_REALM, STAGES_PER_REALM } from '../../../domain/entities/StageNumber';
 import { soundManager } from '../../audio/SoundManager';
+import { getGameContent } from '../../content/ContentCatalog';
+import { isStageReady, StageDefinition } from '../../phaser/stages/StageDefinition';
 
 export interface StageMapModalProps
 {
@@ -10,6 +12,17 @@ export interface StageMapModalProps
     onSelectStage: (stageKey: string) => void;
 }
 
+type CellState = 'placeholder' | 'locked' | 'open' | 'cleared';
+
+function describe (stage: StageDefinition, state: CellState): string
+{
+    if (state === 'placeholder') return `${stage.name} · ກຳລັງສ້າງ`;
+    if (state === 'locked') return `${stage.name} · 🔒 ຕ້ອງຜ່ານດ່ານກ່ອນໜ້າ`;
+    if (state === 'cleared') return `${stage.name} · ⭐ ຜ່ານແລ້ວ`;
+    return `${stage.name} · ▶️ ພ້ອມຫຼິ້ນ`;
+}
+
+/** The map of all 100 Stages, ten rows (Realms) of ten. Stages that are not built yet are grey. */
 export function StageMapModal ({
     currentLevel,
     stageProgression,
@@ -17,17 +30,25 @@ export function StageMapModal ({
     onSelectStage,
 }: StageMapModalProps)
 {
-    const handleSelect = (stage: LevelCatalogItem) =>
+    const { realms, stages } = getGameContent();
+
+    const stateOf = (stage: StageDefinition): CellState =>
     {
-        const isUnlocked = stageProgression.isStageUnlocked(stage.key);
-        if (!isUnlocked)
+        if (!isStageReady(stage)) return 'placeholder';
+        if (stageProgression.isStageCompleted(stage.id)) return 'cleared';
+        return stageProgression.isStageUnlocked(stage.id) ? 'open' : 'locked';
+    };
+
+    const handleSelect = (stageKey: string, state: CellState) =>
+    {
+        if (state === 'placeholder' || state === 'locked')
         {
             soundManager.playHurt();
             return;
         }
 
         soundManager.playCoin();
-        onSelectStage(stage.key);
+        onSelectStage(stageKey);
     };
 
     return (
@@ -37,8 +58,8 @@ export function StageMapModal ({
                     <div className="stage-map-title-group">
                         <span className="stage-map-icon">🗺️</span>
                         <div>
-                            <h2>ແຜນທີ່ດ່ານຜະຈົນໄພ (World Map)</h2>
-                            <p className="stage-map-subtitle">ເລືອກດ່ານທີ່ຕ້ອງການເດີນທາງໄປ ຫຼື ຫຼິ້ນຊ້ຳ</p>
+                            <h2>ແຜນທີ່ 100 ດ່ານ (World Map)</h2>
+                            <p className="stage-map-subtitle">10 ມິຕິ × 10 ດ່ານ. ເລືອກດ່ານທີ່ເປີດແລ້ວ ເພື່ອເດີນທາງໄປ ຫຼື ຫຼິ້ນຊ້ຳ</p>
                         </div>
                     </div>
                     <button
@@ -51,113 +72,69 @@ export function StageMapModal ({
                     </button>
                 </div>
 
-                <div className="stage-map-roadmap">
-                    {LEVEL_CATALOG.map((stage, idx) =>
+                <div className="realm-map">
+                    <button
+                        className={`realm-village-btn ${currentLevel === 'village' ? 'is-current' : ''}`}
+                        type="button"
+                        onClick={() => handleSelect('village', 'open')}
+                    >
+                        🏡 ໝູ່ບ້ານ (Village Hub)
+                    </button>
+
+                    {realms.map(realm =>
                     {
-                        const isUnlocked = stageProgression.isStageUnlocked(stage.key);
-                        const isCompleted = stageProgression.isStageCompleted(stage.key);
-                        const isCurrent = currentLevel === stage.key;
-
-                        let statusBadge = (
-                            <span className="stage-badge status-locked">
-                                🔒 ຍັງລັອກຢູ່
-                            </span>
-                        );
-
-                        if (isCompleted)
-                        {
-                            statusBadge = (
-                                <span className="stage-badge status-completed">
-                                    ⭐ ຜ່ານແລ້ວ
-                                </span>
-                            );
-                        }
-                        else if (isUnlocked)
-                        {
-                            statusBadge = (
-                                <span className="stage-badge status-unlocked">
-                                    ▶️ ພ້ອມຫຼິ້ນ
-                                </span>
-                            );
-                        }
-
-                        const cardClass = [
-                            'stage-map-node',
-                            isUnlocked ? 'node-unlocked' : 'node-locked',
-                            isCompleted ? 'node-completed' : '',
-                            isCurrent ? 'node-current' : '',
-                        ]
-                            .filter(Boolean)
-                            .join(' ');
+                        const realmStages = stages.filter(stage => stage.realm === realm.number);
+                        const builtCount = realmStages.filter(isStageReady).length;
 
                         return (
-                            <div key={stage.key} className="stage-map-step">
-                                <div
-                                    className={cardClass}
-                                    onClick={() => isUnlocked && handleSelect(stage)}
-                                    role="button"
-                                    tabIndex={isUnlocked ? 0 : -1}
-                                >
-                                    <div className="stage-node-header">
-                                        <span className="stage-tag">{stage.tag}</span>
-                                        {statusBadge}
-                                    </div>
+                            <section
+                                key={realm.number}
+                                className="realm-row"
+                                style={{ ['--realm-color' as string]: realm.color }}
+                                aria-label={`ມິຕິ ${realm.number}: ${realm.name}`}
+                            >
+                                <header className="realm-row-header">
+                                    <span className="realm-row-icon">{realm.icon}</span>
+                                    <span className="realm-row-name">ມິຕິ {realm.number}: {realm.name}</span>
+                                    <span className="realm-row-subject">{realm.subject}</span>
+                                    <span className="realm-row-count">{builtCount}/{STAGES_PER_REALM} ດ່ານ</span>
+                                </header>
 
-                                    <div className="stage-node-icon-wrapper">
-                                        <span className="stage-large-icon">{stage.badgeIcon}</span>
-                                        {isCurrent && (
-                                            <span className="stage-current-pin">📍 ປັດຈຸບັນ</span>
-                                        )}
-                                    </div>
+                                <div className="realm-cells">
+                                    {realmStages.map(stage =>
+                                    {
+                                        const state = stateOf(stage);
+                                        const position = ((stage.number - 1) % STAGES_PER_REALM) + 1;
+                                        const mark = position === BOSS_STAGE_IN_REALM
+                                            ? '👑'
+                                            : position === MINIBOSS_STAGE_IN_REALM ? '⚔️' : '';
+                                        const isCurrent = currentLevel === stage.id;
 
-                                    <div className="stage-node-info">
-                                        <h3 className="stage-node-name">{stage.name}</h3>
-                                        <p className="stage-node-desc">{stage.description}</p>
-                                    </div>
-
-                                    <div className="stage-node-actions">
-                                        {isUnlocked ? (
+                                        return (
                                             <button
-                                                className={`stage-action-btn ${isCurrent ? 'btn-current' : isCompleted ? 'btn-replay' : 'btn-enter'}`}
+                                                key={stage.id}
                                                 type="button"
-                                                onClick={e =>
-                                                {
-                                                    e.stopPropagation();
-                                                    handleSelect(stage);
-                                                }}
+                                                className={`realm-cell cell-${state} ${isCurrent ? 'is-current' : ''}`}
+                                                title={describe(stage, state)}
+                                                aria-label={describe(stage, state)}
+                                                aria-disabled={state === 'placeholder' || state === 'locked'}
+                                                onClick={() => handleSelect(stage.id, state)}
                                             >
-                                                {isCurrent
-                                                    ? '▶️ ດ່ານປັດຈຸບັນ'
-                                                    : isCompleted
-                                                        ? '🔄 ຫຼິ້ນຊ້ຳ'
-                                                        : '⚔️ ເຂົ້າຫຼິ້ນ'}
+                                                <span className="realm-cell-number">{stage.number}</span>
+                                                <span className="realm-cell-mark">
+                                                    {state === 'locked' ? '🔒' : state === 'cleared' ? '⭐' : mark}
+                                                </span>
                                             </button>
-                                        ) : (
-                                            <button
-                                                className="stage-action-btn btn-locked"
-                                                type="button"
-                                                disabled
-                                            >
-                                                🔒 ຕ້ອງຜ່ານດ່ານກ່ອນໜ້າ
-                                            </button>
-                                        )}
-                                    </div>
+                                        );
+                                    })}
                                 </div>
-
-                                {idx < LEVEL_CATALOG.length - 1 && (
-                                    <div
-                                        className={`stage-connector ${stageProgression.isStageCompleted(stage.key) ? 'connector-active' : ''}`}
-                                    >
-                                        <span className="connector-arrow">➔</span>
-                                    </div>
-                                )}
-                            </div>
+                            </section>
                         );
                     })}
                 </div>
 
                 <div className="stage-map-footer">
-                    <span>💡 ຄຳແນະນຳ: ຜ່ານແຕ່ລະດ່ານເພື່ອປົດລັອກດ່ານຕໍ່ໄປ! ຍ່າງເຂົ້າປະຕູ Portal ໃນໝູ່ບ້ານໄດ້ຕະຫຼອດເວລາ.</span>
+                    <span>💡 ຜ່ານແຕ່ລະດ່ານເພື່ອເປີດດ່ານຕໍ່ໄປ. ດ່ານສີເທົາ "ກຳລັງສ້າງ" ຍັງເຂົ້າບໍ່ໄດ້. ⚔️ = Mini-boss (ດ່ານ 5), 👑 = Boss (ດ່ານ 10).</span>
                 </div>
             </div>
         </div>

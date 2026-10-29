@@ -25,7 +25,7 @@ const bookCh2: BookDefinition = {
     description: 'Networking',
     price: 60,
     prerequisiteBookId: 'book-ch1',
-    requiredCompletedStageId: 'stage-ch1',
+    requiredCompletedStageId: 'stage-010',
     unlockedRecipes: [],
     pages: [{ pageNumber: 1, title: 'P1', content: 'C1', keyPoints: [] }],
 };
@@ -79,14 +79,14 @@ describe('PurchaseBookUseCase', () =>
             'book-ch1': new BookProgress('book-ch1', true),
         };
         const wallet = new Wallet(100);
-        const stages = new StageProgression(['village', 'level-1', 'stage-ch1'], []);
+        const stages = new StageProgression(['village', 'level-1', 'stage-010'], []);
 
         // 1. Neither exam passed nor boss defeated
         const res1 = purchaseBookUseCase(bookCh2, books, wallet, stages);
         expect(res1.success).toBe(false);
         expect(res1.reason).toBe('locked_prerequisite_exam');
 
-        // 2. Exam passed, but boss stage-ch1 NOT completed yet
+        // 2. Exam passed, but boss stage-010 NOT completed yet
         books['book-ch1'].recordExamResult(5, 5);
         const elig2 = checkBookPurchaseEligibility(bookCh2, books, wallet, stages);
         expect(elig2.prereqExamPassed).toBe(true);
@@ -97,8 +97,8 @@ describe('PurchaseBookUseCase', () =>
         expect(res2.reason).toBe('locked_prerequisite_boss');
         expect(wallet.balance).toBe(100);
 
-        // 3. Boss stage-ch1 completed -> purchase succeeds!
-        stages.completeStage('stage-ch1');
+        // 3. Boss stage-010 completed -> purchase succeeds!
+        stages.completeStage('stage-010');
         const res3 = purchaseBookUseCase(bookCh2, books, wallet, stages);
         expect(res3.success).toBe(true);
         expect(res3.remainingBalance).toBe(40);

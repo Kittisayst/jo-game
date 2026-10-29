@@ -1,0 +1,9 @@
+{
+  "worldWidth": 1280,
+  "scenery": "forest",
+  "spawn": {
+    "x": 80,
+    "y": 556
+  },
+  "platforms": []
+}

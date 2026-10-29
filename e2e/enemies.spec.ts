@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { enterStage, unlockStages } from './helpers/stage';
 
 test.describe('New Enemy Types E2E Verification', () => {
   test('Spawns, renders, and interacts with new enemy archetypes in Chapter 1', async ({ page }) => {
@@ -13,14 +14,9 @@ test.describe('New Enemy Types E2E Verification', () => {
     await page.goto('/');
     await expect(page).toHaveTitle(/Knowledge Quest/i);
 
-    // 2. Click Select Stage from Main Menu
-    const stageSelectBtn = page.getByRole('button', { name: /ເລືອກດ່ານ/i });
-    await stageSelectBtn.click();
-
-    // 3. Select Chapter 1 in the World Map
-    const chapterCard = page.locator('.stage-map-node').filter({ hasText: /ບົດທີ 1|Chapter 1/i }).first();
-    await expect(chapterCard).toBeVisible();
-    await chapterCard.click();
+    // 2. Open the World Map from the Main Menu and enter Stage 2, where slimes patrol
+    await unlockStages(page, 2);
+    await enterStage(page, 2);
 
     const canvas = page.locator('canvas');
     await expect(canvas).toBeVisible({ timeout: 10000 });

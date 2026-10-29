@@ -4,6 +4,8 @@ import enemies from '../../public/data/enemies.json';
 import items from '../../public/data/items.json';
 import questions from '../../public/data/questions.json';
 import recipes from '../../public/data/recipes.json';
+import nodes from '../../public/data/nodes.json';
+import realms from '../../public/data/realms.json';
 import stages from '../../public/data/stages.json';
 
 /**
@@ -12,8 +14,7 @@ import stages from '../../public/data/stages.json';
  */
 const itemIds = new Set(items.map(i => i.id));
 const bookIds = new Set(books.map(b => b.id));
-const enemyIds = new Set(enemies.map(e => e.id));
-const stageIds = new Set(stages.map(s => s.id));
+const stageIds = new Set(stages.stages.map(s => `stage-${String(s.number).padStart(3, '0')}`));
 
 type LooseRecipe = {
     id: string;
@@ -27,7 +28,7 @@ describe('content data integrity', () =>
 {
     it('has unique ids in every file', () =>
     {
-        for (const list of [items, books, enemies, questions, recipes, stages])
+        for (const list of [items, books, enemies, questions, recipes, nodes.nodes])
         {
             const ids = list.map(entry => entry.id);
             expect(new Set(ids).size).toBe(ids.length);
@@ -100,31 +101,86 @@ describe('content data integrity', () =>
         }
     });
 
-    it('builds stages only from known enemies, items and books', () =>
+    describe('stages, nodes and realms', () =>
     {
-        type Zone = {
-            resourceNodes?: { id: string; drops: { itemId: string }[] }[];
-            enemySpawns?: { enemyId: string }[];
-            bossSpawn?: { enemyId: string };
-            gate?: { requiredItem: string; quizBookId: string };
+        type Content = {
+            kind: string;
+            node?: string;
+            enemy?: string;
+            x?: number;
+            requiredItem?: string;
+            quizBookId?: string;
+            overrides?: { drops?: { itemId: string }[] };
         };
+        type StageEntry = { number: number; realm: number; status: string; layout?: string; zones?: { contents: Content[] }[] };
 
-        for (const stage of stages)
+        const levels = import.meta.glob<{ worldWidth: number }>('../../public/assets/levels/stage-*.json', { eager: true, import: 'default' });
+        const worldWidthOf = (layout: string) =>
+            Object.entries(levels).find(([path]) => layout.endsWith(path.split('/').pop()!))?.[1].worldWidth;
+        const allStages = stages.stages as StageEntry[];
+        const readyStages = allStages.filter(s => s.status === 'ready');
+        const nodeIds = new Set(nodes.nodes.map(n => n.id));
+        const enemyKinds = new Map(enemies.map(e => [e.id, e.kind]));
+
+        it('has 100 stages numbered in order, ten to a realm, and a realm for each ten', () =>
         {
-            for (const zone of stage.zones as Zone[])
+            expect(allStages.map(s => s.number)).toEqual(Array.from({ length: 100 }, (_, i) => i + 1));
+            expect(allStages.every(s => s.realm === Math.ceil(s.number / 10))).toBe(true);
+            expect(realms.realms.map(r => r.number)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+        });
+
+        it('drops only known items from nodes', () =>
+        {
+            for (const node of nodes.nodes)
             {
-                for (const node of zone.resourceNodes ?? [])
+                for (const drop of node.drops) expect(itemIds.has(drop.itemId), `${node.id} drop ${drop.itemId}`).toBe(true);
+            }
+        });
+
+        it('builds stages only from known nodes, enemies of the right kind, items and books', () =>
+        {
+            for (const stage of readyStages)
+            {
+                for (const content of stage.zones!.flatMap(z => z.contents))
                 {
-                    for (const drop of node.drops) expect(itemIds.has(drop.itemId), `${node.id} drop ${drop.itemId}`).toBe(true);
-                }
-                for (const spawn of zone.enemySpawns ?? []) expect(enemyIds.has(spawn.enemyId), spawn.enemyId).toBe(true);
-                if (zone.bossSpawn) expect(enemyIds.has(zone.bossSpawn.enemyId), zone.bossSpawn.enemyId).toBe(true);
-                if (zone.gate)
-                {
-                    expect(itemIds.has(zone.gate.requiredItem), zone.gate.requiredItem).toBe(true);
-                    expect(bookIds.has(zone.gate.quizBookId), zone.gate.quizBookId).toBe(true);
+                    const where = `stage ${stage.number} ${content.kind}`;
+                    if (content.kind === 'node') expect(nodeIds.has(content.node!), `${where} ${content.node}`).toBe(true);
+                    for (const drop of content.overrides?.drops ?? []) expect(itemIds.has(drop.itemId), `${where} drop ${drop.itemId}`).toBe(true);
+                    if (content.kind === 'enemy') expect(['normal', 'elite'], `${where} ${content.enemy}`).toContain(enemyKinds.get(content.enemy!));
+                    if (content.kind === 'miniboss') expect(enemyKinds.get(content.enemy!), where).toBe('miniboss');
+                    if (content.kind === 'boss') expect(enemyKinds.get(content.enemy!), where).toBe('boss');
+                    if (content.kind === 'gate')
+                    {
+                        expect(itemIds.has(content.requiredItem!), content.requiredItem).toBe(true);
+                        expect(bookIds.has(content.quizBookId!), content.quizBookId).toBe(true);
+                    }
                 }
             }
-        }
+        });
+
+        it('keeps everything inside the width of its level', () =>
+        {
+            for (const stage of readyStages)
+            {
+                const width = worldWidthOf(stage.layout!);
+                expect(width, `layout of stage ${stage.number}`).toBeDefined();
+                for (const content of stage.zones!.flatMap(z => z.contents))
+                {
+                    if (content.x !== undefined) expect(content.x, `stage ${stage.number} ${content.kind}`).toBeLessThan(width!);
+                }
+            }
+        });
+
+        it('points realms at known books and stages that unlock books at known stages', () =>
+        {
+            for (const realm of realms.realms)
+            {
+                if (realm.bookId) expect(bookIds.has(realm.bookId), `realm ${realm.number}`).toBe(true);
+            }
+            for (const book of books as { id: string; requiredCompletedStageId?: string | null }[])
+            {
+                if (book.requiredCompletedStageId) expect(stageIds.has(book.requiredCompletedStageId), book.id).toBe(true);
+            }
+        });
     });
 });

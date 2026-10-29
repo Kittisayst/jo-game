@@ -7,16 +7,16 @@ import {
 
 describe('SaveData Domain Entity & Migration', () =>
 {
-    it('creates a clean default snapshot with CURRENT_SAVE_VERSION (v6)', () =>
+    it('creates a clean default snapshot with CURRENT_SAVE_VERSION (v7)', () =>
     {
         const defaultSave = createDefaultSaveSnapshot('slot_1');
         expect(defaultSave.version).toBe(CURRENT_SAVE_VERSION);
-        expect(defaultSave.version).toBe(6);
+        expect(defaultSave.version).toBe(7);
         expect(defaultSave.slotId).toBe('slot_1');
         expect(defaultSave.activeSkinId).toBe('cyber-blue');
         expect(defaultSave.ownedSkins).toEqual(['cyber-blue']);
         expect(defaultSave.settings.soundMuted).toBe(false);
-        expect(defaultSave.stageProgression.unlockedStages).toEqual(['village', 'stage-ch1']);
+        expect(defaultSave.stageProgression.unlockedStages).toEqual(['village', 'stage-001']);
         expect(defaultSave.stageProgression.completedStages).toEqual([]);
 
         // Exactly enough Credit for the first textbook; books start unpurchased
@@ -68,14 +68,14 @@ describe('SaveData Domain Entity & Migration', () =>
         expect('gameStats' in migrated).toBe(false);
     });
 
-    it('keeps v6 progress and enforces the starter-book Credit guard only while the book is unbought', () =>
+    it('keeps v7 progress and enforces the starter-book Credit guard only while the book is unbought', () =>
     {
-        const untouched = migrateSaveSnapshot({ version: 6, wallet: { balance: 5 } }, 'slot_1');
+        const untouched = migrateSaveSnapshot({ version: 7, wallet: { balance: 5 } }, 'slot_1');
         expect(untouched.books['book-ch1'].unlocked).toBe(false);
         expect(untouched.wallet.balance).toBe(20);
 
         const bought = migrateSaveSnapshot({
-            version: 6,
+            version: 7,
             wallet: { balance: 5 },
             books: { 'book-ch1': { bookId: 'book-ch1', unlocked: true, readPages: [1, 2], examPassed: false } },
         }, 'slot_1');
@@ -87,7 +87,7 @@ describe('SaveData Domain Entity & Migration', () =>
     it('keeps the daily resit reward date and gate repairs', () =>
     {
         const migrated = migrateSaveSnapshot({
-            version: 6,
+            version: 7,
             books: {
                 'book-ch1': { bookId: 'book-ch1', unlocked: true, examPassed: true, lastResitRewardDate: '2026-10-28' },
             },
@@ -102,11 +102,11 @@ describe('SaveData Domain Entity & Migration', () =>
     it('filters out invalid skins, stage keys and equipment defensively', () =>
     {
         const maliciousData = {
-            version: 6,
+            version: 7,
             activeSkinId: 'hacked_skin',
             stageProgression: {
                 unlockedStages: ['village', 'level-1', 'invalid_debug_stage'],
-                completedStages: ['unknown_stage', 'stage-ch1'],
+                completedStages: ['unknown_stage', 'stage-001'],
             },
             wallet: { balance: -50 },
             equipment: { equippedWeaponId: 'hacked_laser_death_ray', upgradeLevels: { 'iron-sword': -3, x: 'bad' } },
@@ -120,8 +120,8 @@ describe('SaveData Domain Entity & Migration', () =>
         const sanitized = migrateSaveSnapshot(maliciousData);
 
         expect(sanitized.activeSkinId).toBe('cyber-blue');
-        expect(sanitized.stageProgression.unlockedStages).toEqual(['village', 'stage-ch1']);
-        expect(sanitized.stageProgression.completedStages).toEqual(['stage-ch1']);
+        expect(sanitized.stageProgression.unlockedStages).toEqual(['village', 'stage-001']);
+        expect(sanitized.stageProgression.completedStages).toEqual(['stage-001']);
         expect(sanitized.wallet.balance).toBe(20);
         expect(sanitized.equipment.equippedWeaponId).toBe('wooden-sword');
         expect(sanitized.equipment.upgradeLevels).toEqual({ 'iron-sword': 0 });
@@ -130,11 +130,11 @@ describe('SaveData Domain Entity & Migration', () =>
 
     it('only lets the player wear skins they own', () =>
     {
-        const owned = migrateSaveSnapshot({ version: 6, activeSkinId: 'neon-ninja', ownedSkins: ['neon-ninja', 'bogus', 7] });
+        const owned = migrateSaveSnapshot({ version: 7, activeSkinId: 'neon-ninja', ownedSkins: ['neon-ninja', 'bogus', 7] });
         expect(owned.ownedSkins).toEqual(['cyber-blue', 'neon-ninja']);
         expect(owned.activeSkinId).toBe('neon-ninja');
 
-        const notBought = migrateSaveSnapshot({ version: 6, activeSkinId: 'golden-runner' });
+        const notBought = migrateSaveSnapshot({ version: 7, activeSkinId: 'golden-runner' });
         expect(notBought.ownedSkins).toEqual(['cyber-blue']);
         expect(notBought.activeSkinId).toBe('cyber-blue');
     });

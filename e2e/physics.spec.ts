@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { enterStage, unlockStages } from './helpers/stage';
 
 test.describe('Phaser Arcade Physics Enhancements E2E', () => {
   test('Verifies one-way platforms, hitbox tuning, wall slide/kick, and F2 debug toggle', async ({ page }) => {
@@ -13,13 +14,9 @@ test.describe('Phaser Arcade Physics Enhancements E2E', () => {
     await page.goto('/');
     await expect(page).toHaveTitle(/Knowledge Quest/i);
 
-    // 2. Select Chapter 1 with platforms and slimes
-    const stageSelectBtn = page.getByRole('button', { name: /ເລືອກດ່ານ/i });
-    await stageSelectBtn.click();
-
-    const chapterCard = page.locator('.stage-map-node').filter({ hasText: /ບົດທີ 1|Chapter 1/i }).first();
-    await expect(chapterCard).toBeVisible();
-    await chapterCard.click();
+    // 2. Enter Stage 2, which has platforms and slimes
+    await unlockStages(page, 2);
+    await enterStage(page, 2);
 
     const canvas = page.locator('canvas');
     await expect(canvas).toBeVisible({ timeout: 10000 });

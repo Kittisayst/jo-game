@@ -12,6 +12,8 @@ import type { QuestionData } from '../../domain/entities/Quiz';
 import type { RecipeDefinition } from '../../application/CraftRecipeUseCase';
 import type { WeaponUpgradeRecipe } from '../../application/UpgradeWeaponTierUseCase';
 import { parseStageDefinitions, StageDefinition } from '../phaser/stages/StageDefinition';
+import { NodeDefinition, parseNodes } from './NodeCatalog';
+import { parseRealms, RealmDefinition } from './RealmCatalog';
 import { makeValidators } from './validate';
 import { HeldArt, parseHeldArt, parsePlayerAnimations, PlayerAnimations } from './HeldItemArt';
 
@@ -24,6 +26,11 @@ export interface GameContent
     questions: QuestionData[];
     recipes: RecipeEntry[];
     enemies: EnemyDefinition[];
+    /** The ten Realms: subject, colour, biome, Textbook. */
+    realms: RealmDefinition[];
+    /** The kinds of Resource node a Stage can place. */
+    nodes: NodeDefinition[];
+    /** All 100 Stages in order; the ones not built yet are `placeholder`. */
     stages: StageDefinition[];
     /** How weapons and tools look in the hero's hand, by item id. */
     heldArt: Record<string, HeldArt>;
@@ -253,15 +260,19 @@ async function fetchJson (file: string): Promise<unknown>
 /** Fetches and validates all game data. Call once before the app starts. */
 export async function loadGameContent (): Promise<GameContent>
 {
-    const [items, books, questions, recipes, enemies, stages, playerAnimations] = await Promise.all([
+    const [items, books, questions, recipes, enemies, realms, nodes, stages, playerAnimations] = await Promise.all([
         fetchJson('items.json'),
         fetchJson('books.json'),
         fetchJson('questions.json'),
         fetchJson('recipes.json'),
         fetchJson('enemies.json'),
+        fetchJson('realms.json'),
+        fetchJson('nodes.json'),
         fetchJson('stages.json'),
         fetchJson('player-animations.json'),
     ]);
+
+    const parsedNodes = parseNodes(nodes);
 
     return {
         items: parseItems(items),
@@ -269,7 +280,9 @@ export async function loadGameContent (): Promise<GameContent>
         questions: parseQuestions(questions),
         recipes: parseRecipes(recipes),
         enemies: parseEnemies(enemies),
-        stages: parseStageDefinitions(stages),
+        realms: parseRealms(realms),
+        nodes: parsedNodes,
+        stages: parseStageDefinitions(stages, parsedNodes),
         heldArt: parseHeldArt(items),
         playerAnimations: parsePlayerAnimations(playerAnimations),
     };

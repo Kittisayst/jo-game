@@ -2,7 +2,6 @@ import { MovingPlatform } from '../objects/MovingPlatform';
 import { Platform } from '../objects/Platform';
 import { Spike } from '../objects/Spike';
 import type { Level } from '../Level';
-import type { StageDefinition } from '../stages/StageDefinition';
 
 /** Design height of the world; must equal the game config height in `main.ts`. */
 export const WORLD_HEIGHT = 720;
@@ -22,46 +21,15 @@ function clamp01 (v: number): number
 }
 
 /**
- * Builds the sky or multi-zone stage backdrop. Returns a controller whose `update(scrollX)`
- * drives parallax scrolling and smooth biome crossfades across Stage zones.
+ * Builds the backdrop of a level. Returns a controller whose `update(scrollX)` drives parallax scrolling;
+ * a cave level that ends in a boss arena (`level.arenaFromX`) fades into the arena backdrop from there.
  */
 export function createSky (
     scene: Phaser.Scene,
     level: Level,
-    backdropKey: string,
-    stage?: StageDefinition
+    backdropKey: string
 ): SkyBackdrop | undefined
 {
-    // Multi-zone Stage backdrop (Forest -> Cavern -> Boss Arena)
-    if (
-        stage &&
-        scene.textures.exists('bg-plains') &&
-        scene.textures.exists('bg-cavern') &&
-        scene.textures.exists('bg-boss-arena')
-    )
-    {
-        const plains = scene.add.tileSprite(0, 0, 1280, WORLD_HEIGHT, 'bg-plains')
-            .setOrigin(0, 0).setScrollFactor(0).setDepth(-12);
-        const cavern = scene.add.tileSprite(0, 0, 1280, WORLD_HEIGHT, 'bg-cavern')
-            .setOrigin(0, 0).setScrollFactor(0).setDepth(-11).setAlpha(0);
-        const arena = scene.add.tileSprite(0, 0, 1280, WORLD_HEIGHT, 'bg-boss-arena')
-            .setOrigin(0, 0).setScrollFactor(0).setDepth(-10).setAlpha(0);
-
-        return {
-            update (scrollX: number)
-            {
-                const parallaxX = scrollX * 0.25;
-                plains.tilePositionX = parallaxX;
-                cavern.tilePositionX = parallaxX;
-                arena.tilePositionX = parallaxX;
-
-                const centerX = scrollX + 640;
-                cavern.setAlpha(clamp01((centerX - 900) / 240));
-                arena.setAlpha(clamp01((centerX - 2200) / 240));
-            },
-        };
-    }
-
     if (scene.textures.exists(backdropKey))
     {
         // TileSprite pinned to camera viewport with parallax scrolling in update
@@ -69,10 +37,23 @@ export function createSky (
         bg.setOrigin(0, 0);
         bg.setScrollFactor(0);
         bg.setDepth(-10);
+
+        const arenaFromX = level.arenaFromX;
+        const arena = arenaFromX !== undefined && scene.textures.exists('bg-boss-arena')
+            ? scene.add.tileSprite(0, 0, 1280, WORLD_HEIGHT, 'bg-boss-arena')
+                .setOrigin(0, 0).setScrollFactor(0).setDepth(-9.5).setAlpha(0)
+            : undefined;
+
         return {
             update (scrollX: number)
             {
-                bg.tilePositionX = scrollX * 0.25;
+                const parallaxX = scrollX * 0.25;
+                bg.tilePositionX = parallaxX;
+                if (arena && arenaFromX !== undefined)
+                {
+                    arena.tilePositionX = parallaxX;
+                    arena.setAlpha(clamp01((scrollX + 640 - (arenaFromX - 104)) / 240));
+                }
             },
         };
     }
@@ -100,8 +81,7 @@ export function createSky (
 
 export function createGround (
     scene: Phaser.Scene,
-    level: Level,
-    stage?: StageDefinition
+    level: Level
 ): Phaser.Physics.Arcade.StaticGroup
 {
     const textureKey = 'ground-tile';
@@ -127,25 +107,20 @@ export function createGround (
     const ground = scene.physics.add.staticGroup();
     ground.add(tileSprite);
 
-    // Visual biome ground overlays aligned on 64px tile boundaries for Stages
-    if (stage && level.worldWidth >= 2304)
+    // Visual biome ground overlays aligned on 64px tile boundaries: cave floor, then the arena floor
+    const arenaFromX = level.arenaFromX ?? level.worldWidth;
+    if (level.scenery === 'cave' && arenaFromX > 0 && scene.textures.exists('ground-tile-cavern'))
     {
-        if (scene.textures.exists('ground-tile-cavern'))
+        scene.add.tileSprite(arenaFromX / 2, groundY, arenaFromX, GROUND_HEIGHT, 'ground-tile-cavern')
+            .setDepth(4.1);
+    }
+    if (level.arenaFromX !== undefined && scene.textures.exists('ground-tile-arena'))
+    {
+        const arenaWidth = level.worldWidth - level.arenaFromX;
+        if (arenaWidth > 0)
         {
-            const cavernStart = 1024;
-            const cavernWidth = 2304 - cavernStart;
-            scene.add.tileSprite(cavernStart + cavernWidth / 2, groundY, cavernWidth, GROUND_HEIGHT, 'ground-tile-cavern')
-                .setDepth(4.1);
-        }
-        if (scene.textures.exists('ground-tile-arena'))
-        {
-            const arenaStart = 2304;
-            const arenaWidth = level.worldWidth - arenaStart;
-            if (arenaWidth > 0)
-            {
-                scene.add.tileSprite(arenaStart + arenaWidth / 2, groundY, arenaWidth, GROUND_HEIGHT, 'ground-tile-arena')
-                    .setDepth(4.2);
-            }
+            scene.add.tileSprite(level.arenaFromX + arenaWidth / 2, groundY, arenaWidth, GROUND_HEIGHT, 'ground-tile-arena')
+                .setDepth(4.2);
         }
     }
 

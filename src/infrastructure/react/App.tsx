@@ -30,6 +30,8 @@ import { VirtualTouchControls } from './components/VirtualTouchControls';
 import { completeStageUseCase } from '../../application/CompleteStageUseCase';
 import { awardChapterClearUseCase } from '../../application/AwardChapterClearUseCase';
 import { selectStageUseCase } from '../../application/SelectStageUseCase';
+import { BOSS_STAGE_IN_REALM, nextStageIdInRealm, positionInRealm, stageNumberOf } from '../../domain/entities/StageNumber';
+import { getStageDefinition, isStageReady } from '../phaser/stages/StageDefinition';
 import { WEAPON_CONFIGS } from '../../domain/entities/EquipmentState';
 import { cycleEquippedWeaponUseCase } from '../../application/CycleEquippedWeaponUseCase';
 import { TextbookModal } from './components/TextbookModal';
@@ -240,6 +242,10 @@ function App ()
 
     const handleStartGame = (stageKey = 'village') =>
     {
+        // A Stage that is not built yet (grey on the map) has no level to load
+        const stage = getStageDefinition(getGameContent().stages, stageKey);
+        if (stageKey !== 'village' && (!stage || !isStageReady(stage))) return;
+
         const success = selectStageUseCase(stageProgression, stageKey);
         if (!success) return;
 
@@ -381,7 +387,7 @@ function App ()
             hasHammer: count('hammer-t1') > 0,
             hasRepairKit: count('repair-kit') > 0,
             gateRepaired: entities.repairedGates.has('gate-ch1'),
-            bossCleared: stageProgression.isStageCompleted('stage-ch1'),
+            bossCleared: stageProgression.isStageCompleted('stage-010'),
         });
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [booksRevision, backpackRevision, walletBalance, ch1PageCount, currentLevel]);
@@ -425,14 +431,22 @@ function App ()
     useGameEvents({
         onStageCleared: payload =>
         {
-            // Beating a Chapter boss sends the player home to learn and craft, not to a score screen
-            const clear = completeStageUseCase(stageProgression, repositories.stageProgression, payload.stageId, null);
-            const bonus = awardChapterClearUseCase(entities.wallet, clear.isFirstTimeClear);
+            // Clearing a Stage sends the player home to learn and craft, not to a score screen.
+            // The next Stage of the Realm opens; the Realm's boss Stage opens nothing by itself.
+            const stageNumber = stageNumberOf(payload.stageId);
+            const isBossStage = stageNumber !== null && positionInRealm(stageNumber) === BOSS_STAGE_IN_REALM;
+            const next = nextStageIdInRealm(payload.stageId);
+            const clear = completeStageUseCase(stageProgression, repositories.stageProgression, payload.stageId, next);
+            const bonus = isBossStage ? awardChapterClearUseCase(entities.wallet, clear.isFirstTimeClear) : 0;
             setWalletBalance(entities.wallet.balance);
             autoSaveGame();
             EventBus.emit('change-level', 'village');
             const bonusText = bonus > 0 ? ` +${bonus} 🎓 Credit!` : '';
-            setTimeout(() => setVillageWelcomeToast(`🏆 ຊະນະ Boss ບົດທີ 1!${bonusText} ກັບມາໝູ່ບ້ານເພື່ອຮຽນ ແລະ ສ້າງອາວຸດຕໍ່ໄປ`), 300);
+            const opened = next && clear.newlyUnlocked ? ` ດ່ານ ${stageNumberOf(next)} ເປີດແລ້ວ!` : '';
+            const message = isBossStage
+                ? `🏆 ຊະນະ Boss ດ່ານ ${stageNumber}!${bonusText} ກັບມາໝູ່ບ້ານເພື່ອຮຽນ ແລະ ສ້າງອາວຸດຕໍ່ໄປ`
+                : `✅ ຜ່ານດ່ານ ${stageNumber}!${opened} ກັບມາໝູ່ບ້ານເພື່ອຮຽນ ແລະ ສ້າງອາວຸດ`;
+            setTimeout(() => setVillageWelcomeToast(message), 300);
         },
         onPlayerHealthChanged: payload => setHealth(payload.currentHealth),
         onPlayerDied: () =>

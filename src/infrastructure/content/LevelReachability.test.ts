@@ -1,5 +1,4 @@
 import { describe, expect, it } from 'vitest';
-import stageLevel from '../../../public/assets/levels/stage-ch1.json';
 import villageLevel from '../../../public/assets/levels/village.json';
 import stages from '../../../public/data/stages.json';
 import { MAX_JUMP_RISE, MOVE_SPEED, JUMP_SPEED, GRAVITY_Y, PLATFORM_SURFACE_OFFSET } from '../phaser/physicsConstants';
@@ -25,6 +24,10 @@ type LevelData = {
     movingPlatforms?: { x: number; y: number; distanceX?: number; distanceY?: number }[];
     spikes?: { x: number; y: number }[];
 };
+
+const stageLevels = Object.entries(
+    import.meta.glob<LevelData>('../../../public/assets/levels/stage-*.json', { eager: true, import: 'default' })
+).map(([path, level]) => ({ name: path.split('/').pop()!, level }));
 
 function surfacesOf (level: LevelData): Surface[]
 {
@@ -80,16 +83,20 @@ describe('level layout', () =>
         expect(MAX_JUMP_RISE).toBeLessThan(130);
     });
 
-    it('lets the hero reach every platform in the village and in Chapter 1', () =>
+    it('lets the hero reach every platform in the village and in every built Stage', () =>
     {
         expect(unreachable(villageLevel as LevelData)).toEqual([]);
-        expect(unreachable(stageLevel as LevelData)).toEqual([]);
+        expect(stageLevels.length).toBe(stages.stages.filter(s => s.status === 'ready').length);
+        for (const { name, level } of stageLevels) expect(unreachable(level), name).toEqual([]);
     });
 
-    it('gives the Chapter 1 platforms a way up, not just one low step', () =>
+    it('gives the platforms of a Stage that has any a way up, not just one low step', () =>
     {
-        const tops = surfacesOf(stageLevel as LevelData).map(s => s.top);
-        expect(tops.some(top => GROUND_TOP - top > 120)).toBe(true);
+        for (const { name, level } of stageLevels.filter(l => l.level.platforms.length > 0))
+        {
+            const tops = surfacesOf(level).map(s => s.top);
+            expect(tops.some(top => GROUND_TOP - top > 120), name).toBe(true);
+        }
     });
 
     it('would catch a platform that is too high to jump onto', () =>
@@ -100,21 +107,23 @@ describe('level layout', () =>
 
     it('keeps spikes away from anything the hero has to stand next to', () =>
     {
-        const standingSpots: number[] = [];
-        for (const stage of stages)
-        {
-            for (const zone of stage.zones as { resourceNodes?: { x: number }[]; waypoint?: { x: number }; gate?: { x: number } }[])
-            {
-                standingSpots.push(...(zone.resourceNodes ?? []).map(n => n.x));
-                if (zone.waypoint) standingSpots.push(zone.waypoint.x);
-                if (zone.gate) standingSpots.push(zone.gate.x);
-            }
-        }
+        type Content = { kind: string; x?: number };
+        const entries = stages.stages as { number: number; status: string; zones?: { contents: Content[] }[] }[];
 
-        for (const spike of (stageLevel as LevelData).spikes ?? [])
+        for (const stage of entries.filter(s => s.status === 'ready'))
         {
-            const nearest = Math.min(...standingSpots.map(x => Math.abs(x - spike.x)));
-            expect(nearest, `spike at x=${spike.x}`).toBeGreaterThanOrEqual(90);
+            const level = stageLevels.find(l => l.name === `stage-${String(stage.number).padStart(3, '0')}.json`)!.level;
+            const standingKinds = ['node', 'waypoint', 'gate'];
+            const standingSpots = stage.zones!
+                .flatMap(z => z.contents)
+                .filter(c => standingKinds.includes(c.kind) && c.x !== undefined)
+                .map(c => c.x!);
+
+            for (const spike of level.spikes ?? [])
+            {
+                const nearest = Math.min(...standingSpots.map(x => Math.abs(x - spike.x)));
+                expect(nearest, `stage ${stage.number}: spike at x=${spike.x}`).toBeGreaterThanOrEqual(90);
+            }
         }
     });
 });

@@ -13,6 +13,10 @@ import { Bot } from './helpers/bot';
  * crude (it cannot dodge, and fights with the sword only now that stomping is gone) and usually dies
  * before the cavern, so it never gets stone, the gate or the Boss. It asserts only the learning half and logs the rest, so read the log, not the pass mark.
  *
+ * NOTE: Chapter 1 is now Stage 1 to 10 of Realm 1 (see docs/plans/2026-10-29-hundred-stages-realms.md). This bot was
+ * written for the old single Stage, so it only enters Stage 1 now and its forest, cavern, gate and boss steps no longer
+ * match the stage layouts. It needs rewriting for the 10-stage flow before its fighting half means anything again.
+ *
  * Opt-in because it takes minutes:   PLAYTHROUGH=1 npx playwright test e2e/playthrough.spec.ts
  */
 
@@ -31,7 +35,7 @@ async function inventory (page: Page)
       weapon: entities.equipment.equippedWeaponId,
       bookOwned: entities.books['book-ch1'].isUnlocked, examPassed: entities.books['book-ch1'].examPassed,
       gateRepaired: entities.repairedGates.has('gate-ch1'),
-      cleared: entities.stageProgression.isStageCompleted('stage-ch1'),
+      cleared: entities.stageProgression.isStageCompleted('stage-010'),
     };
   });
 }
@@ -101,8 +105,8 @@ async function enterStage (page: Page, bot: Bot)
 {
   await walkVillageTo(bot, 1420);
   await bot.interact();
-  await page.locator('.stage-map-card [role="button"]').filter({ hasText: 'Chapter 1' }).first().click();
-  await expect.poll(async () => (await bot.state()).scene, { timeout: 15000 }).toBe('stage-ch1');
+  await page.getByRole('button', { name: /^ດ່ານ 1: / }).click();
+  await expect.poll(async () => (await bot.state()).scene, { timeout: 15000 }).toBe('stage-001');
   await page.waitForTimeout(600);
 }
 

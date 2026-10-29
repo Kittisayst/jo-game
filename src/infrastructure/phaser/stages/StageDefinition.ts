@@ -1,30 +1,42 @@
 /**
- * Layout of one Stage as authored in `public/data/stages.json`: its Zones, where
- * Materials can be gathered, where enemies and the boss stand, and the broken gate.
- * Platforms, spikes and the player spawn stay in the level JSON (see Level.ts).
+ * Layout of every Stage as authored in `public/data/stages.json`. Everything in a Stage is an entry of
+ * a Zone's `contents`, told apart by its `kind` (node, enemy, miniboss, boss, sign, waypoint, gate, exit).
+ * Platforms, spikes and the player spawn stay in the level JSON named by `layout` (see Level.ts).
  *
- * `parseStageDefinitions` checks the shape once at load time so a typo in the
- * JSON fails loudly with the offending path instead of as an undefined deep in a scene.
+ * `parseStageDefinitions` checks the shape once at load time so a typo in the JSON fails loudly with the
+ * offending path instead of as an undefined deep in a scene, and turns the `contents` of each Zone into the
+ * lists the scene builds from (nodes with their kind already resolved from `nodes.json`, enemy spawns, signs…).
  */
 
 import type { EnemyType } from '../../../domain/entities/Enemy';
+import {
+    BOSS_STAGE_IN_REALM,
+    MINIBOSS_STAGE_IN_REALM,
+    positionInRealm,
+    realmOf,
+    stageIdOf,
+    STAGE_COUNT,
+} from '../../../domain/entities/StageNumber';
+import { NodeDefinition, parseDrops, StageDrop } from '../../content/NodeCatalog';
 import { makeValidators } from '../../content/validate';
 
-export type ResourceNodeType = 'tree' | 'herb' | 'stone' | 'iron-vein';
+export type { StageDrop };
 
-const RESOURCE_NODE_TYPES: ResourceNodeType[] = ['tree', 'herb', 'stone', 'iron-vein'];
 const ENEMY_TYPES: EnemyType[] = ['slime', 'slime-flying', 'slime-armored', 'slime-spitter'];
-
-export interface StageDrop
-{
-    itemId: string;
-    count: number;
-}
+export const STAGE_CONTENT_KINDS = ['node', 'enemy', 'miniboss', 'boss', 'sign', 'waypoint', 'gate', 'exit'] as const;
+export type StageContentKind = typeof STAGE_CONTENT_KINDS[number];
+/** Where enemies stand when a Stage does not say (the top of the ground minus the enemy). */
+const DEFAULT_ENEMY_Y = 580;
 
 export interface StageResourceNode
 {
     id: string;
-    type: ResourceNodeType;
+    /** Id of the kind in `nodes.json`, such as `oak-tree`. */
+    type: string;
+    label: string;
+    icon: string;
+    texture: string;
+    reach: number;
     requiredTool: string | null;
     toolTier: number;
     x: number;
@@ -45,6 +57,8 @@ export interface StageEnemySpawn
     scale?: number;
     /** Warning text floating above the spawn, used for the miniboss. */
     sign?: string;
+    /** True for `kind: "miniboss"`. */
+    miniboss: boolean;
 }
 
 export interface StageBossSpawn
@@ -83,34 +97,48 @@ export interface StageGate
     quizBookId: string;
 }
 
+/** Walking to this x clears the Stage (a Stage with a Boss is cleared by the Boss instead). */
+export interface StageExit
+{
+    x: number;
+}
+
 export interface StageZone
 {
     id: string;
     name: string;
-    startX: number;
-    endX: number;
-    sign?: StageSign;
-    waypoint?: StageWaypoint;
-    resourceNodes?: StageResourceNode[];
-    enemySpawns?: StageEnemySpawn[];
+    signs: StageSign[];
+    waypoints: StageWaypoint[];
+    resourceNodes: StageResourceNode[];
+    enemySpawns: StageEnemySpawn[];
     gate?: StageGate;
     bossSpawn?: StageBossSpawn;
+    exit?: StageExit;
 }
 
 export interface StageDefinition
 {
+    /** `stage-001` … `stage-100`. */
     id: string;
-    chapter: number;
+    number: number;
+    realm: number;
+    /** `placeholder` Stages are shown grey on the map and cannot be entered. */
+    status: 'ready' | 'placeholder';
     name: string;
     nameEn: string;
-    width: number;
-    height: number;
+    /** Path of the level JSON (platforms, spikes, world width), null for a placeholder. */
+    layout: string | null;
     zones: StageZone[];
+}
+
+export function isStageReady (stage: StageDefinition): boolean
+{
+    return stage.status === 'ready';
 }
 
 export function getStageEnemySpawns (stage: StageDefinition): StageEnemySpawn[]
 {
-    return stage.zones.flatMap(zone => zone.enemySpawns ?? []);
+    return stage.zones.flatMap(zone => zone.enemySpawns);
 }
 
 export function getStageBossSpawn (stage: StageDefinition): StageBossSpawn | undefined
@@ -118,150 +146,225 @@ export function getStageBossSpawn (stage: StageDefinition): StageBossSpawn | und
     return stage.zones.find(zone => zone.bossSpawn)?.bossSpawn;
 }
 
+export function getStageExit (stage: StageDefinition): StageExit | undefined
+{
+    return stage.zones.find(zone => zone.exit)?.exit;
+}
+
 export function getStageDefinition (stages: StageDefinition[] | undefined, stageId: string): StageDefinition | undefined
 {
     return stages?.find(stage => stage.id === stageId);
 }
 
-const { asObject, asArray, asString, asNumber, optionalNumber, optionalString, fail } = makeValidators('stages.json');
+const v = makeValidators('stages.json');
+const { asObject, asArray, asString, asNumber, optionalNumber, optionalString, fail } = v;
 
-function parseDrops (value: unknown, path: string): StageDrop[]
+function placeholder (number: number): StageDefinition
 {
-    return asArray(value, path).map((raw, i) =>
-    {
-        const drop = asObject(raw, `${path}[${i}]`);
-        return {
-            itemId: asString(drop.itemId, `${path}[${i}].itemId`),
-            count: asNumber(drop.count, `${path}[${i}].count`),
-        };
-    });
-}
-
-function parseNode (raw: unknown, path: string): StageResourceNode
-{
-    const node = asObject(raw, path);
-    const type = node.type as ResourceNodeType;
-    if (!RESOURCE_NODE_TYPES.includes(type)) fail(`${path}.type`, `one of ${RESOURCE_NODE_TYPES.join(', ')}`);
-
-    const requiredTool = node.requiredTool === null ? null : asString(node.requiredTool, `${path}.requiredTool`);
-
-    const strikes = asNumber(node.strikes, `${path}.strikes`);
-    if (!Number.isInteger(strikes) || strikes < 1) fail(`${path}.strikes`, 'a whole number of Strikes, at least 1');
-
     return {
-        id: asString(node.id, `${path}.id`),
-        type,
-        requiredTool,
-        toolTier: asNumber(node.toolTier, `${path}.toolTier`),
-        x: asNumber(node.x, `${path}.x`),
-        strikes,
-        drops: parseDrops(node.drops, `${path}.drops`),
+        id: stageIdOf(number),
+        number,
+        realm: realmOf(number),
+        status: 'placeholder',
+        name: `ດ່ານ ${number}`,
+        nameEn: `Stage ${number}`,
+        layout: null,
+        zones: [],
     };
 }
 
-function parseEnemySpawn (raw: unknown, path: string): StageEnemySpawn
+function parseNode (
+    entry: Record<string, unknown>,
+    path: string,
+    nodes: ReadonlyMap<string, NodeDefinition>
+): StageResourceNode
 {
-    const spawn = asObject(raw, path);
-    const type = spawn.type as EnemyType | undefined;
+    const nodeId = asString(entry.node, `${path}.node`);
+    const kind = nodes.get(nodeId);
+    if (!kind) fail(`${path}.node`, `an id from nodes.json (${[...nodes.keys()].join(', ')}), got ${nodeId}`);
+
+    const x = asNumber(entry.x, `${path}.x`);
+    let strikes = kind!.strikes;
+    let drops = kind!.drops;
+    if (entry.overrides !== undefined)
+    {
+        const overrides = asObject(entry.overrides, `${path}.overrides`);
+        for (const key of Object.keys(overrides))
+        {
+            if (key !== 'strikes' && key !== 'drops') fail(`${path}.overrides.${key}`, 'one of strikes, drops');
+        }
+        if (overrides.strikes !== undefined)
+        {
+            strikes = asNumber(overrides.strikes, `${path}.overrides.strikes`);
+            if (!Number.isInteger(strikes) || strikes < 1) fail(`${path}.overrides.strikes`, 'a whole number of Strikes, at least 1');
+        }
+        if (overrides.drops !== undefined) drops = parseDrops(v, overrides.drops, `${path}.overrides.drops`);
+    }
+
+    return {
+        id: optionalString(entry.id, `${path}.id`) ?? `${nodeId}-${x}`,
+        type: nodeId,
+        label: kind!.label,
+        icon: kind!.icon,
+        texture: kind!.texture,
+        reach: kind!.reach,
+        requiredTool: kind!.requiredTool,
+        toolTier: kind!.toolTier,
+        x,
+        strikes,
+        drops,
+    };
+}
+
+function parseEnemy (entry: Record<string, unknown>, path: string, miniboss: boolean): StageEnemySpawn
+{
+    const type = entry.type as EnemyType | undefined;
     if (type !== undefined && !ENEMY_TYPES.includes(type)) fail(`${path}.type`, `one of ${ENEMY_TYPES.join(', ')}`);
 
     return {
-        enemyId: asString(spawn.enemyId, `${path}.enemyId`),
-        x: asNumber(spawn.x, `${path}.x`),
-        y: asNumber(spawn.y, `${path}.y`),
+        enemyId: asString(entry.enemy, `${path}.enemy`),
+        x: asNumber(entry.x, `${path}.x`),
+        y: optionalNumber(entry.y, `${path}.y`) ?? DEFAULT_ENEMY_Y,
         type,
-        patrolDistance: optionalNumber(spawn.patrolDistance, `${path}.patrolDistance`),
-        speed: optionalNumber(spawn.speed, `${path}.speed`),
-        scale: optionalNumber(spawn.scale, `${path}.scale`),
-        sign: optionalString(spawn.sign, `${path}.sign`),
+        patrolDistance: optionalNumber(entry.patrolDistance, `${path}.patrolDistance`),
+        speed: optionalNumber(entry.speed, `${path}.speed`),
+        scale: optionalNumber(entry.scale, `${path}.scale`),
+        sign: optionalString(entry.sign, `${path}.sign`),
+        miniboss,
     };
 }
 
-function parseZone (raw: unknown, path: string): StageZone
+function parseZone (raw: unknown, path: string, nodes: ReadonlyMap<string, NodeDefinition>): StageZone
 {
     const zone = asObject(raw, path);
     const parsed: StageZone = {
         id: asString(zone.id, `${path}.id`),
         name: asString(zone.name, `${path}.name`),
-        startX: asNumber(zone.startX, `${path}.startX`),
-        endX: asNumber(zone.endX, `${path}.endX`),
+        signs: [],
+        waypoints: [],
+        resourceNodes: [],
+        enemySpawns: [],
     };
 
-    if (zone.sign !== undefined)
+    asArray(zone.contents, `${path}.contents`).forEach((rawEntry, i) =>
     {
-        const sign = asObject(zone.sign, `${path}.sign`);
-        parsed.sign = {
-            x: asNumber(sign.x, `${path}.sign.x`),
-            text: asString(sign.text, `${path}.sign.text`),
-            color: optionalString(sign.color, `${path}.sign.color`),
-            stroke: optionalString(sign.stroke, `${path}.sign.stroke`),
-        };
-    }
+        const entryPath = `${path}.contents[${i}]`;
+        const entry = asObject(rawEntry, entryPath);
+        const kind = entry.kind as StageContentKind;
+        if (!STAGE_CONTENT_KINDS.includes(kind)) fail(`${entryPath}.kind`, `one of ${STAGE_CONTENT_KINDS.join(', ')}`);
 
-    if (zone.waypoint !== undefined)
-    {
-        const wp = asObject(zone.waypoint, `${path}.waypoint`);
-        parsed.waypoint = {
-            x: asNumber(wp.x, `${path}.waypoint.x`),
-            name: asString(wp.name, `${path}.waypoint.name`),
-            label: asString(wp.label, `${path}.waypoint.label`),
-        };
-    }
-
-    if (zone.resourceNodes !== undefined)
-    {
-        parsed.resourceNodes = asArray(zone.resourceNodes, `${path}.resourceNodes`)
-            .map((n, i) => parseNode(n, `${path}.resourceNodes[${i}]`));
-    }
-
-    if (zone.enemySpawns !== undefined)
-    {
-        parsed.enemySpawns = asArray(zone.enemySpawns, `${path}.enemySpawns`)
-            .map((e, i) => parseEnemySpawn(e, `${path}.enemySpawns[${i}]`));
-    }
-
-    if (zone.gate !== undefined)
-    {
-        const gate = asObject(zone.gate, `${path}.gate`);
-        parsed.gate = {
-            id: asString(gate.id, `${path}.gate.id`),
-            x: asNumber(gate.x, `${path}.gate.x`),
-            requiredTool: asString(gate.requiredTool, `${path}.gate.requiredTool`),
-            requiredItem: asString(gate.requiredItem, `${path}.gate.requiredItem`),
-            requiresQuiz: gate.requiresQuiz === true,
-            quizBookId: asString(gate.quizBookId, `${path}.gate.quizBookId`),
-        };
-    }
-
-    if (zone.bossSpawn !== undefined)
-    {
-        const boss = asObject(zone.bossSpawn, `${path}.bossSpawn`);
-        parsed.bossSpawn = {
-            enemyId: asString(boss.enemyId, `${path}.bossSpawn.enemyId`),
-            x: asNumber(boss.x, `${path}.bossSpawn.x`),
-            y: asNumber(boss.y, `${path}.bossSpawn.y`),
-            banner: optionalString(boss.banner, `${path}.bossSpawn.banner`),
-        };
-    }
+        switch (kind)
+        {
+            case 'node':
+                parsed.resourceNodes.push(parseNode(entry, entryPath, nodes));
+                break;
+            case 'enemy':
+                parsed.enemySpawns.push(parseEnemy(entry, entryPath, false));
+                break;
+            case 'miniboss':
+                parsed.enemySpawns.push(parseEnemy(entry, entryPath, true));
+                break;
+            case 'boss':
+                if (parsed.bossSpawn) fail(entryPath, 'the only boss of its zone');
+                parsed.bossSpawn = {
+                    enemyId: asString(entry.enemy, `${entryPath}.enemy`),
+                    x: asNumber(entry.x, `${entryPath}.x`),
+                    y: asNumber(entry.y, `${entryPath}.y`),
+                    banner: optionalString(entry.banner, `${entryPath}.banner`),
+                };
+                break;
+            case 'sign':
+                parsed.signs.push({
+                    x: asNumber(entry.x, `${entryPath}.x`),
+                    text: asString(entry.text, `${entryPath}.text`),
+                    color: optionalString(entry.color, `${entryPath}.color`),
+                    stroke: optionalString(entry.stroke, `${entryPath}.stroke`),
+                });
+                break;
+            case 'waypoint': {
+                const name = asString(entry.name, `${entryPath}.name`);
+                parsed.waypoints.push({
+                    x: asNumber(entry.x, `${entryPath}.x`),
+                    name,
+                    label: optionalString(entry.label, `${entryPath}.label`) ?? `🌀 ${name}`,
+                });
+                break;
+            }
+            case 'gate':
+                if (parsed.gate) fail(entryPath, 'the only gate of its zone');
+                parsed.gate = {
+                    id: asString(entry.id, `${entryPath}.id`),
+                    x: asNumber(entry.x, `${entryPath}.x`),
+                    requiredTool: asString(entry.requiredTool, `${entryPath}.requiredTool`),
+                    requiredItem: asString(entry.requiredItem, `${entryPath}.requiredItem`),
+                    requiresQuiz: entry.requiresQuiz === true,
+                    quizBookId: asString(entry.quizBookId, `${entryPath}.quizBookId`),
+                };
+                break;
+            case 'exit':
+                if (parsed.exit) fail(entryPath, 'the only exit of its zone');
+                parsed.exit = { x: asNumber(entry.x, `${entryPath}.x`) };
+                break;
+        }
+    });
 
     return parsed;
 }
 
-/** Validates the parsed JSON of `stages.json` and returns typed stage definitions. */
-export function parseStageDefinitions (raw: unknown): StageDefinition[]
+function parseStage (raw: unknown, index: number, nodes: ReadonlyMap<string, NodeDefinition>): StageDefinition
 {
-    return asArray(raw, 'root').map((rawStage, i) =>
+    const path = `stages[${index}]`;
+    const entry = asObject(raw, path);
+    const number = asNumber(entry.number, `${path}.number`);
+    if (number !== index + 1) fail(`${path}.number`, `${index + 1} (stages are listed in order, 1 to ${STAGE_COUNT})`);
+    const realm = asNumber(entry.realm, `${path}.realm`);
+    if (realm !== realmOf(number)) fail(`${path}.realm`, `${realmOf(number)} for stage ${number}`);
+
+    if (entry.status !== 'ready' && entry.status !== 'placeholder') fail(`${path}.status`, 'ready or placeholder');
+    if (entry.status === 'placeholder') return placeholder(number);
+
+    const stage: StageDefinition = {
+        id: stageIdOf(number),
+        number,
+        realm,
+        status: 'ready',
+        name: asString(entry.name, `${path}.name`),
+        nameEn: asString(entry.nameEn, `${path}.nameEn`),
+        layout: asString(entry.layout, `${path}.layout`),
+        zones: asArray(entry.zones, `${path}.zones`).map((z, j) => parseZone(z, `${path}.zones[${j}]`, nodes)),
+    };
+    if (stage.zones.length === 0) fail(`${path}.zones`, 'at least one zone');
+
+    const spawns = getStageEnemySpawns(stage);
+    const minibosses = spawns.filter(s => s.miniboss).length;
+    const hasBoss = getStageBossSpawn(stage) !== undefined;
+    const position = positionInRealm(number);
+
+    if (minibosses > 0 && position !== MINIBOSS_STAGE_IN_REALM) fail(`${path}.zones`, `without a miniboss (only stage ${MINIBOSS_STAGE_IN_REALM} of a realm has one)`);
+    if (position === MINIBOSS_STAGE_IN_REALM && minibosses !== 1) fail(`${path}.zones`, 'exactly one miniboss (stage 5 of a realm)');
+    if (hasBoss && position !== BOSS_STAGE_IN_REALM) fail(`${path}.zones`, `without a boss (only stage ${BOSS_STAGE_IN_REALM} of a realm has one)`);
+    if (position === BOSS_STAGE_IN_REALM && !hasBoss) fail(`${path}.zones`, 'a boss (stage 10 of a realm)');
+    const exits = stage.zones.filter(z => z.exit).length;
+    if (exits === 0 && !hasBoss) fail(`${path}.zones`, 'an exit or a boss, or the stage cannot be cleared');
+    if (exits > 0 && hasBoss) fail(`${path}.zones`, 'either an exit or a boss, not both');
+
+    const nodeIds = new Set<string>();
+    for (const node of stage.zones.flatMap(z => z.resourceNodes))
     {
-        const path = `stages[${i}]`;
-        const stage = asObject(rawStage, path);
-        return {
-            id: asString(stage.id, `${path}.id`),
-            chapter: asNumber(stage.chapter, `${path}.chapter`),
-            name: asString(stage.name, `${path}.name`),
-            nameEn: asString(stage.nameEn, `${path}.nameEn`),
-            width: asNumber(stage.width, `${path}.width`),
-            height: asNumber(stage.height, `${path}.height`),
-            zones: asArray(stage.zones, `${path}.zones`).map((z, j) => parseZone(z, `${path}.zones[${j}]`)),
-        };
-    });
+        if (nodeIds.has(node.id)) fail(`${path}.zones`, `with unique node ids (${node.id} appears twice, give one an "id")`);
+        nodeIds.add(node.id);
+    }
+    return stage;
+}
+
+/**
+ * Validates the parsed JSON of `stages.json` and returns the 100 Stages in order. `nodes` are the kinds from
+ * `nodes.json` that `{ "kind": "node" }` entries refer to.
+ */
+export function parseStageDefinitions (raw: unknown, nodes: readonly NodeDefinition[]): StageDefinition[]
+{
+    const nodeMap = new Map(nodes.map(node => [node.id, node] as const));
+    const list = asArray(asObject(raw, 'root').stages, 'stages');
+    if (list.length !== STAGE_COUNT) fail('stages', `exactly ${STAGE_COUNT} entries, got ${list.length}`);
+    return list.map((entry, i) => parseStage(entry, i, nodeMap));
 }

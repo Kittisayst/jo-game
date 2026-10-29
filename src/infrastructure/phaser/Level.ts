@@ -29,7 +29,10 @@ export interface Level
     platforms: { x: number; y: number }[];
     spikes?: SpikeSpawnData[];
     movingPlatforms?: MovingPlatformSpawnData[];
-    scenery?: 'village' | 'stage-ch1';
+    /** Which backdrop and ground the level has: the village, a forest, or a cave. */
+    scenery?: 'village' | 'forest' | 'cave';
+    /** Where the boss arena starts, when a cave level ends in one (the backdrop and ground change from here). */
+    arenaFromX?: number;
 }
 
 

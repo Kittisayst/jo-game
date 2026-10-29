@@ -35,7 +35,7 @@ function progressedState (): GameState
     state.skinManager.unlock('neon-ninja');
     state.skinManager.selectSkin('neon-ninja');
     state.settings.setSoundMuted(true);
-    state.stageProgression.completeStage('stage-ch1');
+    state.stageProgression.completeStage('stage-001');
     state.backpack.addItem('wood', 7);
     state.backpack.addItem('crystal', 2);
     state.backpack.addItem('iron-sword', 1);
@@ -119,7 +119,7 @@ describe('restoreSaveSnapshotUseCase', () =>
         expect(ports.settings.save).toHaveBeenCalledWith({ soundMuted: true, musicMuted: false });
         expect(ports.stageProgression.save).toHaveBeenCalledWith({
             unlockedStages: snapshot.stageProgression.unlockedStages,
-            completedStages: ['stage-ch1'],
+            completedStages: ['stage-001'],
         });
         expect(onSettings).toHaveBeenCalledWith({ soundMuted: true, musicMuted: false });
     });

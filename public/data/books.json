@@ -75,7 +75,7 @@
     "description": "ຮຽນຮູ້ກ່ຽວກັບການເຊື່ອມຕໍ່ເຄືອຂ່າຍ LAN, WAN, IP Address ແລະ ຄວາມປອດໄພເທິງອິນເຕີເນັດ",
     "price": 60,
     "prerequisiteBookId": "book-ch1",
-    "requiredCompletedStageId": "stage-ch1",
+    "requiredCompletedStageId": "stage-010",
     "unlockedRecipes": ["crystal-sword"],
     "pages": [
       {

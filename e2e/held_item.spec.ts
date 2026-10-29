@@ -33,13 +33,13 @@ test.describe('Held item', () => {
     await page.locator('#hud-menu-btn').click();
     await page.locator('#btn-exit-main-menu').click();
     await page.getByRole('button', { name: /ເລືອກດ່ານ/i }).click();
-    await page.locator('.stage-map-node').filter({ hasText: /ບົດທີ 1|Chapter 1/i }).first().click();
-    await expect(page.locator('.level-badge')).toContainText(/ບົດທີ 1|Chapter 1/i, { timeout: 12000 });
+    await page.getByRole('button', { name: /^ດ່ານ 1: / }).click();
+    await expect(page.locator('.level-badge')).toContainText(/ດ່ານ 1/, { timeout: 12000 });
     // The scene restarts after the badge changes, so wait for the sword instead of sleeping
     await expect.poll(() => held(page), { timeout: 10000 }).toMatchObject({ id: 'wooden-sword', texture: 'held-wooden-sword', visible: true });
 
     const bot = new Bot(page, false);
-    expect(await bot.goTo(285, { fight: false, tolerance: 20 })).toBe('arrived');
+    expect(await bot.goTo(545, { fight: false, tolerance: 20 })).toBe('arrived');
     // The axe is in the hand for only 0.6 s, so record it inside the game on every frame instead of
     // hoping a sample from the test lands in that window on a slow machine
     await page.evaluate(() => {
