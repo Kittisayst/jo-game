@@ -32,6 +32,14 @@
     "maxHp": 140,
     "damage": 20,
     "speed": 55,
+    "attacks": {
+      "engageRange": 500,
+      "cooldownMs": 2500,
+      "moves": [
+        { "id": "charge", "telegraphMs": 800, "minDistance": 0, "maxDistance": 260, "speed": 360, "durationMs": 700, "stunMs": 1000 },
+        { "id": "rock-throw", "telegraphMs": 600, "minDistance": 240, "maxDistance": 500, "speed": 260, "projectiles": 3 }
+      ]
+    },
     "drops": [
       { "itemId": "crystal", "chance": 1.0, "count": 2 }
     ]

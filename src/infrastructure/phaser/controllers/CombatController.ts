@@ -8,7 +8,7 @@ import { soundManager } from '../../audio/SoundManager';
 import { EventBus } from '../../EventBus';
 import { describeDrops, showDamageNumber, showLootNotification } from '../effects/FloatingText';
 import { Boss } from '../objects/Boss';
-import { Enemy, SPIT_PROJECTILE_KEY } from '../objects/Enemy';
+import { Enemy, ROCK_PROJECTILE_KEY, SPIT_PROJECTILE_KEY } from '../objects/Enemy';
 import type { Player } from '../objects/Player';
 import type { Spike } from '../objects/Spike';
 import type { Game } from '../scenes/Game';
@@ -120,6 +120,28 @@ export class CombatController
         scene.time.delayedCall(3500, () =>
         {
             if (spit.active) spit.destroy();
+        });
+    }
+
+    /** The Cave Guardian throws a rock along the ground in `dirX`; the hero jumps over it. */
+    spawnEnemyRock (x: number, y: number, dirX: number, speed: number): void
+    {
+        const { scene } = this;
+        const rock = scene.physics.add.sprite(x, y, ROCK_PROJECTILE_KEY);
+        scene.enemyProjectiles.add(rock);
+
+        const body = rock.body as Phaser.Physics.Arcade.Body;
+        if (body)
+        {
+            body.allowGravity = false;
+            body.setCircle(8, 2, 2);
+            rock.setVelocity(dirX * speed, 0);
+        }
+        scene.tweens.add({ targets: rock, angle: dirX * 360, duration: 700, repeat: -1 });
+
+        scene.time.delayedCall(3500, () =>
+        {
+            if (rock.active) rock.destroy();
         });
     }
 

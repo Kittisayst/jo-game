@@ -1,3 +1,5 @@
+import type { EnemyAttackPlan } from './EnemyAttackPlanner';
+
 export type EnemyState = 'patrol' | 'alert' | 'chase' | 'return';
 
 export type EnemyType = 'slime' | 'slime-flying' | 'slime-armored' | 'slime-spitter';
@@ -19,6 +21,8 @@ export interface EnemyDefinition
     maxHp: number;
     damage: number;
     drops: EnemyDrop[];
+    /** Special attacks, only for a Mini-boss (see `EnemyAttackPlanner`). */
+    attacks?: EnemyAttackPlan;
 }
 
 export interface EnemyArchetype

@@ -555,6 +555,10 @@ export class Game extends Scene
             {
                 this.combat.spawnEnemySpit(x, y, dirX, dirY);
             };
+            enemy.onThrowRock = (x, y, dirX, speed) =>
+            {
+                this.combat.spawnEnemyRock(x, y, dirX, speed);
+            };
             enemies.add(enemy);
         }
 

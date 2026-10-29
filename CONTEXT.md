@@ -51,6 +51,12 @@ One section of a Stage (forest, cavern, Broken Gate, boss arena), each with its 
 **Resource node**:
 A tree, stone, iron vein or herb standing in a Zone that gives Materials when harvested. It needs a matching tool (an axe for trees, a pickaxe for stone and iron; herbs need none) and a number of Strikes, different for each node (a tree takes 3). It respawns, intact, each time the player enters the Stage.
 
+**Mini-boss**:
+A stronger enemy that guards a Zone and drops story Materials (the Cave Guardian drops crystal). Unlike normal enemies it has special attacks, each announced by a Telegraph. Touching it or being hit by its attack costs one heart, like every other enemy.
+
+**Telegraph**:
+The warning an enemy gives before a special attack (a red flash and a mark over its head), long enough for the player to react. An attack never lands without one.
+
 **Strike**:
 One press of the interact key on a Resource node. The node gives its Materials only when the last Strike lands; a Strike is refused, and not counted, if the player lacks the tool or the Backpack cannot hold the Materials. Strikes already made are kept until the player leaves the Stage.
 _Avoid_: hit (a hit is damage to Health), hp (that is Health)
