@@ -4,6 +4,8 @@ export interface BookPage
     title: string;
     content: string;
     keyPoints: string[];
+    /** Optional SVG diagram path in `public/assets/books/` illustrating the page's concept. */
+    illustration?: string;
 }
 
 export interface BookDefinition

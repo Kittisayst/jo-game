@@ -115,6 +115,12 @@ export function DialogueModal ({
 
     if (!node) return null;
 
+    const portraitSrc = node.speaker.includes('Elder') || node.speaker.includes('ພໍ່ເຖົ້າຄຳ')
+        ? 'assets/ui/portrait_elder.png'
+        : node.speaker.includes('Mina')
+            ? 'assets/ui/portrait_mina.png'
+            : null;
+
     return (
         <div className="dialogue-overlay" onClick={handleBoxClick}>
             <div
@@ -128,7 +134,11 @@ export function DialogueModal ({
                 {/* Speaker Avatar & Name Header */}
                 <div className="dialogue-header">
                     <div className="dialogue-avatar-frame">
-                        <span className="dialogue-avatar">{node.avatar || '💬'}</span>
+                        {portraitSrc ? (
+                            <img src={portraitSrc} alt="" width={48} height={48} className="pixel-art w-full h-full object-cover" />
+                        ) : (
+                            <span className="dialogue-avatar">{node.avatar || '💬'}</span>
+                        )}
                     </div>
                     <div className="dialogue-speaker-wrap">
                         <span className="dialogue-speaker-name">{node.speaker}</span>

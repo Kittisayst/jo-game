@@ -22,6 +22,22 @@ export class NPC extends Physics.Arcade.Sprite
         this.setSize(WIDTH, HEIGHT);
         this.setDepth(9);
 
+        const tex = scene.textures.get(texture);
+        if (tex && tex.frameTotal > 4)
+        {
+            const idleKey = `${texture}-idle`;
+            if (!scene.anims.exists(idleKey))
+            {
+                scene.anims.create({
+                    key: idleKey,
+                    frames: scene.anims.generateFrameNumbers(texture, { start: 0, end: 3 }),
+                    frameRate: 4,
+                    repeat: -1,
+                });
+            }
+            this.play(idleKey);
+        }
+
         // Gentle breathing idle float
         scene.tweens.add({
             targets: this,
@@ -96,7 +112,7 @@ export class NPC extends Physics.Arcade.Sprite
 
         const graphics = scene.make.graphics({ x: 0, y: 0 });
 
-        if (textureKey === 'npc-merchant')
+        if (textureKey === 'npc-merchant' || textureKey === 'npc-mina')
         {
             // Merchant Mina: Magenta/violet cyber jacket with gold scarf
             graphics.fillStyle(0x7c3aed, 1);

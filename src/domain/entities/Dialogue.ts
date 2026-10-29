@@ -4,6 +4,8 @@ export interface DialogueChoice
     to: string;
     if?: string;
     set?: Record<string, unknown>;
+    /** Something the game should do when this choice is picked (e.g. `open-skin-shop`). */
+    action?: string;
 }
 
 export interface DialogueNode
@@ -31,6 +33,7 @@ export class DialogueState
     private currentNodeId: string | null = null;
     private variables: Record<string, unknown> = {};
     private isDialogueOpen = false;
+    private pendingAction: string | null = null;
 
     constructor (initialVariables: Record<string, unknown> = {})
     {
@@ -83,6 +86,7 @@ export class DialogueState
         {
             Object.assign(this.variables, selected.set);
         }
+        this.pendingAction = selected.action ?? null;
 
         return this.goToNode(selected.to);
     }
@@ -111,6 +115,14 @@ export class DialogueState
         this.isDialogueOpen = false;
         this.currentNodeId = null;
         this.currentGraph = null;
+    }
+
+    /** The action attached to the last choice, returned once and then cleared. */
+    takeAction (): string | null
+    {
+        const action = this.pendingAction;
+        this.pendingAction = null;
+        return action;
     }
 
     getVariable (key: string): unknown

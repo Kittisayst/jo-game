@@ -2,3 +2,4 @@
 |------|------|--------|----------------|
 | 2026-10-28 | docs/plans/2026-10-28-village-hub-alignment.md | done (code) | ແກ້ loop GDD, ຮວມລະບົບອາວຸດ, ຕັດຫຼຽນ/Shop/ຄະແນນ, ແຍກ Game.ts, ອັບເດດເອກະສານ |
 | 2026-10-28 | docs/plans/2026-10-28-clean-architecture-audit.md | done (Phase 0–6) | ກວດ Clean Architecture: import ຖືກ, ແຕ່ກົດຫຼຸດອອກ UI/scene (herb-potion bug), content ຊ້ຳ, singleton, ໂຄດຕາຍ; ແຜນ 6 phase |
+| 2026-10-29 | docs/plans/2026-10-29-skin-shop-npc.md | done (branch feat/skin-shop-npc) | ຮ້ານ Skin ກັບ NPC Mina ໃນໝູ່ບ້ານ: ຊື້/ປ່ຽນໄດ້ແຕ່ທີ່ NPC, ລຶບປຸ່ມໃນເມນູ, ໜ້າຮ້ານໃໝ່ມີ try-on |

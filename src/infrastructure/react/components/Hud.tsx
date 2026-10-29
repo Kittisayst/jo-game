@@ -1,5 +1,6 @@
 import { getLevelItem } from '../../phaser/levelCatalog';
 import { ObjectiveId } from '../../../domain/utils/nextObjective';
+import { ItemIcon } from './ItemIcon';
 
 const OBJECTIVE_TEXT: Record<ObjectiveId, string> = {
     'buy-book': '📚 ຊື້ປຶ້ມຕຳລາບົດທີ 1 ທີ່ຫໍສະໝຸດ',
@@ -18,6 +19,7 @@ export interface EquippedWeaponView
     id: string;
     name: string;
     icon: string;
+    iconImage?: string;
 }
 
 export interface HudProps
@@ -140,7 +142,9 @@ export function Hud ({
                         title="ປ່ຽນອາວຸດ (ກົດ Q)"
                         type="button"
                     >
-                        <span className="badge-icon">{equippedWeapon.icon}</span>
+                        <span className="badge-icon flex items-center">
+                            <ItemIcon iconImage={equippedWeapon.iconImage} icon={equippedWeapon.icon} size={20} />
+                        </span>
                         <span className="badge-label">{equippedWeapon.name}</span>
                         <span className="badge-hint">[Q]</span>
                     </button>

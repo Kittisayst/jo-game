@@ -2,6 +2,96 @@ import { Scene } from 'phaser';
 import { LEVEL_CATALOG } from '../levelCatalog';
 import { ACTIVE_SESSION_STORAGE_KEY, readString, STORAGE_PREFIX } from '../../storage/safeStorage';
 
+const IMAGE_ASSETS: readonly { key: string; path: string }[] = [
+    // Backgrounds
+    { key: 'bg-village', path: 'assets/backgrounds/bg_village.jpg' },
+    { key: 'bg-plains', path: 'assets/backgrounds/bg_plains.jpg' },
+    { key: 'bg-cavern', path: 'assets/backgrounds/bg_cavern.jpg' },
+    { key: 'bg-boss-arena', path: 'assets/backgrounds/bg_boss_arena.jpg' },
+
+    // Terrain & Hazards
+    { key: 'ground-tile', path: 'assets/environment/tile_ground.png' },
+    { key: 'ground-tile-cavern', path: 'assets/environment/tile_ground_cavern.png' },
+    { key: 'ground-tile-arena', path: 'assets/environment/tile_ground_arena.png' },
+    { key: 'platform-texture', path: 'assets/environment/platform.png' },
+    { key: 'moving-platform-texture', path: 'assets/environment/moving_platform.png' },
+    { key: 'spike-texture', path: 'assets/environment/spikes.png' },
+
+    // Village Architecture & Props
+    { key: 'building-library', path: 'assets/environment/building_library.png' },
+    { key: 'building-academy', path: 'assets/environment/building_academy.png' },
+    { key: 'building-workshop', path: 'assets/environment/building_workshop.png' },
+    { key: 'building-forge-open', path: 'assets/environment/building_forge_open.png' },
+    { key: 'building-forge-locked', path: 'assets/environment/building_forge_locked.png' },
+    { key: 'stall-mina', path: 'assets/environment/stall_mina.png' },
+    { key: 'village-tree', path: 'assets/environment/village_tree.png' },
+    { key: 'village-lantern', path: 'assets/environment/village_lantern.png' },
+    { key: 'signpost', path: 'assets/environment/signpost.png' },
+];
+
+const SPRITESHEET_ASSETS: readonly { key: string; path: string; frameWidth: number; frameHeight: number }[] = [
+    // Interactive Environment Sheets
+    { key: 'world-gate', path: 'assets/environment/world_gate.png', frameWidth: 112, frameHeight: 160 },
+    { key: 'node-tree', path: 'assets/environment/node_tree.png', frameWidth: 80, frameHeight: 112 },
+    { key: 'node-herb', path: 'assets/environment/node_herb.png', frameWidth: 48, frameHeight: 48 },
+    { key: 'node-stone', path: 'assets/environment/node_stone.png', frameWidth: 56, frameHeight: 56 },
+    { key: 'node-iron-vein', path: 'assets/environment/node_iron_vein.png', frameWidth: 64, frameHeight: 64 },
+    { key: 'waypoint-shrine', path: 'assets/environment/waypoint_shrine.png', frameWidth: 48, frameHeight: 80 },
+    { key: 'gate-ch1', path: 'assets/environment/gate_ch1.png', frameWidth: 96, frameHeight: 160 },
+
+    // Player Skins (16 frames of 32x48)
+    { key: 'player-skin-cyber-blue', path: 'assets/characters/player-skin-cyber-blue.png', frameWidth: 32, frameHeight: 48 },
+    { key: 'player-skin-neon-ninja', path: 'assets/characters/player-skin-neon-ninja.png', frameWidth: 32, frameHeight: 48 },
+    { key: 'player-skin-cyber-knight', path: 'assets/characters/player-skin-cyber-knight.png', frameWidth: 32, frameHeight: 48 },
+    { key: 'player-skin-golden-runner', path: 'assets/characters/player-skin-golden-runner.png', frameWidth: 32, frameHeight: 48 },
+
+    // Village NPCs (4 frames of 32x48)
+    { key: 'npc-elder', path: 'assets/characters/npc_elder.png', frameWidth: 32, frameHeight: 48 },
+    { key: 'npc-mina', path: 'assets/characters/npc_mina.png', frameWidth: 32, frameHeight: 48 },
+
+    // Enemies, Mini-Boss & Chapter Boss (4 frames each)
+    { key: 'enemy-slime', path: 'assets/characters/enemy_slime.png', frameWidth: 32, frameHeight: 28 },
+    { key: 'enemy-rock-golem', path: 'assets/characters/enemy_rock_golem.png', frameWidth: 48, frameHeight: 40 },
+    { key: 'miniboss-cave-guardian', path: 'assets/characters/miniboss_cave_guardian.png', frameWidth: 64, frameHeight: 64 },
+    { key: 'boss-hardware-overlord', path: 'assets/characters/boss_hardware_overlord.png', frameWidth: 96, frameHeight: 80 },
+
+    // Weapon Slash VFX (3 frames of 48x48)
+    { key: 'slash-wood', path: 'assets/vfx/slash_wood.png', frameWidth: 48, frameHeight: 48 },
+    { key: 'slash-iron', path: 'assets/vfx/slash_iron.png', frameWidth: 48, frameHeight: 48 },
+    { key: 'slash-crystal', path: 'assets/vfx/slash_crystal.png', frameWidth: 48, frameHeight: 48 },
+];
+
+/** Queues every level JSON, image, and spritesheet not yet in Phaser's cache. */
+export function enqueueGameAssets (scene: Scene): void
+{
+    for (const item of LEVEL_CATALOG)
+    {
+        if (!scene.cache.json.exists(item.key))
+        {
+            scene.load.json(item.key, item.assetPath);
+        }
+    }
+
+    for (const img of IMAGE_ASSETS)
+    {
+        if (!scene.textures.exists(img.key))
+        {
+            scene.load.image(img.key, img.path);
+        }
+    }
+
+    for (const sheet of SPRITESHEET_ASSETS)
+    {
+        if (!scene.textures.exists(sheet.key))
+        {
+            scene.load.spritesheet(sheet.key, sheet.path, {
+                frameWidth: sheet.frameWidth,
+                frameHeight: sheet.frameHeight,
+            });
+        }
+    }
+}
+
 export class Preloader extends Scene
 {
     constructor ()
@@ -11,36 +101,7 @@ export class Preloader extends Scene
 
     preload ()
     {
-        for (const item of LEVEL_CATALOG)
-        {
-            if (!this.cache.json.exists(item.key))
-            {
-                this.load.json(item.key, item.assetPath);
-            }
-        }
-
-        this.load.image('bg-village', 'assets/backgrounds/bg_village.jpg');
-        this.load.image('bg-plains', 'assets/backgrounds/bg_plains.jpg');
-        this.load.image('bg-sky-islands', 'assets/backgrounds/bg_sky_islands.jpg');
-        this.load.image('bg-boss-arena', 'assets/backgrounds/bg_boss_arena.jpg');
-
-        this.load.image('ground-tile', 'assets/environment/tile_ground.png');
-        this.load.image('platform-texture', 'assets/environment/platform.png');
-        this.load.image('door-texture', 'assets/environment/door.png');
-        this.load.image('goal-flag-texture', 'assets/environment/goal_flag.png');
-        this.load.image('spike-texture', 'assets/environment/spikes.png');
-
-        this.load.image('powerup-heart', 'assets/items/heart.png');
-        this.load.image('powerup-star', 'assets/items/star.png');
-        this.load.image('powerup-spring', 'assets/items/spring.png');
-
-        this.load.spritesheet('player-skin-cyber-blue', 'assets/characters/player-skin-cyber-blue.png', { frameWidth: 32, frameHeight: 48 });
-        this.load.spritesheet('player-skin-neon-ninja', 'assets/characters/player-skin-neon-ninja.png', { frameWidth: 32, frameHeight: 48 });
-        this.load.spritesheet('player-skin-cyber-knight', 'assets/characters/player-skin-cyber-knight.png', { frameWidth: 32, frameHeight: 48 });
-        this.load.spritesheet('player-skin-golden-runner', 'assets/characters/player-skin-golden-runner.png', { frameWidth: 32, frameHeight: 48 });
-        this.load.image('enemy-slime', 'assets/characters/enemy_slime.png');
-        this.load.image('boss-king-slime', 'assets/characters/boss_king_slime.png');
-        this.load.image('npc-elder', 'assets/characters/npc_elder.png');
+        enqueueGameAssets(this);
     }
 
     create ()

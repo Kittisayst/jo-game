@@ -90,4 +90,27 @@ describe('DialogueState Entity', () =>
         expect(state.isOpen).toBe(false);
         expect(state.getCurrentNode()).toBeNull();
     });
+
+    it('hands out the action of the picked choice once', () =>
+    {
+        const state = new DialogueState();
+        state.start({
+            id: 'g',
+            title: 'g',
+            startNodeId: 'a',
+            nodes: {
+                a: {
+                    id: 'a', speaker: 's', avatar: 'x', line: 'l',
+                    choices: [
+                        { text: 'go', to: 'end', action: 'do-it' },
+                        { text: 'skip', to: 'end' },
+                    ],
+                },
+            },
+        });
+
+        state.choose(0);
+        expect(state.takeAction()).toBe('do-it');
+        expect(state.takeAction()).toBeNull();
+    });
 });

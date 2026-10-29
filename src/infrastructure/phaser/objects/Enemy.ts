@@ -33,6 +33,7 @@ export class Enemy extends Physics.Arcade.Sprite
     private alertTimer = 0;
     private hopCooldown = 0;
     private alertText?: Phaser.GameObjects.Text;
+    private spriteHeight = HEIGHT;
 
     // Flying slime attributes
     private baseY: number;
@@ -56,7 +57,15 @@ export class Enemy extends Physics.Arcade.Sprite
         const archetype = ENEMY_ARCHETYPES[type] ?? ENEMY_ARCHETYPES['slime'];
         Enemy.ensureTextures(scene);
 
-        const texKey = TEXTURE_KEYS[type] ?? TEXTURE_KEYS['slime'];
+        const defTexMap: Record<string, string> = {
+            'forest-slime': 'enemy-slime',
+            'rock-golem': 'enemy-rock-golem',
+            'cave-guardian': 'miniboss-cave-guardian',
+        };
+        const preferredTex = definition ? defTexMap[definition.id] : undefined;
+        const texKey = (preferredTex && scene.textures.exists(preferredTex))
+            ? preferredTex
+            : (TEXTURE_KEYS[type] ?? TEXTURE_KEYS['slime']);
         super(scene, x, y, texKey);
 
         this.enemyType = type;
@@ -77,7 +86,19 @@ export class Enemy extends Physics.Arcade.Sprite
         const body = this.body as Phaser.Physics.Arcade.Body;
         if (body)
         {
-            if (type === 'slime-flying')
+            if (texKey === 'miniboss-cave-guardian')
+            {
+                this.spriteHeight = 64;
+                body.setSize(48, 54);
+                body.setOffset(8, 10);
+            }
+            else if (texKey === 'enemy-rock-golem')
+            {
+                this.spriteHeight = 40;
+                body.setSize(38, 32);
+                body.setOffset(5, 8);
+            }
+            else if (type === 'slime-flying')
             {
                 body.allowGravity = false;
                 body.setSize(24, 20);
@@ -85,20 +106,36 @@ export class Enemy extends Physics.Arcade.Sprite
             }
             else if (type === 'slime-armored')
             {
-                body.setSize(30, 24);
-                body.setOffset(2, 8);
+                body.setSize(30, 20);
+                body.setOffset(1, 8);
             }
             else if (type === 'slime-spitter')
             {
-                body.setSize(26, 22);
-                body.setOffset(3, 10);
+                body.setSize(26, 20);
+                body.setOffset(3, 8);
             }
             else
             {
-                // Basic slime: low profile
+                // Basic slime: flush with 32x28 sprite bottom
                 body.setSize(26, 20);
-                body.setOffset(3, 12);
+                body.setOffset(3, 8);
             }
+        }
+
+        const loadedTex = scene.textures.get(texKey);
+        if (loadedTex && loadedTex.frameTotal > 4)
+        {
+            const moveKey = `${texKey}-move`;
+            if (!scene.anims.exists(moveKey))
+            {
+                scene.anims.create({
+                    key: moveKey,
+                    frames: scene.anims.generateFrameNumbers(texKey, { start: 0, end: 3 }),
+                    frameRate: 6,
+                    repeat: -1,
+                });
+            }
+            this.play(moveKey);
         }
 
         this.setVelocityX(this.speed);
@@ -241,7 +278,7 @@ export class Enemy extends Physics.Arcade.Sprite
 
         if (this.alertText && this.alertText.active)
         {
-            this.alertText.setPosition(this.x - 4, this.y - HEIGHT);
+            this.alertText.setPosition(this.x - 4, this.y - this.spriteHeight / 2 - 18);
         }
 
         // Flying slime floating logic
@@ -525,7 +562,7 @@ export class Enemy extends Physics.Arcade.Sprite
     private showAlertIndicator ()
     {
         if (this.alertText) return;
-        this.alertText = this.scene.add.text(this.x - 4, this.y - HEIGHT, '!', {
+        this.alertText = this.scene.add.text(this.x - 4, this.y - this.spriteHeight / 2 - 18, '!', {
             fontFamily: 'monospace, sans-serif',
             fontSize: '18px',
             fontStyle: 'bold',

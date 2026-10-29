@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import assetManifest from '../../../docs/asset-manifest.json';
 import books from '../../../public/data/books.json';
 import enemies from '../../../public/data/enemies.json';
 import items from '../../../public/data/items.json';
@@ -26,6 +27,28 @@ describe('the shipped game data', () =>
 
         expect(parsed.some(r => 'resultItemId' in r)).toBe(true);
         expect(parsed.some(r => 'targetWeaponId' in r)).toBe(true);
+    });
+
+    it('tracks every item iconImage and book page illustration in docs/asset-manifest.json', () =>
+    {
+        const trackedPaths = new Set(assetManifest.assets.map(a => a.path));
+        const parsedItems = parseItems(items);
+        const parsedBooks = parseBooks(books);
+
+        for (const item of parsedItems)
+        {
+            expect(item.iconImage, `${item.id} iconImage`).toBeDefined();
+            expect(trackedPaths.has(item.iconImage!), `${item.id} -> ${item.iconImage}`).toBe(true);
+        }
+
+        for (const book of parsedBooks)
+        {
+            for (const page of book.pages)
+            {
+                expect(page.illustration, `${book.id} p${page.pageNumber} illustration`).toBeDefined();
+                expect(trackedPaths.has(page.illustration!), `${book.id} p${page.pageNumber} -> ${page.illustration}`).toBe(true);
+            }
+        }
     });
 });
 

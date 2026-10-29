@@ -29,9 +29,10 @@ import {
     createSpikes,
     GROUND_HEIGHT,
     GROUND_Y,
+    SkyBackdrop,
     WORLD_HEIGHT,
 } from '../scenery/WorldBuilder';
-import { LEVEL_CATALOG } from '../levelCatalog';
+import { enqueueGameAssets } from './Preloader';
 import { DomainEvents } from '../../../domain/DomainEvents';
 import { Health } from '../../../domain/entities/Health';
 import { PLAYER_DIED_EVENT } from '../../../application/PlayerTakeDamageUseCase';
@@ -57,13 +58,14 @@ export class Game extends Scene
     enemies: Phaser.Physics.Arcade.Group;
     enemyProjectiles: Phaser.Physics.Arcade.Group;
     boss?: Boss;
-    elderNpc?: NPC;
+    /** Everyone in the village the hero can talk to (the elder, Mina). */
+    villagers: { npc: NPC; prompt: string }[] = [];
     isDialogueActive = false;
     particleManager: ParticleManager;
     cursors: Phaser.Types.Input.Keyboard.CursorKeys;
     wasdKeys?: Record<string, Phaser.Input.Keyboard.Key>;
     touchControls = { left: false, right: false, up: false };
-    bgTileSprite?: Phaser.GameObjects.TileSprite;
+    skyBackdrop?: SkyBackdrop;
     level: Level;
     /** Zones, resource nodes, enemies and gate of the current Stage; undefined in the village. */
     stage?: StageDefinition;
@@ -79,6 +81,7 @@ export class Game extends Scene
     private resourceNodes: ResourceNodeView[] = [];
     private waypoints: WaypointView[] = [];
     private brokenGate?: BrokenGate;
+    private bossBgmStarted = false;
 
     constructor ()
     {
@@ -95,7 +98,7 @@ export class Game extends Scene
     {
         // Reset per-run references to prevent lingering stale objects across restarts
         this.boss = undefined;
-        this.elderNpc = undefined;
+        this.villagers = [];
         this.isDialogueActive = false;
         this.touchControls = { left: false, right: false, up: false };
 
@@ -107,93 +110,19 @@ export class Game extends Scene
         this.waypoints = [];
         this.brokenGate = undefined;
         this.stage = undefined;
+        this.bossBgmStarted = false;
     }
 
     preload ()
     {
         // Fallback load in case Game scene is loaded directly without Preloader
-        for (const item of LEVEL_CATALOG)
-        {
-            if (!this.cache.json.exists(item.key))
-            {
-                this.load.json(item.key, item.assetPath);
-            }
-        }
-
-        const bgAssets = [
-            { key: 'bg-village', path: 'assets/backgrounds/bg_village.jpg' },
-            { key: 'bg-plains', path: 'assets/backgrounds/bg_plains.jpg' },
-            { key: 'bg-sky-islands', path: 'assets/backgrounds/bg_sky_islands.jpg' },
-            { key: 'bg-boss-arena', path: 'assets/backgrounds/bg_boss_arena.jpg' },
-        ];
-        for (const bg of bgAssets)
-        {
-            if (!this.textures.exists(bg.key))
-            {
-                this.load.image(bg.key, bg.path);
-            }
-        }
-
-        const envAssets = [
-            { key: 'ground-tile', path: 'assets/environment/tile_ground.png' },
-            { key: 'platform-texture', path: 'assets/environment/platform.png' },
-            { key: 'door-texture', path: 'assets/environment/door.png' },
-            { key: 'goal-flag-texture', path: 'assets/environment/goal_flag.png' },
-            { key: 'spike-texture', path: 'assets/environment/spikes.png' },
-        ];
-        for (const env of envAssets)
-        {
-            if (!this.textures.exists(env.key))
-            {
-                this.load.image(env.key, env.path);
-            }
-        }
-
-        const itemAssets = [
-            { key: 'powerup-heart', path: 'assets/items/heart.png' },
-            { key: 'powerup-star', path: 'assets/items/star.png' },
-            { key: 'powerup-spring', path: 'assets/items/spring.png' },
-        ];
-        for (const item of itemAssets)
-        {
-            if (!this.textures.exists(item.key))
-            {
-                this.load.image(item.key, item.path);
-            }
-        }
-
-        const skinAssets = [
-            { key: 'player-skin-cyber-blue', path: 'assets/characters/player-skin-cyber-blue.png' },
-            { key: 'player-skin-neon-ninja', path: 'assets/characters/player-skin-neon-ninja.png' },
-            { key: 'player-skin-cyber-knight', path: 'assets/characters/player-skin-cyber-knight.png' },
-            { key: 'player-skin-golden-runner', path: 'assets/characters/player-skin-golden-runner.png' },
-        ];
-        for (const skin of skinAssets)
-        {
-            if (!this.textures.exists(skin.key))
-            {
-                this.load.spritesheet(skin.key, skin.path, { frameWidth: 32, frameHeight: 48 });
-            }
-        }
-
-        const enemyAssets = [
-            { key: 'enemy-slime', path: 'assets/characters/enemy_slime.png' },
-            { key: 'boss-king-slime', path: 'assets/characters/boss_king_slime.png' },
-            { key: 'npc-elder', path: 'assets/characters/npc_elder.png' },
-        ];
-        for (const enemy of enemyAssets)
-        {
-            if (!this.textures.exists(enemy.key))
-            {
-                this.load.image(enemy.key, enemy.path);
-            }
-        }
+        enqueueGameAssets(this);
     }
 
     create ()
     {
         this.boss = undefined;
-        this.elderNpc = undefined;
+        this.villagers = [];
 
         this.level = this.cache.json.get(this.currentLevelKey) as Level;
         this.stage = getStageDefinition(getGameContent().stages, this.currentLevelKey);
@@ -211,9 +140,10 @@ export class Game extends Scene
         this.camera.setBounds(0, 0, this.level.worldWidth, WORLD_HEIGHT);
 
         const isVillage = this.level.scenery === 'village' || this.currentLevelKey === 'village';
-        this.bgTileSprite = createSky(this, this.level, isVillage ? 'bg-village' : (this.stage ? 'bg-boss-arena' : 'bg-plains'));
+        this.bossBgmStarted = false;
+        this.skyBackdrop = createSky(this, this.level, isVillage ? 'bg-village' : 'bg-plains', this.stage);
 
-        this.ground = createGround(this, this.level);
+        this.ground = createGround(this, this.level, this.stage);
         this.platforms = createPlatforms(this, this.level);
         this.movingPlatforms = createMovingPlatforms(this, this.level);
         this.spikes = createSpikes(this, this.level);
@@ -229,11 +159,17 @@ export class Game extends Scene
                 Boolean(entities.forgeUnlocked || entities.books['book-ch1']?.examPassed)
             );
             const baseY = WORLD_HEIGHT - GROUND_HEIGHT - 24;
-            this.elderNpc = new NPC(this, 460, baseY, 'npc-elder');
-            this.elderNpc.onInteract = () =>
-            {
-                EventBus.emit('start-dialogue', 'village_elder');
-            };
+            const elder = new NPC(this, 460, baseY, 'npc-elder');
+            elder.onInteract = () => EventBus.emit('start-dialogue', 'village_elder');
+
+            // Mina runs the Skin shop at the little market between the Forge and the World Gate
+            const mina = new NPC(this, 1290, baseY, 'npc-mina', '🛍️ [E] ລົມກັບ Mina');
+            mina.onInteract = () => EventBus.emit('start-dialogue', 'skin_shop');
+
+            this.villagers = [
+                { npc: elder, prompt: '💬 [E] ລົມກັບຫົວໜ້າໝູ່ບ້ານ' },
+                { npc: mina, prompt: '🛍️ [E] ລົມກັບ Mina (ຮ້ານຊຸດ)' },
+            ];
         }
         else if (this.stage)
         {
@@ -248,7 +184,7 @@ export class Game extends Scene
             waypoints: this.waypoints,
             resourceNodes: this.resourceNodes,
             brokenGate: this.brokenGate,
-            elderNpc: this.elderNpc,
+            villagers: this.villagers,
         });
 
         const eKey = this.input.keyboard?.addKey('E');
@@ -431,8 +367,8 @@ export class Game extends Scene
         EventBus.on('quiz-finisher-failed', onQuizFinisherFailed);
         EventBus.on('gate-repaired', onGateRepaired);
 
-        // Boss theme in a stage with a boss, adventure theme everywhere else
-        soundManager.startBgm(bossSpawn ? 'boss' : 'adventure');
+        // Village hub gets warm pastoral-cyber theme; Stages start with adventure and crossfade to boss in Zone C
+        soundManager.startBgm(isVillage ? 'village' : (bossSpawn && !this.stage ? 'boss' : 'adventure'));
 
         const onSkinChanged = (payload: SkinChangedPayload) =>
         {
@@ -485,8 +421,9 @@ export class Game extends Scene
             EventBus.removeListener('gate-repaired', onGateRepaired);
             soundManager.stopBgm();
             this.boss = undefined;
-            this.elderNpc = undefined;
-            this.bgTileSprite = undefined;
+            this.villagers = [];
+            this.skyBackdrop = undefined;
+            this.bossBgmStarted = false;
             entities.attackCooldown.reset();
             this.input.keyboard?.removeAllKeys(true);
         });
@@ -513,9 +450,9 @@ export class Game extends Scene
             return;
         }
 
-        if (this.elderNpc && this.elderNpc.active)
+        for (const { npc } of this.villagers)
         {
-            this.elderNpc.updateProximity(this.player.x, this.player.y);
+            if (npc.active) npc.updateProximity(this.player.x, this.player.y);
         }
 
         this.interaction.update();
@@ -553,9 +490,18 @@ export class Game extends Scene
             this.boss.update(this.player.x, this.player.y, delta);
         }
 
-        if (this.bgTileSprite)
+        this.skyBackdrop?.update(this.cameras.main.scrollX);
+
+        if (
+            !this.bossBgmStarted &&
+            this.stage &&
+            this.boss &&
+            !this.boss.entity.isDefeated &&
+            this.player.x >= 2280
+        )
         {
-            this.bgTileSprite.tilePositionX = this.cameras.main.scrollX * 0.25;
+            this.bossBgmStarted = true;
+            soundManager.startBgm('boss');
         }
 
     }

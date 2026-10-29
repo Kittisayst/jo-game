@@ -15,13 +15,14 @@ export interface Interactables
     waypoints: WaypointView[];
     resourceNodes: ResourceNodeView[];
     brokenGate?: BrokenGate;
-    elderNpc?: NPC;
+    /** People to talk to, each with the prompt shown while the hero is close enough. */
+    villagers: { npc: NPC; prompt: string }[];
 }
 
 /**
  * The "press E" part of the scene: finds what is next to the hero, shows its prompt
  * above the hero, and runs the action when E is pressed. Order of priority is
- * buildings, waypoints, the broken gate, resource nodes, then NPCs.
+ * buildings, waypoints, the broken gate, resource nodes, then villagers.
  */
 export class InteractionController
 {
@@ -55,10 +56,10 @@ export class InteractionController
             return;
         }
 
-        const elder = this.interactables.elderNpc;
-        if (elder && elder.isInteractable)
+        const villager = this.interactables.villagers.find(v => v.npc.isInteractable);
+        if (villager)
         {
-            elder.triggerInteraction();
+            villager.npc.triggerInteraction();
         }
     }
 
@@ -130,10 +131,10 @@ export class InteractionController
         }
 
         // 5. NPCs
-        const elder = this.interactables.elderNpc;
-        if (elder && elder.isInteractable)
+        const villager = this.interactables.villagers.find(v => v.npc.isInteractable);
+        if (villager)
         {
-            show(elder.x, '💬 [E] ລົມກັບຫົວໜ້າໝູ່ບ້ານ', () => elder.triggerInteraction());
+            show(villager.npc.x, villager.prompt, () => villager.npc.triggerInteraction());
             return;
         }
 
@@ -148,9 +149,9 @@ export class InteractionController
 
         if (result.success)
         {
-            soundManager.playCoin();
+            if (node.type === 'stone' || node.type === 'iron-vein') soundManager.playMine(); else soundManager.playChop(); soundManager.playCoin();
             node.harvested = true;
-            node.graphic.clear();
+            node.markHarvestedVisual();
             scene.particleManager.emitCelebration(node.x, node.y - 20);
 
             EventBus.emit('backpack-changed');

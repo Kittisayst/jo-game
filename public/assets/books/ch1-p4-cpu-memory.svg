@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 156" width="360" height="156">
+  <defs>
+    <pattern id="grid" width="18" height="18" patternUnits="userSpaceOnUse">
+      <path d="M 18 0 L 0 0 0 18" fill="none" stroke="#1e293b" stroke-width="1"/>
+    </pattern>
+    <marker id="arrowCyan" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#38bdf8"/>
+    </marker>
+    <marker id="arrowGold" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#f59e0b"/>
+    </marker>
+    <marker id="arrowGreen" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#22c55e"/>
+    </marker>
+  </defs>
+  <rect width="360" height="156" rx="10" fill="#0f172a"/>
+  <rect width="360" height="156" rx="10" fill="url(#grid)"/>
+  <rect x="1.5" y="1.5" width="357" height="153" rx="9" fill="none" stroke="#334155" stroke-width="1.5"/>
+
+  <!-- CPU -->
+  <rect x="16" y="32" width="94" height="92" rx="8" fill="#1e293b" stroke="#f59e0b" stroke-width="2.5"/>
+  <rect x="41" y="46" width="44" height="34" rx="4" fill="#451a03" stroke="#fbbf24" stroke-width="2"/>
+  <text x="63" y="68" text-anchor="middle" fill="#fde047" font-family="monospace" font-size="14" font-weight="bold">CPU</text>
+  <text x="63" y="99" text-anchor="middle" fill="#fbbf24" font-family="Noto Sans Lao, sans-serif" font-size="11" font-weight="bold">ສະໝອງຄຳນວນ</text>
+  <text x="63" y="114" text-anchor="middle" fill="#cbd5e1" font-family="Noto Sans Lao, sans-serif" font-size="9.5">ປະມວນຜົນຄຳສັ່ງ</text>
+
+  <!-- Fast Bus -->
+  <line x1="112" y1="72" x2="132" y2="72" stroke="#38bdf8" stroke-width="2.5" marker-end="url(#arrowCyan)" marker-start="url(#arrowCyan)"/>
+  <text x="122" y="63" text-anchor="middle" fill="#38bdf8" font-family="monospace" font-size="8.5">FAST</text>
+
+  <!-- RAM -->
+  <rect x="134" y="32" width="94" height="92" rx="8" fill="#1e293b" stroke="#38bdf8" stroke-width="2.5"/>
+  <rect x="148" y="50" width="66" height="24" rx="3" fill="#083344" stroke="#38bdf8" stroke-width="1.5"/>
+  <rect x="153" y="55" width="10" height="14" fill="#0284c7"/>
+  <rect x="168" y="55" width="10" height="14" fill="#0284c7"/>
+  <rect x="183" y="55" width="10" height="14" fill="#0284c7"/>
+  <rect x="198" y="55" width="10" height="14" fill="#0284c7"/>
+  <text x="181" y="96" text-anchor="middle" fill="#38bdf8" font-family="Noto Sans Lao, sans-serif" font-size="11.5" font-weight="bold">RAM (ຊົ່ວຄາວ)</text>
+  <text x="181" y="113" text-anchor="middle" fill="#f87171" font-family="Noto Sans Lao, sans-serif" font-size="9.5">ປິດເຄື່ອງ = ຂໍ້ມູນຫາຍ</text>
+
+  <!-- Storage Bus -->
+  <line x1="230" y1="72" x2="250" y2="72" stroke="#22c55e" stroke-width="2" marker-end="url(#arrowGreen)" marker-start="url(#arrowGreen)"/>
+
+  <!-- SSD / HDD -->
+  <rect x="252" y="32" width="92" height="92" rx="8" fill="#1e293b" stroke="#22c55e" stroke-width="2.5"/>
+  <rect x="272" y="46" width="52" height="32" rx="5" fill="#052e16" stroke="#22c55e" stroke-width="2"/>
+  <circle cx="298" cy="62" r="9" fill="none" stroke="#86efac" stroke-width="2"/>
+  <circle cx="298" cy="62" r="2.5" fill="#86efac"/>
+  <text x="298" y="96" text-anchor="middle" fill="#4ade80" font-family="Noto Sans Lao, sans-serif" font-size="11.5" font-weight="bold">SSD / HDD</text>
+  <text x="298" y="113" text-anchor="middle" fill="#86efac" font-family="Noto Sans Lao, sans-serif" font-size="9.5">ເກັບຂໍ້ມູນຖາວອນ ✓</text>
+</svg>

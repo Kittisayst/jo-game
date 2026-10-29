@@ -4,6 +4,12 @@ import { DomainEvents } from '../domain/DomainEvents';
 export const DIALOGUE_STARTED_EVENT = 'dialogue_started';
 export const DIALOGUE_UPDATED_EVENT = 'dialogue_updated';
 export const DIALOGUE_CLOSED_EVENT = 'dialogue_closed';
+export const DIALOGUE_ACTION_EVENT = 'dialogue_action';
+
+export interface DialogueActionPayload
+{
+    action: string;
+}
 
 export interface DialoguePayload
 {
@@ -44,6 +50,14 @@ export function advanceDialogueUseCase (state: DialogueState): DialogueNode | nu
 export function selectDialogueChoiceUseCase (state: DialogueState, choiceIndex: number): DialogueNode | null
 {
     const node = state.choose(choiceIndex);
+
+    // A choice can ask the game to do something (open a shop); announce it before the dialogue closes
+    const action = state.takeAction();
+    if (action)
+    {
+        DomainEvents.emit<DialogueActionPayload>(DIALOGUE_ACTION_EVENT, { action });
+    }
+
     if (!state.isOpen)
     {
         DomainEvents.emit<DialoguePayload>(DIALOGUE_CLOSED_EVENT, {

@@ -13,6 +13,8 @@ export interface ItemDefinition
     category: ItemCategory;
     maxStack: number;
     icon: string;
+    /** Optional path to a crisp 32x32 pixel-art item sprite in `public/assets/items/`. */
+    iconImage?: string;
     /** Story Materials (crystal, boss core) are never lost when the player dies or retreats. */
     story?: boolean;
     toolType?: string;

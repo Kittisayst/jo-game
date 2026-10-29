@@ -6,6 +6,7 @@ import { EventBus } from '../../EventBus';
 import { consumeItemUseCase } from '../../../application/ConsumeItemUseCase';
 import { equipWeaponUseCase } from '../../../application/EquipWeaponUseCase';
 import { discardItemUseCase } from '../../../application/DiscardItemUseCase';
+import { ItemIcon } from './ItemIcon';
 
 interface BackpackModalProps
 {
@@ -373,8 +374,8 @@ export const BackpackModal: React.FC<BackpackModalProps> = ({ isOpen, onClose, o
 
                                         {slot && itemDef ? (
                                             <>
-                                                <span className="text-2xl sm:text-3xl filter drop-shadow">
-                                                    {itemDef.icon}
+                                                <span className="text-2xl sm:text-3xl filter drop-shadow flex items-center justify-center">
+                                                    <ItemIcon iconImage={itemDef.iconImage} icon={itemDef.icon} size={28} />
                                                 </span>
                                                 <span className="text-[10px] sm:text-[11px] font-medium text-slate-200 truncate w-full text-center leading-tight mt-1">
                                                     {itemDef.name}
@@ -408,7 +409,7 @@ export const BackpackModal: React.FC<BackpackModalProps> = ({ isOpen, onClose, o
                                 {/* Header with Large Icon and Category Badge */}
                                 <div className="flex items-start gap-3.5 pb-3 border-b border-slate-800">
                                     <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-slate-800 to-slate-950 border-2 border-cyan-500/40 flex items-center justify-center text-4xl shadow-inner flex-shrink-0">
-                                        {selectedItemDef.icon}
+                                        <ItemIcon iconImage={selectedItemDef.iconImage} icon={selectedItemDef.icon} size={44} />
                                     </div>
                                     <div className="flex-1 min-w-0">
                                         <div className="flex items-center gap-2 flex-wrap">
