@@ -50,8 +50,10 @@ export class Player extends Physics.Arcade.Sprite
         scene.add.existing(this);
         scene.physics.add.existing(this);
 
-        // Tuned collision box (22x44 with 5px horizontal offset, 4px vertical offset)
-        this.setSize(22, 44);
+        // Tuned collision box: 22x42, 5px in from the left and 4px down from the top of the 32x48 cell.
+        // The boots reach the last row of the cell, 2px below the box, so the hero stands in the grass
+        // line like the trees and signs do (the ground tile's grass starts 2px below its top edge).
+        this.setSize(22, 42);
         this.setOffset(5, 4);
         this.setCollideWorldBounds(true);
         this.setDepth(10);
