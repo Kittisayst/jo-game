@@ -48,6 +48,13 @@ _Avoid_: level, map
 **Zone**:
 One section of a Stage (forest, cavern, Broken Gate, boss arena), each with its own enemies and resources.
 
+**Resource node**:
+A tree, stone, iron vein or herb standing in a Zone that gives Materials when harvested. It needs a matching tool (an axe for trees, a pickaxe for stone and iron; herbs need none) and a number of Strikes, different for each node (a tree takes 3). It respawns, intact, each time the player enters the Stage.
+
+**Strike**:
+One press of the interact key on a Resource node. The node gives its Materials only when the last Strike lands; a Strike is refused, and not counted, if the player lacks the tool or the Backpack cannot hold the Materials. Strikes already made are kept until the player leaves the Stage.
+_Avoid_: hit (a hit is damage to Health), hp (that is Health)
+
 **Credit**:
 The currency earned only by learning (passing a Book exam, Daily Practice, finishing a Chapter by answering the Boss question). Killing enemies never gives Credit, and there is no separate coin currency; the Wallet holds Credit only.
 _Avoid_: coins, money, gold

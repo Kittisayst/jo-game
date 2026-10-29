@@ -255,6 +255,20 @@ export class Player extends Physics.Arcade.Sprite
         });
     }
 
+    /** Faces `targetX` and plays the attack pose, e.g. for chopping a tree (no slash wave). */
+    swingToolToward (targetX: number): void
+    {
+        this.facingDir = targetX < this.x ? -1 : 1;
+        this.setFlipX(this.facingDir < 0);
+
+        const attackKey = `${this.currentSkinId}-attack`;
+        this.attackAnimTimer = 170;
+        if (this.scene.anims.exists(attackKey))
+        {
+            this.play(attackKey, true);
+        }
+    }
+
     triggerSlashVfx (weaponId: string): void
     {
         const attackKey = `${this.currentSkinId}-attack`;

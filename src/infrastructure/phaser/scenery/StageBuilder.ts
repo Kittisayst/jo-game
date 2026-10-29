@@ -1,4 +1,5 @@
 import type { GateRequirements } from '../../../application/RepairBrokenGateUseCase';
+import { ResourceNode } from '../../../domain/entities/ResourceNode';
 import type {
     ResourceNodeType,
     StageDefinition,
@@ -9,9 +10,13 @@ import type {
 
 const FONT = '"Noto Sans Lao", sans-serif';
 
-/** A gatherable node standing in a Zone; `harvested` flips once the player takes it. */
+/** A gatherable node standing in a Zone; `harvested` flips once its last Strike has landed. */
 export interface ResourceNodeView extends StageResourceNode {
     y: number;
+    /** The domain's count of Strikes taken so far. */
+    progress: ResourceNode;
+    /** Shakes the node when a Strike lands without felling it. */
+    shakeOnStrike: () => void;
     /** Updates the node's visual from intact to harvested (stump / rubble / cut stems). */
     markHarvestedVisual: () => void;
     /** Interaction prompt shown while the player stands next to it. */
@@ -39,10 +44,15 @@ function titleCase(itemId: string): string {
 function nodePrompt(node: StageResourceNode): string {
     const { emoji, verb } = NODE_PROMPTS[node.type];
     const gains = node.drops.map(d => `+${d.count} ${titleCase(d.itemId)}`).join(', ');
-    return `${emoji} [E] ${verb} (${gains})`;
+    const strikes = node.strikes > 1 ? ` ×${node.strikes}` : '';
+    return `${emoji} [E] ${verb}${strikes} (${gains})`;
 }
 
-function createNodeVisual(scene: Phaser.Scene, node: StageResourceNode, baseY: number): () => void {
+function createNodeVisual(
+    scene: Phaser.Scene,
+    node: StageResourceNode,
+    baseY: number
+): { shakeOnStrike: () => void; markHarvestedVisual: () => void } {
     const { textureKey } = NODE_PROMPTS[node.type];
 
     if (scene.textures.exists(textureKey)) {
@@ -50,16 +60,29 @@ function createNodeVisual(scene: Phaser.Scene, node: StageResourceNode, baseY: n
         sprite.setOrigin(0.5, 1);
         sprite.setDepth(2);
 
-        return () => {
-            sprite.setFrame(1);
-            scene.tweens.add({
-                targets: sprite,
-                scaleX: 1.15,
-                scaleY: 0.85,
-                duration: 90,
-                yoyo: true,
-                ease: 'Quad.easeOut',
-            });
+        return {
+            shakeOnStrike: () => {
+                scene.tweens.add({
+                    targets: sprite,
+                    angle: { from: -4, to: 4 },
+                    duration: 55,
+                    yoyo: true,
+                    repeat: 1,
+                    ease: 'Sine.easeInOut',
+                    onComplete: () => sprite.setAngle(0),
+                });
+            },
+            markHarvestedVisual: () => {
+                sprite.setFrame(1);
+                scene.tweens.add({
+                    targets: sprite,
+                    scaleX: 1.15,
+                    scaleY: 0.85,
+                    duration: 90,
+                    yoyo: true,
+                    ease: 'Quad.easeOut',
+                });
+            },
         };
     }
 
@@ -68,7 +91,7 @@ function createNodeVisual(scene: Phaser.Scene, node: StageResourceNode, baseY: n
     g.setDepth(2);
     g.fillStyle(0x16a34a, 1);
     g.fillCircle(node.x, baseY - 24, 18);
-    return () => g.clear();
+    return { shakeOnStrike: () => undefined, markHarvestedVisual: () => g.clear() };
 }
 
 function addWaypoint(scene: Phaser.Scene, wp: StageWaypoint, baseY: number): WaypointView {
@@ -214,11 +237,13 @@ export function buildStageScenery(
         }
 
         for (const node of zone.resourceNodes ?? []) {
-            const markHarvestedVisual = createNodeVisual(scene, node, baseY);
+            const { shakeOnStrike, markHarvestedVisual } = createNodeVisual(scene, node, baseY);
 
             built.resourceNodes.push({
                 ...node,
                 y: baseY - 30,
+                progress: new ResourceNode(node.strikes),
+                shakeOnStrike,
                 markHarvestedVisual,
                 label: nodePrompt(node),
                 harvested: false,

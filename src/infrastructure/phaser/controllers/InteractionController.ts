@@ -8,6 +8,9 @@ import type { BrokenGate, ResourceNodeView, WaypointView } from '../scenery/Stag
 import type { InteractiveBuilding } from '../scenery/VillageBuilder';
 import type { Game } from '../scenes/Game';
 
+/** Shortest time between two Strikes, so a held or mashed E key cannot fell a tree in an instant. */
+const STRIKE_COOLDOWN_MS = 400;
+
 /** Everything in the current level the player can press E on. */
 export interface Interactables
 {
@@ -28,6 +31,7 @@ export class InteractionController
 {
     private readonly promptText: Phaser.GameObjects.Text;
     private activeInteraction: (() => void) | null = null;
+    private lastStrikeAt = -Infinity;
 
     constructor (private readonly scene: Game, private readonly interactables: Interactables)
     {
@@ -139,14 +143,31 @@ export class InteractionController
         this.activeInteraction = null;
     }
 
+    /** One Strike on a node: the rules are in the use case, this adds the swing, sound and floating text. */
     private harvest (node: ResourceNodeView): void
     {
         const { scene } = this;
-        const result = harvestResourceNodeUseCase(node, entities.backpack);
+
+        if (scene.time.now - this.lastStrikeAt < STRIKE_COOLDOWN_MS) return;
+        this.lastStrikeAt = scene.time.now;
+
+        const result = harvestResourceNodeUseCase(node, node.progress, entities.backpack);
 
         if (result.success)
         {
-            if (node.type === 'stone' || node.type === 'iron-vein') soundManager.playMine(); else soundManager.playChop(); soundManager.playCoin();
+            const isMining = node.type === 'stone' || node.type === 'iron-vein';
+            if (isMining) soundManager.playMine(); else soundManager.playChop();
+            scene.player.swingToolToward(node.x);
+
+            if (!result.completed)
+            {
+                node.shakeOnStrike();
+                const tool = isMining ? '⛏' : '🪓';
+                showLootNotification(scene, node.x, node.y - 30, `${tool} ${result.strikesTaken}/${result.strikesNeeded}`, '#fde68a');
+                return;
+            }
+
+            soundManager.playCoin();
             node.harvested = true;
             node.markHarvestedVisual();
             scene.particleManager.emitCelebration(node.x, node.y - 20);
