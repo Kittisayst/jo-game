@@ -1,6 +1,10 @@
 {
   "name": "knowledge-quest",
   "description": "ພະຈົນໄພຄວາມຮູ້ (Knowledge Quest): 2D learning adventure built with Phaser 4, React and TypeScript.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Kittisayst/jo-game.git"
+  },
   "version": "1.1.0",
   "license": "MIT",
   "licenseUrl": "http://www.opensource.org/licenses/mit-license.php",
@@ -42,5 +46,9 @@
     "typescript-eslint": "^8.26.1",
     "vite": "^6.3.1",
     "vitest": "^4.1.11"
-  }
+  },
+  "bugs": {
+    "url": "https://github.com/Kittisayst/jo-game/issues"
+  },
+  "homepage": "https://github.com/Kittisayst/jo-game#readme"
 }
