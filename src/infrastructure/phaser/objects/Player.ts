@@ -1,7 +1,7 @@
 import { Physics, Scene } from 'phaser';
 import { soundManager } from '../../audio/SoundManager';
 import { getGameContent } from '../../content/ContentCatalog';
-import { JUMP_SPEED, MOVE_SPEED } from '../physicsConstants';
+import { GROUND_SINK, JUMP_SPEED, MOVE_SPEED } from '../physicsConstants';
 
 const WIDTH = 32;
 const HEIGHT = 48;
@@ -53,7 +53,7 @@ export class Player extends Physics.Arcade.Sprite
         // Tuned collision box: 22x42, 5px in from the left and 4px down from the top of the 32x48 cell.
         // The boots reach the last row of the cell, 2px below the box, so the hero stands in the grass
         // line like the trees and signs do (the ground tile's grass starts 2px below its top edge).
-        this.setSize(22, 42);
+        this.setSize(22, 44 - GROUND_SINK);
         this.setOffset(5, 4);
         this.setCollideWorldBounds(true);
         this.setDepth(10);
