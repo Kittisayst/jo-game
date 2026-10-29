@@ -309,15 +309,15 @@
 
 ### Phase 0: ຄຳສັບ, ADR ແລະກຽມພື້ນ
 **ເປົ້າ:** ທຸກຄົນໃຊ້ຄຳສັບດຽວກັນ ແລະກົດໃໝ່ຖືກບັນທຶກກ່ອນຂຽນ code.
-- [ ] 0.1 Merge PR #11 (node reach) ເຂົ້າ main.
-- [ ] 0.2 CONTEXT.md:
+- [x] 0.1 Merge PR #11 (node reach) ເຂົ້າ main.
+- [x] 0.2 CONTEXT.md:
   - ຕື່ມ Realm, Stage number, Lesson number, Portal shard, Portal block, Durability, Broken, Armor, Armor heart, Potion, Quick slot, Seed, Sapling, Regrow, Garden, Plot, Storage chest, Tutorial step.
   - ແກ້ Chapter → Realm, Stage, Material, Resource node.
-- [ ] 0.3 ADR 0007 "Materials can be grown from explored seeds". ແກ້ກົດໃນ CLAUDE.md ແລະອ້າງເຖິງ ADR 0005.
-- [ ] 0.4 GDD: ພາກໂຄງສ້າງ 10 ມິຕິ × 10 ດ່ານ, ເສດ/ກ້ອນ, ຄວາມທົນທານ, ສວນ.
-- [ ] 0.5 `docs/asset-manifest.json`: ຕື່ມລາຍການ asset ໃນພາກ 4 ໂດຍມີສະຖານະ `planned`.
+- [x] 0.3 ADR 0007 "Materials can be grown from explored seeds". ແກ້ກົດໃນ CLAUDE.md ແລະອ້າງເຖິງ ADR 0005.
+- [x] 0.4 GDD: ພາກໂຄງສ້າງ 10 ມິຕິ × 10 ດ່ານ, ເສດ/ກ້ອນ, ຄວາມທົນທານ, ສວນ.
+- [x] 0.5 `docs/asset-manifest.json`: ຕື່ມລາຍການ asset ໃນພາກ 4 ໂດຍມີສະຖານະ `planned`.
 
-**ເງື່ອນໄຂຈົບ:** ເອກະສານ merge ແລ້ວ ແລະ PR #11 ຢູ່ໃນ main.
+**ເງື່ອນໄຂຈົບ:** ເອກະສານ merge ແລ້ວ ແລະ PR #11 ຢູ່ໃນ main. **ສະຖານະ: ເຮັດແລ້ວ** (PR #11 ແລະ #12 merge ແລ້ວ; ເອກະສານ Phase 0 ຢູ່ PR ຂອງກິ່ງ docs/phase0-realms-terms; ຍັງບໍ່ໄດ້ແກ້ ADR 0005 ເພາະມັນຍັງຖືກຕ້ອງ, ADR 0007 ອ້າງເຖິງມັນ).
 
 ### Phase 1: ຂໍ້ມູນດ່ານແບບໃໝ່ + ແຜນທີ່ 100 ດ່ານ
 **ເປົ້າ:** ເກມອ່ານດ່ານຈາກ `stages.json` ແບບ `contents`. ມິຕິ 1 ຫຼິ້ນໄດ້ 10 ດ່ານ, ດ່ານ 11–100 ເປັນສີເທົາ.
