@@ -156,8 +156,6 @@ test('Chapter 1 played with real keys (learning half asserted, fighting half log
   page.on('pageerror', err => console.log('PAGE ERROR:', err.message));
 
   await page.goto('/');
-  await page.evaluate(() => window.localStorage.clear());
-  await page.reload();
   await page.getByRole('button', { name: /ເຂົ້າເກມ/i }).click();
   await expect(page.locator('.game-hud')).toBeVisible({ timeout: 15000 });
   await page.waitForTimeout(1200);

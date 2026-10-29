@@ -81,13 +81,15 @@ test.describe('Cave Guardian special attacks', () => {
     page.on('pageerror', err => console.log('PAGE ERROR:', err.message));
 
     await page.goto('/');
-    await page.evaluate(() => window.localStorage.clear());
-    await page.reload();
     await unlockStages(page, 5);
     await enterStage(page, 5);
     await expect(page.locator('.game-hud')).toBeVisible({ timeout: 12000 });
-    await page.waitForTimeout(1000);
     await readState(page); // lets the helpers find the running game
+    // Under load the scene can still be building: wait until the Cave Guardian exists
+    await expect.poll(() => page.evaluate(() => {
+      const scene = (window as any).__botGame?.scene.getScene('Game');
+      return Boolean(scene?.enemies?.getChildren().some((e: any) => e.entity.definitionId === 'cave-guardian'));
+    }), { timeout: 20000 }).toBe(true);
 
     // From afar (about 350 px) the Guardian throws rocks, after a warning
     await placeHero(page, 1200);

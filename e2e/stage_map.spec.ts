@@ -20,8 +20,6 @@ test.describe('The map of 100 stages', () => {
   test('shows ten realms of ten, opens only Stage 1 and keeps the unbuilt stages grey', async ({ page }) => {
     page.on('pageerror', err => console.log('PAGE ERROR:', err.message));
     await page.goto('/');
-    await page.evaluate(() => window.localStorage.clear());
-    await page.reload();
 
     await page.getByRole('button', { name: /ເລືອກດ່ານ/i }).click();
     await expect(page.locator('.realm-row')).toHaveCount(10);
@@ -46,8 +44,6 @@ test.describe('The map of 100 stages', () => {
     test.setTimeout(120000);
     page.on('pageerror', err => console.log('PAGE ERROR:', err.message));
     await page.goto('/');
-    await page.evaluate(() => window.localStorage.clear());
-    await page.reload();
 
     await enterStage(page, 1);
     await expect(page.locator('.level-badge')).toContainText(/ດ່ານ 1/, { timeout: 12000 });
@@ -66,8 +62,6 @@ test.describe('The map of 100 stages', () => {
     const errors: string[] = [];
     page.on('pageerror', err => { console.log('PAGE ERROR:', err.message); errors.push(err.message); });
     await page.goto('/');
-    await page.evaluate(() => window.localStorage.clear());
-    await page.reload();
     await unlockStages(page, 10);
     await enterStage(page, 1);
 

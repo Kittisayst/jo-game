@@ -18,8 +18,6 @@ test.describe('Harvesting takes several Strikes', () => {
     page.on('pageerror', err => console.log('PAGE ERROR:', err.message));
 
     await page.goto('/');
-    await page.evaluate(() => window.localStorage.clear());
-    await page.reload();
 
     // Stage 1 through the stage map, like a player would
     await enterStage(page, 1);

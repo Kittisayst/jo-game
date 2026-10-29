@@ -18,8 +18,6 @@ test.describe('Keyboard shortcuts', () => {
     page.on('pageerror', err => console.log('PAGE ERROR:', err.message));
 
     await page.goto('/');
-    await page.evaluate(() => window.localStorage.clear());
-    await page.reload();
 
     await page.getByRole('button', { name: /ເຂົ້າເກມ/i }).click();
     await expect(page.locator('.game-hud')).toBeVisible({ timeout: 12000 });
