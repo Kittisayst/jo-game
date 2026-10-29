@@ -1,0 +1,1 @@
+crsolver/claude-pxl @ 21fee41 (MIT), copied without docs/examples/tests

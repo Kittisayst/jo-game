@@ -1002,7 +1002,7 @@
       "hasAlpha": true,
       "colorCount": 6,
       "bytes": 266,
-      "source": "Hand-authored pixel script (tools/art/draw_held_items.py)",
+      "source": "pxl source tools/art/held-items.px.js (built with the vendored pxl skill)",
       "license": "MIT (Project Original)",
       "anchor": "grip (16, 26), pointing up; rotated and mirrored in game"
     },
@@ -1016,7 +1016,7 @@
       "hasAlpha": true,
       "colorCount": 8,
       "bytes": 274,
-      "source": "Hand-authored pixel script (tools/art/draw_held_items.py)",
+      "source": "pxl source tools/art/held-items.px.js (built with the vendored pxl skill)",
       "license": "MIT (Project Original)",
       "anchor": "grip (16, 26), pointing up; rotated and mirrored in game"
     },
@@ -1030,7 +1030,7 @@
       "hasAlpha": true,
       "colorCount": 8,
       "bytes": 295,
-      "source": "Hand-authored pixel script (tools/art/draw_held_items.py)",
+      "source": "pxl source tools/art/held-items.px.js (built with the vendored pxl skill)",
       "license": "MIT (Project Original)",
       "anchor": "grip (16, 26), pointing up; rotated and mirrored in game"
     },
@@ -1044,7 +1044,7 @@
       "hasAlpha": true,
       "colorCount": 7,
       "bytes": 275,
-      "source": "Hand-authored pixel script (tools/art/draw_held_items.py)",
+      "source": "pxl source tools/art/held-items.px.js (built with the vendored pxl skill)",
       "license": "MIT (Project Original)",
       "anchor": "grip (16, 26), pointing up; rotated and mirrored in game"
     },
@@ -1058,7 +1058,7 @@
       "hasAlpha": true,
       "colorCount": 7,
       "bytes": 309,
-      "source": "Hand-authored pixel script (tools/art/draw_held_items.py)",
+      "source": "pxl source tools/art/held-items.px.js (built with the vendored pxl skill)",
       "license": "MIT (Project Original)",
       "anchor": "grip (16, 26), pointing up; rotated and mirrored in game"
     },
@@ -1072,7 +1072,7 @@
       "hasAlpha": true,
       "colorCount": 8,
       "bytes": 240,
-      "source": "Hand-authored pixel script (tools/art/draw_held_items.py)",
+      "source": "pxl source tools/art/held-items.px.js (built with the vendored pxl skill)",
       "license": "MIT (Project Original)",
       "anchor": "grip (16, 26), pointing up; rotated and mirrored in game"
     }
