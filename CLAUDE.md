@@ -61,4 +61,4 @@ The dev server's configured port is 8080 ([vite/config.dev.mjs](vite/config.dev.
 
 ## Known leftovers
 
-Achievements were removed (they paid coins and had no UI); they can return later as learning achievements that never pay Credit. Chapter 2's question bank is too small to show students; the Cave Guardian has no special attacks yet; `App.tsx` still holds one large event/shortcut effect. Details are in the plan's phase notes.
+Achievements were removed (they paid coins and had no UI); they can return later as learning achievements that never pay Credit. the Cave Guardian has no special attacks yet; `App.tsx` still holds one large event/shortcut effect. Details are in the plan's phase notes.
