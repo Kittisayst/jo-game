@@ -116,6 +116,7 @@ export function createMovingPlatforms (scene: Phaser.Scene, level: Level): Phase
             speed: item.speed,
         });
         movingPlatforms.add(mp);
+        mp.activate();
     }
 
     return movingPlatforms;

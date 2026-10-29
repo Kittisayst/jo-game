@@ -1,12 +1,11 @@
 import { Physics, Scene } from 'phaser';
 import { soundManager } from '../../audio/SoundManager';
+import { JUMP_SPEED, MOVE_SPEED } from '../physicsConstants';
 
 const WIDTH = 32;
 const HEIGHT = 48;
 
 
-const MOVE_SPEED = 220;
-const JUMP_SPEED = 420;
 
 export interface PlayerInputControls
 {

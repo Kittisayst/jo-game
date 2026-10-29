@@ -43,30 +43,39 @@ export class MovingPlatform extends Physics.Arcade.Sprite
         scene.add.existing(this);
         scene.physics.add.existing(this);
 
+        this.activate();
+    }
+
+    /**
+     * Makes the platform hover and start moving. Call it again after adding the platform to a
+     * physics group: the group applies its own defaults (gravity on, not immovable) and would
+     * otherwise let the platform fall out of the world.
+     */
+    activate (): void
+    {
         const body = this.body as Phaser.Physics.Arcade.Body;
-        if (body)
+        if (!body) return;
+
+        body.setImmovable(true);
+        body.setAllowGravity(false);
+        // High friction ensures bodies standing on it move along with the platform
+        body.friction.x = 1;
+        body.friction.y = 1;
+
+        // One-way jump-through support for hover moving platforms
+        body.checkCollision.down = false;
+        body.checkCollision.left = false;
+        body.checkCollision.right = false;
+        body.checkCollision.up = true;
+
+        // Start initial velocity
+        if (this.distanceX > 0)
         {
-            body.setImmovable(true);
-            body.setAllowGravity(false);
-            // High friction ensures bodies standing on it move along with the platform
-            body.friction.x = 1;
-            body.friction.y = 1;
-
-            // One-way jump-through support for hover moving platforms
-            body.checkCollision.down = false;
-            body.checkCollision.left = false;
-            body.checkCollision.right = false;
-            body.checkCollision.up = true;
-
-            // Start initial velocity
-            if (this.distanceX > 0)
-            {
-                body.velocity.x = this.speed;
-            }
-            if (this.distanceY > 0)
-            {
-                body.velocity.y = this.speed;
-            }
+            body.velocity.x = this.speed;
+        }
+        if (this.distanceY > 0)
+        {
+            body.velocity.y = this.speed;
         }
     }
 

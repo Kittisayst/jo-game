@@ -10,8 +10,9 @@ import { Bot } from './helpers/bot';
  *
  * Status: the learning half works (buy, read five pages, answer the exam from the book: ends with
  * 50 Credit and the recipes unlocked). The fighting half does not finish the chapter: the bot is
- * crude (no dodging) and dies in the forest in most attempts, so it never reaches the gate or the
- * Boss. It asserts only the learning half and logs the rest, so read the log, not the pass mark.
+ * crude (it cannot dodge) and keeps dying to the rock golems in the cavern (it survived the forest in 5 of
+ * 8 attempts on the current layout, 1 of 8 before the platforms and spike were fixed), so it never gets
+ * stone, the gate or the Boss. It asserts only the learning half and logs the rest, so read the log, not the pass mark.
  *
  * Opt-in because it takes minutes:   PLAYTHROUGH=1 npx playwright test e2e/playthrough.spec.ts
  */
