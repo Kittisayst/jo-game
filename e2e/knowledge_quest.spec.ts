@@ -46,6 +46,14 @@ test.describe('Knowledge Quest — Buy-to-Read Textbook & Chapter 1 Loop E2E', (
     const libraryStoreHeader = page.locator('h2:has-text("ຫໍສະໝຸດແຫ່ງປັນຍາ (Library Bookstore)")');
     await expect(libraryStoreHeader).toBeVisible({ timeout: 5000 });
 
+    // The Library has three parts; it opens on "For sale" with both books still unbought
+    const shopTab = page.getByRole('tab', { name: /ວາງຂາຍ/ });
+    const mineTab = page.getByRole('tab', { name: /ປຶ້ມຂອງຂ້ອຍ/ });
+    const readTab = page.getByRole('tab', { name: /ອ່ານ/ });
+    await expect(shopTab).toHaveAttribute('aria-selected', 'true');
+    await expect(mineTab).toContainText('0');
+    await expect(readTab).toBeDisabled();
+
     // Verify Chapter 2 book is locked behind Chapter 1 Exam + Boss
     await expect(page.locator('button:has-text("ຍັງບໍ່ປົດລັອກບົດຮຽນນີ້")')).toBeVisible();
 
@@ -58,7 +66,14 @@ test.describe('Knowledge Quest — Buy-to-Read Textbook & Chapter 1 Loop E2E', (
     await expect(creditBadge).not.toContainText('20');
     await expect(creditBadge).toContainText('0');
     await expect(textbookBtn).toContainText('ຕຳລາ (1)');
+
+    // The bought book moves from "For sale" to "My books" (unread: 0/5)
+    await expect(mineTab).toHaveAttribute('aria-selected', 'true');
     await expect(page.locator('button:has-text("ເປີດອ່ານຕຳລາ (0/5)")')).toBeVisible();
+    await expect(page.locator('button:has-text("ຊື້ປຶ້ມຕຳລາ")')).toHaveCount(0);
+    await shopTab.click();
+    await expect(page.locator('h3:has-text("ພື້ນຖານລະບົບຄອມພິວເຕີ")')).toHaveCount(0);
+    await expect(page.locator('button:has-text("ຍັງບໍ່ປົດລັອກບົດຮຽນນີ້")')).toBeVisible();
 
     // Close Library Store and walk to Academy (x=600) to verify Exam is still locked before reading all pages
     await page.keyboard.press('Escape');

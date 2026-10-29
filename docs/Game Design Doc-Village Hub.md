@@ -212,7 +212,7 @@ Chapter 1 ຈົບໃນ 4 ຮອບອອກສຳຫຼວດ:
 | TitleScene | ໜ້າເລີ່ມ |
 | Game | ທັງໝູ່ບ້ານ (Hub) ແລະ ດ່ານ (Stage) ໃນ scene ດຽວ; ໂຫຼດ layout ຕາມ stages.json |
 
-**UI (React modal ໃນ `infrastructure/react/components/`):** `Hud`, `TextbookModal` (Library), `AcademyModal`, `WorkshopModal`, `ForgeModal`, `GateRepairModal`, `QuizFinisherModal` (ຄຳຖາມ Boss), `BackpackModal`, `StageMapModal` (World Gate), `SkinModal` (ຮ້ານຊຸດຂອງ Mina: ລອງ/ຊື້/ໃສ່ Skin ດ້ວຍ Credit, ເປີດຈາກບົດສົນທະນາກັບ Mina ເທົ່ານັ້ນ).
+**UI (React modal ໃນ `infrastructure/react/components/`):** `Hud`, `TextbookModal` (Library: 3 ແຖບ ວາງຂາຍ / ປຶ້ມຂອງຂ້ອຍ / ອ່ານ), `AcademyModal`, `WorkshopModal`, `ForgeModal`, `GateRepairModal`, `QuizFinisherModal` (ຄຳຖາມ Boss), `BackpackModal`, `StageMapModal` (World Gate), `SkinModal` (ຮ້ານຊຸດຂອງ Mina: ລອງ/ຊື້/ໃສ່ Skin ດ້ວຍ Credit, ເປີດຈາກບົດສົນທະນາກັບ Mina ເທົ່ານັ້ນ).
 
 **ໂຄງສ້າງໂຄດ Phaser:** `scenes/Game.ts` ເປັນ scene ເຈົ້າຂອງ physics/ການໂຕ້ຕອບ; ຮູບຮ່າງຂອງໝູ່ບ້ານ ແລະ ດ່ານ ຖືກສ້າງໂດຍ `scenery/VillageBuilder.ts` ແລະ `scenery/StageBuilder.ts` (ລວມ `BrokenGate`); `stages/StageDefinition.ts` ກວດຮູບແບບ `stages.json` ຕອນເລີ່ມ scene.
 
