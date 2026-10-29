@@ -1,6 +1,7 @@
 import { Backpack } from '../domain/entities/Backpack';
 import { DomainEvents } from '../domain/DomainEvents';
 import { ResourceNode } from '../domain/entities/ResourceNode';
+import { findTool } from '../domain/entities/HeldItem';
 
 export const RESOURCE_HARVESTED_EVENT = 'resource-harvested';
 
@@ -57,14 +58,7 @@ export function harvestResourceNodeUseCase (
     // 1. Check tool requirement
     if (node.requiredTool)
     {
-        // Check if player has the matching tool in backpack (e.g. 'axe-t1' has 'axe')
-        const allSlots = backpack.getAllSlots();
-        const hasMatchingTool = allSlots.some(s =>
-        {
-            if (!s) return false;
-            // Tool IDs follow pattern: axe-t1, pickaxe-t1, hammer-t1
-            return s.itemId.startsWith(node.requiredTool!);
-        });
+        const hasMatchingTool = findTool(backpack, node.requiredTool) !== null;
 
         if (!hasMatchingTool)
         {

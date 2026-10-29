@@ -57,6 +57,11 @@ export class Player extends Physics.Arcade.Sprite
         this.initAnimations(skinId);
     }
 
+    get skinId (): string
+    {
+        return this.currentSkinId;
+    }
+
     setSkin (skinId: string): void
     {
         this.currentSkinId = skinId;

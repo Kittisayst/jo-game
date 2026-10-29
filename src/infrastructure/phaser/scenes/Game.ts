@@ -13,6 +13,8 @@ import { InteractionController } from '../controllers/InteractionController';
 import { soundManager } from '../../audio/SoundManager';
 import { Level } from '../Level';
 import { getGameContent } from '../../content/ContentCatalog';
+import { HeldItemSprite } from '../objects/HeldItemSprite';
+import { findTool } from '../../../domain/entities/HeldItem';
 import {
     getStageBossSpawn,
     getStageDefinition,
@@ -51,6 +53,7 @@ export class Game extends Scene
 {
     camera: Phaser.Cameras.Scene2D.Camera;
     player: Player;
+    heldItem: HeldItemSprite;
     ground: Phaser.Physics.Arcade.StaticGroup;
     platforms: Phaser.Physics.Arcade.StaticGroup;
     movingPlatforms: Phaser.Physics.Arcade.Group;
@@ -203,6 +206,7 @@ export class Game extends Scene
 
         this.player = new Player(this, this.level.spawn.x, this.level.spawn.y, this.currentSkinId);
         this.player.setDepth(10);
+        this.heldItem = new HeldItemSprite(this, this.player, getGameContent().handAnchors, getGameContent().heldArt);
         this.player.onJump = (x, y) => this.particleManager.emitJumpDust(x, y);
         this.player.onLand = (x, y) =>
         {
@@ -349,6 +353,7 @@ export class Game extends Scene
         {
             if (this.brokenGate && this.brokenGate.gateId === gateId)
             {
+                this.heldItem.useTool(findTool(entities.backpack, this.brokenGate.requirements.requiredTool));
                 this.brokenGate.repair();
                 this.particleManager.emitCelebration(this.brokenGate.x, this.brokenGate.y - 40);
                 soundManager.playPowerUp();
@@ -458,6 +463,7 @@ export class Game extends Scene
         const isRight = Boolean(this.cursors.right.isDown || this.wasdKeys?.right?.isDown || this.touchControls.right);
         const isUp = Boolean(this.cursors.up.isDown || this.wasdKeys?.up?.isDown || this.wasdKeys?.space?.isDown || this.touchControls.up);
 
+        this.heldItem.setContext(this.currentLevelKey === 'village', entities.equipment.equippedWeaponId);
         this.player.update({
             left: { isDown: isLeft },
             right: { isDown: isRight },

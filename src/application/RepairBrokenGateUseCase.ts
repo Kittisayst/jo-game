@@ -1,3 +1,4 @@
+import { findTool } from '../domain/entities/HeldItem';
 import { Backpack } from '../domain/entities/Backpack';
 import { QuestionData } from '../domain/entities/Quiz';
 import { DomainEvents } from '../domain/DomainEvents';
@@ -29,7 +30,7 @@ export interface GateRequirementStatus
 export function checkGateRequirements (backpack: Backpack, requirements: GateRequirements): GateRequirementStatus
 {
     return {
-        hasTool: backpack.getAllSlots().some(s => s && s.itemId.startsWith(requirements.requiredTool)),
+        hasTool: findTool(backpack, requirements.requiredTool) !== null,
         hasItem: backpack.getItemCount(requirements.requiredItem) >= 1,
     };
 }

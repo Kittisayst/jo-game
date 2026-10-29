@@ -1,0 +1,20 @@
+{
+  "frames": [
+    { "x": 19, "y": 28, "angle": 30, "front": true },
+    { "x": 19, "y": 28, "angle": 30, "front": true },
+    { "x": 19, "y": 29, "angle": 30, "front": true },
+    { "x": 19, "y": 28, "angle": 30, "front": true },
+    { "x": 21, "y": 27, "angle": 45, "front": true },
+    { "x": 20, "y": 27, "angle": 45, "front": true },
+    { "x": 19, "y": 28, "angle": 45, "front": true },
+    { "x": 21, "y": 27, "angle": 45, "front": true },
+    { "x": 20, "y": 27, "angle": 45, "front": true },
+    { "x": 19, "y": 28, "angle": 45, "front": true },
+    { "x": 21, "y": 22, "angle": 0, "front": true },
+    { "x": 21, "y": 24, "angle": 15, "front": true },
+    { "x": 6, "y": 20, "angle": -60, "front": false },
+    { "x": 27, "y": 25, "angle": 90, "front": true },
+    { "x": 23, "y": 29, "angle": 135, "front": true },
+    { "x": 19, "y": 24, "angle": 0, "front": false }
+  ]
+}

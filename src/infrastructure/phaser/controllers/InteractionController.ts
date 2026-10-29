@@ -1,5 +1,6 @@
 import { harvestResourceNodeUseCase } from '../../../application/HarvestResourceNodeUseCase';
 import { entities } from '../../composition';
+import { findTool } from '../../../domain/entities/HeldItem';
 import { soundManager } from '../../audio/SoundManager';
 import { EventBus } from '../../EventBus';
 import { describeDrops, showLootNotification } from '../effects/FloatingText';
@@ -157,6 +158,7 @@ export class InteractionController
         {
             const isMining = node.type === 'stone' || node.type === 'iron-vein';
             if (isMining) soundManager.playMine(); else soundManager.playChop();
+            if (node.requiredTool) scene.heldItem.useTool(findTool(entities.backpack, node.requiredTool));
             scene.player.swingToolToward(node.x);
 
             if (!result.completed)

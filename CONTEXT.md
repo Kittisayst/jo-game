@@ -51,6 +51,9 @@ One section of a Stage (forest, cavern, Broken Gate, boss arena), each with its 
 **Resource node**:
 A tree, stone, iron vein or herb standing in a Zone that gives Materials when harvested. It needs a matching tool (an axe for trees, a pickaxe for stone and iron; herbs need none) and a number of Strikes, different for each node (a tree takes 3). It respawns, intact, each time the player enters the Stage.
 
+**Held item**:
+What the hero visibly holds: nothing in the Village Hub, the equipped weapon in a Stage, and for a moment the matching tool while striking a Resource node or repairing a gate. It is only a picture; reach and damage come from the weapon's stats.
+
 **Mini-boss**:
 A stronger enemy that guards a Zone and drops story Materials (the Cave Guardian drops crystal). Unlike normal enemies it has special attacks, each announced by a Telegraph. Touching it or being hit by its attack costs one heart, like every other enemy.
 

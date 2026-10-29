@@ -44,6 +44,7 @@
   - `public/assets/backgrounds/` — seamless stage & hub backdrops
   - `public/assets/environment/` — tiles, platforms, hazards, village buildings, resource nodes, gates, waypoints, props
   - `public/assets/characters/` — player skin sheets, NPC sheets, enemy/miniboss/boss sheets
+  - `public/assets/held/` — weapons/tools in the hand: `32×32`, pointing straight up, grip at `(16, 26)`, one image per item id; the game rotates and mirrors them (spec in `docs/plans/2026-10-30-held-items.md`)
   - `public/assets/vfx/` — weapon slash spritesheets
   - `public/assets/items/` — `32×32` item icons matching `items.json` IDs
   - `public/assets/ui/` — dialogue portraits & title crest
