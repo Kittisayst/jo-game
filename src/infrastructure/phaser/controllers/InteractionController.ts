@@ -15,8 +15,8 @@ export interface Interactables
     waypoints: WaypointView[];
     resourceNodes: ResourceNodeView[];
     brokenGate?: BrokenGate;
-    /** People to talk to, each with the prompt shown while the hero is close enough. */
-    villagers: { npc: NPC; prompt: string }[];
+    /** People to talk to; each shows its own speech-bubble prompt while the hero is close enough. */
+    villagers: NPC[];
 }
 
 /**
@@ -56,11 +56,7 @@ export class InteractionController
             return;
         }
 
-        const villager = this.interactables.villagers.find(v => v.npc.isInteractable);
-        if (villager)
-        {
-            villager.npc.triggerInteraction();
-        }
+        this.interactables.villagers.find(npc => npc.isInteractable)?.triggerInteraction();
     }
 
     /** Called every frame: updates the prompt and which action E will run. */
@@ -130,11 +126,12 @@ export class InteractionController
             }
         }
 
-        // 5. NPCs
-        const villager = this.interactables.villagers.find(v => v.npc.isInteractable);
+        // 5. NPCs: the speech bubble over their head is the prompt, so no second label here
+        const villager = this.interactables.villagers.find(npc => npc.isInteractable);
         if (villager)
         {
-            show(villager.npc.x, villager.prompt, () => villager.npc.triggerInteraction());
+            promptText.setVisible(false);
+            this.activeInteraction = () => villager.triggerInteraction();
             return;
         }
 
