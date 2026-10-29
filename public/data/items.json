@@ -1,0 +1,156 @@
+[
+  {
+    "id": "wood",
+    "name": "ໄມ້ທ່ອນ",
+    "nameEn": "Wood",
+    "description": "ໄມ້ທ່ອນທີ່ໄດ້ຈາກການຕັດຕົ້ນໄມ້ ໃຊ້ສຳລັບສ້າງເຄື່ອງມື ແລະ ສິ່ງປຸກສ້າງ",
+    "category": "material",
+    "maxStack": 99,
+    "icon": "🪵"
+  },
+  {
+    "id": "stone",
+    "name": "ກ້ອນຫີນ",
+    "nameEn": "Stone",
+    "description": "ກ້ອນຫີນແຂງທີ່ໄດ້ຈາກການທຸບຫີນ ໃຊ້ສຳລັບຫຼອມ ແລະ ສ້າງອຸປະກອນ",
+    "category": "material",
+    "maxStack": 99,
+    "icon": "🪨"
+  },
+  {
+    "id": "iron-ore",
+    "name": "ແຮ່ເຫຼັກ",
+    "nameEn": "Iron Ore",
+    "description": "ແຮ່ເຫຼັກດິບທີ່ຂຸດໄດ້ຈາກສາຍແຮ່ໃນຖ້ຳ ຕ້ອງໃຊ້ Pickaxe ໃນການຂຸດ",
+    "category": "material",
+    "maxStack": 99,
+    "icon": "⛏️"
+  },
+  {
+    "id": "herb",
+    "name": "ສະໝຸນໄພປ່າ",
+    "nameEn": "Wild Herb",
+    "description": "ພືດສະໝຸນໄພສີຂຽວສົດ ສາມາດເກັບດ້ວຍມືເປົ່າ ໃຊ້ປຸງຢາຟື້ນຟູພະລັງ",
+    "category": "material",
+    "maxStack": 99,
+    "icon": "🌿"
+  },
+  {
+    "id": "fiber",
+    "name": "ເສັ້ນໃຍພືດ",
+    "nameEn": "Plant Fiber",
+    "description": "ເສັ້ນໃຍທຳມະຊາດໃຊ້ສຳລັບມັດ ແລະ ຖັກແສ່ວເຄື່ອງມື",
+    "category": "material",
+    "maxStack": 99,
+    "icon": "🌾"
+  },
+  {
+    "id": "crystal",
+    "name": "ຜລຶກແກ້ວເວດມົນ",
+    "nameEn": "Magic Crystal",
+    "description": "ຜລຶກແກ້ວສີຟ້າເຫຼື້ອມ ເປັ່ງພະລັງງານ ໄດ້ຈາກການປາບຜູ້ພິທັກຖ້ຳ",
+    "category": "material",
+    "story": true,
+    "maxStack": 99,
+    "icon": "💎"
+  },
+  {
+    "id": "boss-core",
+    "name": "ແກນພະລັງບອສ",
+    "nameEn": "Boss Core",
+    "description": "ແກນພະລັງງານເຂັ້ມຂຸ້ນທີ່ໄດ້ຈາກບອສໃຫຍ່ ປະຈຳບົດທີ 1",
+    "category": "material",
+    "story": true,
+    "maxStack": 99,
+    "icon": "🔮"
+  },
+  {
+    "id": "repair-kit",
+    "name": "ຊຸດສ້ອມແປງປະຕູ",
+    "nameEn": "Gate Repair Kit",
+    "description": "ຊຸດວັດສະດຸພິເສດປະກອບດ້ວຍໄມ້, ແຮ່ເຫຼັກ ແລະ ຜລຶກ ໃຊ້ສ້ອມແປງປະຕູໃຫຍ່ຂ້າມດ່ານ",
+    "category": "consumable",
+    "maxStack": 10,
+    "icon": "🧰"
+  },
+  {
+    "id": "herb-potion",
+    "name": "ຢາຟື້ນຟູພະລັງຊີວິດ",
+    "nameEn": "Health Potion",
+    "description": "ດື່ມເພື່ອຟື້ນຟູ 1 ຫົວໃຈທັນທີ",
+    "category": "consumable",
+    "maxStack": 20,
+    "healAmount": 1,
+    "icon": "🧪"
+  },
+  {
+    "id": "axe-t1",
+    "name": "ຂວານຕັດໄມ້ T1",
+    "nameEn": "Wood Axe T1",
+    "description": "ຂວານພື້ນຖານສຳລັບຕັດຕົ້ນໄມ້ໃນປ່າ (ກົດ E ໃສ່ຕົ້ນໄມ້)",
+    "category": "tool",
+    "toolType": "axe",
+    "tier": 1,
+    "maxStack": 1,
+    "icon": "🪓"
+  },
+  {
+    "id": "pickaxe-t1",
+    "name": "ຈົກຂຸດແຮ່ T1",
+    "nameEn": "Mining Pickaxe T1",
+    "description": "ຈົກສຳລັບຂຸດສາຍແຮ່ເຫຼັກໃນຖ້ຳ (ກົດ E ໃສ່ສາຍແຮ່)",
+    "category": "tool",
+    "toolType": "pickaxe",
+    "tier": 1,
+    "maxStack": 1,
+    "icon": "⛏️"
+  },
+  {
+    "id": "hammer-t1",
+    "name": "ຄ້ອນສ້ອມແປງ T1",
+    "nameEn": "Repair Hammer T1",
+    "description": "ຄ້ອນນາຍຊ່າງທີ່ຈຳເປັນຕໍ່ການສ້ອມແປງປະຕູໃຫຍ່ທີ່ຫັກພັງ",
+    "category": "tool",
+    "toolType": "hammer",
+    "tier": 1,
+    "maxStack": 1,
+    "icon": "🔨"
+  },
+  {
+    "id": "wooden-sword",
+    "name": "ດາບໄມ້ຝຶກຫັດ",
+    "nameEn": "Wooden Sword",
+    "description": "ດາບໄມ້ພື້ນຖານສຳລັບນັກຮຽນເລີ່ມຕົ້ນ ພະລັງໂຈມຕີ 12",
+    "category": "weapon",
+    "tier": 1,
+    "baseDamage": 12,
+    "maxUpgradeLevel": 0,
+    "maxStack": 1,
+    "icon": "🗡️"
+  },
+  {
+    "id": "iron-sword",
+    "name": "ດາບເຫຼັກກ້າ",
+    "nameEn": "Iron Sword",
+    "description": "ດາບເຫຼັກຄົມກ້າ ພະລັງໂຈມຕີພື້ນຖານ 22, ສາມາດອັບເກຣດໄດ້ເຖິງ +3 ທີ່ໂຮງຕີເຫຼັກ",
+    "category": "weapon",
+    "tier": 2,
+    "baseDamage": 22,
+    "maxUpgradeLevel": 3,
+    "maxStack": 1,
+    "icon": "⚔️"
+  },
+  {
+    "id": "crystal-sword",
+    "name": "ດາບຜລຶກແກ້ວມົນຕາ",
+    "nameEn": "Crystal Sword",
+    "description": "ດາບຜລຶກແກ້ວພະລັງສູງ ພະລັງໂຈມຕີພື້ນຖານ 38, ສາມາດອັບເກຣດໄດ້ເຖິງ +3",
+    "category": "weapon",
+    "tier": 3,
+    "baseDamage": 38,
+    "maxUpgradeLevel": 3,
+    "maxStack": 1,
+    "icon": "✨"
+  }
+]
+

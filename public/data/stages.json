@@ -1,0 +1,77 @@
+[
+  {
+    "id": "stage-ch1",
+    "chapter": 1,
+    "name": "ປ່າແຫ່ງຄວາມຮູ້ ແລະ ຖ້ຳສາຍແຮ່",
+    "nameEn": "Forest of Knowledge & Mineral Cavern",
+    "width": 3200,
+    "height": 720,
+    "zones": [
+      {
+        "id": "zone-a",
+        "name": "ເຂດປ່າໄມ້ (Zone A - Forest)",
+        "startX": 0,
+        "endX": 1000,
+        "sign": { "x": 240, "text": "🌲 ເຂດປ່າໄມ້ (Zone A - Forest)\n[E] ເກັບກ່ຽວຊັບພະຍາກອນ", "color": "#86efac", "stroke": "#064e3b" },
+        "waypoint": { "x": 120, "name": "ຈຸດວາບປອດໄພ ປາກທາງເຂົ້າ (Zone A)", "label": "🌀 ຈຸດວາບປອດໄພ 1\n(Zone A Entrance)" },
+        "resourceNodes": [
+          { "id": "tree-1", "type": "tree", "requiredTool": "axe", "toolTier": 1, "x": 300, "hp": 3, "drops": [{ "itemId": "wood", "count": 3 }] },
+          { "id": "herb-1", "type": "herb", "requiredTool": null, "toolTier": 0, "x": 420, "hp": 1, "drops": [{ "itemId": "herb", "count": 2 }] },
+          { "id": "tree-2", "type": "tree", "requiredTool": "axe", "toolTier": 1, "x": 550, "hp": 3, "drops": [{ "itemId": "wood", "count": 3 }] },
+          { "id": "tree-3", "type": "tree", "requiredTool": "axe", "toolTier": 1, "x": 660, "hp": 3, "drops": [{ "itemId": "wood", "count": 3 }] },
+          { "id": "herb-2", "type": "herb", "requiredTool": null, "toolTier": 0, "x": 780, "hp": 1, "drops": [{ "itemId": "herb", "count": 2 }] },
+          { "id": "tree-4", "type": "tree", "requiredTool": "axe", "toolTier": 1, "x": 900, "hp": 3, "drops": [{ "itemId": "wood", "count": 3 }] }
+        ],
+        "enemySpawns": [
+          { "enemyId": "forest-slime", "type": "slime", "x": 480, "y": 580, "patrolDistance": 100, "speed": 50 },
+          { "enemyId": "forest-slime", "type": "slime", "x": 750, "y": 580, "patrolDistance": 120, "speed": 60 },
+          { "enemyId": "forest-slime", "type": "slime", "x": 920, "y": 580, "patrolDistance": 80, "speed": 40 }
+        ]
+      },
+      {
+        "id": "zone-b",
+        "name": "ເຂດຖ້ຳສາຍແຮ່ (Zone B - Cavern)",
+        "startX": 1000,
+        "endX": 2000,
+        "sign": { "x": 1100, "text": "⛏️ ເຂດຖ້ຳສາຍແຮ່ (Zone B - Cavern)\nຕ້ອງໃຊ້ Pickaxe ຂຸດແຮ່ເຫຼັກ", "color": "#cbd5e1", "stroke": "#1e293b" },
+        "resourceNodes": [
+          { "id": "stone-1", "type": "stone", "requiredTool": "pickaxe", "toolTier": 1, "x": 1150, "hp": 3, "drops": [{ "itemId": "stone", "count": 3 }] },
+          { "id": "iron-1", "type": "iron-vein", "requiredTool": "pickaxe", "toolTier": 1, "x": 1350, "hp": 4, "drops": [{ "itemId": "iron-ore", "count": 4 }] },
+          { "id": "iron-2", "type": "iron-vein", "requiredTool": "pickaxe", "toolTier": 1, "x": 1600, "hp": 4, "drops": [{ "itemId": "iron-ore", "count": 4 }] }
+        ],
+        "enemySpawns": [
+          { "enemyId": "rock-golem", "type": "slime-armored", "x": 1300, "y": 580, "patrolDistance": 140, "speed": 45 },
+          { "enemyId": "rock-golem", "type": "slime-armored", "x": 1550, "y": 580, "patrolDistance": 90, "speed": 35 },
+          { "enemyId": "cave-guardian", "type": "slime-armored", "x": 1850, "y": 560, "patrolDistance": 160, "speed": 40, "scale": 1.8, "sign": "⚠️ ຜູ້ພິທັກຖ້ຳ Cave Guardian\n(ປາບເພື່ອຮັບຜລຶກແກ້ວ 💎)" }
+        ]
+      },
+      {
+        "id": "zone-gate",
+        "name": "ປະຕູໃຫຍ່ທີ່ຫັກພັງ (Broken Gate)",
+        "startX": 2000,
+        "endX": 2300,
+        "waypoint": { "x": 2050, "name": "ຈຸດວາບປອດໄພ ໜ້າປະຕູໃຫຍ່ (Broken Gate)", "label": "🌀 ຈຸດວາບປອດໄພ 2\n(Gate Waypoint)" },
+        "gate": {
+          "id": "gate-ch1",
+          "x": 2150,
+          "requiredTool": "hammer",
+          "requiredItem": "repair-kit",
+          "requiresQuiz": true,
+          "quizBookId": "book-ch1"
+        }
+      },
+      {
+        "id": "zone-c",
+        "name": "ລານປະລອງບອສໃຫຍ່ (Zone C - Boss Arena)",
+        "startX": 2300,
+        "endX": 3200,
+        "bossSpawn": {
+          "enemyId": "stage-ch1-boss",
+          "x": 2850,
+          "y": 400,
+          "banner": "👑 ຈອມມານຮາດແວບູຮານ (Hardware Overlord) 👑\n(ຫຼົບກະແສໄຟຟ້າ & ໂຈມຕີປິດສາກດ້ວຍຄວາມຮູ້!)"
+        }
+      }
+    ]
+  }
+]

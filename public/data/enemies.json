@@ -1,0 +1,62 @@
+[
+  {
+    "id": "forest-slime",
+    "name": "ສະໄລມ໌ປ່າ",
+    "nameEn": "Forest Slime",
+    "kind": "normal",
+    "maxHp": 24,
+    "damage": 8,
+    "speed": 60,
+    "drops": [
+      { "itemId": "fiber", "chance": 0.8, "count": 1 },
+      { "itemId": "herb", "chance": 0.4, "count": 1 }
+    ]
+  },
+  {
+    "id": "rock-golem",
+    "name": "ໂກເລມຫີນຜາ",
+    "nameEn": "Rock Golem",
+    "kind": "normal",
+    "maxHp": 60,
+    "damage": 15,
+    "speed": 40,
+    "drops": [
+      { "itemId": "stone", "chance": 1.0, "count": 3 }
+    ]
+  },
+  {
+    "id": "cave-guardian",
+    "name": "ຜູ້ພິທັກຖ້ຳສາຍແຮ່",
+    "nameEn": "Cave Guardian",
+    "kind": "miniboss",
+    "maxHp": 140,
+    "damage": 20,
+    "speed": 55,
+    "drops": [
+      { "itemId": "crystal", "chance": 1.0, "count": 2 }
+    ]
+  },
+  {
+    "id": "stage-ch1-boss",
+    "name": "ຈອມມານຮາດແວບູຮານ",
+    "nameEn": "Ancient Hardware Overlord",
+    "kind": "boss",
+    "maxHp": 300,
+    "damage": 25,
+    "speed": 70,
+    "phases": [
+      { "phase": 1, "hpThreshold": 1.0, "description": "ໂຈມຕີປົກກະຕິ ແລະ ພຸ່ງຕຳ" },
+      { "phase": 2, "hpThreshold": 0.66, "description": "ຍິງຄື້ນກະແສໄຟຟ້າ" },
+      { "phase": 3, "hpThreshold": 0.33, "description": "ບ້າຄັ່ງ ຄວາມໄວໂຈມຕີເພີ່ມຂຶ້ນ" }
+    ],
+    "quizFinisher": {
+      "bookId": "book-ch1",
+      "requiredPass": true
+    },
+    "drops": [
+      { "itemId": "boss-core", "chance": 1.0, "count": 1 },
+      { "itemId": "crystal", "chance": 1.0, "count": 3 }
+    ]
+  }
+]
+

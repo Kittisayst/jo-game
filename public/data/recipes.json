@@ -1,0 +1,156 @@
+[
+  {
+    "id": "recipe-axe-t1",
+    "resultItemId": "axe-t1",
+    "resultCount": 1,
+    "building": "workshop",
+    "requiredBookRecipe": null,
+    "creditCost": 0,
+    "ingredients": [
+      { "itemId": "wood", "count": 5 },
+      { "itemId": "stone", "count": 2 }
+    ]
+  },
+  {
+    "id": "recipe-pickaxe-t1",
+    "resultItemId": "pickaxe-t1",
+    "resultCount": 1,
+    "building": "workshop",
+    "requiredBookRecipe": "pickaxe-t1",
+    "creditCost": 0,
+    "ingredients": [
+      { "itemId": "wood", "count": 8 },
+      { "itemId": "stone", "count": 5 }
+    ]
+  },
+  {
+    "id": "recipe-hammer-t1",
+    "resultItemId": "hammer-t1",
+    "resultCount": 1,
+    "building": "workshop",
+    "requiredBookRecipe": "hammer-t1",
+    "creditCost": 0,
+    "ingredients": [
+      { "itemId": "wood", "count": 6 },
+      { "itemId": "iron-ore", "count": 4 }
+    ]
+  },
+  {
+    "id": "recipe-repair-kit",
+    "resultItemId": "repair-kit",
+    "resultCount": 1,
+    "building": "workshop",
+    "requiredBookRecipe": "repair-kit",
+    "creditCost": 0,
+    "ingredients": [
+      { "itemId": "wood", "count": 5 },
+      { "itemId": "iron-ore", "count": 3 },
+      { "itemId": "crystal", "count": 1 }
+    ]
+  },
+  {
+    "id": "recipe-herb-potion",
+    "resultItemId": "herb-potion",
+    "resultCount": 1,
+    "building": "workshop",
+    "requiredBookRecipe": null,
+    "creditCost": 0,
+    "ingredients": [
+      { "itemId": "herb", "count": 2 },
+      { "itemId": "wood", "count": 1 }
+    ]
+  },
+  {
+    "id": "recipe-iron-sword",
+    "resultItemId": "iron-sword",
+    "resultCount": 1,
+    "building": "forge",
+    "requiredBookRecipe": "iron-sword",
+    "creditCost": 10,
+    "ingredients": [
+      { "itemId": "iron-ore", "count": 10 },
+      { "itemId": "wood", "count": 5 }
+    ]
+  },
+  {
+    "id": "recipe-crystal-sword",
+    "resultItemId": "crystal-sword",
+    "resultCount": 1,
+    "building": "forge",
+    "requiredBookRecipe": "crystal-sword",
+    "creditCost": 30,
+    "ingredients": [
+      { "itemId": "crystal", "count": 3 },
+      { "itemId": "iron-ore", "count": 15 }
+    ]
+  },
+  {
+    "id": "upgrade-iron-sword-1",
+    "targetWeaponId": "iron-sword",
+    "targetLevel": 1,
+    "building": "forge",
+    "creditCost": 5,
+    "bonusDamage": 5,
+    "ingredients": [
+      { "itemId": "iron-ore", "count": 4 }
+    ]
+  },
+  {
+    "id": "upgrade-iron-sword-2",
+    "targetWeaponId": "iron-sword",
+    "targetLevel": 2,
+    "building": "forge",
+    "creditCost": 10,
+    "bonusDamage": 5,
+    "ingredients": [
+      { "itemId": "iron-ore", "count": 8 }
+    ]
+  },
+  {
+    "id": "upgrade-iron-sword-3",
+    "targetWeaponId": "iron-sword",
+    "targetLevel": 3,
+    "building": "forge",
+    "creditCost": 15,
+    "bonusDamage": 6,
+    "ingredients": [
+      { "itemId": "iron-ore", "count": 12 },
+      { "itemId": "crystal", "count": 1 }
+    ]
+  },
+  {
+    "id": "upgrade-crystal-sword-1",
+    "targetWeaponId": "crystal-sword",
+    "targetLevel": 1,
+    "building": "forge",
+    "creditCost": 10,
+    "bonusDamage": 8,
+    "ingredients": [
+      { "itemId": "crystal", "count": 2 }
+    ]
+  },
+  {
+    "id": "upgrade-crystal-sword-2",
+    "targetWeaponId": "crystal-sword",
+    "targetLevel": 2,
+    "building": "forge",
+    "creditCost": 20,
+    "bonusDamage": 8,
+    "ingredients": [
+      { "itemId": "crystal", "count": 4 }
+    ]
+  },
+  {
+    "id": "upgrade-crystal-sword-3",
+    "targetWeaponId": "crystal-sword",
+    "targetLevel": 3,
+    "building": "forge",
+    "creditCost": 30,
+    "bonusDamage": 10,
+    "ingredients": [
+      { "itemId": "crystal", "count": 6 },
+      { "itemId": "boss-core", "count": 1 }
+    ]
+  }
+]
+
