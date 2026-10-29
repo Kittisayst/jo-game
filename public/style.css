@@ -4423,3 +4423,425 @@ button,
 .skin-close-btn:active {
     transform: scale(0.95);
 }
+
+/* ===== Library: for sale / my books / read =====
+   Reuses the outfit-* window chrome (overlay, header, wallet, close); the rest is lib-* */
+.lib-card {
+    width: min(920px, 100%);
+}
+
+.lib-tabs {
+    display: flex;
+    gap: 6px;
+    padding: 10px 20px 0;
+    border-bottom: 1px solid rgba(253, 230, 138, 0.18);
+    background: rgba(10, 6, 32, 0.35);
+}
+
+.lib-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    border: 1px solid transparent;
+    border-bottom: 0;
+    border-radius: 12px 12px 0 0;
+    font: inherit;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.6);
+    background: transparent;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.lib-tab:hover:not(:disabled):not(.is-active) {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.07);
+}
+
+.lib-tab.is-active {
+    color: #2b1500;
+    background: linear-gradient(180deg, #fde68a, #f59e0b);
+    border-color: rgba(253, 230, 138, 0.6);
+    box-shadow: 0 -4px 14px rgba(245, 158, 11, 0.25);
+}
+
+.lib-tab:disabled {
+    opacity: 0.4;
+    cursor: default;
+}
+
+.lib-tab-count {
+    min-width: 1.6em;
+    padding: 0 7px;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    text-align: center;
+    color: #fde68a;
+    background: rgba(10, 6, 32, 0.6);
+}
+
+.lib-tab.is-active .lib-tab-count {
+    color: #fff;
+    background: rgba(43, 21, 0, 0.7);
+}
+
+.lib-toast {
+    padding: 8px 20px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    text-align: center;
+    color: #86efac;
+    background: rgba(6, 78, 59, 0.45);
+    border-bottom: 1px solid rgba(52, 211, 153, 0.4);
+}
+
+.lib-body {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 16px 20px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.lib-hint {
+    margin: 0;
+    font-size: 0.85rem;
+    color: #fcd34d;
+}
+
+.lib-book {
+    display: flex;
+    gap: 16px;
+    padding: 16px;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(253, 230, 138, 0.35);
+}
+
+.lib-book.is-locked {
+    background: rgba(255, 255, 255, 0.02);
+    border-color: rgba(255, 255, 255, 0.12);
+}
+
+.lib-book.is-owned {
+    border-color: rgba(52, 211, 153, 0.45);
+    background: rgba(16, 185, 129, 0.07);
+}
+
+.lib-cover {
+    display: grid;
+    place-items: center;
+    flex: 0 0 64px;
+    width: 64px;
+    height: 84px;
+    font-size: 2rem;
+    border-radius: 8px 12px 12px 8px;
+    background: linear-gradient(135deg, #7c3aed, #4c1d95);
+    border-left: 6px solid #f59e0b;
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.45);
+}
+
+.lib-book.is-locked .lib-cover {
+    filter: grayscale(0.8);
+    opacity: 0.7;
+}
+
+.lib-book.is-owned .lib-cover {
+    background: linear-gradient(135deg, #059669, #064e3b);
+}
+
+.lib-book-main {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.lib-book-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 10px;
+}
+
+.lib-book-head h3 {
+    margin: 0;
+    flex: 1;
+    min-width: 0;
+    font-size: 1.1rem;
+    color: #fff;
+}
+
+.lib-chip {
+    padding: 2px 10px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    border-radius: 6px;
+    color: #fde68a;
+    background: rgba(245, 158, 11, 0.2);
+    border: 1px solid rgba(253, 230, 138, 0.35);
+}
+
+.lib-price {
+    padding: 3px 12px;
+    font-size: 0.85rem;
+    font-weight: 800;
+    border-radius: 999px;
+    color: #fcd34d;
+    background: rgba(10, 6, 32, 0.6);
+    border: 1px solid rgba(253, 230, 138, 0.35);
+}
+
+.lib-status {
+    padding: 3px 12px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    border-radius: 999px;
+    color: rgba(255, 255, 255, 0.7);
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.lib-status.is-passed {
+    color: #86efac;
+    background: rgba(16, 185, 129, 0.2);
+    border: 1px solid rgba(52, 211, 153, 0.4);
+}
+
+.lib-meta {
+    margin: 0;
+    font-size: 0.78rem;
+    color: rgba(255, 255, 255, 0.55);
+}
+
+.lib-desc {
+    margin: 0;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: rgba(255, 255, 255, 0.82);
+}
+
+.lib-rewards {
+    margin: 0;
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.lib-rewards strong {
+    color: #fcd34d;
+}
+
+.lib-checklist {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 10px 12px;
+    font-size: 0.82rem;
+    color: rgba(255, 255, 255, 0.6);
+    border-radius: 12px;
+    background: rgba(6, 3, 20, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.lib-checklist-title {
+    font-weight: 800;
+    color: #fda4af;
+}
+
+.lib-checklist .is-done {
+    color: #86efac;
+}
+
+.lib-progress {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 0.8rem;
+    color: #86efac;
+}
+
+.lib-progress-bar {
+    height: 8px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.lib-progress-fill {
+    height: 100%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #34d399, #a7f3d0);
+    transition: width 0.3s ease;
+}
+
+.lib-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 10px;
+    margin-top: 4px;
+}
+
+.lib-btn {
+    padding: 10px 20px;
+    border: 0;
+    border-radius: 12px;
+    font: inherit;
+    font-weight: 800;
+    font-size: 0.92rem;
+    color: rgba(255, 255, 255, 0.55);
+    background: rgba(255, 255, 255, 0.08);
+    cursor: default;
+    transition: transform 0.12s ease, filter 0.15s ease;
+}
+
+.lib-btn:not(:disabled) {
+    cursor: pointer;
+}
+
+.lib-btn:hover:not(:disabled) {
+    filter: brightness(1.1);
+    transform: translateY(-1px);
+}
+
+.lib-btn.is-buy:not(:disabled) {
+    color: #2b1500;
+    background: linear-gradient(180deg, #fde68a, #f59e0b);
+    box-shadow: 0 6px 18px rgba(245, 158, 11, 0.35);
+}
+
+.lib-btn.is-read {
+    color: #fff;
+    background: linear-gradient(180deg, #8b5cf6, #6d28d9);
+    box-shadow: 0 6px 18px rgba(109, 40, 217, 0.35);
+}
+
+.lib-btn.is-exam {
+    color: #052e16;
+    background: linear-gradient(180deg, #a7f3d0, #10b981);
+}
+
+.lib-note {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.55);
+}
+
+.lib-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 28px 16px;
+    text-align: center;
+}
+
+.lib-empty-icon {
+    font-size: 2.6rem;
+}
+
+.lib-empty h3 {
+    margin: 0;
+    color: #fde68a;
+}
+
+.lib-empty p {
+    margin: 0;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+@media (max-width: 720px) {
+    .lib-tabs {
+        padding: 8px 12px 0;
+    }
+
+    .lib-tab {
+        flex: 1;
+        justify-content: center;
+        gap: 5px;
+        padding: 10px 4px;
+        font-size: 0.82rem;
+        white-space: nowrap;
+    }
+
+    .lib-card .outfit-header {
+        flex-wrap: wrap;
+        gap: 8px 10px;
+    }
+
+    .lib-card .outfit-avatar {
+        display: none;
+    }
+
+    .lib-card .outfit-title {
+        flex: 1 1 0;
+    }
+
+    .lib-card .outfit-title h2 {
+        font-size: 1.05rem;
+    }
+
+    .lib-card .outfit-wallet {
+        order: 3;
+        flex: 1 1 100%;
+        text-align: center;
+    }
+
+    .lib-book-head h3 {
+        flex: 1 1 100%;
+        order: 2;
+    }
+
+    .lib-body {
+        padding: 12px;
+    }
+
+    .lib-book {
+        padding: 12px;
+        gap: 12px;
+    }
+
+    .lib-cover {
+        flex-basis: 48px;
+        width: 48px;
+        height: 64px;
+        font-size: 1.5rem;
+    }
+
+    .lib-card .outfit-title p {
+        display: none;
+    }
+}
+
+/* Landscape phones: a tab bar and a card must fit under the header */
+@media (max-height: 520px) {
+    .lib-tab {
+        padding: 6px 14px;
+    }
+
+    .lib-body {
+        padding: 8px 14px 12px;
+        gap: 8px;
+    }
+
+    .lib-book {
+        padding: 10px;
+    }
+
+    .lib-cover {
+        flex-basis: 40px;
+        width: 40px;
+        height: 52px;
+        font-size: 1.2rem;
+    }
+
+    .lib-btn {
+        padding: 7px 14px;
+    }
+
+    .lib-card .outfit-title p {
+        display: none;
+    }
+}
