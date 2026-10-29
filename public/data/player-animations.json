@@ -1,0 +1,61 @@
+{
+  "frame": {"width": 32, "height": 48, "columns": 8},
+  "animations": {
+    "idle": {"row": 0, "frames": 4, "fps": 6, "loop": true, "anchors": [
+      {"x": 19.0, "y": 28, "angle": 30, "front": true},
+      {"x": 19.0, "y": 28, "angle": 30, "front": true},
+      {"x": 19.0, "y": 29, "angle": 30, "front": true},
+      {"x": 19.0, "y": 28, "angle": 30, "front": true}
+    ]},
+    "run": {"row": 1, "frames": 8, "fps": 12, "loop": true, "anchors": [
+      {"x": 19.0, "y": 28, "angle": 45, "front": true},
+      {"x": 19.0, "y": 29, "angle": 45, "front": true},
+      {"x": 19.0, "y": 28, "angle": 45, "front": true},
+      {"x": 19.0, "y": 27, "angle": 45, "front": true},
+      {"x": 19.0, "y": 28, "angle": 45, "front": true},
+      {"x": 19.0, "y": 29, "angle": 45, "front": true},
+      {"x": 19.0, "y": 28, "angle": 45, "front": true},
+      {"x": 19.0, "y": 27, "angle": 45, "front": true}
+    ]},
+    "air": {"row": 2, "frames": 5, "fps": 0, "loop": false, "anchors": [
+      {"x": 19.0, "y": 29, "angle": 20, "front": true},
+      {"x": 24.5, "y": 14, "angle": 10, "front": true},
+      {"x": 24.5, "y": 13, "angle": 0, "front": true},
+      {"x": 24.5, "y": 16, "angle": 20, "front": true},
+      {"x": 24.5, "y": 17, "angle": 30, "front": true}
+    ]},
+    "attack": {"row": 3, "frames": 6, "fps": 24, "loop": false, "anchors": [
+      {"x": 24.5, "y": 14, "angle": -20, "front": true},
+      {"x": 22.5, "y": 12, "angle": -60, "front": true},
+      {"x": 29.5, "y": 22, "angle": 45, "front": true},
+      {"x": 30.0, "y": 25, "angle": 90, "front": true},
+      {"x": 29.5, "y": 29, "angle": 135, "front": true},
+      {"x": 25.5, "y": 28, "angle": 60, "front": true}
+    ]},
+    "tool": {"row": 4, "frames": 6, "fps": 16, "loop": false, "anchors": [
+      {"x": 26.5, "y": 28, "angle": 45, "front": true},
+      {"x": 24.5, "y": 13, "angle": -20, "front": true},
+      {"x": 22.5, "y": 10, "angle": -50, "front": true},
+      {"x": 29.5, "y": 29, "angle": 100, "front": true},
+      {"x": 30.0, "y": 31, "angle": 120, "front": true},
+      {"x": 26.5, "y": 28, "angle": 45, "front": true}
+    ]},
+    "wall": {"row": 5, "frames": 2, "fps": 8, "loop": true, "anchors": [
+      {"x": 24.5, "y": 16, "angle": 0, "front": true},
+      {"x": 24.5, "y": 17, "angle": 0, "front": true}
+    ]},
+    "hurt": {"row": 6, "frames": 3, "fps": 12, "loop": false, "anchors": [
+      {"x": 24.5, "y": 16, "angle": 20, "front": true},
+      {"x": 26.5, "y": 24, "angle": 60, "front": true},
+      {"x": 18.0, "y": 29, "angle": 30, "front": true}
+    ]},
+    "faint": {"row": 7, "frames": 6, "fps": 8, "loop": false, "anchors": [
+      {"x": 18.0, "y": 28, "angle": 30, "front": true, "hidden": true},
+      {"x": 18.0, "y": 31, "angle": 30, "front": true, "hidden": true},
+      {"x": 19.0, "y": 35, "angle": 20, "front": true, "hidden": true},
+      {"x": 20.0, "y": 37, "angle": 10, "front": true, "hidden": true},
+      {"x": 20.0, "y": 39, "angle": 0, "front": true, "hidden": true},
+      {"x": 20.0, "y": 39, "angle": 0, "front": true, "hidden": true}
+    ]}
+  }
+}

@@ -1,5 +1,7 @@
 import { Scene } from 'phaser';
 import { LEVEL_CATALOG } from '../levelCatalog';
+import { getGameContent } from '../../content/ContentCatalog';
+import { heldTextureKey } from '../objects/HeldItemSprite';
 import { ACTIVE_SESSION_STORAGE_KEY, readString, STORAGE_PREFIX } from '../../storage/safeStorage';
 
 const IMAGE_ASSETS: readonly { key: string; path: string }[] = [
@@ -77,6 +79,15 @@ export function enqueueGameAssets (scene: Scene): void
         if (!scene.textures.exists(img.key))
         {
             scene.load.image(img.key, img.path);
+        }
+    }
+
+    // Weapons and tools in the hero's hand; items without an image get a drawn placeholder
+    for (const [itemId, art] of Object.entries(getGameContent().heldArt))
+    {
+        if (art.image && !scene.textures.exists(heldTextureKey(itemId)))
+        {
+            scene.load.image(heldTextureKey(itemId), art.image);
         }
     }
 

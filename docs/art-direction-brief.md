@@ -44,6 +44,8 @@
   - `public/assets/backgrounds/` — seamless stage & hub backdrops
   - `public/assets/environment/` — tiles, platforms, hazards, village buildings, resource nodes, gates, waypoints, props
   - `public/assets/characters/` — player skin sheets, NPC sheets, enemy/miniboss/boss sheets
+  - `public/assets/characters/player-skin-<id>.png` — **256×384**, an 8×8 grid of 32×48 cells; row = animation (idle 4, run 8, air 5, attack 6, tool 6, wall 2, hurt 3, faint 6 frames), column = frame; unused cells stay transparent. Frame number = `row*8 + column`. Built by `tools/art/build_player.py`.
+  - `public/assets/held/` — weapons/tools in the hand: `32×32`, pointing straight up, grip at `(16, 26)`, one image per item id; the game rotates and mirrors them (spec in `docs/plans/2026-10-30-held-items.md`)
   - `public/assets/vfx/` — weapon slash spritesheets
   - `public/assets/items/` — `32×32` item icons matching `items.json` IDs
   - `public/assets/ui/` — dialogue portraits & title crest

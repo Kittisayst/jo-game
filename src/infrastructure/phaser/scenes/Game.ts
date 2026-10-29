@@ -13,6 +13,8 @@ import { InteractionController } from '../controllers/InteractionController';
 import { soundManager } from '../../audio/SoundManager';
 import { Level } from '../Level';
 import { getGameContent } from '../../content/ContentCatalog';
+import { HeldItemSprite } from '../objects/HeldItemSprite';
+import { findTool } from '../../../domain/entities/HeldItem';
 import {
     getStageBossSpawn,
     getStageDefinition,
@@ -40,6 +42,7 @@ import { SKIN_CHANGED_EVENT, SkinChangedPayload } from '../../../application/Sel
 import { GAME_PAUSED_EVENT, GAME_RESUMED_EVENT } from '../../../application/TogglePauseUseCase';
 import { entities } from '../../composition';
 import { EnemyDefinition } from '../../../domain/entities/Enemy';
+import { GROUND_SINK } from '../physicsConstants';
 import { awardBossRewardUseCase, reviveBossAfterFailedFinisherUseCase } from '../../../application/AwardBossRewardUseCase';
 
 /**
@@ -51,6 +54,7 @@ export class Game extends Scene
 {
     camera: Phaser.Cameras.Scene2D.Camera;
     player: Player;
+    heldItem: HeldItemSprite;
     ground: Phaser.Physics.Arcade.StaticGroup;
     platforms: Phaser.Physics.Arcade.StaticGroup;
     movingPlatforms: Phaser.Physics.Arcade.Group;
@@ -159,11 +163,11 @@ export class Game extends Scene
                 Boolean(entities.forgeUnlocked || entities.books['book-ch1']?.examPassed)
             );
             const baseY = WORLD_HEIGHT - GROUND_HEIGHT - 24;
-            const elder = new NPC(this, 460, baseY, 'npc-elder', '💬 [E] ລົມກັບຫົວໜ້າໝູ່ບ້ານ');
+            const elder = new NPC(this, 460, baseY + GROUND_SINK, 'npc-elder', '💬 [E] ລົມກັບຫົວໜ້າໝູ່ບ້ານ');
             elder.onInteract = () => EventBus.emit('start-dialogue', 'village_elder');
 
             // Mina runs the Skin shop at the little market between the Forge and the World Gate
-            const mina = new NPC(this, 1290, baseY, 'npc-mina', '🛍️ [E] ລົມກັບ Mina (ຮ້ານຊຸດ)');
+            const mina = new NPC(this, 1290, baseY + GROUND_SINK, 'npc-mina', '🛍️ [E] ລົມກັບ Mina (ຮ້ານຊຸດ)');
             mina.onInteract = () => EventBus.emit('start-dialogue', 'skin_shop');
 
             this.villagers = [elder, mina];
@@ -203,6 +207,7 @@ export class Game extends Scene
 
         this.player = new Player(this, this.level.spawn.x, this.level.spawn.y, this.currentSkinId);
         this.player.setDepth(10);
+        this.heldItem = new HeldItemSprite(this, this.player, getGameContent().playerAnimations, getGameContent().heldArt);
         this.player.onJump = (x, y) => this.particleManager.emitJumpDust(x, y);
         this.player.onLand = (x, y) =>
         {
@@ -349,6 +354,8 @@ export class Game extends Scene
         {
             if (this.brokenGate && this.brokenGate.gateId === gateId)
             {
+                this.heldItem.useTool(findTool(entities.backpack, this.brokenGate.requirements.requiredTool));
+                this.player.swingToolToward(this.brokenGate.x);
                 this.brokenGate.repair();
                 this.particleManager.emitCelebration(this.brokenGate.x, this.brokenGate.y - 40);
                 soundManager.playPowerUp();
@@ -398,6 +405,7 @@ export class Game extends Scene
         const onGameOver = () =>
         {
             this.physics.pause();
+            this.player.playFaint();
         };
         DomainEvents.on(PLAYER_DIED_EVENT, onGameOver);
 
@@ -458,6 +466,7 @@ export class Game extends Scene
         const isRight = Boolean(this.cursors.right.isDown || this.wasdKeys?.right?.isDown || this.touchControls.right);
         const isUp = Boolean(this.cursors.up.isDown || this.wasdKeys?.up?.isDown || this.wasdKeys?.space?.isDown || this.touchControls.up);
 
+        this.heldItem.setContext(this.currentLevelKey === 'village', entities.equipment.equippedWeaponId);
         this.player.update({
             left: { isDown: isLeft },
             right: { isDown: isRight },

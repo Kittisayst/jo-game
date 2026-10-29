@@ -1,6 +1,7 @@
 import { Physics, Scene } from 'phaser';
 import { Enemy as EnemyEntity, EnemyDefinition, EnemyState, EnemyType, ENEMY_ARCHETYPES } from '../../../domain/entities/Enemy';
 import { soundManager } from '../../audio/SoundManager';
+import { GROUND_SINK } from '../physicsConstants';
 import { EnemyAttackBehavior } from './EnemyAttackBehavior';
 
 const WIDTH = 32;
@@ -96,13 +97,13 @@ export class Enemy extends Physics.Arcade.Sprite
             if (texKey === 'miniboss-cave-guardian')
             {
                 this.spriteHeight = 64;
-                body.setSize(48, 54);
+                body.setSize(48, 54 - GROUND_SINK);
                 body.setOffset(8, 10);
             }
             else if (texKey === 'enemy-rock-golem')
             {
                 this.spriteHeight = 40;
-                body.setSize(38, 32);
+                body.setSize(38, 32 - GROUND_SINK);
                 body.setOffset(5, 8);
             }
             else if (type === 'slime-flying')
@@ -113,18 +114,18 @@ export class Enemy extends Physics.Arcade.Sprite
             }
             else if (type === 'slime-armored')
             {
-                body.setSize(30, 20);
+                body.setSize(30, 20 - GROUND_SINK);
                 body.setOffset(1, 8);
             }
             else if (type === 'slime-spitter')
             {
-                body.setSize(26, 20);
+                body.setSize(26, 20 - GROUND_SINK);
                 body.setOffset(3, 8);
             }
             else
             {
-                // Basic slime: flush with 32x28 sprite bottom
-                body.setSize(26, 20);
+                // Basic slime: the art reaches GROUND_SINK below the 32x28 sprite's hitbox
+                body.setSize(26, 20 - GROUND_SINK);
                 body.setOffset(3, 8);
             }
         }

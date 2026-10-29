@@ -102,7 +102,8 @@
     "tier": 1,
     "maxStack": 1,
     "icon": "🪓",
-    "iconImage": "assets/items/axe-t1.png"
+    "iconImage": "assets/items/axe-t1.png",
+    "held": { "image": "assets/held/axe-t1.png", "gripX": 16, "gripY": 26 }
   },
   {
     "id": "pickaxe-t1",
@@ -114,7 +115,8 @@
     "tier": 1,
     "maxStack": 1,
     "icon": "⛏️",
-    "iconImage": "assets/items/pickaxe-t1.png"
+    "iconImage": "assets/items/pickaxe-t1.png",
+    "held": { "image": "assets/held/pickaxe-t1.png", "gripX": 16, "gripY": 26 }
   },
   {
     "id": "hammer-t1",
@@ -126,7 +128,8 @@
     "tier": 1,
     "maxStack": 1,
     "icon": "🔨",
-    "iconImage": "assets/items/hammer-t1.png"
+    "iconImage": "assets/items/hammer-t1.png",
+    "held": { "image": "assets/held/hammer-t1.png", "gripX": 16, "gripY": 26 }
   },
   {
     "id": "wooden-sword",
@@ -139,7 +142,8 @@
     "maxUpgradeLevel": 0,
     "maxStack": 1,
     "icon": "🗡️",
-    "iconImage": "assets/items/wooden-sword.png"
+    "iconImage": "assets/items/wooden-sword.png",
+    "held": { "image": "assets/held/wooden-sword.png", "gripX": 16, "gripY": 26 }
   },
   {
     "id": "iron-sword",
@@ -152,7 +156,8 @@
     "maxUpgradeLevel": 3,
     "maxStack": 1,
     "icon": "⚔️",
-    "iconImage": "assets/items/iron-sword.png"
+    "iconImage": "assets/items/iron-sword.png",
+    "held": { "image": "assets/held/iron-sword.png", "gripX": 16, "gripY": 26 }
   },
   {
     "id": "crystal-sword",
@@ -165,6 +170,7 @@
     "maxUpgradeLevel": 3,
     "maxStack": 1,
     "icon": "✨",
-    "iconImage": "assets/items/crystal-sword.png"
+    "iconImage": "assets/items/crystal-sword.png",
+    "held": { "image": "assets/held/crystal-sword.png", "gripX": 16, "gripY": 26 }
   }
 ]

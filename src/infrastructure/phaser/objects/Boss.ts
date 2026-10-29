@@ -1,6 +1,7 @@
 import { Physics, Scene } from 'phaser';
 import { Boss as BossEntity, BossPhase } from '../../../domain/entities/Boss';
 import { damageBossUseCase } from '../../../application/DamageBossUseCase';
+import { GROUND_SINK } from '../physicsConstants';
 
 const TEXTURE_KEY = 'boss-hardware-overlord';
 const WIDTH = 96;
@@ -49,7 +50,7 @@ export class Boss extends Physics.Arcade.Sprite
         const body = this.body as Phaser.Physics.Arcade.Body;
         if (body)
         {
-            body.setSize(76, 66);
+            body.setSize(76, 66 - GROUND_SINK);
             body.setOffset(10, 14);
         }
 
