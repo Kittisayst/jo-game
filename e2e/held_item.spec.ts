@@ -23,8 +23,6 @@ test.describe('Held item', () => {
     });
 
     await page.goto('/');
-    await page.evaluate(() => window.localStorage.clear());
-    await page.reload();
     await page.getByRole('button', { name: /ເຂົ້າເກມ/i }).click();
     await expect(page.locator('.game-hud')).toBeVisible({ timeout: 12000 });
     await page.waitForTimeout(800);
