@@ -156,7 +156,7 @@ export class InteractionController
 
         if (result.success)
         {
-            const isMining = node.type === 'stone' || node.type === 'iron-vein';
+            const isMining = node.requiredTool === 'pickaxe';
             if (isMining) soundManager.playMine(); else soundManager.playChop();
             if (node.requiredTool) scene.heldItem.useTool(findTool(entities.backpack, node.requiredTool));
             scene.player.swingToolToward(node.x);

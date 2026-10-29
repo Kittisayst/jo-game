@@ -25,9 +25,9 @@ describe('SelectStageUseCase', () =>
             emittedPayload = payload;
         });
 
-        const success = selectStageUseCase(progression, 'stage-ch1');
+        const success = selectStageUseCase(progression, 'stage-001');
         expect(success).toBe(true);
-        expect(emittedPayload).toEqual({ stageId: 'stage-ch1' });
+        expect(emittedPayload).toEqual({ stageId: 'stage-001' });
     });
 
     it('rejects selecting a locked stage and emits nothing', () =>
@@ -38,7 +38,7 @@ describe('SelectStageUseCase', () =>
             emitted = true;
         });
 
-        const success = selectStageUseCase(progression, 'stage-ch2');
+        const success = selectStageUseCase(progression, 'stage-002');
         expect(success).toBe(false);
         expect(emitted).toBe(false);
     });

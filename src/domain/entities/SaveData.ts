@@ -5,14 +5,16 @@ import { EquipmentSnapshot, WEAPON_CONFIGS } from './EquipmentState';
 import { DailyPracticeProgressSnapshot } from './Quiz';
 import { AVAILABLE_SKINS } from './Skin';
 import { ALWAYS_UNLOCKED_STAGES } from './StageProgression';
+import { isStageId } from './StageNumber';
 
-export const CURRENT_SAVE_VERSION = 6;
+export const CURRENT_SAVE_VERSION = 7;
 export const STARTER_BOOK_CREDIT_RESERVE = 20;
 
 /** Herb potions a new player starts with. */
 export const STARTER_POTION_COUNT = 2;
 
-const VALID_STAGE_KEYS = ['village', 'stage-ch1'];
+/** The village and the 100 numbered Stages are the only places progress can be saved for. */
+const isValidStageKey = (key: string): boolean => key === 'village' || isStageId(key);
 const VALID_SKIN_IDS = AVAILABLE_SKINS.map(skin => skin.id);
 const DEFAULT_SKIN_ID = 'cyber-blue';
 const DEFAULT_WEAPON_ID = 'wooden-sword';
@@ -100,7 +102,7 @@ function wholeNumber (value: unknown, fallback = 0): number
 }
 
 /**
- * Validates an unknown input into a clean, verified SaveGameSnapshot (version 6).
+ * Validates an unknown input into a clean, verified SaveGameSnapshot (version 7).
  * Saves older than v6 come from the platformer prototype (coins, score, shop, old weapons) and
  * are intentionally not carried over: only the settings survive.
  */
@@ -141,7 +143,7 @@ export function migrateSaveSnapshot (raw: unknown, fallbackSlotId = 'slot_1'): S
     // Stage progression
     const rawProg = asRecord(data.stageProgression);
     const stageList = (value: unknown): string[] => Array.isArray(value)
-        ? value.filter((s): s is string => typeof s === 'string' && VALID_STAGE_KEYS.includes(s))
+        ? value.filter((s): s is string => typeof s === 'string' && isValidStageKey(s))
         : [];
     const unlockedStages = Array.from(new Set([...ALWAYS_UNLOCKED_STAGES, ...stageList(rawProg.unlockedStages)]));
     const completedStages = Array.from(new Set(stageList(rawProg.completedStages)));

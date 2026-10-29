@@ -1,4 +1,5 @@
 import { test, expect, Page } from '@playwright/test';
+import { enterStage, unlockStages } from './helpers/stage';
 import { readState } from './helpers/bot';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -82,14 +83,14 @@ test.describe('Cave Guardian special attacks', () => {
     await page.goto('/');
     await page.evaluate(() => window.localStorage.clear());
     await page.reload();
-    await page.getByRole('button', { name: /ເລືອກດ່ານ/i }).click();
-    await page.locator('.stage-map-node').filter({ hasText: /ບົດທີ 1|Chapter 1/i }).first().click();
+    await unlockStages(page, 5);
+    await enterStage(page, 5);
     await expect(page.locator('.game-hud')).toBeVisible({ timeout: 12000 });
     await page.waitForTimeout(1000);
     await readState(page); // lets the helpers find the running game
 
     // From afar (about 350 px) the Guardian throws rocks, after a warning
-    await placeHero(page, 1500);
+    await placeHero(page, 1200);
     const far = await watchGuardian(page, (phases, rocks) => phases.has('throw') && rocks > 0);
     expect(far.phases.has('telegraph')).toBe(true);
     expect(far.phases.has('throw')).toBe(true);

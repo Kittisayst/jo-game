@@ -1,7 +1,6 @@
 import type { GateRequirements } from '../../../application/RepairBrokenGateUseCase';
 import { ResourceNode } from '../../../domain/entities/ResourceNode';
 import type {
-    ResourceNodeType,
     StageDefinition,
     StageGate,
     StageResourceNode,
@@ -32,26 +31,15 @@ export interface WaypointView {
     name: string;
 }
 
-/**
- * `reach`: the hero's tool is about 30 px long, so the hero must stand about that close to the
- * edge of the node's art: half its width plus a few px. A node is not struck from outside its own picture.
- */
-const NODE_PROMPTS: Record<ResourceNodeType, { emoji: string; verb: string; textureKey: string; reach: number }> = {
-    'tree': { emoji: '🪵', verb: 'ຕັດຕົ້ນໄມ້', textureKey: 'node-tree', reach: 44 },
-    'herb': { emoji: '🌿', verb: 'ເກັບສະໝຸນໄພ', textureKey: 'node-herb', reach: 30 },
-    'stone': { emoji: '🪨', verb: 'ທຸບຫີນ', textureKey: 'node-stone', reach: 34 },
-    'iron-vein': { emoji: '⛏️', verb: 'ຂຸດແຮ່ເຫຼັກ', textureKey: 'node-iron-vein', reach: 38 },
-};
-
 function titleCase(itemId: string): string {
     return itemId.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
 }
 
 function nodePrompt(node: StageResourceNode): string {
-    const { emoji, verb } = NODE_PROMPTS[node.type];
+    const { icon, label } = node;
     const gains = node.drops.map(d => `+${d.count} ${titleCase(d.itemId)}`).join(', ');
     const strikes = node.strikes > 1 ? ` ×${node.strikes}` : '';
-    return `${emoji} [E] ${verb}${strikes} (${gains})`;
+    return `${icon} [E] ${label}${strikes} (${gains})`;
 }
 
 function createNodeVisual(
@@ -59,7 +47,7 @@ function createNodeVisual(
     node: StageResourceNode,
     baseY: number
 ): { shakeOnStrike: () => void; markHarvestedVisual: () => void } {
-    const { textureKey } = NODE_PROMPTS[node.type];
+    const textureKey = node.texture;
 
     if (scene.textures.exists(textureKey)) {
         const sprite = scene.add.sprite(node.x, baseY + 2, textureKey, 0);
@@ -224,6 +212,19 @@ export interface BuiltStage {
     brokenGate?: BrokenGate;
 }
 
+/** A marker at the walk-out edge of a Stage without a Boss. */
+function addExitMarker(scene: Phaser.Scene, x: number, baseY: number): void {
+    scene.add.text(x, baseY - 62, '🚪 ທາງອອກ\n(Exit) ➔', {
+        fontFamily: FONT,
+        fontSize: '14px',
+        color: '#fde047',
+        stroke: '#422006',
+        strokeThickness: 3,
+        align: 'center',
+    }).setOrigin(0.5, 0.5).setDepth(2.5);
+    scene.add.rectangle(x, baseY - 40, 6, 80, 0xfde047, 0.55).setDepth(2.4);
+}
+
 /**
  * Draws a Stage's scenery from its definition: zone signs, waypoints, resource
  * nodes, the broken gate and the miniboss / boss banners. Enemies and the boss
@@ -238,11 +239,11 @@ export function buildStageScenery(
     const built: BuiltStage = { resourceNodes: [], waypoints: [] };
 
     for (const zone of stage.zones) {
-        if (zone.waypoint) {
-            built.waypoints.push(addWaypoint(scene, zone.waypoint, baseY));
+        for (const waypoint of zone.waypoints) {
+            built.waypoints.push(addWaypoint(scene, waypoint, baseY));
         }
 
-        for (const node of zone.resourceNodes ?? []) {
+        for (const node of zone.resourceNodes) {
             const { shakeOnStrike, markHarvestedVisual } = createNodeVisual(scene, node, baseY);
 
             built.resourceNodes.push({
@@ -252,27 +253,26 @@ export function buildStageScenery(
                 shakeOnStrike,
                 markHarvestedVisual,
                 label: nodePrompt(node),
-                reach: NODE_PROMPTS[node.type].reach,
                 harvested: false,
             });
         }
 
-        if (zone.sign) {
+        for (const sign of zone.signs) {
             if (scene.textures.exists('signpost')) {
-                scene.add.image(zone.sign.x, baseY + 2, 'signpost').setOrigin(0.5, 1).setDepth(1.8);
+                scene.add.image(sign.x, baseY + 2, 'signpost').setOrigin(0.5, 1).setDepth(1.8);
             }
 
-            scene.add.text(zone.sign.x, baseY - 74, zone.sign.text, {
+            scene.add.text(sign.x, baseY - 74, sign.text, {
                 fontFamily: FONT,
                 fontSize: '13px',
-                color: zone.sign.color ?? '#86efac',
-                stroke: zone.sign.stroke ?? '#064e3b',
+                color: sign.color ?? '#86efac',
+                stroke: sign.stroke ?? '#064e3b',
                 strokeThickness: 3,
                 align: 'center',
             }).setOrigin(0.5, 0.5).setDepth(2.5);
         }
 
-        for (const spawn of zone.enemySpawns ?? []) {
+        for (const spawn of zone.enemySpawns) {
             if (!spawn.sign) continue;
 
             const sign = scene.add.text(spawn.x, baseY - 96, spawn.sign, {
@@ -298,6 +298,10 @@ export function buildStageScenery(
             const gate = new BrokenGate(scene, zone.gate, baseY);
             gate.redraw(repairedGateIds.has(zone.gate.id));
             built.brokenGate = gate;
+        }
+
+        if (zone.exit) {
+            addExitMarker(scene, zone.exit.x, baseY);
         }
 
         if (zone.bossSpawn?.banner) {

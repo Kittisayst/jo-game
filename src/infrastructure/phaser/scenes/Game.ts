@@ -19,6 +19,7 @@ import {
     getStageBossSpawn,
     getStageDefinition,
     getStageEnemySpawns,
+    getStageExit,
     StageDefinition,
 } from '../stages/StageDefinition';
 import { buildStageScenery, BrokenGate, ResourceNodeView, WaypointView } from '../scenery/StageBuilder';
@@ -75,6 +76,8 @@ export class Game extends Scene
     stage?: StageDefinition;
     /** True once the stage boss is beaten and the stage-cleared event has been sent. */
     isStageCleared = false;
+    /** Walking past this x clears a Stage that has no boss (see `exit` in stages.json). */
+    private stageExitX?: number;
     health: Health;
     currentLevelKey = 'village';
     currentSkinId = 'cyber-blue';
@@ -114,6 +117,7 @@ export class Game extends Scene
         this.waypoints = [];
         this.brokenGate = undefined;
         this.stage = undefined;
+        this.stageExitX = undefined;
         this.bossBgmStarted = false;
     }
 
@@ -130,6 +134,7 @@ export class Game extends Scene
 
         this.level = this.cache.json.get(this.currentLevelKey) as Level;
         this.stage = getStageDefinition(getGameContent().stages, this.currentLevelKey);
+        this.stageExitX = this.stage ? getStageExit(this.stage)?.x : undefined;
         this.isStageCleared = false;
         // One Health for the whole session so the backpack UI can heal the same hearts the scene damages
         this.health = entities.health;
@@ -144,10 +149,11 @@ export class Game extends Scene
         this.camera.setBounds(0, 0, this.level.worldWidth, WORLD_HEIGHT);
 
         const isVillage = this.level.scenery === 'village' || this.currentLevelKey === 'village';
+        const backdropKey = isVillage ? 'bg-village' : (this.level.scenery === 'cave' ? 'bg-cavern' : 'bg-plains');
         this.bossBgmStarted = false;
-        this.skyBackdrop = createSky(this, this.level, isVillage ? 'bg-village' : 'bg-plains', this.stage);
+        this.skyBackdrop = createSky(this, this.level, backdropKey);
 
-        this.ground = createGround(this, this.level, this.stage);
+        this.ground = createGround(this, this.level);
         this.platforms = createPlatforms(this, this.level);
         this.movingPlatforms = createMovingPlatforms(this, this.level);
         this.spikes = createSpikes(this, this.level);
@@ -248,13 +254,10 @@ export class Game extends Scene
         {
             const bossDefinition = this.getEnemyDefinition(bossSpawn.enemyId);
             this.boss = new Boss(this, bossSpawn.x, bossSpawn.y, bossDefinition?.maxHp ?? 5);
-            this.boss.awaitFinisher = this.currentLevelKey === 'stage-ch1';
+            this.boss.awaitFinisher = true;
             this.combat.bindBoss(this.boss, () =>
             {
-                if (this.currentLevelKey === 'stage-ch1')
-                {
-                    EventBus.emit('open-quiz-finisher');
-                }
+                EventBus.emit('open-quiz-finisher');
             });
 
             this.physics.add.collider(this.boss, this.ground);
@@ -461,6 +464,12 @@ export class Game extends Scene
         }
 
         this.interaction.update();
+
+        if (this.stageExitX !== undefined && this.player.x >= this.stageExitX)
+        {
+            this.handleStageCleared();
+            return;
+        }
 
         const isLeft = Boolean(this.cursors.left.isDown || this.wasdKeys?.left?.isDown || this.touchControls.left);
         const isRight = Boolean(this.cursors.right.isDown || this.wasdKeys?.right?.isDown || this.touchControls.right);

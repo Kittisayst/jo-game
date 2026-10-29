@@ -194,7 +194,7 @@ export class SaveManager implements SavePort
                 musicMuted: legacySettings?.musicMuted ?? false,
             },
             stageProgression: {
-                unlockedStages: legacyProgression?.unlockedStages ?? ['village', 'stage-ch1'],
+                unlockedStages: legacyProgression?.unlockedStages ?? ['village', 'stage-001'],
                 completedStages: legacyProgression?.completedStages ?? [],
             },
         };

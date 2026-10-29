@@ -14,7 +14,7 @@ export interface ResourceDrop
 export interface ResourceNodeDefinition
 {
     id: string;
-    type: string; // 'tree' | 'stone' | 'iron-vein' | 'herb'
+    type: string; // the node kind from nodes.json, such as 'oak-tree' or 'iron-vein'
     requiredTool: string | null; // e.g. 'axe' | 'pickaxe' | 'hammer'
     toolTier: number;
     drops: ResourceDrop[];

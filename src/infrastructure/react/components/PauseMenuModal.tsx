@@ -1,4 +1,4 @@
-import { getLevelItem } from '../../phaser/levelCatalog';
+import { shortTitleOf } from '../../phaser/levelCatalog';
 
 export interface PauseMenuModalProps
 {
@@ -25,7 +25,7 @@ export function PauseMenuModal ({
     onExitToMainMenu,
 }: PauseMenuModalProps)
 {
-    const levelLabel = getLevelItem(currentLevel)?.shortTitle || currentLevel;
+    const levelLabel = shortTitleOf(currentLevel);
 
     return (
         <div className="pause-menu-overlay" onClick={onResume}>

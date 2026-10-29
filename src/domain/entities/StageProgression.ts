@@ -2,8 +2,8 @@
  * Domain entity managing stage/level unlocking and completion progression.
  * Pure business rules — see "Domain layer" in CONTEXT.md.
  */
-/** Stages the player can always enter. Chapter 1 has no earlier stage to unlock it, so it starts open. */
-export const ALWAYS_UNLOCKED_STAGES = ['village', 'stage-ch1'];
+/** Places the player can always enter. Stage 1 has no earlier stage to unlock it, so it starts open. */
+export const ALWAYS_UNLOCKED_STAGES = ['village', 'stage-001'];
 
 export class StageProgression
 {

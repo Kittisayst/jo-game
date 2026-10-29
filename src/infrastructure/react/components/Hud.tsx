@@ -1,4 +1,4 @@
-import { getLevelItem } from '../../phaser/levelCatalog';
+import { hudLabelOf } from '../../phaser/levelCatalog';
 import { ObjectiveId } from '../../../domain/utils/nextObjective';
 import { ItemIcon } from './ItemIcon';
 
@@ -62,7 +62,7 @@ export function Hud ({
     maxBackpackSlots = 20,
 }: HudProps)
 {
-    const levelLabel = getLevelItem(currentLevel)?.hudLabel || currentLevel;
+    const levelLabel = hudLabelOf(currentLevel);
 
     return (
         <>
@@ -172,11 +172,11 @@ export function Hud ({
             </div>
 
             {/* Boss Bar */}
-            {(currentLevel === 'level-3' || currentLevel === 'stage-ch1' || bossHp !== null) && bossHp !== null && (
+            {bossHp !== null && (
                 <div className="boss-hud-container">
                     <div className="boss-hud-header">
                         <span className="boss-title">
-                            {currentLevel === 'stage-ch1' ? '⚡ ຈອມມານຮາດແວບູຮານ (Hardware Overlord)' : '👑 KING SLIME'}
+                            {currentLevel === 'stage-010' ? '⚡ ຈອມມານຮາດແວບູຮານ (Hardware Overlord)' : '👑 BOSS'}
                         </span>
                         <span className="boss-hp-number">{bossHp} / {bossMaxHp} HP</span>
                     </div>

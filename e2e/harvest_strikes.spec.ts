@@ -1,5 +1,8 @@
 import { test, expect, Page } from '@playwright/test';
 import { Bot } from './helpers/bot';
+import { enterStage } from './helpers/stage';
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 async function woodCount (page: Page): Promise<number>
 {
@@ -18,23 +21,31 @@ test.describe('Harvesting takes several Strikes', () => {
     await page.evaluate(() => window.localStorage.clear());
     await page.reload();
 
-    // Chapter 1 through the stage map, like a player would
-    await page.getByRole('button', { name: /ເລືອກດ່ານ/i }).click();
-    await page.locator('.stage-map-node').filter({ hasText: /ບົດທີ 1|Chapter 1/i }).first().click();
+    // Stage 1 through the stage map, like a player would
+    await enterStage(page, 1);
     await expect(page.locator('.game-hud')).toBeVisible({ timeout: 12000 });
     await page.waitForTimeout(1000);
 
-    // Too far away (55 px from the tree at x = 300; the old reach was 65 px): striking does nothing
+    // Too far away (56 px from the tree at x = 560; the old reach was 65 px): striking does nothing
     const bot = new Bot(page, false);
-    expect(await bot.goTo(245, { fight: false, tolerance: 8 })).toBe('arrived');
+    // The hero slides a long way after the keys come up on this slow machine, so put it exactly 56 px from the
+    // tree (outside the new reach of 44, inside the old 65: the test proves the change) instead of walking there
+    await bot.state(); // lets the helpers find the running game
+    await page.evaluate(() => {
+      const scene = (window as any).__botGame.scene.getScene('Game');
+      scene.player.setX(504);
+      scene.player.setVelocityX(0);
+    });
+    await page.waitForTimeout(400);
+    expect(Math.round(560 - (await bot.state()).x)).toBe(56);
     for (let i = 0; i < 3; i++) {
       await page.keyboard.press('KeyE');
       await page.waitForTimeout(500);
     }
     expect(await woodCount(page)).toBe(0);
 
-    // Walk next to the first tree (x = 300)
-    expect(await bot.goTo(285, { fight: false, tolerance: 20 })).toBe('arrived');
+    // Walk next to the tree (x = 560)
+    expect(await bot.goTo(545, { fight: false, tolerance: 20 })).toBe('arrived');
     expect(await woodCount(page)).toBe(0);
 
     // Three presses within a moment: only the first Strike counts, so nothing drops yet

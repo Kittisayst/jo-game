@@ -1,5 +1,6 @@
 import { Scene } from 'phaser';
-import { LEVEL_CATALOG } from '../levelCatalog';
+import { VILLAGE_LEVEL_KEY, VILLAGE_LEVEL_PATH } from '../levelCatalog';
+import { isStageReady } from '../stages/StageDefinition';
 import { getGameContent } from '../../content/ContentCatalog';
 import { heldTextureKey } from '../objects/HeldItemSprite';
 import { ACTIVE_SESSION_STORAGE_KEY, readString, STORAGE_PREFIX } from '../../storage/safeStorage';
@@ -66,11 +67,17 @@ const SPRITESHEET_ASSETS: readonly { key: string; path: string; frameWidth: numb
 /** Queues every level JSON, image, and spritesheet not yet in Phaser's cache. */
 export function enqueueGameAssets (scene: Scene): void
 {
-    for (const item of LEVEL_CATALOG)
+    if (!scene.cache.json.exists(VILLAGE_LEVEL_KEY))
     {
-        if (!scene.cache.json.exists(item.key))
+        scene.load.json(VILLAGE_LEVEL_KEY, VILLAGE_LEVEL_PATH);
+    }
+
+    // One level JSON per built Stage, cached under the Stage's id
+    for (const stage of getGameContent().stages)
+    {
+        if (isStageReady(stage) && stage.layout && !scene.cache.json.exists(stage.id))
         {
-            scene.load.json(item.key, item.assetPath);
+            scene.load.json(stage.id, stage.layout);
         }
     }
 
@@ -118,7 +125,10 @@ export class Preloader extends Scene
     create ()
     {
         const activeSession = readString(ACTIVE_SESSION_STORAGE_KEY);
-        if (activeSession && activeSession !== 'title')
+        // A session saved by an older version (stage-ch1) or for a Stage that is not built has nowhere to resume
+        const resumable = activeSession === VILLAGE_LEVEL_KEY
+            || getGameContent().stages.some(stage => stage.id === activeSession && isStageReady(stage));
+        if (activeSession && resumable)
         {
             const activeSkinId = readString(`${STORAGE_PREFIX}active_skin_id`) ?? 'cyber-blue';
             this.scene.start('Game', {

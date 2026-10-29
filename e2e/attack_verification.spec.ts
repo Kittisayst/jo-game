@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { enterStage } from './helpers/stage';
 
 test.describe('Hero Attack Controls (J / Z) & Combat Verification', () => {
   test('Verifies J and Z keys trigger attack, hit spark VFX, and defeat enemies in Chapter 1', async ({ page }) => {
@@ -15,27 +16,22 @@ test.describe('Hero Attack Controls (J / Z) & Combat Verification', () => {
 
     // If main menu is not open (e.g. from session persistence), open pause menu and exit to main menu
     const mainMenuCard = page.locator('.title-screen');
+    // Wait for the menu or the in-game HUD first: right after the page loads neither is on screen yet
+    await expect(mainMenuCard.or(page.locator('#hud-menu-btn'))).toBeVisible({ timeout: 15000 });
     if (!await mainMenuCard.isVisible()) {
       await page.locator('#hud-menu-btn').click();
       await page.locator('#btn-exit-main-menu').click();
       await expect(mainMenuCard).toBeVisible({ timeout: 6000 });
     }
 
-    // 2. Click "ເລືອກດ່ານ (Stage Map)" from Main Menu
-    const stageSelectBtn = page.getByRole('button', { name: /ເລືອກດ່ານ/i });
-    await expect(stageSelectBtn).toBeVisible();
-    await stageSelectBtn.click();
-
-    // 3. Select Chapter 1 with enemies
-    const chapterNode = page.locator('.stage-map-node').filter({ hasText: /ບົດທີ 1|Chapter 1/i }).first();
-    await expect(chapterNode).toBeVisible();
-    await chapterNode.click();
+    // 2. Open the stage map from the Main Menu and enter Stage 1
+    await enterStage(page, 1);
 
     // 4. Verify in Chapter 1 with HUD and the starter wooden sword
     const hud = page.locator('.game-hud');
     await expect(hud).toBeVisible({ timeout: 8000 });
     const levelBadge = page.locator('.level-badge');
-    await expect(levelBadge).toContainText(/ບົດທີ 1|Chapter 1/i);
+    await expect(levelBadge).toContainText(/ດ່ານ 1/);
 
     const weaponBadge = page.locator('.weapon-hud-badge');
     await expect(weaponBadge).toContainText(/ດາບໄມ້/i);
