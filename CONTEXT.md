@@ -68,7 +68,7 @@ _Avoid_: lesson, course
 The safe place between Stages with no enemies; the player walks to buildings (Library, Academy, Workshop, Forge, World Gate) and returns here to heal and save.
 
 **Skin**:
-A cosmetic look for the player character, bought once with Credit and kept forever. The free default is always owned. Skins change nothing about gameplay.
+A cosmetic look for the player character, bought once with Credit and kept forever. The free default is always owned. Skins change nothing about gameplay. Buying and changing a Skin both happen only at the Skin shop in the Village Hub, never from a menu.
 _Avoid_: costume, outfit
 
 **Wallet**:
@@ -87,3 +87,7 @@ _Avoid_: session (the old score-and-lives `GameSession` no longer exists), store
 **Content catalog**:
 The game's JSON data (items, textbooks, questions, recipes, enemies, stages) loaded and checked once at startup. Rules that depend on what an item is ask the item catalog; screens and scenes read the loaded content and never fetch data themselves.
 _Avoid_: data loader, assets (assets are images and sounds)
+
+**Skin shop**:
+The only shop in the game, run by the NPC Mina in the Village Hub. It sells Skins for Credit and nothing else (no items, no Materials), so Credit still comes only from learning. Talking to Mina is the only way to open it.
+_Avoid_: store, merchant, coin shop (the old coin shop is gone)
