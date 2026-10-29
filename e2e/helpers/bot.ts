@@ -241,7 +241,7 @@ export class Bot
     }
   }
 
-  /** Fights the enemy near `x` until it is gone, keeping a sword's length away. */
+  /** Fights the enemy near `x` until it is gone with the sword only, keeping a sword's length away. */
   async fightEnemy (x: number, timeoutMs = 25000): Promise<void>
   {
     const startedAt = Date.now();
@@ -260,14 +260,8 @@ export class Bot
       const gap = Math.abs(target.x - s.x);
       if (process.env.BOT_TRACE) console.log(`[trace] t=${Date.now() - startedAt} hero=${s.x},${s.y} face=${s.facing} hp=${s.hearts} enemy=${target.type}@${target.x},${target.y} hp=${target.hp} gap=${gap}`);
 
-      // Armored enemies cannot be stomped; everything else can: jump on it, bounce, repeat
-      if (target.type !== 'slime-armored') {
-        const dx = target.x - s.x;
-        await this.walk(Math.abs(dx) <= 6 ? 0 : dx > 0 ? 1 : -1);
-        if (s.onGround && Math.abs(dx) < 90) await this.tap('Space', 50);
-        await this.page.waitForTimeout(40);
-        continue;
-      }
+      // Touching an enemy always costs a heart, so fight from a distance and heal when low
+      if (s.hearts <= 1 && gap > 110 && await this.drinkPotion()) continue;
 
       if (s.facing !== dir) await this.face(dir);
 

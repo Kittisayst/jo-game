@@ -61,16 +61,14 @@ describe('Enemy entity', () =>
         const flying = new Enemy('slime-flying');
         expect(flying.type).toBe('slime-flying');
         expect(flying.maxHp).toBe(1);
-        expect(flying.canStomp).toBe(true);
     });
 
-    it('initializes armored slime archetype with stomp immunity and 3 HP', () =>
+    it('initializes armored slime archetype with 3 HP', () =>
     {
         const armored = new Enemy('slime-armored');
         expect(armored.type).toBe('slime-armored');
         expect(armored.maxHp).toBe(3);
         expect(armored.currentHp).toBe(3);
-        expect(armored.canStomp).toBe(false);
 
         // Takes 3 hits
         expect(armored.takeDamage(1).defeated).toBe(false);
@@ -83,7 +81,6 @@ describe('Enemy entity', () =>
         const spitter = new Enemy('slime-spitter');
         expect(spitter.type).toBe('slime-spitter');
         expect(spitter.maxHp).toBe(2);
-        expect(spitter.canStomp).toBe(true);
     });
 
     describe('fromDefinition', () =>

@@ -25,6 +25,7 @@ describe('SaveData Domain Entity & Migration', () =>
         expect(defaultSave.backpack).toEqual([
             { slotIndex: 0, itemId: 'wooden-sword', count: 1 },
             { slotIndex: 1, itemId: 'axe-t1', count: 1 },
+            { slotIndex: 2, itemId: 'herb-potion', count: 2 },
         ]);
         expect(defaultSave.equipment.equippedWeaponId).toBe('wooden-sword');
         expect(defaultSave.forgeUnlocked).toBe(false);

@@ -16,7 +16,7 @@ export const VILLAGE_ELDER_DIALOGUE: DialogueGraph = {
             id: 'story_intro',
             speaker: 'ພໍ່ເຖົ້າຄຳ (Elder Kham)',
             avatar: '👴',
-            line: 'ຕອນນີ້ King Slime ໄດ້ພາລູກສະໝຸນ Slime ບຸກຍຶດຄອງທົ່ງຫຍ້າ ແລະ ເກາະລອຍຟ້າແລ້ວ! ຊາວບ້ານຕ້ອງການຄວາມຊ່ວຍເຫຼືອຈາກເຈົ້າ.',
+            line: 'ຈອມມານຮາດແວບູຮານ (Hardware Overlord) ຍຶດຄອງປ່າ ແລະ ຖ້ຳສາຍແຮ່ ແລະປະຕູໃຫຍ່ກໍຖືກຫັກພັງ! ເຮົາຕ້ອງການຄວາມຮູ້ ແລະ ອາວຸດຂອງເຈົ້າ.',
             next: 'questions',
         },
         questions: {
@@ -26,12 +26,16 @@ export const VILLAGE_ELDER_DIALOGUE: DialogueGraph = {
             line: 'ເຈົ້າມີຂໍ້ສົງໄສ ຫຼື ຕ້ອງການຄຳແນະນຳຫຍັງກ່ອນອອກເດີນທາງບໍ່?',
             choices: [
                 {
-                    text: '💡 ແນະນຳວິທີຄວບຄຸມ & ເຕັກນິກການໂດດແດ່?',
+                    text: '📚 ເລີ່ມຕົ້ນແນວໃດ? (ຮຽນ → ສ້າງ → ສຳຫຼວດ)',
+                    to: 'learn_tip',
+                },
+                {
+                    text: '⌨️ ແນະນຳວິທີຄວບຄຸມ ແລະການສູ້ແດ່?',
                     to: 'controls_tip',
                     set: { askedControls: true },
                 },
                 {
-                    text: '👑 King Slime ຢູ່ໃສ ແລະ ເອົາຊະນະແນວໃດ?',
+                    text: '👑 Hardware Overlord ຢູ່ໃສ ແລະ ເອົາຊະນະແນວໃດ?',
                     to: 'boss_tip',
                     set: { askedBoss: true },
                 },
@@ -41,14 +45,30 @@ export const VILLAGE_ELDER_DIALOGUE: DialogueGraph = {
                 },
             ],
         },
+        learn_tip: {
+            id: 'learn_tip',
+            speaker: 'ພໍ່ເຖົ້າຄຳ (Elder Kham)',
+            avatar: '👴',
+            line: 'ຊື້ປຶ້ມຕຳລາທີ່ຫໍສະໝຸດ (20 Credit) ອ່ານໃຫ້ຄົບ ແລ້ວສອບທີ່ສະຖາບັນເພື່ອປົດລັອກສູດ. ຈາກນັ້ນສ້າງ Pickaxe, ຄ້ອນ ແລະ ຊຸດສ້ອມແປງທີ່ໂຮງຊ່າງ, ໄປເກັບວັດສະດຸໃນດ່ານ ແລ້ວກັບມາຕີດາບທີ່ໂຮງຕີເຫຼັກ.',
+            choices: [
+                {
+                    text: '⌨️ ແລ້ວວິທີຄວບຄຸມ ແລະການສູ້ເດ?',
+                    to: 'controls_tip',
+                },
+                {
+                    text: '✨ ເຂົ້າໃຈແລ້ວ ຂ້ອຍພ້ອມລຸຍ!',
+                    to: 'ready_go',
+                },
+            ],
+        },
         controls_tip: {
             id: 'controls_tip',
             speaker: 'ພໍ່ເຖົ້າຄຳ (Elder Kham)',
             avatar: '👴',
-            line: 'ເຈົ້າສາມາດໃຊ້ [A]/[D] ຫຼື ລູກສອນເພື່ອແລ່ນ, ກົດ [W]/[Space] ເພື່ອກະໂດດ! ເກມນີ້ມີລະບົບ Coyote Time (ໂດດໄດ້ແມ່ນແຕ່ຫຼຸດຂອບ) ແລະ Variable Jump (ປ່ອຍປຸ່ມໄວຈະໂດດຕ່ຳ)!',
+            line: 'ໃຊ້ [A]/[D] ຫຼື ລູກສອນເພື່ອແລ່ນ, [W]/[Space] ເພື່ອໂດດ (ປ່ອຍໄວຈະໂດດຕ່ຳ), [J]/[Z] ເພື່ອຟັນດາບ, [Q] ສັບດາບ, [E] ເພື່ອໂຕ້ຕອບ ແລະ [I] ເປີດກະເປົາ. ການແຕະຕົວສັດຕູເສຍຫົວໃຈ ຈຶ່ງຄວນຟັນຈາກໄລຍະໄກ ແລະຖອຍຫຼັງຕີ!',
             choices: [
                 {
-                    text: '👑 ແລ້ວ King Slime ເດ ເອົາຊະນະແນວໃດ?',
+                    text: '👑 ແລ້ວ Hardware Overlord ເດ ເອົາຊະນະແນວໃດ?',
                     to: 'boss_tip',
                 },
                 {
@@ -61,7 +81,7 @@ export const VILLAGE_ELDER_DIALOGUE: DialogueGraph = {
             id: 'boss_tip',
             speaker: 'ພໍ່ເຖົ້າຄຳ (Elder Kham)',
             avatar: '👴',
-            line: 'King Slime ລໍຖ້າເຈົ້າຢູ່ທີ່ Stage 3 Boss Arena! ມັນມີ 5 HP, ເຈົ້າຕ້ອງໂດດຢຽບຫົວມັນໃຫ້ຄົບ 5 ຄັ້ງ ແລະ ຢ່າລືມເກັບດາວ Star ເພື່ອເປັນອຳມະຕະ!',
+            line: 'ຈອມມານຢູ່ລານສຸດທ້າຍຫຼັງປະຕູໃຫຍ່ ແລະມີ 300 HP. ເຈົ້າຕ້ອງມີຄ້ອນ + ຊຸດສ້ອມແປງ ແລະຕອບຄຳຖາມເພື່ອເປີດປະຕູ. ເມື່ອມັນໃກ້ຕາຍຈະມີຄຳຖາມປິດສາກ: ຕອບຖືກຈຶ່ງຊະນະ ແລະໄດ້ Credit ເພີ່ມ, ຕອບຜິດມັນຈະຟື້ນພະລັງ!',
             choices: [
                 {
                     text: '💡 ຂໍຖາມເລື່ອງການຄວບຄຸມແດ່',
@@ -77,7 +97,7 @@ export const VILLAGE_ELDER_DIALOGUE: DialogueGraph = {
             id: 'ready_go',
             speaker: 'ພໍ່ເຖົ້າຄຳ (Elder Kham)',
             avatar: '👴',
-            line: 'ຂໍໃຫ້ໂຊກດີ ຜູ້ກ້າ Jo! ຈົ່ງຍ່າງໄປທາງຂວາສຸດແລ້ວຜ່ານປະຕູ Portal ເພື່ອເລີ່ມຕົ້ນການຜະຈົນໄພໄດ້ເລີຍ!',
+            line: 'ຂໍໃຫ້ໂຊກດີ ຜູ້ກ້າ Jo! ເມື່ອພ້ອມແລ້ວ ຈົ່ງຍ່າງໄປທາງຂວາສຸດ ແລະເຂົ້າປະຕູມິຕິ (World Gate) ເພື່ອເລີ່ມຜະຈົນໄພ!',
             end: true,
         },
     },

@@ -4,7 +4,7 @@
     "name": "ສະໄລມ໌ປ່າ",
     "nameEn": "Forest Slime",
     "kind": "normal",
-    "maxHp": 40,
+    "maxHp": 24,
     "damage": 8,
     "speed": 60,
     "drops": [
@@ -17,7 +17,7 @@
     "name": "ໂກເລມຫີນຜາ",
     "nameEn": "Rock Golem",
     "kind": "normal",
-    "maxHp": 80,
+    "maxHp": 60,
     "damage": 15,
     "speed": 40,
     "drops": [
@@ -29,7 +29,7 @@
     "name": "ຜູ້ພິທັກຖ້ຳສາຍແຮ່",
     "nameEn": "Cave Guardian",
     "kind": "miniboss",
-    "maxHp": 180,
+    "maxHp": 140,
     "damage": 20,
     "speed": 55,
     "drops": [

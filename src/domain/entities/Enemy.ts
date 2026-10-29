@@ -26,7 +26,6 @@ export interface EnemyArchetype
     type: EnemyType;
     name: string;
     maxHp: number;
-    canStomp: boolean;
     speed: number;
 }
 
@@ -35,28 +34,24 @@ export const ENEMY_ARCHETYPES: Record<EnemyType, EnemyArchetype> = {
         type: 'slime',
         name: 'Basic Slime',
         maxHp: 1,
-        canStomp: true,
         speed: 70,
     },
     'slime-flying': {
         type: 'slime-flying',
         name: 'Cyber Drone Slime',
         maxHp: 1,
-        canStomp: true,
         speed: 95,
     },
     'slime-armored': {
         type: 'slime-armored',
         name: 'Armored Slime',
         maxHp: 3,
-        canStomp: false,
         speed: 45,
     },
     'slime-spitter': {
         type: 'slime-spitter',
         name: 'Toxic Spitter Slime',
         maxHp: 2,
-        canStomp: true,
         speed: 55,
     },
 };
@@ -72,7 +67,6 @@ export class Enemy
     private _state: EnemyState = 'patrol';
     private _currentHp: number;
     private readonly _maxHp: number;
-    private readonly _canStomp: boolean;
     private _definitionId: string | null = null;
     private _kind: EnemyKind = 'normal';
     private _drops: EnemyDrop[] = [];
@@ -83,20 +77,18 @@ export class Enemy
      */
     static fromDefinition (definition: EnemyDefinition, archetype: EnemyType = 'slime'): Enemy
     {
-        const base = ENEMY_ARCHETYPES[archetype] ?? ENEMY_ARCHETYPES['slime'];
-        const enemy = new Enemy(archetype, Math.max(1, definition.maxHp), base.canStomp);
+        const enemy = new Enemy(archetype, Math.max(1, definition.maxHp));
         enemy._definitionId = definition.id;
         enemy._kind = definition.kind;
         enemy._drops = definition.drops.map(d => ({ ...d }));
         return enemy;
     }
 
-    constructor (type: EnemyType = 'slime', maxHp?: number, canStomp?: boolean)
+    constructor (type: EnemyType = 'slime', maxHp?: number)
     {
         const archetype = ENEMY_ARCHETYPES[type] ?? ENEMY_ARCHETYPES['slime'];
         this._type = archetype.type;
         this._maxHp = maxHp !== undefined ? Math.max(1, maxHp) : archetype.maxHp;
-        this._canStomp = canStomp !== undefined ? canStomp : archetype.canStomp;
         this._currentHp = this._maxHp;
     }
 
@@ -118,11 +110,6 @@ export class Enemy
     get drops (): EnemyDrop[]
     {
         return this._drops;
-    }
-
-    get canStomp (): boolean
-    {
-        return this._canStomp;
     }
 
     get state (): EnemyState

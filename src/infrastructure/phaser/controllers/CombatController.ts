@@ -17,7 +17,7 @@ import type { Game } from '../scenes/Game';
 const MAX_ENEMIES_FOR_SUMMON = 3;
 
 /**
- * Everything that hurts or is hurt in the scene: the hero's attacks and stomps, contact
+ * Everything that hurts or is hurt in the scene: the hero's sword attacks, contact
  * damage from enemies, spikes, spit and the Boss, enemy drops, and hit-stop. The damage
  * numbers and rules themselves come from use cases; this class turns them into physics
  * checks, camera shake, particles and sound.
@@ -52,56 +52,16 @@ export class CombatController
         EventBus.emit('weapon-changed', nextWeapon);
     }
 
-    /** Overlap callback: hero touches an enemy (stomp it, or get hurt). */
+    /** Overlap callback: touching an enemy always costs a heart; the answer is the sword, from a distance. */
     onPlayerTouchesEnemy (player: Player, enemy: Enemy): void
     {
         const { scene } = this;
-        if (enemy.entity.isDefeated) return;
+        if (enemy.entity.isDefeated || player.isInvincible) return;
 
-        const playerBody = player.body as Phaser.Physics.Arcade.Body;
-        const isFalling = playerBody.velocity.y > 0;
-        const isAbove = player.y < enemy.y - 4;
-
-        if (isFalling && isAbove)
-        {
-            // Armored slime stomp immunity check
-            if (!enemy.entity.canStomp)
-            {
-                soundManager.playClink();
-                scene.particleManager.emitSpikeHit(enemy.x, enemy.y - 12);
-                player.setVelocityY(-240);
-                scene.cameras.main.shake(130, 0.006);
-                if (!player.isInvincible)
-                {
-                    player.triggerDamage(enemy.x);
-                    scene.cameras.main.flash(100, 239, 68, 68, true);
-                    playerTakeDamageUseCase(scene.health);
-                }
-                return;
-            }
-
-            // Stomp victory: bounce, emit particle burst, freeze frame, camera shake, and defeat enemy
-            const stompDamage = entities.equipment.equippedStats.damage;
-            player.setVelocityY(-340);
-            scene.particleManager.emitStompBurst(enemy.x, enemy.y);
-            this.triggerHitStop(45);
-            scene.cameras.main.shake(100, 0.0035);
-            showDamageNumber(scene, enemy.x, enemy.y, stompDamage, false);
-            if (enemy.takeDamage(stompDamage, 0).defeated)
-            {
-                this.onEnemyDefeated(enemy);
-            }
-            return;
-        }
-
-        // Player hit by enemy
-        if (!player.isInvincible)
-        {
-            player.triggerDamage(enemy.x);
-            scene.cameras.main.shake(160, 0.008);
-            scene.cameras.main.flash(110, 239, 68, 68, true);
-            playerTakeDamageUseCase(scene.health);
-        }
+        player.triggerDamage(enemy.x);
+        scene.cameras.main.shake(160, 0.008);
+        scene.cameras.main.flash(110, 239, 68, 68, true);
+        playerTakeDamageUseCase(scene.health);
     }
 
     /** Overlap callback: hero touches a spike. */
@@ -117,36 +77,16 @@ export class CombatController
         playerTakeDamageUseCase(scene.health);
     }
 
-    /** Overlap callback: hero touches the Boss (stomp it, or get hurt). */
+    /** Overlap callback: touching the Boss costs a heart. */
     onPlayerTouchesBoss (player: Player, boss: Boss): void
     {
         const { scene } = this;
-        if (boss.entity.isDefeated) return;
+        if (boss.entity.isDefeated || player.isInvincible) return;
 
-        const playerBody = player.body as Phaser.Physics.Arcade.Body;
-        const isFalling = playerBody.velocity.y > 0;
-        const isAbove = player.y < boss.y - 8;
-
-        if (isFalling && isAbove && !boss.isInvulnerable)
-        {
-            // High bounce when stomping boss with impact hit-stop, punchy camera shake, and impact flash
-            player.setVelocityY(-420);
-            scene.particleManager.emitStompBurst(boss.x, boss.y);
-            this.triggerHitStop(75);
-            scene.cameras.main.shake(200, 0.012);
-            scene.cameras.main.flash(70, 255, 255, 255, true);
-            soundManager.playStomp();
-            boss.takeDamage(entities.equipment.equippedStats.damage);
-            return;
-        }
-
-        if (!player.isInvincible)
-        {
-            player.triggerDamage(boss.x);
-            scene.cameras.main.shake(220, 0.012);
-            scene.cameras.main.flash(140, 239, 68, 68, true);
-            playerTakeDamageUseCase(scene.health);
-        }
+        player.triggerDamage(boss.x);
+        scene.cameras.main.shake(220, 0.012);
+        scene.cameras.main.flash(140, 239, 68, 68, true);
+        playerTakeDamageUseCase(scene.health);
     }
 
     /** Overlap callback: an enemy spit hits the hero. */

@@ -9,6 +9,9 @@ import { ALWAYS_UNLOCKED_STAGES } from './StageProgression';
 export const CURRENT_SAVE_VERSION = 6;
 export const STARTER_BOOK_CREDIT_RESERVE = 20;
 
+/** Herb potions a new player starts with. */
+export const STARTER_POTION_COUNT = 2;
+
 const VALID_STAGE_KEYS = ['village', 'stage-ch1'];
 const VALID_SKIN_IDS = AVAILABLE_SKINS.map(skin => skin.id);
 const DEFAULT_SKIN_ID = 'cyber-blue';
@@ -69,6 +72,8 @@ export function createDefaultSaveSnapshot (slotId = 'slot_1'): SaveGameSnapshot
             { slotIndex: 0, itemId: 'wooden-sword', count: 1 },
             // Trees need an axe and the axe recipe needs wood, so the player must start with one
             { slotIndex: 1, itemId: 'axe-t1', count: 1 },
+            // The forest has no healing and touching an enemy costs a heart, so a new player starts with two potions
+            { slotIndex: 2, itemId: 'herb-potion', count: STARTER_POTION_COUNT },
         ],
         equipment: {
             equippedWeaponId: DEFAULT_WEAPON_ID,

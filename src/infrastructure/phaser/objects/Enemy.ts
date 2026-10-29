@@ -19,7 +19,7 @@ export const SPIT_PROJECTILE_KEY = 'enemy-slime-ball';
  * Features an intelligent Finite State Machine and archetype-specific behaviors:
  * - Basic Slime: Standard ground patrol and hop attack
  * - Flying Slime: Zero-gravity sinusoidal floating, dive-bomb swoop
- * - Armored Slime: Heavy steel armor, immune to stomping, high HP, bonus coin drops
+ * - Armored Slime: Heavy steel armor and high HP
  * - Spitter Slime: Ranged acid projectile spitting
  */
 export class Enemy extends Physics.Arcade.Sprite
@@ -95,7 +95,7 @@ export class Enemy extends Physics.Arcade.Sprite
             }
             else
             {
-                // Basic slime: lower profile so player stomping from above connects reliably
+                // Basic slime: low profile
                 body.setSize(26, 20);
                 body.setOffset(3, 12);
             }
