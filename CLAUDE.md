@@ -62,4 +62,4 @@ The dev server's configured port is 8080 ([vite/config.dev.mjs](vite/config.dev.
 
 ## Known leftovers
 
-Achievements were removed (they paid coins and had no UI); they can return later as learning achievements that never pay Credit. the Cave Guardian has no special attacks yet; `App.tsx` still holds one large event/shortcut effect. Details are in the plan's phase notes.
+Achievements were removed (they paid coins and had no UI); they can return later as learning achievements that never pay Credit. `App.tsx` still holds one large event/shortcut effect. At a very low frame rate (about 17 fps) enemies can sink through the floor (seen with the Cave Guardian; `e2e/cave_guardian.spec.ts` skips when it happens), see "Known issues" in [docs/plans/2026-10-30-player-sprite-rows.md](docs/plans/2026-10-30-player-sprite-rows.md). Details are in the plan's phase notes.
