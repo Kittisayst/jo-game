@@ -87,3 +87,39 @@ hero("hero_idle_0", { head: 0, body: 0 })
 hero("hero_idle_1", { head: 1, body: 0 })
 hero("hero_idle_2", { head: 1, body: 1, squat: true })
 hero("hero_idle_3", { head: 1, body: 0 })
+
+// ---------------------------------------------------------------------------------------------
+// Legs as two movable parts. A leg is a thigh, a shin and a boot; `knee` and `foot` shift the shin
+// and boot sideways (+ = forward), `lift` raises the foot by shortening the leg. Each leg gets its
+// own 1px outline so the front leg reads as separate from the back leg.
+const LEG_HIP = 8   // x of the leg inside its own sprite
+const legSprite = (name, fill, bootFill, p) => sprite(name, { w: 20, h: 14, outline8: "k" }, (c) => {
+  const thigh = 5 - Math.max(0, (p.lift ?? 0) - 4)
+  const shin = 4 - Math.min(4, p.lift ?? 0)
+  c.rect(LEG_HIP, 0, 5, thigh, fill)
+  c.rect(LEG_HIP + p.knee, thigh, 5, shin, fill)
+  c.rect(LEG_HIP + p.foot, thigh + shin, 6, 4, bootFill)
+  c.rect(LEG_HIP + p.foot + 1, thigh + shin, 4, 1, "c")
+})
+
+// A running pose: back leg (dark) and front leg (light) with a hip shift each, body and head offsets.
+const runPose = (name, { head = 0, body = 0, back, front }) => {
+  legSprite(`_lb_${name}`, "b", "j", back)
+  legSprite(`_lf_${name}`, "h", "b", front)
+  sprite(name, F,
+    stamp(`_lb_${name}`, 10 + (back.dx ?? 0) - LEG_HIP - 1, 33),
+    stamp(`_lf_${name}`, 15 + (front.dx ?? 0) - LEG_HIP - 1, 33),
+    stamp("_body", 4, 18 + body),
+    stamp("_head", 9, 5 + head))
+}
+
+// Row 1: run (8 frames, 12 fps). Frames 0-3 the front leg leads, frames 4-7 the back leg leads.
+//   contact -> down (body lowest) -> passing -> up (body highest, both feet off the ground)
+runPose("hero_run_0", { back: { dx: -3, knee: -1, foot: -2, lift: 1 }, front: { dx: 3, knee: 1, foot: 2 } })
+runPose("hero_run_1", { head: 1, body: 1, back: { dx: -2, knee: -2, foot: -3, lift: 4 }, front: { dx: 1, knee: 0, foot: 1 } })
+runPose("hero_run_2", { back: { dx: 1, knee: 2, foot: 1, lift: 5 }, front: { dx: 0, knee: 0, foot: 0 } })
+runPose("hero_run_3", { head: -1, body: -1, back: { dx: 2, knee: 1, foot: 2, lift: 2 }, front: { dx: -2, knee: -1, foot: -2, lift: 1 } })
+runPose("hero_run_4", { back: { dx: 3, knee: 1, foot: 2 }, front: { dx: -3, knee: -1, foot: -2, lift: 1 } })
+runPose("hero_run_5", { head: 1, body: 1, back: { dx: -1, knee: 0, foot: 1 }, front: { dx: 2, knee: -2, foot: -3, lift: 4 } })
+runPose("hero_run_6", { back: { dx: 0, knee: 0, foot: 0 }, front: { dx: -1, knee: 2, foot: 1, lift: 5 } })
+runPose("hero_run_7", { head: -1, body: -1, back: { dx: -2, knee: -1, foot: -2, lift: 1 }, front: { dx: 2, knee: 1, foot: 2, lift: 2 } })
