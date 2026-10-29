@@ -14,7 +14,7 @@ test.describe('Hero Attack Controls (J / Z) & Combat Verification', () => {
     await expect(page).toHaveTitle(/JO RUNNER/i);
 
     // If main menu is not open (e.g. from session persistence), open pause menu and exit to main menu
-    const mainMenuCard = page.locator('.main-menu-card');
+    const mainMenuCard = page.locator('.title-screen');
     if (!await mainMenuCard.isVisible()) {
       await page.locator('#hud-menu-btn').click();
       await page.locator('#btn-exit-main-menu').click();

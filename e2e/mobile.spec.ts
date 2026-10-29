@@ -6,7 +6,7 @@ test.describe('Mobile Viewport & Touch Controls Test', () => {
     await page.goto('/');
 
     // 1. Verify Main Menu in Landscape
-    await expect(page.locator('.main-menu-card')).toBeVisible();
+    await expect(page.locator('.title-screen')).toBeVisible();
     await page.screenshot({
       path: 'C:/Users/kitti/.gemini/antigravity-ide/brain/19865946-8b19-4609-b9f5-202555dcb966/mobile_landscape_menu.png',
     });
@@ -31,7 +31,7 @@ test.describe('Mobile Viewport & Touch Controls Test', () => {
     await page.goto('/');
 
     // 1. Verify Main Menu in Portrait
-    await expect(page.locator('.main-menu-card')).toBeVisible();
+    await expect(page.locator('.title-screen')).toBeVisible();
     await page.screenshot({
       path: 'C:/Users/kitti/.gemini/antigravity-ide/brain/19865946-8b19-4609-b9f5-202555dcb966/mobile_portrait_menu.png',
     });

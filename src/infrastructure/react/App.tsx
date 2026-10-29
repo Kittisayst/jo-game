@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { IRefPhaserGame, PhaserGame } from './PhaserGame';
 import { toggleSoundUseCase, toggleMusicUseCase } from '../../application/UpdateSettingsUseCase';
 import { soundManager } from '../audio/SoundManager';
-import { SaveGameSnapshot } from '../../domain/entities/SaveData';
+import { SaveGameSnapshot, STARTER_BOOK_CREDIT_RESERVE } from '../../domain/entities/SaveData';
 import { saveManager, SaveSlotId } from '../storage/SaveManager';
 import {
     pauseGameUseCase,
@@ -22,7 +22,7 @@ import { autoSaveGame, createCurrentSnapshot, resetEntitiesToNewGame, restoreEnt
 import { getNextObjective } from '../../domain/utils/nextObjective';
 import { getGameContent } from '../content/ContentCatalog';
 import { PauseMenuModal } from './components/PauseMenuModal';
-import { MainMenuModal } from './components/MainMenuModal';
+import { TitleMenu } from './components/TitleMenu';
 import { SettingsModal } from './components/SettingsModal';
 import { StageMapModal } from './components/StageMapModal';
 import { DialogueModal } from './components/DialogueModal';
@@ -345,6 +345,12 @@ function App ()
         });
     };
 
+    // Anything beyond a brand-new save: the first menu item then reads "Continue" and "New Game" appears
+    const hasProgress = Object.values(entities.books).some(book => book.isUnlocked)
+        || stageProgression.completedStages.length > 0
+        || walletBalance !== STARTER_BOOK_CREDIT_RESERVE
+        || skinManager.ownedSkinIds.length > 1;
+
     const equippedWeaponDef = {
         id: equippedWeaponId,
         name: WEAPON_CONFIGS[equippedWeaponId]?.name ?? WEAPON_CONFIGS['wooden-sword'].name,
@@ -567,12 +573,15 @@ function App ()
             )}
 
             {isMainMenuOpen && (
-                <MainMenuModal
+                <TitleMenu
                     walletBalance={walletBalance}
+                    hasProgress={hasProgress}
+                    isBlocked={isSettingsOpen || isSkinModalOpen || isStageMapOpen || isStageSelectOpen}
+                    onStartGame={handleStartGame}
+                    onNewGame={handleClearAllData}
+                    onOpenStageSelect={() => setIsStageMapOpen(true)}
                     onOpenSettings={() => setIsSettingsOpen(true)}
                     onOpenSkinModal={openSkinModal}
-                    onOpenStageSelect={() => setIsStageMapOpen(true)}
-                    onStartGame={handleStartGame}
                 />
             )}
 
