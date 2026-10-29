@@ -24,8 +24,16 @@ test.describe('Harvesting takes several Strikes', () => {
     await expect(page.locator('.game-hud')).toBeVisible({ timeout: 12000 });
     await page.waitForTimeout(1000);
 
-    // Walk next to the first tree (x = 300)
+    // Too far away (55 px from the tree at x = 300; the old reach was 65 px): striking does nothing
     const bot = new Bot(page, false);
+    expect(await bot.goTo(245, { fight: false, tolerance: 8 })).toBe('arrived');
+    for (let i = 0; i < 3; i++) {
+      await page.keyboard.press('KeyE');
+      await page.waitForTimeout(500);
+    }
+    expect(await woodCount(page)).toBe(0);
+
+    // Walk next to the first tree (x = 300)
     expect(await bot.goTo(285, { fight: false, tolerance: 20 })).toBe('arrived');
     expect(await woodCount(page)).toBe(0);
 

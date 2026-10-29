@@ -40,9 +40,17 @@ test.describe('Held item', () => {
 
     const bot = new Bot(page, false);
     expect(await bot.goTo(285, { fight: false, tolerance: 20 })).toBe('arrived');
+    // The axe is in the hand for only 0.6 s, so record it inside the game on every frame instead of
+    // hoping a sample from the test lands in that window on a slow machine
+    await page.evaluate(() => {
+      const w = window as any;
+      const scene = w.__botGame.scene.getScene('Game');
+      w.__sawAxe = false;
+      scene.events.on('postupdate', () => { if (scene.heldItem.heldItemId === 'axe-t1') w.__sawAxe = true; });
+    });
     await page.keyboard.press('KeyE');
-    await expect.poll(async () => (await held(page)).id).toBe('axe-t1');
-    await expect.poll(async () => (await held(page)).id, { timeout: 3000 }).toBe('wooden-sword');
+    await expect.poll(() => page.evaluate(() => (window as any).__sawAxe), { timeout: 10000 }).toBe(true);
+    await expect.poll(async () => (await held(page)).id, { timeout: 10000 }).toBe('wooden-sword');
     expect(loadErrors).toEqual([]);
   });
 });
