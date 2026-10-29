@@ -100,7 +100,7 @@ PLAYTHROUGH=1 npx playwright test e2e/playthrough.spec.ts
 
 ## ສະຖານະ
 
-ເຮັດແລ້ວ: ໝູ່ບ້ານ (ຫໍສະໝຸດ, ສະຖາບັນ, ໂຮງຊ່າງ, ໂຮງຕີເຫຼັກ), ບົດທີ 1 ທັງ 4 ເຂດ, Mini-boss ແລະ Boss 3 phase, ລະບົບປຶ້ມ/ສອບ/ຝຶກປະຈຳວັນ, craft, ຊື້ Skin ດ້ວຍ Credit, Save 3 ຊ່ອງ.
+ເຮັດແລ້ວ: ໝູ່ບ້ານ (ຫໍສະໝຸດ, ສະຖາບັນ, ໂຮງຊ່າງ, ໂຮງຕີເຫຼັກ), ບົດທີ 1 ທັງ 4 ເຂດ, Mini-boss ແລະ Boss 3 phase, ລະບົບປຶ້ມ/ສອບ/ຝຶກປະຈຳວັນ, craft, ຊື້ Skin ດ້ວຍ Credit ທີ່ NPC Mina, Save 3 ຊ່ອງ.
 
 ຍັງຄ້າງ:
 - playtest ກັບນັກຮຽນ ແລະປັບ balance (ຕົວເລກປັດຈຸບັນເປັນຄ່າຊົ່ວຄາວ, ໂດຍສະເພາະ HP ສັດຕູ ແລະລາຄາ Skin).

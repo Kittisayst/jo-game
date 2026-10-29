@@ -35,12 +35,32 @@ export const VILLAGE_ELDER_DIALOGUE: DialogueGraph = {
                     set: { askedControls: true },
                 },
                 {
+                    text: '👗 ມີບ່ອນປ່ຽນຊຸດບໍ?',
+                    to: 'skin_tip',
+                },
+                {
                     text: '👑 Hardware Overlord ຢູ່ໃສ ແລະ ເອົາຊະນະແນວໃດ?',
                     to: 'boss_tip',
                     set: { askedBoss: true },
                 },
                 {
                     text: '🚀 ຂ້ອຍພ້ອມແລ້ວ, ຈະອອກໄປດຽວນີ້ເລີຍ!',
+                    to: 'ready_go',
+                },
+            ],
+        },
+        skin_tip: {
+            id: 'skin_tip',
+            speaker: 'ພໍ່ເຖົ້າຄຳ (Elder Kham)',
+            avatar: '👴',
+            line: 'Mina ຂາຍຊຸດຕົວລະຄອນ ຢືນຢູ່ຕະຫຼາດນ້ອຍທາງຂວາ ໃກ້ປະຕູມິຕິ. ເຈົ້າຊື້ ແລະປ່ຽນຊຸດໄດ້ທີ່ນາງເທົ່ານັ້ນ ດ້ວຍ Credit ທີ່ໄດ້ຈາກການຮຽນ.',
+            choices: [
+                {
+                    text: '📚 ຖາມເລື່ອງອື່ນຕໍ່',
+                    to: 'questions',
+                },
+                {
+                    text: '✨ ຂອບໃຈ ຂ້ອຍພ້ອມລຸຍ!',
                     to: 'ready_go',
                 },
             ],

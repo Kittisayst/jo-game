@@ -28,8 +28,8 @@ test.describe('Title Start Screen and Village Hub Transition E2E', () => {
     const stageBtn = page.locator('#menu-stage-select-btn');
     await expect(stageBtn).toBeVisible();
 
-    // Skins are cosmetics bought with Credit
-    await expect(page.locator('#menu-skins-btn')).toBeVisible();
+    // Skins are bought and changed only from Mina in the village, never from a menu
+    await expect(page.locator('#menu-skins-btn')).toHaveCount(0);
 
     const settingsBtn = page.locator('#menu-settings-btn');
     await expect(settingsBtn).toBeVisible();
@@ -80,6 +80,8 @@ test.describe('Title Start Screen and Village Hub Transition E2E', () => {
     await hudMenuBtn.click();
     const pauseMenu = page.locator('.pause-menu-card');
     await expect(pauseMenu).toBeVisible();
+    // The pause menu has no Skins button either: that shop is Mina's
+    await expect(pauseMenu.getByText(/ຮ້ານຊຸດ|Skins/)).toHaveCount(0);
 
     const exitBtn = page.locator('#btn-exit-main-menu');
     await expect(exitBtn).toBeVisible();

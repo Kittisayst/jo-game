@@ -11,7 +11,6 @@ export interface TitleMenuProps
     onNewGame: () => void;
     onOpenStageSelect: () => void;
     onOpenSettings: () => void;
-    onOpenSkinModal: () => void;
 }
 
 interface MenuItem
@@ -54,7 +53,6 @@ export function TitleMenu ({
     onNewGame,
     onOpenStageSelect,
     onOpenSettings,
-    onOpenSkinModal,
 }: TitleMenuProps)
 {
     const items: MenuItem[] = [
@@ -83,13 +81,6 @@ export function TitleMenu ({
             label: 'ເລືອກດ່ານ (Stage Map)',
             hint: 'ເປີດແຜນທີ່ ແລະເລືອກດ່ານທີ່ປົດລັອກແລ້ວ',
             action: onOpenStageSelect,
-        },
-        {
-            id: 'menu-skins-btn',
-            icon: '♛',
-            label: 'ຮ້ານຊຸດ (Skins)',
-            hint: 'ຊື້ ແລະປ່ຽນຊຸດຕົວລະຄອນດ້ວຍ Credit ທີ່ໄດ້ຈາກການຮຽນ',
-            action: onOpenSkinModal,
         },
         {
             id: 'menu-settings-btn',

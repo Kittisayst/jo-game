@@ -9,7 +9,7 @@ test.describe('Knowledge Quest Village HUD & Combat Controls E2E', () => {
     await page.goto('/');
     await expect(page).toHaveTitle(/Knowledge Quest/i);
 
-    // 2. The main menu offers play, stage map, skins and settings. There is no coin shop any more.
+    // 2. The main menu offers play, stage map and settings. There is no coin shop any more.
     await expect(page.getByRole('button', { name: /ເຂົ້າເກມ/i })).toBeVisible();
     await expect(page.getByRole('button', { name: /ຮ້ານຄ້າ/i })).toHaveCount(0);
 

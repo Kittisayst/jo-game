@@ -50,6 +50,7 @@ Loop ກາງ (ເສັ້ນດ້ານເທິງ) ວົນ 2–3 ຮອ�
 - ກັບໝູ່ບ້ານແລ້ວ HP ເຕັມອັດຕະໂນມັດ ແລະ save ເກມ
 - ອາຄານໃໝ່ປົດລັອກຕາມຄວາມກ້າວໜ້າ (ເຊັ່ນ Forge ເປີດຫຼັງສອບປຶ້ມ Ch.1 ຜ່ານ ເພາະ Boss Ch.1 ຕ້ອງໃຊ້ດາບເຫຼັກ T2) ເພື່ອບໍ່ໃຫ້ນັກຮຽນສັບສົນຕອນເລີ່ມ
 - NPC ໃນແຕ່ລະອາຄານໃຫ້ hint ສັ້ນໆ ວ່າຄວນເຮັດຫຍັງຕໍ່
+- **Mina** ຢູ່ຕະຫຼາດໃກ້ປະຕູມິຕິ (World Gate) ຂາຍ Skin ດ້ວຍ Credit: ກົດ `E` → "ເບິ່ງຊຸດ". ຊື້/ປ່ຽນ Skin ບໍ່ໄດ້ຈາກບ່ອນອື່ນ (ບໍ່ມີໃນເມນູໜ້າເລີ່ມ/ເມນູພັກ)
 
 ## ດ່ານສຳຫຼວດ (Stage)
 
@@ -174,7 +175,7 @@ Loop ກາງ (ເສັ້ນດ້ານເທິງ) ວົນ 2–3 ຮອ�
 | ສ້າງອາວຸດ T3 (ດາບຜລຶກ) | −30 |
 | Upgrade ດາບເຫຼັກ +1 / +2 / +3 | −5 / −10 / −15 |
 | Upgrade ດາບຜລຶກ +1 / +2 / +3 | −10 / −20 / −30 |
-| ຊື້ Skin ຕົວລະຄອນ (cosmetic) | −40 / −80 / −120 (ຕົວເລກເບື້ອງຕົ້ນ). ຕ້ອງເກັບ 20 Credit ໄວ້ຊື້ປຶ້ມ Ch.1 ກ່ອນ |
+| ຊື້ Skin ຕົວລະຄອນ (cosmetic) ທີ່ NPC Mina ໃນໝູ່ບ້ານເທົ່ານັ້ນ | −40 / −80 / −120 (ຕົວເລກເບື້ອງຕົ້ນ). ຕ້ອງເກັບ 20 Credit ໄວ້ຊື້ປຶ້ມ Ch.1 ກ່ອນ |
 
 **ຫຼັກ Balance:**
 
@@ -211,7 +212,7 @@ Chapter 1 ຈົບໃນ 4 ຮອບອອກສຳຫຼວດ:
 | TitleScene | ໜ້າເລີ່ມ |
 | Game | ທັງໝູ່ບ້ານ (Hub) ແລະ ດ່ານ (Stage) ໃນ scene ດຽວ; ໂຫຼດ layout ຕາມ stages.json |
 
-**UI (React modal ໃນ `infrastructure/react/components/`):** `Hud`, `TextbookModal` (Library), `AcademyModal`, `WorkshopModal`, `ForgeModal`, `GateRepairModal`, `QuizFinisherModal` (ຄຳຖາມ Boss), `BackpackModal`, `StageMapModal` (World Gate), `SkinModal` (ຊື້/ໃສ່ Skin ດ້ວຍ Credit).
+**UI (React modal ໃນ `infrastructure/react/components/`):** `Hud`, `TextbookModal` (Library), `AcademyModal`, `WorkshopModal`, `ForgeModal`, `GateRepairModal`, `QuizFinisherModal` (ຄຳຖາມ Boss), `BackpackModal`, `StageMapModal` (World Gate), `SkinModal` (ຮ້ານຊຸດຂອງ Mina: ລອງ/ຊື້/ໃສ່ Skin ດ້ວຍ Credit, ເປີດຈາກບົດສົນທະນາກັບ Mina ເທົ່ານັ້ນ).
 
 **ໂຄງສ້າງໂຄດ Phaser:** `scenes/Game.ts` ເປັນ scene ເຈົ້າຂອງ physics/ການໂຕ້ຕອບ; ຮູບຮ່າງຂອງໝູ່ບ້ານ ແລະ ດ່ານ ຖືກສ້າງໂດຍ `scenery/VillageBuilder.ts` ແລະ `scenery/StageBuilder.ts` (ລວມ `BrokenGate`); `stages/StageDefinition.ts` ກວດຮູບແບບ `stages.json` ຕອນເລີ່ມ scene.
 

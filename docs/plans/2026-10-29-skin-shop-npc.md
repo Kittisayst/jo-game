@@ -1,7 +1,7 @@
 # ຮ້ານ Skin ກັບ NPC Mina ໃນໝູ່ບ້ານ
 
 - **Date:** 2026-10-29
-- **Status:** planned
+- **Status:** done (code, tests, screenshots); not yet merged
 - **Project:** jo-game (ພະຈົນໄພຄວາມຮູ້ / Knowledge Quest)
 
 ## ເປົ້າໝາຍ (Goal)

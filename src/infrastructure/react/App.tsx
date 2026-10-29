@@ -85,23 +85,24 @@ function App ()
     }, [villageWelcomeToast]);
 
     const {
+        activeSkinId,
+        setActiveSkinId,
+        isSkinModalOpen,
+        skinNotice,
+        reservedCredit,
+        openSkinModal,
+        closeSkinModal,
+        buySkin,
+        equipSkin,
+    } = useSkinShop(() => setWalletBalance(entities.wallet.balance), () => currentLevel === 'village');
+    const {
         isDialogueOpen,
         currentDialogueNode,
         dialogueChoices,
         advanceDialogue,
         selectDialogueChoice,
         closeDialogue,
-    } = useDialogue();
-    const {
-        activeSkinId,
-        setActiveSkinId,
-        isSkinModalOpen,
-        skinNotice,
-        openSkinModal,
-        closeSkinModal,
-        buySkin,
-        equipSkin,
-    } = useSkinShop(() => setWalletBalance(entities.wallet.balance));
+    } = useDialogue(openSkinModal);
     const modals = useModalState();
     const {
         isLibraryOpen, setIsLibraryOpen,
@@ -398,6 +399,12 @@ function App ()
             return;
         }
 
+        if (isSkinModalOpen)
+        {
+            closeSkinModal();
+            return;
+        }
+
         if (modals.closeTopModal()) return;
 
         togglePauseUseCase(pauseState);
@@ -409,7 +416,7 @@ function App ()
         escape: handleEscape,
         toggleBackpack: () =>
         {
-            if (!isMainMenuOpen) setIsBackpackOpen(prev => !prev);
+            if (!isMainMenuOpen && !isSkinModalOpen) setIsBackpackOpen(prev => !prev);
         },
     });
 
@@ -552,7 +559,6 @@ function App ()
                     isMuted={isMuted}
                     onExitToMainMenu={handleOpenMainMenu}
                     onOpenSettings={() => setIsSettingsOpen(true)}
-                    onOpenSkinModal={openSkinModal}
                     onRestartLevel={() => handleRestart(false)}
                     onResume={handleResumeGame}
                     onToggleMusic={handleToggleMusic}
@@ -564,6 +570,7 @@ function App ()
                 <SkinModal
                     activeSkinId={activeSkinId}
                     walletBalance={walletBalance}
+                    reservedCredit={reservedCredit}
                     skinManager={skinManager}
                     notice={skinNotice}
                     onClose={closeSkinModal}
@@ -581,7 +588,6 @@ function App ()
                     onNewGame={handleClearAllData}
                     onOpenStageSelect={() => setIsStageMapOpen(true)}
                     onOpenSettings={() => setIsSettingsOpen(true)}
-                    onOpenSkinModal={openSkinModal}
                 />
             )}
 
@@ -760,7 +766,7 @@ function App ()
             />
 
             <VirtualTouchControls
-                visible={!isMainMenuOpen && !isGamePaused && !isDialogueOpen && !modals.isAnyModalOpen}
+                visible={!isMainMenuOpen && !isGamePaused && !isDialogueOpen && !isSkinModalOpen && !modals.isAnyModalOpen}
             />
         </div>
     );

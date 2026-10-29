@@ -1,9 +1,9 @@
 import { Page } from '@playwright/test';
 
-/** Reads the hero's x position from the running Phaser `Game` scene (found through the React tree). */
-export async function getPlayerX (page: Page): Promise<number>
+/** Reads a value off the hero in the running Phaser `Game` scene (found through the React tree). */
+async function readPlayer (page: Page, what: 'x' | 'texture'): Promise<number | string>
 {
-  return page.evaluate(() => {
+  return page.evaluate((what) => {
     const root = document.getElementById('root')!;
     const key = Object.keys(root).find(k => k.startsWith('__reactContainer'))!;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -24,8 +24,21 @@ export async function getPlayerX (page: Page): Promise<number>
       if (node.child) stack.push(node.child);
       if (node.sibling) stack.push(node.sibling);
     }
-    return Math.round(game?.scene?.getScene('Game')?.player?.x ?? -1);
-  });
+    const player = game?.scene?.getScene('Game')?.player;
+    return what === 'x' ? Math.round(player?.x ?? -1) : (player?.texture?.key ?? '');
+  }, what);
+}
+
+/** The hero's x position. */
+export async function getPlayerX (page: Page): Promise<number>
+{
+  return (await readPlayer(page, 'x')) as number;
+}
+
+/** The texture key of the hero's current look, e.g. `player-skin-neon-ninja`. */
+export async function getPlayerTexture (page: Page): Promise<string>
+{
+  return (await readPlayer(page, 'texture')) as string;
 }
 
 /**

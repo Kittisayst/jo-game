@@ -62,6 +62,11 @@ export class Player extends Physics.Arcade.Sprite
         Player.ensureSkinTexture(this.scene, skinId);
         this.setTexture(`player-skin-${skinId}`);
         this.initAnimations(skinId);
+
+        // The hero may be frozen (a conversation or the Skin shop is open) so update() is not
+        // running to switch animations: without this the old skin's animation keeps repainting
+        const idleKey = `${skinId}-idle`;
+        if (this.scene.anims.exists(idleKey)) this.play(idleKey);
     }
 
     private initAnimations (skinId: string): void

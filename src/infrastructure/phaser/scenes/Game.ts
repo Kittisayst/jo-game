@@ -57,7 +57,8 @@ export class Game extends Scene
     enemies: Phaser.Physics.Arcade.Group;
     enemyProjectiles: Phaser.Physics.Arcade.Group;
     boss?: Boss;
-    elderNpc?: NPC;
+    /** Everyone in the village the hero can talk to (the elder, Mina). */
+    villagers: { npc: NPC; prompt: string }[] = [];
     isDialogueActive = false;
     particleManager: ParticleManager;
     cursors: Phaser.Types.Input.Keyboard.CursorKeys;
@@ -95,7 +96,7 @@ export class Game extends Scene
     {
         // Reset per-run references to prevent lingering stale objects across restarts
         this.boss = undefined;
-        this.elderNpc = undefined;
+        this.villagers = [];
         this.isDialogueActive = false;
         this.touchControls = { left: false, right: false, up: false };
 
@@ -193,7 +194,7 @@ export class Game extends Scene
     create ()
     {
         this.boss = undefined;
-        this.elderNpc = undefined;
+        this.villagers = [];
 
         this.level = this.cache.json.get(this.currentLevelKey) as Level;
         this.stage = getStageDefinition(getGameContent().stages, this.currentLevelKey);
@@ -229,11 +230,17 @@ export class Game extends Scene
                 Boolean(entities.forgeUnlocked || entities.books['book-ch1']?.examPassed)
             );
             const baseY = WORLD_HEIGHT - GROUND_HEIGHT - 24;
-            this.elderNpc = new NPC(this, 460, baseY, 'npc-elder');
-            this.elderNpc.onInteract = () =>
-            {
-                EventBus.emit('start-dialogue', 'village_elder');
-            };
+            const elder = new NPC(this, 460, baseY, 'npc-elder');
+            elder.onInteract = () => EventBus.emit('start-dialogue', 'village_elder');
+
+            // Mina runs the Skin shop at the little market between the Forge and the World Gate
+            const mina = new NPC(this, 1290, baseY, 'npc-merchant', '🛍️ [E] ລົມກັບ Mina');
+            mina.onInteract = () => EventBus.emit('start-dialogue', 'skin_shop');
+
+            this.villagers = [
+                { npc: elder, prompt: '💬 [E] ລົມກັບຫົວໜ້າໝູ່ບ້ານ' },
+                { npc: mina, prompt: '🛍️ [E] ລົມກັບ Mina (ຮ້ານຊຸດ)' },
+            ];
         }
         else if (this.stage)
         {
@@ -248,7 +255,7 @@ export class Game extends Scene
             waypoints: this.waypoints,
             resourceNodes: this.resourceNodes,
             brokenGate: this.brokenGate,
-            elderNpc: this.elderNpc,
+            villagers: this.villagers,
         });
 
         const eKey = this.input.keyboard?.addKey('E');
@@ -485,7 +492,7 @@ export class Game extends Scene
             EventBus.removeListener('gate-repaired', onGateRepaired);
             soundManager.stopBgm();
             this.boss = undefined;
-            this.elderNpc = undefined;
+            this.villagers = [];
             this.bgTileSprite = undefined;
             entities.attackCooldown.reset();
             this.input.keyboard?.removeAllKeys(true);
@@ -513,9 +520,9 @@ export class Game extends Scene
             return;
         }
 
-        if (this.elderNpc && this.elderNpc.active)
+        for (const { npc } of this.villagers)
         {
-            this.elderNpc.updateProximity(this.player.x, this.player.y);
+            if (npc.active) npc.updateProximity(this.player.x, this.player.y);
         }
 
         this.interaction.update();
