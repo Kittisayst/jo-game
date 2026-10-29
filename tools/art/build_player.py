@@ -64,6 +64,10 @@ def build_source():
         head = grid(im, 0, 18, skip=lambda x, y: y == 18 and x < 9)
         body = grid(im, 18, 33, skip=lambda x, y: y == 18 and x >= 9)
         legs = grid(im, 34, 46)
+        # The painted legs have no outline under the boots, the movable legs do. Add that row so that
+        # every standing pose ends on row 47 (the bottom of the cell, where the hitbox ends).
+        outline_key = key(im.getpixel(SAMPLES['outline']))
+        legs.append(''.join(outline_key if ch != '.' else '.' for ch in legs[-1]))
         squat = legs[:5] + legs[6:]
         colors = {k: hexc(im.getpixel(v)) for k, v in SAMPLES.items()}
         tpl = lambda rows: '`\n' + '\n'.join('  ' + r for r in rows) + '`'
