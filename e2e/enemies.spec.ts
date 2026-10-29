@@ -11,7 +11,7 @@ test.describe('New Enemy Types E2E Verification', () => {
 
     // 1. Open game
     await page.goto('/');
-    await expect(page).toHaveTitle(/JO RUNNER/i);
+    await expect(page).toHaveTitle(/Knowledge Quest/i);
 
     // 2. Click Select Stage from Main Menu
     const stageSelectBtn = page.getByRole('button', { name: /ເລືອກດ່ານ/i });

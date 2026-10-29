@@ -7,7 +7,7 @@ test.describe('Title Start Screen and Village Hub Transition E2E', () => {
 
     // 1. Open game
     await page.goto('/');
-    await expect(page).toHaveTitle(/JO RUNNER/i);
+    await expect(page).toHaveTitle(/Knowledge Quest/i);
 
     // 2. Verify Title Screen Header & Elements
     const titleCard = page.locator('.title-screen');

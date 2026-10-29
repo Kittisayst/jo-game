@@ -11,7 +11,7 @@ test.describe('Hero Attack Controls (J / Z) & Combat Verification', () => {
 
     // 1. Open game
     await page.goto('/');
-    await expect(page).toHaveTitle(/JO RUNNER/i);
+    await expect(page).toHaveTitle(/Knowledge Quest/i);
 
     // If main menu is not open (e.g. from session persistence), open pause menu and exit to main menu
     const mainMenuCard = page.locator('.title-screen');

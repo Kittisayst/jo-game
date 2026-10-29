@@ -11,7 +11,7 @@ test.describe('Phaser Arcade Physics Enhancements E2E', () => {
 
     // 1. Open game
     await page.goto('/');
-    await expect(page).toHaveTitle(/JO RUNNER/i);
+    await expect(page).toHaveTitle(/Knowledge Quest/i);
 
     // 2. Select Chapter 1 with platforms and slimes
     const stageSelectBtn = page.getByRole('button', { name: /ເລືອກດ່ານ/i });

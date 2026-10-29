@@ -11,7 +11,7 @@ test.describe('Knowledge Quest — Buy-to-Read Textbook & Chapter 1 Loop E2E', (
     await page.goto('/');
     await page.evaluate(() => window.localStorage.clear());
     await page.reload();
-    await expect(page).toHaveTitle(/JO RUNNER/i);
+    await expect(page).toHaveTitle(/Knowledge Quest/i);
 
     const playBtn = page.locator('#btn-play-game');
     if (await playBtn.isVisible()) {

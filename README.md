@@ -91,6 +91,7 @@ PLAYTHROUGH=1 npx playwright test e2e/playthrough.spec.ts
 
 ## ເອກະສານ
 
+- [ວິທີຫຼິ້ນ](docs/how-to-play.md): ຄູ່ມືສັ້ນສຳລັບຜູ້ຫຼິ້ນ ແລະຄູ (ສິບນາທີທຳອິດ, ໃນດ່ານ, ເຄັດລັບ).
 - [Game Design Doc](docs/Game%20Design%20Doc-Village%20Hub.md): ການອອກແບບເກມ ລາຄາ ກົດ ແລະສະຖານະ (ພາສາລາວ).
 - [CONTEXT.md](CONTEXT.md): ຄຳສັບຂອງເກມ (Chapter, Stage, Credit, Material…) ແລະຄຳທີ່ບໍ່ຄວນໃຊ້.
 - [CLAUDE.md](CLAUDE.md): ວິທີໂຄດເຮັດວຽກ, ກົດ ແລະຄຳສັ່ງ.

@@ -1,13 +1,13 @@
 import { test, expect } from '@playwright/test';
 
-test.describe('JO RUNNER Village HUD & Combat Controls E2E', () => {
+test.describe('Knowledge Quest Village HUD & Combat Controls E2E', () => {
   test('Main Menu, HUD without shop or hotbar, elder NPC, and combat controls', async ({ page }) => {
     page.on('console', msg => console.log('BROWSER LOG:', msg.type(), msg.text()));
     page.on('pageerror', err => console.log('PAGE ERROR:', err.message, err.stack));
 
     // 1. Open game
     await page.goto('/');
-    await expect(page).toHaveTitle(/JO RUNNER/i);
+    await expect(page).toHaveTitle(/Knowledge Quest/i);
 
     // 2. The main menu offers play, stage map, skins and settings. There is no coin shop any more.
     await expect(page.getByRole('button', { name: /ເຂົ້າເກມ/i })).toBeVisible();
