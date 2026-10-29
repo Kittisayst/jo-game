@@ -6,6 +6,7 @@
 
 import type { BookDefinition } from '../../domain/entities/Book';
 import type { EnemyDefinition, EnemyKind } from '../../domain/entities/Enemy';
+import type { EnemyAttackId, EnemyAttackMove, EnemyAttackPlan } from '../../domain/entities/EnemyAttackPlanner';
 import type { ItemCategory, ItemDefinition } from '../../domain/entities/ItemCatalog';
 import type { QuestionData } from '../../domain/entities/Quiz';
 import type { RecipeDefinition } from '../../application/CraftRecipeUseCase';
@@ -27,6 +28,7 @@ export interface GameContent
 
 const ITEM_CATEGORIES: readonly ItemCategory[] = ['material', 'consumable', 'tool', 'weapon'];
 const ENEMY_KINDS: readonly EnemyKind[] = ['normal', 'elite', 'miniboss', 'boss'];
+const ENEMY_ATTACK_IDS: readonly EnemyAttackId[] = ['charge', 'rock-throw'];
 const BUILDINGS = ['workshop', 'forge'] as const;
 
 function parseIngredients (v: ReturnType<typeof makeValidators>, value: unknown, path: string)
@@ -164,6 +166,48 @@ export function parseRecipes (raw: unknown): RecipeEntry[]
     });
 }
 
+function parseEnemyAttacks (v: ReturnType<typeof makeValidators>, raw: unknown, p: string): EnemyAttackPlan
+{
+    const attacks = v.asObject(raw, p);
+    const engageRange = v.asNumber(attacks.engageRange, `${p}.engageRange`);
+    if (engageRange <= 0) v.fail(`${p}.engageRange`, 'more than 0');
+    const cooldownMs = v.asNumber(attacks.cooldownMs, `${p}.cooldownMs`);
+    if (cooldownMs < 0) v.fail(`${p}.cooldownMs`, 'at least 0');
+
+    const moves = v.asArray(attacks.moves, `${p}.moves`).map((rawMove, j) =>
+    {
+        const mp = `${p}.moves[${j}]`;
+        const move = v.asObject(rawMove, mp);
+        const id = v.asOneOf(move.id, ENEMY_ATTACK_IDS, `${mp}.id`);
+        const telegraphMs = v.asNumber(move.telegraphMs, `${mp}.telegraphMs`);
+        if (telegraphMs < 100) v.fail(`${mp}.telegraphMs`, 'at least 100 so the player can react');
+        const minDistance = v.asNumber(move.minDistance, `${mp}.minDistance`);
+        const maxDistance = v.asNumber(move.maxDistance, `${mp}.maxDistance`);
+        if (minDistance < 0 || maxDistance < minDistance) v.fail(`${mp}.maxDistance`, 'not less than minDistance');
+        const speed = v.asNumber(move.speed, `${mp}.speed`);
+        if (speed <= 0) v.fail(`${mp}.speed`, 'more than 0');
+
+        const result: EnemyAttackMove = { id, telegraphMs, minDistance, maxDistance, speed };
+        if (id === 'charge')
+        {
+            result.durationMs = v.asNumber(move.durationMs, `${mp}.durationMs`);
+            result.stunMs = v.asNumber(move.stunMs, `${mp}.stunMs`);
+            if (result.durationMs <= 0) v.fail(`${mp}.durationMs`, 'more than 0');
+            if (result.stunMs < 0) v.fail(`${mp}.stunMs`, 'at least 0');
+        }
+        else
+        {
+            const projectiles = v.asNumber(move.projectiles, `${mp}.projectiles`);
+            if (!Number.isInteger(projectiles) || projectiles < 1) v.fail(`${mp}.projectiles`, 'a whole number, at least 1');
+            result.projectiles = projectiles;
+        }
+        return result;
+    });
+    if (moves.length === 0) v.fail(`${p}.moves`, 'at least one attack');
+
+    return { engageRange, cooldownMs, moves };
+}
+
 export function parseEnemies (raw: unknown): EnemyDefinition[]
 {
     const v = makeValidators('enemies.json');
@@ -173,12 +217,15 @@ export function parseEnemies (raw: unknown): EnemyDefinition[]
         const enemy = v.asObject(entry, p);
         const maxHp = v.asNumber(enemy.maxHp, `${p}.maxHp`);
         if (maxHp < 1) v.fail(`${p}.maxHp`, 'at least 1');
+        const kind = v.asOneOf(enemy.kind, ENEMY_KINDS, `${p}.kind`);
+        if (enemy.attacks !== undefined && kind !== 'miniboss') v.fail(`${p}.attacks`, 'only on a miniboss');
 
         return {
             id: v.asString(enemy.id, `${p}.id`),
-            kind: v.asOneOf(enemy.kind, ENEMY_KINDS, `${p}.kind`),
+            kind,
             maxHp,
             damage: v.asNumber(enemy.damage, `${p}.damage`),
+            ...(enemy.attacks !== undefined ? { attacks: parseEnemyAttacks(v, enemy.attacks, `${p}.attacks`) } : {}),
             drops: v.asArray(enemy.drops, `${p}.drops`).map((rawDrop, j) =>
             {
                 const dp = `${p}.drops[${j}]`;

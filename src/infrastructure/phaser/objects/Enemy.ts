@@ -1,6 +1,7 @@
 import { Physics, Scene } from 'phaser';
 import { Enemy as EnemyEntity, EnemyDefinition, EnemyState, EnemyType, ENEMY_ARCHETYPES } from '../../../domain/entities/Enemy';
 import { soundManager } from '../../audio/SoundManager';
+import { EnemyAttackBehavior } from './EnemyAttackBehavior';
 
 const WIDTH = 32;
 const HEIGHT = 28;
@@ -13,6 +14,7 @@ const TEXTURE_KEYS: Record<EnemyType, string> = {
 };
 
 export const SPIT_PROJECTILE_KEY = 'enemy-slime-ball';
+export const ROCK_PROJECTILE_KEY = 'enemy-rock-ball';
 
 /**
  * An Arcade Physics sprite representing an enemy in the level.
@@ -44,6 +46,10 @@ export class Enemy extends Physics.Arcade.Sprite
     private spitCooldown = 2200;
     onSpit?: (x: number, y: number, dirX: number, dirY: number) => void;
 
+    // Mini-boss special attacks (charge, rock throw), only when its definition has `attacks`
+    private attackBehavior?: EnemyAttackBehavior;
+    onThrowRock?: (x: number, y: number, dirX: number, speed: number) => void;
+
     constructor (
         scene: Scene,
         x: number,
@@ -70,6 +76,7 @@ export class Enemy extends Physics.Arcade.Sprite
 
         this.enemyType = type;
         this.entity = definition ? EnemyEntity.fromDefinition(definition, type) : new EnemyEntity(type);
+        if (definition?.attacks) this.attackBehavior = new EnemyAttackBehavior(this, definition.attacks);
 
         scene.add.existing(this);
         scene.physics.add.existing(this);
@@ -257,6 +264,29 @@ export class Enemy extends Physics.Arcade.Sprite
             g.generateTexture(SPIT_PROJECTILE_KEY, 14, 14);
             g.destroy();
         }
+
+        // 6. Thrown rock (Cave Guardian)
+        if (!scene.textures.exists(ROCK_PROJECTILE_KEY))
+        {
+            const g = scene.make.graphics({ x: 0, y: 0 });
+            g.fillStyle(0x57534e, 1);
+            g.fillCircle(10, 10, 10);
+            g.fillStyle(0x78716c, 1);
+            g.fillCircle(8, 8, 6);
+            g.fillStyle(0xa8a29e, 1);
+            g.fillCircle(6, 6, 2.5);
+            g.lineStyle(1.5, 0x292524, 1);
+            g.strokeCircle(10, 10, 9.5);
+            g.generateTexture(ROCK_PROJECTILE_KEY, 20, 20);
+            g.destroy();
+        }
+    }
+
+    /** One rock of the Mini-boss's rock throw, leaving from the enemy's side in `dirX`. */
+    throwRock (dirX: number, speed: number): void
+    {
+        soundManager.playSpit();
+        this.onThrowRock?.(this.x + dirX * 30, this.y + 6, dirX, speed);
     }
 
     get currentState (): EnemyState
@@ -279,6 +309,13 @@ export class Enemy extends Physics.Arcade.Sprite
         if (this.alertText && this.alertText.active)
         {
             this.alertText.setPosition(this.x - 4, this.y - this.spriteHeight / 2 - 18);
+        }
+
+        // Mini-boss special attacks take over while one is running
+        if (this.attackBehavior && typeof playerX === 'number' && typeof playerY === 'number'
+            && this.attackBehavior.update(delta, playerX, playerY, body))
+        {
+            return;
         }
 
         // Flying slime floating logic
@@ -634,6 +671,7 @@ export class Enemy extends Physics.Arcade.Sprite
         this.entity.defeat();
 
         this.removeAlertIndicator();
+        this.attackBehavior?.cancel();
         this.disableBody(true, false);
 
         this.scene.tweens.add({
@@ -653,6 +691,7 @@ export class Enemy extends Physics.Arcade.Sprite
     destroy (fromScene?: boolean): void
     {
         this.removeAlertIndicator();
+        this.attackBehavior?.cancel();
         super.destroy(fromScene);
     }
 }

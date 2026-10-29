@@ -87,6 +87,62 @@ describe('validator errors', () =>
         expect(() => parseEnemies(broken)).toThrow(/enemies\[0\]\.kind must be one of/);
     });
 
+    describe('Mini-boss attacks', () =>
+    {
+        const guardianIndex = () => enemies.findIndex(e => e.id === 'cave-guardian');
+        const brokenGuardian = (change: (guardian: { attacks: { moves: Record<string, unknown>[] } }) => void) =>
+        {
+            const broken = JSON.parse(JSON.stringify(enemies));
+            change(broken[guardianIndex()]);
+            return broken;
+        };
+
+        it('reads the charge and the rock throw of the Cave Guardian', () =>
+        {
+            const guardian = parseEnemies(enemies)[guardianIndex()];
+
+            expect(guardian.attacks?.moves.map(m => m.id)).toEqual(['charge', 'rock-throw']);
+            expect(guardian.attacks?.moves[0]).toMatchObject({ telegraphMs: 800, stunMs: 1000 });
+            expect(guardian.attacks?.moves[1].projectiles).toBe(3);
+        });
+
+        it('rejects attacks on an enemy that is not a miniboss', () =>
+        {
+            const broken = JSON.parse(JSON.stringify(enemies));
+            broken[0].attacks = JSON.parse(JSON.stringify(enemies[guardianIndex()].attacks));
+
+            expect(() => parseEnemies(broken)).toThrow(/enemies\[0\]\.attacks must be only on a miniboss/);
+        });
+
+        it('rejects a warning too short for the player to react to', () =>
+        {
+            const broken = brokenGuardian(g => { g.attacks.moves[0].telegraphMs = 50; });
+
+            expect(() => parseEnemies(broken)).toThrow(/moves\[0\]\.telegraphMs must be at least 100/);
+        });
+
+        it('rejects an unknown attack', () =>
+        {
+            const broken = brokenGuardian(g => { g.attacks.moves[1].id = 'laser'; });
+
+            expect(() => parseEnemies(broken)).toThrow(/moves\[1\]\.id must be one of/);
+        });
+
+        it('rejects a charge without a dazed time', () =>
+        {
+            const broken = brokenGuardian(g => { delete g.attacks.moves[0].stunMs; });
+
+            expect(() => parseEnemies(broken)).toThrow(/moves\[0\]\.stunMs/);
+        });
+
+        it('rejects a distance band that ends before it starts', () =>
+        {
+            const broken = brokenGuardian(g => { g.attacks.moves[1].maxDistance = 100; });
+
+            expect(() => parseEnemies(broken)).toThrow(/moves\[1\]\.maxDistance must be not less than minDistance/);
+        });
+    });
+
     it('rejects a drop chance above 1', () =>
     {
         const broken = JSON.parse(JSON.stringify(enemies));
