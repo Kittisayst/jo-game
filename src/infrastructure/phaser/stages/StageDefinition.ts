@@ -28,7 +28,8 @@ export interface StageResourceNode
     requiredTool: string | null;
     toolTier: number;
     x: number;
-    hp: number;
+    /** How many Strikes it takes to deplete the node (see "Strike" in CONTEXT.md). */
+    strikes: number;
     drops: StageDrop[];
 }
 
@@ -144,13 +145,16 @@ function parseNode (raw: unknown, path: string): StageResourceNode
 
     const requiredTool = node.requiredTool === null ? null : asString(node.requiredTool, `${path}.requiredTool`);
 
+    const strikes = asNumber(node.strikes, `${path}.strikes`);
+    if (!Number.isInteger(strikes) || strikes < 1) fail(`${path}.strikes`, 'a whole number of Strikes, at least 1');
+
     return {
         id: asString(node.id, `${path}.id`),
         type,
         requiredTool,
         toolTier: asNumber(node.toolTier, `${path}.toolTier`),
         x: asNumber(node.x, `${path}.x`),
-        hp: asNumber(node.hp, `${path}.hp`),
+        strikes,
         drops: parseDrops(node.drops, `${path}.drops`),
     };
 }

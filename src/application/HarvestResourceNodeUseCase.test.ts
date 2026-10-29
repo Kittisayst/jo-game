@@ -1,10 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { harvestResourceNodeUseCase, ResourceNodeDefinition } from './HarvestResourceNodeUseCase';
+import { DomainEvents } from '../domain/DomainEvents';
+import { harvestResourceNodeUseCase, RESOURCE_HARVESTED_EVENT, ResourceNodeDefinition } from './HarvestResourceNodeUseCase';
 import { Backpack } from '../domain/entities/Backpack';
+import { ResourceNode } from '../domain/entities/ResourceNode';
 
 describe('HarvestResourceNodeUseCase', () =>
 {
-    const treeNode: ResourceNodeDefinition = {
+    const treeDefinition: ResourceNodeDefinition = {
         id: 'tree-1',
         type: 'tree',
         requiredTool: 'axe',
@@ -12,7 +14,7 @@ describe('HarvestResourceNodeUseCase', () =>
         drops: [{ itemId: 'wood', count: 3 }],
     };
 
-    const herbNode: ResourceNodeDefinition = {
+    const herbDefinition: ResourceNodeDefinition = {
         id: 'herb-1',
         type: 'herb',
         requiredTool: null,
@@ -20,49 +22,119 @@ describe('HarvestResourceNodeUseCase', () =>
         drops: [{ itemId: 'herb', count: 2 }],
     };
 
-    it('fails to harvest tree when player has no axe', () =>
+    const backpackWithAxe = () =>
     {
         const backpack = new Backpack();
-        const result = harvestResourceNodeUseCase(treeNode, backpack);
+        backpack.addItem('axe-t1', 1);
+        return backpack;
+    };
+
+    it('fails to strike a tree when the player has no axe, and does not count the Strike', () =>
+    {
+        const backpack = new Backpack();
+        const tree = new ResourceNode(3);
+        const result = harvestResourceNodeUseCase(treeDefinition, tree, backpack);
 
         expect(result.success).toBe(false);
         expect(result.reason).toBe('missing_tool');
         expect(result.requiredTool).toBe('axe');
+        expect(tree.strikesTaken).toBe(0);
         expect(backpack.getItemCount('wood')).toBe(0);
     });
 
-    it('successfully harvests tree when player has axe-t1', () =>
+    it('gives no Materials until the third Strike fells a tree', () =>
     {
-        const backpack = new Backpack();
-        backpack.addItem('axe-t1', 1);
+        const backpack = backpackWithAxe();
+        const tree = new ResourceNode(3);
 
-        const result = harvestResourceNodeUseCase(treeNode, backpack);
-        expect(result.success).toBe(true);
+        const first = harvestResourceNodeUseCase(treeDefinition, tree, backpack);
+        expect(first).toMatchObject({ success: true, completed: false, strikesTaken: 1, strikesNeeded: 3, drops: [] });
+        expect(backpack.getItemCount('wood')).toBe(0);
+
+        const second = harvestResourceNodeUseCase(treeDefinition, tree, backpack);
+        expect(second).toMatchObject({ success: true, completed: false, strikesTaken: 2 });
+        expect(backpack.getItemCount('wood')).toBe(0);
+
+        const third = harvestResourceNodeUseCase(treeDefinition, tree, backpack);
+        expect(third).toMatchObject({ success: true, completed: true, strikesTaken: 3 });
+        expect(third.drops).toEqual([{ itemId: 'wood', count: 3 }]);
         expect(backpack.getItemCount('wood')).toBe(3);
     });
 
-    it('harvests herb by hand without needing any tool', () =>
+    it('announces the harvest once, on the last Strike only', () =>
+    {
+        const backpack = backpackWithAxe();
+        const tree = new ResourceNode(3);
+        const harvested: string[] = [];
+        const listener = (payload: { nodeId: string }) => harvested.push(payload.nodeId);
+        DomainEvents.on(RESOURCE_HARVESTED_EVENT, listener);
+
+        try
+        {
+            harvestResourceNodeUseCase(treeDefinition, tree, backpack);
+            harvestResourceNodeUseCase(treeDefinition, tree, backpack);
+            expect(harvested).toEqual([]);
+
+            harvestResourceNodeUseCase(treeDefinition, tree, backpack);
+            expect(harvested).toEqual(['tree-1']);
+        }
+        finally
+        {
+            DomainEvents.off(RESOURCE_HARVESTED_EVENT, listener);
+        }
+    });
+
+    it('harvests herb by hand with a single Strike and no tool', () =>
     {
         const backpack = new Backpack();
-        const result = harvestResourceNodeUseCase(herbNode, backpack);
+        const result = harvestResourceNodeUseCase(herbDefinition, new ResourceNode(1), backpack);
 
-        expect(result.success).toBe(true);
+        expect(result).toMatchObject({ success: true, completed: true });
         expect(backpack.getItemCount('herb')).toBe(2);
     });
 
-    it('fails when backpack has no room for drops', () =>
+    it('refuses every Strike while the backpack cannot hold the Materials, without counting them', () =>
     {
-        const backpack = new Backpack();
-        backpack.addItem('axe-t1', 1);
-        // Fill remaining 19 slots with 1 item each of maxStack 1
+        const backpack = backpackWithAxe();
+        // Fill the remaining 19 slots with 1 item each of maxStack 1
+        for (let i = 0; i < 19; i++)
+        {
+            backpack.addItem(`filler-${i}`, 1);
+        }
+        const tree = new ResourceNode(3);
+
+        const first = harvestResourceNodeUseCase(treeDefinition, tree, backpack);
+        expect(first.success).toBe(false);
+        expect(first.reason).toBe('backpack_full');
+        expect(tree.strikesTaken).toBe(0);
+    });
+
+    it('keeps the Strikes already made when the backpack fills up before the last one', () =>
+    {
+        const backpack = backpackWithAxe();
+        const tree = new ResourceNode(3);
+        harvestResourceNodeUseCase(treeDefinition, tree, backpack);
+        harvestResourceNodeUseCase(treeDefinition, tree, backpack);
+
         for (let i = 0; i < 19; i++)
         {
             backpack.addItem(`filler-${i}`, 1);
         }
 
-        const result = harvestResourceNodeUseCase(treeNode, backpack);
-        expect(result.success).toBe(false);
-        expect(result.reason).toBe('backpack_full');
+        const blocked = harvestResourceNodeUseCase(treeDefinition, tree, backpack);
+        expect(blocked.reason).toBe('backpack_full');
+        expect(tree.strikesTaken).toBe(2);
+    });
+
+    it('does nothing to a node that is already depleted', () =>
+    {
+        const backpack = backpackWithAxe();
+        const tree = new ResourceNode(1);
+        harvestResourceNodeUseCase(treeDefinition, tree, backpack);
+
+        const again = harvestResourceNodeUseCase(treeDefinition, tree, backpack);
+        expect(again.success).toBe(false);
+        expect(again.reason).toBe('depleted');
+        expect(backpack.getItemCount('wood')).toBe(3);
     });
 });
-

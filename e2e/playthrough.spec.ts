@@ -123,7 +123,7 @@ async function waitForVillage (bot: Bot)
   await bot.page.waitForTimeout(800);
 }
 
-/** Walks through a list of stops, fights what gets in the way, heals when low, and presses E at each stop. */
+/** Walks through a list of stops, fights what gets in the way, heals when low, and presses E at each stop (several times, since a node needs several Strikes). */
 async function sweep (bot: Bot, stops: { x: number; interact?: boolean }[])
 {
   for (const stop of stops) {
@@ -136,8 +136,11 @@ async function sweep (bot: Bot, stops: { x: number; interact?: boolean }[])
       s = await bot.state();
     }
     if (stop.interact !== false) {
-      await bot.interact();
-      await bot.page.waitForTimeout(150);
+      // Trees take 3 Strikes and iron veins 4, one every 400 ms at most; extra presses on a node that is gone do nothing
+      for (let strike = 0; strike < 5; strike++) {
+        await bot.interact();
+        await bot.page.waitForTimeout(450);
+      }
     }
   }
   return true;

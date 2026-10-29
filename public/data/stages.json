@@ -15,12 +15,12 @@
         "sign": { "x": 240, "text": "🌲 ເຂດປ່າໄມ້ (Zone A - Forest)\n[E] ເກັບກ່ຽວຊັບພະຍາກອນ", "color": "#86efac", "stroke": "#064e3b" },
         "waypoint": { "x": 120, "name": "ຈຸດວາບປອດໄພ ປາກທາງເຂົ້າ (Zone A)", "label": "🌀 ຈຸດວາບປອດໄພ 1\n(Zone A Entrance)" },
         "resourceNodes": [
-          { "id": "tree-1", "type": "tree", "requiredTool": "axe", "toolTier": 1, "x": 300, "hp": 3, "drops": [{ "itemId": "wood", "count": 3 }] },
-          { "id": "herb-1", "type": "herb", "requiredTool": null, "toolTier": 0, "x": 420, "hp": 1, "drops": [{ "itemId": "herb", "count": 2 }] },
-          { "id": "tree-2", "type": "tree", "requiredTool": "axe", "toolTier": 1, "x": 550, "hp": 3, "drops": [{ "itemId": "wood", "count": 3 }] },
-          { "id": "tree-3", "type": "tree", "requiredTool": "axe", "toolTier": 1, "x": 660, "hp": 3, "drops": [{ "itemId": "wood", "count": 3 }] },
-          { "id": "herb-2", "type": "herb", "requiredTool": null, "toolTier": 0, "x": 780, "hp": 1, "drops": [{ "itemId": "herb", "count": 2 }] },
-          { "id": "tree-4", "type": "tree", "requiredTool": "axe", "toolTier": 1, "x": 900, "hp": 3, "drops": [{ "itemId": "wood", "count": 3 }] }
+          { "id": "tree-1", "type": "tree", "requiredTool": "axe", "toolTier": 1, "x": 300, "strikes": 3, "drops": [{ "itemId": "wood", "count": 3 }] },
+          { "id": "herb-1", "type": "herb", "requiredTool": null, "toolTier": 0, "x": 420, "strikes": 1, "drops": [{ "itemId": "herb", "count": 2 }] },
+          { "id": "tree-2", "type": "tree", "requiredTool": "axe", "toolTier": 1, "x": 550, "strikes": 3, "drops": [{ "itemId": "wood", "count": 3 }] },
+          { "id": "tree-3", "type": "tree", "requiredTool": "axe", "toolTier": 1, "x": 660, "strikes": 3, "drops": [{ "itemId": "wood", "count": 3 }] },
+          { "id": "herb-2", "type": "herb", "requiredTool": null, "toolTier": 0, "x": 780, "strikes": 1, "drops": [{ "itemId": "herb", "count": 2 }] },
+          { "id": "tree-4", "type": "tree", "requiredTool": "axe", "toolTier": 1, "x": 900, "strikes": 3, "drops": [{ "itemId": "wood", "count": 3 }] }
         ],
         "enemySpawns": [
           { "enemyId": "forest-slime", "type": "slime", "x": 480, "y": 580, "patrolDistance": 100, "speed": 50 },
@@ -35,9 +35,9 @@
         "endX": 2000,
         "sign": { "x": 1100, "text": "⛏️ ເຂດຖ້ຳສາຍແຮ່ (Zone B - Cavern)\nຕ້ອງໃຊ້ Pickaxe ຂຸດແຮ່ເຫຼັກ", "color": "#cbd5e1", "stroke": "#1e293b" },
         "resourceNodes": [
-          { "id": "stone-1", "type": "stone", "requiredTool": "pickaxe", "toolTier": 1, "x": 1150, "hp": 3, "drops": [{ "itemId": "stone", "count": 3 }] },
-          { "id": "iron-1", "type": "iron-vein", "requiredTool": "pickaxe", "toolTier": 1, "x": 1350, "hp": 4, "drops": [{ "itemId": "iron-ore", "count": 4 }] },
-          { "id": "iron-2", "type": "iron-vein", "requiredTool": "pickaxe", "toolTier": 1, "x": 1600, "hp": 4, "drops": [{ "itemId": "iron-ore", "count": 4 }] }
+          { "id": "stone-1", "type": "stone", "requiredTool": "pickaxe", "toolTier": 1, "x": 1150, "strikes": 3, "drops": [{ "itemId": "stone", "count": 3 }] },
+          { "id": "iron-1", "type": "iron-vein", "requiredTool": "pickaxe", "toolTier": 1, "x": 1350, "strikes": 4, "drops": [{ "itemId": "iron-ore", "count": 4 }] },
+          { "id": "iron-2", "type": "iron-vein", "requiredTool": "pickaxe", "toolTier": 1, "x": 1600, "strikes": 4, "drops": [{ "itemId": "iron-ore", "count": 4 }] }
         ],
         "enemySpawns": [
           { "enemyId": "rock-golem", "type": "slime-armored", "x": 1300, "y": 580, "patrolDistance": 140, "speed": 45 },

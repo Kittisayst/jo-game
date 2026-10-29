@@ -1,5 +1,6 @@
 import { Backpack } from '../domain/entities/Backpack';
 import { DomainEvents } from '../domain/DomainEvents';
+import { ResourceNode } from '../domain/entities/ResourceNode';
 
 export const RESOURCE_HARVESTED_EVENT = 'resource-harvested';
 
@@ -28,16 +29,31 @@ export interface ResourceHarvestedPayload
 export interface HarvestResult
 {
     success: boolean;
-    reason?: 'missing_tool' | 'backpack_full';
+    reason?: 'missing_tool' | 'backpack_full' | 'depleted';
     requiredTool?: string | null;
+    /** True when this Strike was the last one and the Materials were handed over. */
+    completed?: boolean;
+    strikesTaken?: number;
+    strikesNeeded?: number;
     drops: ResourceDrop[];
 }
 
+/**
+ * One Strike on a Resource node. The Strike is refused, and not counted, when the tool is missing
+ * or the Backpack cannot hold the Materials; otherwise the node gets one step closer to depleted
+ * and gives its Materials on the last Strike.
+ */
 export function harvestResourceNodeUseCase (
     node: ResourceNodeDefinition,
+    progress: ResourceNode,
     backpack: Backpack
 ): HarvestResult
 {
+    if (progress.isDepleted)
+    {
+        return { success: false, reason: 'depleted', drops: [] };
+    }
+
     // 1. Check tool requirement
     if (node.requiredTool)
     {
@@ -74,7 +90,16 @@ export function harvestResourceNodeUseCase (
         }
     }
 
-    // 3. Add drops to backpack
+    // 3. Count the Strike; only the last one gives the Materials
+    progress.registerStrike();
+    const strikeInfo = { strikesTaken: progress.strikesTaken, strikesNeeded: progress.strikesNeeded };
+
+    if (!progress.isDepleted)
+    {
+        return { success: true, completed: false, ...strikeInfo, drops: [] };
+    }
+
+    // 4. Add drops to backpack
     for (const drop of node.drops)
     {
         backpack.addItem(drop.itemId, drop.count);
@@ -88,6 +113,8 @@ export function harvestResourceNodeUseCase (
 
     return {
         success: true,
+        completed: true,
+        ...strikeInfo,
         drops: node.drops,
     };
 }
