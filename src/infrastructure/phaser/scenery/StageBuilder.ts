@@ -21,6 +21,8 @@ export interface ResourceNodeView extends StageResourceNode {
     markHarvestedVisual: () => void;
     /** Interaction prompt shown while the player stands next to it. */
     label: string;
+    /** How close to the node's centre the hero must stand to strike it (px). */
+    reach: number;
     harvested: boolean;
 }
 
@@ -30,11 +32,15 @@ export interface WaypointView {
     name: string;
 }
 
-const NODE_PROMPTS: Record<ResourceNodeType, { emoji: string; verb: string; textureKey: string }> = {
-    'tree': { emoji: '🪵', verb: 'ຕັດຕົ້ນໄມ້', textureKey: 'node-tree' },
-    'herb': { emoji: '🌿', verb: 'ເກັບສະໝຸນໄພ', textureKey: 'node-herb' },
-    'stone': { emoji: '🪨', verb: 'ທຸບຫີນ', textureKey: 'node-stone' },
-    'iron-vein': { emoji: '⛏️', verb: 'ຂຸດແຮ່ເຫຼັກ', textureKey: 'node-iron-vein' },
+/**
+ * `reach`: the hero's tool is about 30 px long, so the hero must stand about that close to the
+ * edge of the node's art: half its width plus a few px. A node is not struck from outside its own picture.
+ */
+const NODE_PROMPTS: Record<ResourceNodeType, { emoji: string; verb: string; textureKey: string; reach: number }> = {
+    'tree': { emoji: '🪵', verb: 'ຕັດຕົ້ນໄມ້', textureKey: 'node-tree', reach: 44 },
+    'herb': { emoji: '🌿', verb: 'ເກັບສະໝຸນໄພ', textureKey: 'node-herb', reach: 30 },
+    'stone': { emoji: '🪨', verb: 'ທຸບຫີນ', textureKey: 'node-stone', reach: 34 },
+    'iron-vein': { emoji: '⛏️', verb: 'ຂຸດແຮ່ເຫຼັກ', textureKey: 'node-iron-vein', reach: 38 },
 };
 
 function titleCase(itemId: string): string {
@@ -246,6 +252,7 @@ export function buildStageScenery(
                 shakeOnStrike,
                 markHarvestedVisual,
                 label: nodePrompt(node),
+                reach: NODE_PROMPTS[node.type].reach,
                 harvested: false,
             });
         }

@@ -124,7 +124,7 @@ export class InteractionController
         // 4. Resource nodes
         for (const node of this.interactables.resourceNodes)
         {
-            if (!node.harvested && Math.abs(px - node.x) < 65)
+            if (!node.harvested && Math.abs(px - node.x) < node.reach)
             {
                 show(node.x, node.label, () => this.harvest(node));
                 return;
