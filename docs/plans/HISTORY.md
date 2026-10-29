@@ -6,4 +6,4 @@
 | 2026-10-29 | docs/plans/2026-10-29-multi-hit-harvest.md | done (branch feat/multi-hit-harvest) | ເກັບ node ຫຼາຍຄັ້ງ (Strike): ຕົ້ນໄມ້ 3, ຫີນ 3, ເສັ້ນແຮ່ 4, ຄູນດາວ 400 ms, ບໍ່ນັບເມື່ອເກັບບໍ່ໄດ້ |
 | 2026-10-29 | docs/plans/2026-10-29-cave-guardian-attacks.md | done (branch feat/guardian-attacks) | Cave Guardian ມີ 2 ທ່າ: ພຸ່ງຕຳ ແລະຖິ້ມຫີນ, ມີ telegraph, ເລືອກຕາມໄລຍະ, ຕົວເລກໃນ enemies.json |
 | 2026-10-30 | docs/plans/2026-10-30-held-items.md | done (system + held PNGs + skin fix) | ຕົວລະຄອນຖືດາບ/ເຄື່ອງມືໃຫ້ເຫັນ: sprite ແຍກຕິດມືຕາມຕາຕະລາງ anchor 16 ເຟຣມ, ເຄື່ອງມືປ່ຽນອັດຕະໂນມັດ, ມືເປົ່າໃນໝູ່ບ້ານ, placeholder ກ່ອນ + spec PNG 6 ໄຟລ໌ |
-| 2026-10-30 | docs/plans/2026-10-30-player-sprite-rows.md | planned | Player sheet ແຖວລະທ່າ: 8 ຄໍລຳ × 8 ແຖວ (idle, run, air, attack, tool, wall, hurt, faint), anim ຈາກ JSON, ແຕ້ມດ້ວຍ pxl ຈາກຕົ້ນສະບັບດຽວ + 4 skin |
+| 2026-10-30 | docs/plans/2026-10-30-player-sprite-rows.md | done | Player sheet ແຖວລະທ່າ: 8 ຄໍລຳ × 8 ແຖວ (idle, run, air, attack, tool, wall, hurt, faint), anim ຈາກ JSON, ແຕ້ມດ້ວຍ pxl ຈາກຕົ້ນສະບັບດຽວ + 4 skin |

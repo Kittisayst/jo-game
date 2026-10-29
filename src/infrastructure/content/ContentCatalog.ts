@@ -13,7 +13,7 @@ import type { RecipeDefinition } from '../../application/CraftRecipeUseCase';
 import type { WeaponUpgradeRecipe } from '../../application/UpgradeWeaponTierUseCase';
 import { parseStageDefinitions, StageDefinition } from '../phaser/stages/StageDefinition';
 import { makeValidators } from './validate';
-import { HandAnchors, HeldArt, parseHandAnchors, parseHeldArt } from './HeldItemArt';
+import { HeldArt, parseHeldArt, parsePlayerAnimations, PlayerAnimations } from './HeldItemArt';
 
 export type RecipeEntry = RecipeDefinition | WeaponUpgradeRecipe;
 
@@ -27,7 +27,8 @@ export interface GameContent
     stages: StageDefinition[];
     /** How weapons and tools look in the hero's hand, by item id. */
     heldArt: Record<string, HeldArt>;
-    handAnchors: HandAnchors;
+    /** The rows of the player skin sheets (animations) and where the hand is in each frame. */
+    playerAnimations: PlayerAnimations;
 }
 
 const ITEM_CATEGORIES: readonly ItemCategory[] = ['material', 'consumable', 'tool', 'weapon'];
@@ -252,14 +253,14 @@ async function fetchJson (file: string): Promise<unknown>
 /** Fetches and validates all game data. Call once before the app starts. */
 export async function loadGameContent (): Promise<GameContent>
 {
-    const [items, books, questions, recipes, enemies, stages, handAnchors] = await Promise.all([
+    const [items, books, questions, recipes, enemies, stages, playerAnimations] = await Promise.all([
         fetchJson('items.json'),
         fetchJson('books.json'),
         fetchJson('questions.json'),
         fetchJson('recipes.json'),
         fetchJson('enemies.json'),
         fetchJson('stages.json'),
-        fetchJson('hand-anchors.json'),
+        fetchJson('player-animations.json'),
     ]);
 
     return {
@@ -270,7 +271,7 @@ export async function loadGameContent (): Promise<GameContent>
         enemies: parseEnemies(enemies),
         stages: parseStageDefinitions(stages),
         heldArt: parseHeldArt(items),
-        handAnchors: parseHandAnchors(handAnchors),
+        playerAnimations: parsePlayerAnimations(playerAnimations),
     };
 }
 

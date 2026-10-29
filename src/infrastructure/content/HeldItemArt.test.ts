@@ -1,9 +1,18 @@
 import { describe, expect, it } from 'vitest';
 import items from '../../../public/data/items.json';
-import handAnchors from '../../../public/data/hand-anchors.json';
-import { parseHandAnchors, parseHeldArt, SKIN_FRAME_COUNT } from './HeldItemArt';
+import playerAnimations from '../../../public/data/player-animations.json';
+import { parseHeldArt, parsePlayerAnimations, REQUIRED_ANIMATIONS } from './HeldItemArt';
 
 const copy = <T>(value: T): T => JSON.parse(JSON.stringify(value));
+// The skin sheets as data URLs, so the test can read their size from the PNG header
+const sheetFiles = Object.entries(import.meta.glob<string>('../../../public/assets/characters/player-skin-*.png', { query: '?inline', import: 'default', eager: true }));
+/** Width and height of a PNG data URL, read from its header. */
+const pngSize = (dataUrl: string): [number, number] =>
+{
+    const bytes = Uint8Array.from(atob(dataUrl.split(',')[1].slice(0, 44)), ch => ch.charCodeAt(0));
+    const view = new DataView(bytes.buffer);
+    return [view.getUint32(16), view.getUint32(20)];
+};
 const heldFiles = new Set(
     Object.keys(import.meta.glob('../../../public/assets/held/*')).map(p => p.replace('../../../public/', ''))
 );
@@ -38,26 +47,67 @@ describe('held item art', () =>
         expect(() => parseHeldArt(broken)).toThrow(/held\.gripX must be inside the 32×32 canvas/);
     });
 
-    it('reads one hand anchor per skin frame', () =>
+    describe('player animations', () =>
     {
-        expect(parseHandAnchors(handAnchors).frames).toHaveLength(SKIN_FRAME_COUNT);
-    });
+        it('reads the eight animation rows and an anchor for every frame', () =>
+        {
+            const sheet = parsePlayerAnimations(playerAnimations);
 
-    it('rejects a table with a missing frame or an anchor off the frame', () =>
-    {
-        const short = copy(handAnchors);
-        short.frames.pop();
-        expect(() => parseHandAnchors(short)).toThrow(/frames must be exactly 16 entries/);
+            expect(Object.keys(sheet.animations)).toEqual([...REQUIRED_ANIMATIONS]);
+            for (const [name, animation] of Object.entries(sheet.animations))
+            {
+                for (let i = 0; i < animation.frames; i++)
+                {
+                    expect(sheet.anchors[animation.row * sheet.frame.columns + i], `${name} frame ${i}`).not.toBeNull();
+                }
+            }
+        });
 
-        const off = copy(handAnchors);
-        off.frames[3].y = 60;
-        expect(() => parseHandAnchors(off)).toThrow(/frames\[3\]\.x must be inside the 32×48 frame/);
-    });
+        it('has a skin sheet on disk as big as the grid for every skin', () =>
+        {
+            const sheet = parsePlayerAnimations(playerAnimations);
+            const rows = Math.max(...Object.values(sheet.animations).map(a => a.row)) + 1;
 
-    it('reads per-skin overrides', () =>
-    {
-        const withOverride = { ...copy(handAnchors), overrides: { 'neon-ninja': { 13: { x: 26, y: 24, angle: 90, front: true } } } };
+            expect(sheetFiles.length).toBe(4);
+            for (const [file, dataUrl] of sheetFiles)
+            {
+                expect(pngSize(dataUrl), file).toEqual([sheet.frame.columns * sheet.frame.width, rows * sheet.frame.height]);
+            }
+        });
 
-        expect(parseHandAnchors(withOverride).overrides['neon-ninja'][13].x).toBe(26);
+        it('rejects an animation without anchors for all its frames', () =>
+        {
+            const broken = copy(playerAnimations);
+            broken.animations.run.anchors.pop();
+
+            expect(() => parsePlayerAnimations(broken)).toThrow(/animations\.run\.anchors must be exactly 8 entries/);
+        });
+
+        it('rejects a missing required animation', () =>
+        {
+            const broken = copy(playerAnimations) as { animations: Record<string, unknown> };
+            delete broken.animations.faint;
+
+            expect(() => parsePlayerAnimations(broken)).toThrow(/animations\.faint must be present/);
+        });
+
+        it('rejects two animations on one row and more frames than columns', () =>
+        {
+            const sameRow = copy(playerAnimations);
+            sameRow.animations.run.row = sameRow.animations.idle.row;
+            expect(() => parsePlayerAnimations(sameRow)).toThrow(/animations\.run\.row must be a row no other animation uses/);
+
+            const tooMany = copy(playerAnimations);
+            tooMany.animations.idle.frames = 9;
+            expect(() => parsePlayerAnimations(tooMany)).toThrow(/animations\.idle\.frames must be between 1 and 8/);
+        });
+
+        it('rejects an anchor off the 32×48 frame', () =>
+        {
+            const off = copy(playerAnimations);
+            off.animations.idle.anchors[1].y = 60;
+
+            expect(() => parsePlayerAnimations(off)).toThrow(/anchors\[1\]\.x must be inside the 32×48 frame/);
+        });
     });
 });

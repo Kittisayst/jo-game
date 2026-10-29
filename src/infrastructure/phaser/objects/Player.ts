@@ -1,9 +1,13 @@
 import { Physics, Scene } from 'phaser';
 import { soundManager } from '../../audio/SoundManager';
+import { getGameContent } from '../../content/ContentCatalog';
 import { JUMP_SPEED, MOVE_SPEED } from '../physicsConstants';
 
 const WIDTH = 32;
 const HEIGHT = 48;
+/** How long the attack row (6 frames at 24 fps) and the tool row (6 frames at 16 fps) take. */
+const ATTACK_ANIM_MS = 250;
+const TOOL_ANIM_MS = 375;
 
 
 
@@ -29,6 +33,7 @@ export class Player extends Physics.Arcade.Sprite
     private footstepTimer = 0;
     private runDustTimer = 0;
     private attackAnimTimer = 0;
+    private isFainted = false;
 
     onJump?: (x: number, y: number) => void;
     onLand?: (x: number, y: number) => void;
@@ -75,81 +80,44 @@ export class Player extends Physics.Arcade.Sprite
         if (this.scene.anims.exists(idleKey)) this.play(idleKey);
     }
 
+    /** One Phaser animation per sheet row (`<skin>-<name>`), from player-animations.json. */
     private initAnimations (skinId: string): void
     {
         const anims = this.scene.anims;
         const textureKey = `player-skin-${skinId}`;
         const texture = this.scene.textures.get(textureKey);
 
+        // A generated stand-in (no sheet loaded) has a single frame and no animations
         if (!texture || texture.frameTotal <= 1) return;
 
-        const idleKey = `${skinId}-idle`;
-        const runKey = `${skinId}-run`;
-        const jumpKey = `${skinId}-jump`;
-        const fallKey = `${skinId}-fall`;
-
-        if (!anims.exists(idleKey))
+        const { frame, animations } = getGameContent().playerAnimations;
+        for (const [name, animation] of Object.entries(animations))
         {
+            const key = `${skinId}-${name}`;
+            if (anims.exists(key)) continue;
+
+            const start = animation.row * frame.columns;
             anims.create({
-                key: idleKey,
-                frames: anims.generateFrameNumbers(textureKey, { start: 0, end: 3 }),
-                frameRate: 6,
-                repeat: -1,
+                key,
+                frames: anims.generateFrameNumbers(textureKey, { start, end: start + animation.frames - 1 }),
+                frameRate: Math.max(1, animation.fps),
+                repeat: animation.loop ? -1 : 0,
             });
         }
+    }
 
-        if (!anims.exists(runKey))
-        {
-            anims.create({
-                key: runKey,
-                frames: anims.generateFrameNumbers(textureKey, { start: 4, end: 9 }),
-                frameRate: 11,
-                repeat: -1,
-            });
-        }
+    /** The sheet frame number of column `column` in the animation `name`. */
+    private frameOf (name: string, column: number): number
+    {
+        const { frame, animations } = getGameContent().playerAnimations;
+        return animations[name].row * frame.columns + column;
+    }
 
-        if (!anims.exists(jumpKey))
-        {
-            anims.create({
-                key: jumpKey,
-                frames: [{ key: textureKey, frame: 10 }],
-                frameRate: 1,
-            });
-        }
-
-        if (!anims.exists(fallKey))
-        {
-            anims.create({
-                key: fallKey,
-                frames: [{ key: textureKey, frame: 11 }],
-                frameRate: 1,
-            });
-        }
-
-        if (texture.frameTotal > 15)
-        {
-            const attackKey = `${skinId}-attack`;
-            const wallKey = `${skinId}-wall`;
-
-            if (!anims.exists(attackKey))
-            {
-                anims.create({
-                    key: attackKey,
-                    frames: anims.generateFrameNumbers(textureKey, { start: 12, end: 14 }),
-                    frameRate: 18,
-                    repeat: 0,
-                });
-            }
-
-            if (!anims.exists(wallKey))
-            {
-                anims.create({
-                    key: wallKey,
-                    frames: [{ key: textureKey, frame: 15 }],
-                    frameRate: 1,
-                });
-            }
-        }
+    /** Plays an animation of the current skin from its first frame, if the skin has a sheet. */
+    private playAnimation (name: string): void
+    {
+        const key = `${this.currentSkinId}-${name}`;
+        if (this.scene.anims.exists(key)) this.play(key, true);
     }
 
     private static ensureSkinTexture (scene: Scene, skinId: string)
@@ -224,12 +192,21 @@ export class Player extends Physics.Arcade.Sprite
     }
 
 
+    /** Plays the faint row and then stays down; the scene sends the hero home meanwhile. */
+    playFaint (): void
+    {
+        this.isFainted = true;
+        this.setVelocity(0, 0);
+        this.playAnimation('faint');
+    }
+
     triggerDamage (sourceX: number): void
     {
         if (this.isInvincible) return;
 
         this.isInvincible = true;
         this.isKnockedBack = true;
+        this.playAnimation('hurt');
 
         // Apply knockback
         const knockDirection = this.x < sourceX ? -1 : 1;
@@ -266,22 +243,14 @@ export class Player extends Physics.Arcade.Sprite
         this.facingDir = targetX < this.x ? -1 : 1;
         this.setFlipX(this.facingDir < 0);
 
-        const attackKey = `${this.currentSkinId}-attack`;
-        this.attackAnimTimer = 170;
-        if (this.scene.anims.exists(attackKey))
-        {
-            this.play(attackKey, true);
-        }
+        this.attackAnimTimer = TOOL_ANIM_MS;
+        this.playAnimation('tool');
     }
 
     triggerSlashVfx (weaponId: string): void
     {
-        const attackKey = `${this.currentSkinId}-attack`;
-        this.attackAnimTimer = 170;
-        if (this.scene.anims.exists(attackKey))
-        {
-            this.play(attackKey, true);
-        }
+        this.attackAnimTimer = ATTACK_ANIM_MS;
+        this.playAnimation('attack');
 
         const slashX = this.x + (this.facingDir * 30);
         const slashY = this.y;
@@ -401,7 +370,7 @@ export class Player extends Physics.Arcade.Sprite
 
     update (controls: PlayerInputControls | Phaser.Types.Input.Keyboard.CursorKeys, delta = 16.66)
     {
-        if (this.isKnockedBack) return;
+        if (this.isFainted || this.isKnockedBack) return;
 
         const body = this.body as Phaser.Physics.Arcade.Body;
         const onGround = body.blocked.down;
@@ -585,49 +554,31 @@ export class Player extends Physics.Arcade.Sprite
             return;
         }
 
-        const idleKey = `${this.currentSkinId}-idle`;
-        const runKey = `${this.currentSkinId}-run`;
-        const jumpKey = `${this.currentSkinId}-jump`;
-        const fallKey = `${this.currentSkinId}-fall`;
-        const wallKey = `${this.currentSkinId}-wall`;
+        const hasSheet = this.scene.anims.exists(`${this.currentSkinId}-idle`);
+        if (!hasSheet) return;
 
         if (!onGround)
         {
-            if (this.isWallSliding && this.scene.anims.exists(wallKey))
+            if (this.isWallSliding)
             {
-                this.play(wallKey, true);
-            }
-            else if (body.velocity.y < 0)
-            {
-                if (this.scene.anims.exists(jumpKey))
-                {
-                    this.play(jumpKey, true);
-                }
+                this.playAnimation('wall');
             }
             else
             {
-                if (this.scene.anims.exists(fallKey))
-                {
-                    this.play(fallKey, true);
-                }
+                // The air row is not played: the frame follows the vertical speed
+                const vy = body.velocity.y;
+                const column = vy < -JUMP_SPEED * 0.85 ? 0 : vy < -120 ? 1 : vy <= 120 ? 2 : vy < 380 ? 3 : 4;
+                this.anims.stop();
+                this.setFrame(this.frameOf('air', column));
             }
+        }
+        else if (Math.abs(body.velocity.x) > 10)
+        {
+            this.playAnimation('run');
         }
         else
         {
-            if (Math.abs(body.velocity.x) > 10)
-            {
-                if (this.scene.anims.exists(runKey))
-                {
-                    this.play(runKey, true);
-                }
-            }
-            else
-            {
-                if (this.scene.anims.exists(idleKey))
-                {
-                    this.play(idleKey, true);
-                }
-            }
+            this.playAnimation('idle');
         }
     }
 }

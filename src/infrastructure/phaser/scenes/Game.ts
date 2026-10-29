@@ -206,7 +206,7 @@ export class Game extends Scene
 
         this.player = new Player(this, this.level.spawn.x, this.level.spawn.y, this.currentSkinId);
         this.player.setDepth(10);
-        this.heldItem = new HeldItemSprite(this, this.player, getGameContent().handAnchors, getGameContent().heldArt);
+        this.heldItem = new HeldItemSprite(this, this.player, getGameContent().playerAnimations, getGameContent().heldArt);
         this.player.onJump = (x, y) => this.particleManager.emitJumpDust(x, y);
         this.player.onLand = (x, y) =>
         {
@@ -404,6 +404,7 @@ export class Game extends Scene
         const onGameOver = () =>
         {
             this.physics.pause();
+            this.player.playFaint();
         };
         DomainEvents.on(PLAYER_DIED_EVENT, onGameOver);
 

@@ -1,5 +1,5 @@
 import { heldItemFor } from '../../../domain/entities/HeldItem';
-import type { HandAnchor, HandAnchors, HeldArt } from '../../content/HeldItemArt';
+import type { HandAnchor, HeldArt, PlayerAnimations } from '../../content/HeldItemArt';
 import type { Player } from './Player';
 
 /** Skin frames are 32×48 and drawn around the hero's centre. */
@@ -21,7 +21,7 @@ export const heldTextureKey = (itemId: string) => `held-${itemId}`;
 
 /**
  * The weapon or tool in the hero's hand, see "Held item" in CONTEXT.md. A separate image that
- * follows the fist of the current skin frame (from `hand-anchors.json`), mirrored when the hero
+ * follows the fist of the current skin frame (from `player-animations.json`), mirrored when the hero
  * faces left. What is held is decided by the domain's `heldItemFor`; this only draws it.
  */
 export class HeldItemSprite
@@ -35,7 +35,7 @@ export class HeldItemSprite
     constructor (
         private readonly scene: Phaser.Scene,
         private readonly player: Player,
-        private readonly anchors: HandAnchors,
+        private readonly animations: PlayerAnimations,
         private readonly art: Record<string, HeldArt>
     )
     {
@@ -87,6 +87,11 @@ export class HeldItemSprite
         if (itemId !== this.shownItemId) this.show(itemId);
 
         const anchor = this.anchorFor(Number(player.frame.name));
+        if (!anchor || anchor.hidden)
+        {
+            image.setVisible(false);
+            return;
+        }
         const flip = player.flipX;
         const { gripX, gripY } = this.art[itemId] ?? DEFAULT_GRIP;
         const left = player.x - FRAME_WIDTH / 2;
@@ -102,10 +107,10 @@ export class HeldItemSprite
         image.setVisible(player.visible);
     }
 
-    private anchorFor (frame: number): HandAnchor
+    /** The anchor of a sheet frame (row * columns + column), or null for an unused cell. */
+    private anchorFor (frame: number): HandAnchor | null
     {
-        const index = Number.isInteger(frame) && frame >= 0 && frame < this.anchors.frames.length ? frame : 0;
-        return this.anchors.overrides[this.player.skinId]?.[index] ?? this.anchors.frames[index];
+        return this.animations.anchors[frame] ?? null;
     }
 
     private show (itemId: string): void

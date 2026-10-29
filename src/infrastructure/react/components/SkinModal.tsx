@@ -15,7 +15,7 @@ export interface SkinModalProps
     onEquipSkin: (skinId: string) => void;
 }
 
-/** A skin sheet is 16 frames of 32×48; frames 0–3 are the idle loop. */
+/** A skin sheet is a 8×8 grid of 32×48 cells, one animation per row; the first row (frames 0–3) is the idle loop. */
 function SkinSprite ({ skinId, scale }: { skinId: string; scale: number })
 {
     return (
@@ -26,7 +26,7 @@ function SkinSprite ({ skinId, scale }: { skinId: string; scale: number })
                 width: 32 * scale,
                 height: 48 * scale,
                 backgroundImage: `url('assets/characters/player-skin-${skinId}.png')`,
-                backgroundSize: `${512 * scale}px ${48 * scale}px`,
+                backgroundSize: `${256 * scale}px ${384 * scale}px`,
                 ['--frames-width' as string]: `${-128 * scale}px`,
             } as React.CSSProperties}
         />
