@@ -354,6 +354,7 @@ export class Game extends Scene
             if (this.brokenGate && this.brokenGate.gateId === gateId)
             {
                 this.heldItem.useTool(findTool(entities.backpack, this.brokenGate.requirements.requiredTool));
+                this.player.swingToolToward(this.brokenGate.x);
                 this.brokenGate.repair();
                 this.particleManager.emitCelebration(this.brokenGate.x, this.brokenGate.y - 40);
                 soundManager.playPowerUp();

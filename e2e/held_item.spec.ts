@@ -14,7 +14,13 @@ async function held (page: Page): Promise<{ id: string | null; texture: string; 
 test.describe('Held item', () => {
   test('empty hands in the village, the sword in a Stage, the axe while chopping', async ({ page }) => {
     test.setTimeout(90000);
+    const loadErrors: string[] = [];
     page.on('pageerror', err => console.log('PAGE ERROR:', err.message));
+    page.on('console', msg => {
+      if (msg.type() === 'error' && msg.text().includes('Failed to process file')) {
+        loadErrors.push(msg.text());
+      }
+    });
 
     await page.goto('/');
     await page.evaluate(() => window.localStorage.clear());
@@ -29,13 +35,14 @@ test.describe('Held item', () => {
     await page.getByRole('button', { name: /ເລືອກດ່ານ/i }).click();
     await page.locator('.stage-map-node').filter({ hasText: /ບົດທີ 1|Chapter 1/i }).first().click();
     await expect(page.locator('.level-badge')).toContainText(/ບົດທີ 1|Chapter 1/i, { timeout: 12000 });
-    await page.waitForTimeout(800);
-    expect(await held(page)).toMatchObject({ id: 'wooden-sword', texture: 'held-wooden-sword', visible: true });
+    // The scene restarts after the badge changes, so wait for the sword instead of sleeping
+    await expect.poll(() => held(page), { timeout: 10000 }).toMatchObject({ id: 'wooden-sword', texture: 'held-wooden-sword', visible: true });
 
     const bot = new Bot(page, false);
     expect(await bot.goTo(285, { fight: false, tolerance: 20 })).toBe('arrived');
     await page.keyboard.press('KeyE');
     await expect.poll(async () => (await held(page)).id).toBe('axe-t1');
     await expect.poll(async () => (await held(page)).id, { timeout: 3000 }).toBe('wooden-sword');
+    expect(loadErrors).toEqual([]);
   });
 });

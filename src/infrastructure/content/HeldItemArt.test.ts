@@ -4,6 +4,9 @@ import handAnchors from '../../../public/data/hand-anchors.json';
 import { parseHandAnchors, parseHeldArt, SKIN_FRAME_COUNT } from './HeldItemArt';
 
 const copy = <T>(value: T): T => JSON.parse(JSON.stringify(value));
+const heldFiles = new Set(
+    Object.keys(import.meta.glob('../../../public/assets/held/*')).map(p => p.replace('../../../public/', ''))
+);
 
 describe('held item art', () =>
 {
@@ -13,6 +16,18 @@ describe('held item art', () =>
         const holdable = items.filter(i => i.category === 'weapon' || i.category === 'tool').map(i => i.id);
 
         expect(Object.keys(art).sort()).toEqual(holdable.sort());
+    });
+
+    it('points every held image to an existing file in public/assets/held/', () =>
+    {
+        const art = parseHeldArt(items);
+        for (const [id, entry] of Object.entries(art))
+        {
+            if (entry.image)
+            {
+                expect(heldFiles.has(entry.image), `${id} -> ${entry.image}`).toBe(true);
+            }
+        }
     });
 
     it('rejects a grip outside the 32×32 canvas', () =>
