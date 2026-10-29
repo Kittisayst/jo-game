@@ -88,9 +88,12 @@ export class HeldItemSprite
 
         const anchor = this.anchorFor(Number(player.frame.name));
         const flip = player.flipX;
+        const { gripX, gripY } = this.art[itemId] ?? DEFAULT_GRIP;
         const left = player.x - FRAME_WIDTH / 2;
         const top = player.y - FRAME_HEIGHT / 2;
 
+        // Mirror gripX explicitly when flipped because Phaser's flipX does not mirror originX
+        image.setOrigin((flip ? HELD_CANVAS - gripX : gripX) / HELD_CANVAS, gripY / HELD_CANVAS);
         image.setPosition(left + (flip ? FRAME_WIDTH - anchor.x : anchor.x), top + anchor.y);
         image.setAngle(flip ? -anchor.angle : anchor.angle);
         image.setFlipX(flip);
@@ -109,10 +112,7 @@ export class HeldItemSprite
     {
         const key = heldTextureKey(itemId);
         HeldItemSprite.ensurePlaceholder(this.scene, itemId);
-
-        const { gripX, gripY } = this.art[itemId] ?? DEFAULT_GRIP;
-        // When the item is flipped the grip mirrors too, so the origin stays on the fist
-        this.image.setTexture(key).setOrigin(gripX / HELD_CANVAS, gripY / HELD_CANVAS);
+        this.image.setTexture(key);
         this.shownItemId = itemId;
     }
 

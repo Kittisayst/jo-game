@@ -103,7 +103,7 @@
     "maxStack": 1,
     "icon": "🪓",
     "iconImage": "assets/items/axe-t1.png",
-    "held": { "image": "assets/held/wood.png", "gripX": 16, "gripY": 26 }
+    "held": { "image": "assets/held/axe-t1.png", "gripX": 16, "gripY": 26 }
   },
   {
     "id": "pickaxe-t1",
