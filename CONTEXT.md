@@ -38,24 +38,49 @@ _Avoid_: entity ID, entity registry/lookup (for gameplay entities — reserve ID
 **Pairing is optional, not automatic**:
 Not every infrastructure game object needs a paired domain Entity. A pairing exists only when there's an actual rule or piece of state for the domain to own — health, AI decisions, Credit, and the like. A game object that is pure geometry with no rules (e.g. a static floating platform — just a position and a collision box) stays entirely inside infrastructure, with nothing in `domain/` or `application/` for it at all. Don't create an Entity speculatively "because this is a game object" — wait until a real rule shows up.
 
-**Chapter**:
-One lesson of the curriculum: one Textbook, one Stage, one Boss. Beating the Boss for the first time completes the Chapter.
+**Realm**:
+One subject of the curriculum and one colour of portal: ten Stages (numbers 10k+1 to 10k+10), one Textbook, a Mini-boss at Stage 5 and a Boss at Stage 10. There are ten Realms. Moving into the next Realm needs the Portal block of the Realm before it. This replaces the earlier "Chapter" (one Textbook, one Stage, one Boss).
+_Avoid_: chapter, world, level
+
+**Stage number**:
+A Stage's place in the whole game, 1 to 100. The Realm of Stage n is ceil(n / 10). A Stage that is not built yet is a placeholder: it is shown grey on the Stage map and cannot be entered.
+
+**Lesson number**:
+A Textbook page written `<stage number>-<order>`, such as `12-3` (the third lesson of Stage 12). The question at the end of a Stage is drawn from that Stage's lessons.
 
 **Stage**:
-The explorable run of a Chapter, walked left to right and divided into Zones. Its layout is infrastructure-owned spatial data loaded from `stages.json` (zones, spawn points, resource nodes, gate) and a level JSON (platforms, world width); that layout has no domain Entity (see "Pairing is optional, not automatic"). Enemies and Resource nodes respawn each time the player enters.
+One explorable run of a Realm, walked left to right and divided into Zones. Its layout is infrastructure-owned spatial data loaded from `stages.json` (everything in a Stage is an entry of its `contents`) and a level JSON or a generated layout (platforms, world width); that layout has no domain Entity (see "Pairing is optional, not automatic"). Enemies respawn each time the player enters, and so do Resource nodes that regrow "on enter" (see Regrow).
 _Avoid_: level, map
 
 **Zone**:
 One section of a Stage (forest, cavern, Broken Gate, boss arena), each with its own enemies and resources.
 
 **Resource node**:
-A tree, stone, iron vein or herb standing in a Zone that gives Materials when harvested; the hero must stand right next to it (about the reach of the tool), not just near its picture. It needs a matching tool (an axe for trees, a pickaxe for stone and iron; herbs need none) and a number of Strikes, different for each node (a tree takes 3). It respawns, intact, each time the player enters the Stage.
+A tree, stone, iron vein, herb or other plant standing in a Zone that gives Materials when harvested; the hero must stand right next to it (about the reach of the tool), not just near its picture. It needs a matching tool (an axe for trees, a pickaxe for stone and iron; herbs need none) and a number of Strikes, different for each node (a tree takes 3). Its kind comes from `nodes.json`, not from code. It comes back according to its Regrow rule.
+
+**Regrow**:
+How a Resource node comes back after it is depleted. "On enter": intact each time the player enters the Stage (trees, stone, iron). "Minutes": it becomes a Sapling and can be harvested again only after that much real time has passed, even while the game is closed (small plants).
+
+**Seed**:
+An item that may drop when a plant Resource node is harvested (a chance set in `nodes.json`). Planted in a Plot of the Garden it grows into that plant.
+
+**Sapling**:
+The picture and state of a plant Resource node that is still growing; it cannot be harvested yet.
+
+**Garden**:
+A separate scene reached from the Village Hub where Seeds are planted in Plots. No watering: plant, wait, harvest.
+
+**Plot**:
+One planting spot of the Garden: empty, growing or ready. The Garden starts with six and can be expanded with Materials.
+
+**Storage chest**:
+A chest in the Village Hub holding 40 items. What is in it is never lost on death.
 
 **Held item**:
 What the hero visibly holds: nothing in the Village Hub, the equipped weapon in a Stage, and for a moment the matching tool while striking a Resource node or repairing a gate. It is only a picture; reach and damage come from the weapon's stats.
 
 **Mini-boss**:
-A stronger enemy that guards a Zone and drops story Materials (the Cave Guardian drops crystal). Unlike normal enemies it has special attacks, each announced by a Telegraph. Touching it or being hit by its attack costs one heart, like every other enemy.
+A stronger enemy at Stage 5 of a Realm that drops one Portal shard (the Cave Guardian also drops crystal). Unlike normal enemies it has special attacks, each announced by a Telegraph. Touching it or being hit by its attack costs one heart, like every other enemy.
 
 **Telegraph**:
 The warning an enemy gives before a special attack (a red flash and a mark over its head), long enough for the player to react. An attack never lands without one.
@@ -65,7 +90,7 @@ One press of the interact key on a Resource node. The node gives its Materials o
 _Avoid_: hit (a hit is damage to Health), hp (that is Health)
 
 **Credit**:
-The currency earned only by learning (passing a Book exam, Daily Practice, finishing a Chapter by answering the Boss question). Killing enemies never gives Credit, and there is no separate coin currency; the Wallet holds Credit only.
+The currency earned only by learning (passing a Book exam, Daily Practice, answering the question at the end of a Stage, finishing a Realm's Boss). Killing enemies never gives Credit, and there is no separate coin currency; the Wallet holds Credit only.
 _Avoid_: coins, money, gold
 
 **Health**:
@@ -73,15 +98,40 @@ The player's hit points, shown as hearts. Dropping to zero sends the player back
 _Avoid_: lives, score, game over
 
 **Material**:
-A resource gathered only by exploring a Stage (wood, stone, iron ore, herb, fiber, crystal, boss core). Lost 50% on death or emergency retreat, except story Materials (crystal, boss core), which are always kept.
+A resource gained by exploring a Stage, or grown from a Seed that exploring gave (wood, stone, iron ore, herb, fiber, crystal, boss core). Credit still comes only from learning. Lost 50% on death or emergency retreat (Seeds too), except story Materials (crystal, boss core, Portal shards and blocks), which are always kept.
 _Avoid_: resource (for the item; "Resource node" is the place it is harvested from)
 
+**Portal shard**:
+What the Boss (3) and the Mini-boss (1) of a Realm drop every time they are defeated. A story Material of the Realm's colour.
+
+**Portal block**:
+Five Portal shards of one colour, plus the Realm's Materials, crafted at the Forge once the Realm's Textbook exam is passed. Placed once in the World Gate, it opens the next Realm for good. A story Material.
+
+**Durability**:
+How worn a weapon, tool or Armor piece is. It goes down by one per attack, Strike or hit taken. At zero the item is Broken: it stays in the Backpack but works worse (a weapon does half damage, a tool needs twice the Strikes, Armor gives no Armor hearts). Repaired at the Forge with Materials, never with Credit. The starting wooden sword never wears.
+_Avoid_: HP (that is Health)
+
+**Armor**:
+Three pieces worn at once (head, body, feet). Each gives Armor hearts; boots may add a little speed. Shown as icons only, not drawn on the hero.
+
+**Armor heart**:
+Protection that is lost before Health and comes back when the player returns to the Village Hub.
+
+**Potion**:
+A drink made at the Workshop: heal, strength (+50% damage for 60 s), armor (+1 Armor heart) or speed (+30% for 60 s). Drunk from the Quick slot with Q.
+
+**Quick slot**:
+The one Backpack slot chosen to be drunk with Q.
+
+**Tutorial step**:
+One hint of the first Stage, shown until the thing it teaches has been done (walk, harvest, strike a tree, fight, open the Backpack, finish the Stage, then read, craft and plant in the Village). Defined in `tutorial.json`; done steps are saved.
+
 **Textbook**:
-A purchasable Book of short pages for one Chapter. Passing its exam unlocks the Recipes tied to it.
+A purchasable Book of short pages for one Realm. Passing its exam unlocks the Recipes tied to it.
 _Avoid_: lesson, course
 
 **Village Hub**:
-The safe place between Stages with no enemies; the player walks to buildings (Library, Academy, Workshop, Forge, World Gate) and returns here to heal and save.
+The safe place between Stages with no enemies; the player walks to buildings (Library, Academy, Workshop, Forge, World Gate), the Garden door and the Storage chest and returns here to heal and save.
 
 **Skin**:
 A cosmetic look for the player character, bought once with Credit and kept forever. The free default is always owned. Skins change nothing about gameplay. Buying and changing a Skin both happen only at the Skin shop in the Village Hub, never from a menu.
@@ -94,7 +144,10 @@ The player's Credit balance. It holds no other currency.
 The player's carried items (Materials, tools, weapons, crafted gear) in a fixed number of slots; this is what is at risk when the player dies.
 
 **Broken Gate**:
-The gate between the cavern Zone and the boss arena. It stays closed until the player brings the right tool and a Repair Kit and answers a question from the Chapter's Textbook.
+The gate between the cavern Zone and the boss arena of Stage 10 of Realm 1. It stays closed until the player brings the right tool and a Repair Kit and answers a question from the Realm's Textbook.
+
+**World Gate**:
+The gate in the Village Hub that chooses a Stage and holds the ten Portal slots. Placing a Portal block opens the next Realm.
 
 **Game state**:
 Everything that makes up one player's game (Wallet, Backpack, Health, Equipment, Textbook progress, Skins, stage progress, settings), held in one `GameState` aggregate. Its members are created once and changed in place when a save is loaded.

@@ -1072,5 +1072,210 @@
       "license": "MIT (Project Original)",
       "anchor": "grip (16, 26), pointing up; rotated and mirrored in game"
     }
-  ]
+  ],
+  "plannedAssets": {
+    "note": "Assets planned in docs/plans/2026-10-29-hundred-stages-realms.md, section 4. Not counted in totalAssets until the file exists.",
+    "items": [
+      {
+        "group": "system",
+        "id": "realm-icons",
+        "description": "10 realm icons, one per portal colour",
+        "count": 10,
+        "size": "32x32",
+        "phase": "1",
+        "method": "pxl recolour",
+        "status": "planned"
+      },
+      {
+        "group": "system",
+        "id": "map-slots",
+        "description": "Stage map slots: open, locked, cleared, grey placeholder, mini-boss and boss marks",
+        "count": 6,
+        "size": "UI",
+        "phase": "1",
+        "method": "CSS/SVG",
+        "status": "planned"
+      },
+      {
+        "group": "system",
+        "id": "tutorial-signs",
+        "description": "Tutorial arrow/sign and stage exit marker",
+        "count": 2,
+        "size": "sprite",
+        "phase": "3-4",
+        "method": "pxl",
+        "status": "planned"
+      },
+      {
+        "group": "system",
+        "id": "durability-ui",
+        "description": "Durability bar, broken mark, warning icon",
+        "count": 3,
+        "size": "UI",
+        "phase": "5",
+        "method": "CSS/SVG",
+        "status": "planned"
+      },
+      {
+        "group": "system",
+        "id": "armor-hearts",
+        "description": "Armor heart full/empty",
+        "count": 2,
+        "size": "HUD",
+        "phase": "6",
+        "method": "pxl",
+        "status": "planned"
+      },
+      {
+        "group": "system",
+        "id": "potion-effect-icons",
+        "description": "Strength, armor, speed effect icons and quick slot",
+        "count": 4,
+        "size": "24x24",
+        "phase": "6",
+        "method": "pxl",
+        "status": "planned"
+      },
+      {
+        "group": "system",
+        "id": "potion-icons",
+        "description": "Strength, armor and speed potions",
+        "count": 3,
+        "size": "32x32",
+        "phase": "6",
+        "method": "pxl",
+        "status": "planned"
+      },
+      {
+        "group": "system",
+        "id": "portal-shards-blocks",
+        "description": "Portal shard and portal block, 10 colours each",
+        "count": 20,
+        "size": "32x32",
+        "phase": "7",
+        "method": "pxl 2 shapes x 10 colours",
+        "status": "planned"
+      },
+      {
+        "group": "system",
+        "id": "world-gate-slots",
+        "description": "World Gate with 10 portal slots, closed/open per colour",
+        "count": 1,
+        "size": "sprite + glow",
+        "phase": "7",
+        "method": "pxl + code",
+        "status": "planned"
+      },
+      {
+        "group": "system",
+        "id": "saplings-seeds",
+        "description": "Sapling sprite and seed icon per crop",
+        "count": null,
+        "size": "node size / 32x32",
+        "phase": "8",
+        "method": "pxl",
+        "status": "planned"
+      },
+      {
+        "group": "system",
+        "id": "garden-backdrop-door",
+        "description": "Garden backdrop and garden door in the village",
+        "count": 2,
+        "size": "as backgrounds",
+        "phase": "9",
+        "method": "drawn/generated",
+        "status": "planned"
+      },
+      {
+        "group": "system",
+        "id": "garden-plots",
+        "description": "Plot states: empty, planted, growing, ready (+ crop result per plant)",
+        "count": 4,
+        "size": "sprite",
+        "phase": "9",
+        "method": "pxl",
+        "status": "planned"
+      },
+      {
+        "group": "system",
+        "id": "storage-chest",
+        "description": "Storage chest closed/open",
+        "count": 2,
+        "size": "sprite",
+        "phase": "9",
+        "method": "pxl",
+        "status": "planned"
+      },
+      {
+        "group": "system",
+        "id": "new-sfx",
+        "description": "Repair, item broken, drink potion, plant, harvest crop, gate opens, tutorial step done",
+        "count": 7,
+        "size": "synth",
+        "phase": "4-9",
+        "method": "SoundManager",
+        "status": "planned"
+      },
+      {
+        "group": "realm-2",
+        "id": "crystal-cave-backgrounds",
+        "description": "Backdrops for normal stage and boss room",
+        "count": 2,
+        "size": "1280x720",
+        "phase": "10",
+        "method": "drawn/generated",
+        "status": "planned"
+      },
+      {
+        "group": "realm-2",
+        "id": "crystal-cave-tiles",
+        "description": "Ground tile and platform",
+        "count": 2,
+        "size": "tile",
+        "phase": "10",
+        "method": "recolour + paint over",
+        "status": "planned"
+      },
+      {
+        "group": "realm-2",
+        "id": "nodes",
+        "description": "Crystal wood, copper, cave mushroom",
+        "count": 3,
+        "size": "node size",
+        "phase": "10",
+        "method": "pxl",
+        "status": "planned"
+      },
+      {
+        "group": "realm-2",
+        "id": "materials",
+        "description": "Icons for the 3 new materials",
+        "count": 3,
+        "size": "32x32",
+        "phase": "10",
+        "method": "pxl",
+        "status": "planned"
+      },
+      {
+        "group": "realm-2",
+        "id": "enemies",
+        "description": "2 recoloured enemies, mini-boss, boss",
+        "count": 4,
+        "size": "code",
+        "phase": "10",
+        "method": "code + data",
+        "status": "planned"
+      },
+      {
+        "group": "realm-2",
+        "id": "gear",
+        "description": "Tier 2 sword, 3 tools (icon + held), 3 armor icons",
+        "count": null,
+        "size": "32x32",
+        "phase": "10",
+        "method": "pxl",
+        "status": "planned"
+      }
+    ]
+  }
 }
