@@ -3,7 +3,7 @@ import { Physics, Scene } from 'phaser';
 const TEXTURE_KEY = 'spike-texture';
 const FALLBACK_KEY = 'hazard-spike';
 const WIDTH = 64;
-const HEIGHT = 24;
+const HEIGHT = 28;
 
 /**
  * A static hazard spike object — pure geometry hazard with no domain entity.
@@ -27,7 +27,7 @@ export class Spike extends Physics.Arcade.Sprite
         if (body)
         {
             body.setSize(WIDTH - 12, 14);
-            body.setOffset(6, 10);
+            body.setOffset(6, 14);
         }
     }
 

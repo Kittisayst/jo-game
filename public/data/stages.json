@@ -42,7 +42,7 @@
         "enemySpawns": [
           { "enemyId": "rock-golem", "type": "slime-armored", "x": 1300, "y": 580, "patrolDistance": 140, "speed": 45 },
           { "enemyId": "rock-golem", "type": "slime-armored", "x": 1550, "y": 580, "patrolDistance": 90, "speed": 35 },
-          { "enemyId": "cave-guardian", "type": "slime-armored", "x": 1850, "y": 560, "patrolDistance": 160, "speed": 40, "scale": 1.8, "sign": "⚠️ ຜູ້ພິທັກຖ້ຳ Cave Guardian\n(ປາບເພື່ອຮັບຜລຶກແກ້ວ 💎)" }
+          { "enemyId": "cave-guardian", "type": "slime-armored", "x": 1850, "y": 560, "patrolDistance": 160, "speed": 40, "sign": "⚠️ ຜູ້ພິທັກຖ້ຳ Cave Guardian\n(ປາບເພື່ອຮັບຜລຶກແກ້ວ 💎)" }
         ]
       },
       {

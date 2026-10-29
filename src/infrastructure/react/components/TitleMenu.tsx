@@ -158,7 +158,10 @@ export function TitleMenu ({
 
             <main className="title-content">
                 <header className="title-logo">
-                    <span className="title-eyebrow">KNOWLEDGE QUEST</span>
+                    <span className="title-eyebrow">
+                        <img src="assets/ui/logo_crest.png" alt="" width={36} height={36} className="pixel-art" />
+                        <span>KNOWLEDGE QUEST</span>
+                    </span>
                     <h1 className="title-name">ພະຈົນໄພຄວາມຮູ້</h1>
                     <p className="title-tagline">ຮຽນຮູ້ · ສ້າງ · ສຳຫຼວດ · ກັບບ້ານ</p>
                 </header>

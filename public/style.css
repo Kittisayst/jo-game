@@ -1486,6 +1486,7 @@ button,
     justify-content: center;
     font-size: 1.8rem;
     flex-shrink: 0;
+    overflow: hidden;
 }
 
 .dialogue-speaker-wrap {
@@ -3560,10 +3561,14 @@ button,
     to { opacity: 1; }
 }
 
+.pixel-art {
+    image-rendering: pixelated;
+}
+
 .title-bg {
     position: absolute;
     inset: -5%;
-    background: url('assets/backgrounds/bg_sky_islands.jpg') center 40% / cover no-repeat;
+    background: url('assets/backgrounds/bg_title.jpg') center 40% / cover no-repeat;
     image-rendering: pixelated;
     animation: titleDrift 46s ease-in-out infinite alternate;
     will-change: transform;
@@ -3961,6 +3966,7 @@ button,
     border-radius: 50%;
     background: linear-gradient(135deg, #7c3aed, #f472b6);
     box-shadow: 0 0 18px rgba(244, 114, 182, 0.5);
+    overflow: hidden;
 }
 
 .outfit-title {

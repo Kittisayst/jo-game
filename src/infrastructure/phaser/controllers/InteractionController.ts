@@ -149,9 +149,9 @@ export class InteractionController
 
         if (result.success)
         {
-            soundManager.playCoin();
+            if (node.type === 'stone' || node.type === 'iron-vein') soundManager.playMine(); else soundManager.playChop(); soundManager.playCoin();
             node.harvested = true;
-            node.graphic.clear();
+            node.markHarvestedVisual();
             scene.particleManager.emitCelebration(node.x, node.y - 20);
 
             EventBus.emit('backpack-changed');

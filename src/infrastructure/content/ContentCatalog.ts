@@ -56,6 +56,7 @@ export function parseItems (raw: unknown): ItemDefinition[]
             category: v.asOneOf(item.category, ITEM_CATEGORIES, `${p}.category`),
             maxStack,
             icon: v.asText(item.icon, `${p}.icon`),
+            iconImage: v.optionalString(item.iconImage, `${p}.iconImage`),
             story: v.optionalBoolean(item.story, `${p}.story`),
             toolType: v.optionalString(item.toolType, `${p}.toolType`),
             tier: v.optionalNumber(item.tier, `${p}.tier`),
@@ -95,6 +96,7 @@ export function parseBooks (raw: unknown): BookDefinition[]
                     title: v.asText(page.title, `${pp}.title`),
                     content: v.asText(page.content, `${pp}.content`),
                     keyPoints: v.asArray(page.keyPoints, `${pp}.keyPoints`).map((k, n) => v.asText(k, `${pp}.keyPoints[${n}]`)),
+                    illustration: v.optionalString(page.illustration, `${pp}.illustration`),
                 };
             }),
         };

@@ -17,6 +17,22 @@ import {
 } from '../../application/UpdateSettingsUseCase';
 import { EventBus } from '../EventBus';
 
+// Village Hub melody (Warm pastoral-cyber C major pentatonic)
+const VILLAGE_MELODY = [
+    392.00, 0, 440.00, 0, 523.25, 0, 659.25, 0,
+    587.33, 0, 523.25, 0, 440.00, 0, 392.00, 0,
+    349.23, 0, 440.00, 0, 523.25, 0, 587.33, 0,
+    523.25, 0, 440.00, 392.00, 329.63, 0, 0, 0,
+];
+
+// Village Hub bassline (Gentle warm walking root notes)
+const VILLAGE_BASS = [
+    130.81, 0, 196.00, 0, 130.81, 0, 196.00, 0,
+    110.00, 0, 164.81, 0, 110.00, 0, 164.81, 0,
+    87.31, 0, 130.81, 0, 87.31, 0, 130.81, 0,
+    98.00, 0, 146.83, 0, 130.81, 0, 196.00, 0,
+];
+
 // Adventure melody notes (C major energetic 8-bit chiptune)
 const ADVENTURE_MELODY = [
     523.25, 0, 659.25, 0, 783.99, 880.00, 783.99, 0,
@@ -83,7 +99,7 @@ export class SoundManager
     private bgmIntervalId: number | null = null;
     private nextNoteTime = 0;
     private currentStep = 0;
-    private currentTheme: 'adventure' | 'boss' | 'title' = 'adventure';
+    private currentTheme: 'village' | 'adventure' | 'boss' | 'title' = 'adventure';
     private isBgmRunning = false;
 
     constructor ()
@@ -188,7 +204,7 @@ export class SoundManager
 
     // --- BGM Engine ---
 
-    startBgm (theme: 'adventure' | 'boss' | 'title' = 'adventure'): void
+    startBgm (theme: 'village' | 'adventure' | 'boss' | 'title' = 'adventure'): void
     {
         this.currentTheme = theme;
         this.isBgmRunning = true;
@@ -247,7 +263,8 @@ export class SoundManager
 
             const isBoss = this.currentTheme === 'boss';
             const isTitle = this.currentTheme === 'title';
-            const tempo = isBoss ? 165 : (isTitle ? 120 : 138);
+            const isVillage = this.currentTheme === 'village';
+            const tempo = isBoss ? 165 : (isTitle ? 120 : (isVillage ? 104 : 138));
             const secondsPerBeat = 60 / tempo;
             const stepDuration = secondsPerBeat / 4; // 16th notes
 
@@ -257,21 +274,22 @@ export class SoundManager
                 this.nextNoteTime += stepDuration;
                 const totalSteps = isBoss
                     ? BOSS_MELODY.length
-                    : (isTitle ? TITLE_MELODY.length : ADVENTURE_MELODY.length);
+                    : (isTitle ? TITLE_MELODY.length : (isVillage ? VILLAGE_MELODY.length : ADVENTURE_MELODY.length));
                 this.currentStep = (this.currentStep + 1) % totalSteps;
             }
         }, 35);
     }
 
-    private playStep (step: number, time: number, theme: 'adventure' | 'boss' | 'title'): void
+    private playStep (step: number, time: number, theme: 'village' | 'adventure' | 'boss' | 'title'): void
     {
         if (!this.ctx || !this.bgmGain) return;
 
         const isBoss = theme === 'boss';
         const isTitle = theme === 'title';
-        const melodyTrack = isBoss ? BOSS_MELODY : (isTitle ? TITLE_MELODY : ADVENTURE_MELODY);
-        const bassTrack = isBoss ? BOSS_BASS : (isTitle ? TITLE_BASS : ADVENTURE_BASS);
-        const noteDuration = isBoss ? 0.09 : (isTitle ? 0.14 : 0.11);
+        const isVillage = theme === 'village';
+        const melodyTrack = isBoss ? BOSS_MELODY : (isTitle ? TITLE_MELODY : (isVillage ? VILLAGE_MELODY : ADVENTURE_MELODY));
+        const bassTrack = isBoss ? BOSS_BASS : (isTitle ? TITLE_BASS : (isVillage ? VILLAGE_BASS : ADVENTURE_BASS));
+        const noteDuration = isBoss ? 0.09 : (isTitle ? 0.14 : (isVillage ? 0.16 : 0.11));
 
         // Play melody note if not rest (0)
         const melodyFreq = melodyTrack[step % melodyTrack.length];
@@ -280,10 +298,10 @@ export class SoundManager
             const osc = this.ctx.createOscillator();
             const noteGain = this.ctx.createGain();
 
-            osc.type = isBoss ? 'sawtooth' : (isTitle ? 'sine' : 'square');
+            osc.type = isBoss ? 'sawtooth' : (isTitle ? 'sine' : (isVillage ? 'triangle' : 'square'));
             osc.frequency.setValueAtTime(melodyFreq, time);
 
-            noteGain.gain.setValueAtTime(isTitle ? 0.28 : 0.35, time);
+            noteGain.gain.setValueAtTime(isTitle ? 0.28 : (isVillage ? 0.30 : 0.35), time);
             noteGain.gain.exponentialRampToValueAtTime(0.01, time + noteDuration);
 
             osc.connect(noteGain);
@@ -1025,6 +1043,98 @@ export class SoundManager
 
         osc.start(now);
         osc.stop(now + 0.10);
+    }
+
+    /**
+     * Tree / Herb Harvest Sound: crisp woody chop thwack
+     */
+    playChop (): void
+    {
+        if (this._isMuted) return;
+        this.initContext();
+        if (!this.ctx) return;
+
+        const now = this.ctx.currentTime;
+        const pitchFactor = 1 + (Math.random() - 0.5) * 0.1;
+
+        const thud = this.ctx.createOscillator();
+        const thudGain = this.ctx.createGain();
+        const filter = this.ctx.createBiquadFilter();
+
+        thud.type = 'triangle';
+        thud.frequency.setValueAtTime(195 * pitchFactor, now);
+        thud.frequency.exponentialRampToValueAtTime(62 * pitchFactor, now + 0.09);
+
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(520, now);
+
+        thudGain.gain.setValueAtTime(0.24, now);
+        thudGain.gain.exponentialRampToValueAtTime(0.001, now + 0.09);
+
+        thud.connect(filter);
+        filter.connect(thudGain);
+        this.connectOutput(thudGain);
+
+        thud.start(now);
+        thud.stop(now + 0.09);
+
+        const snap = this.ctx.createOscillator();
+        const snapGain = this.ctx.createGain();
+        snap.type = 'square';
+        snap.frequency.setValueAtTime(420 * pitchFactor, now);
+        snap.frequency.exponentialRampToValueAtTime(180 * pitchFactor, now + 0.035);
+        snapGain.gain.setValueAtTime(0.09, now);
+        snapGain.gain.exponentialRampToValueAtTime(0.001, now + 0.035);
+        snap.connect(snapGain);
+        this.connectOutput(snapGain);
+        snap.start(now);
+        snap.stop(now + 0.035);
+    }
+
+    /**
+     * Stone / Ore Mining Sound: ringing metallic pickaxe strike with rock crunch
+     */
+    playMine (): void
+    {
+        if (this._isMuted) return;
+        this.initContext();
+        if (!this.ctx) return;
+
+        const now = this.ctx.currentTime;
+        const pitchFactor = 1 + (Math.random() - 0.5) * 0.08;
+
+        const freqs = [1320 * pitchFactor, 2180 * pitchFactor];
+        freqs.forEach((freq) =>
+        {
+            if (!this.ctx) return;
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(freq, now);
+            osc.frequency.exponentialRampToValueAtTime(freq * 0.94, now + 0.14);
+
+            gain.gain.setValueAtTime(0.2, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.14);
+
+            osc.connect(gain);
+            this.connectOutput(gain);
+
+            osc.start(now);
+            osc.stop(now + 0.14);
+        });
+
+        const crunch = this.ctx.createOscillator();
+        const crunchGain = this.ctx.createGain();
+        crunch.type = 'sawtooth';
+        crunch.frequency.setValueAtTime(160 * pitchFactor, now);
+        crunch.frequency.exponentialRampToValueAtTime(55, now + 0.07);
+        crunchGain.gain.setValueAtTime(0.14, now);
+        crunchGain.gain.exponentialRampToValueAtTime(0.001, now + 0.07);
+        crunch.connect(crunchGain);
+        this.connectOutput(crunchGain);
+        crunch.start(now);
+        crunch.stop(now + 0.07);
     }
 }
 

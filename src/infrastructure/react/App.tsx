@@ -352,10 +352,12 @@ function App ()
         || walletBalance !== STARTER_BOOK_CREDIT_RESERVE
         || skinManager.ownedSkinIds.length > 1;
 
+    const weaponCatalogEntry = entities.itemCatalog.get(equippedWeaponId);
     const equippedWeaponDef = {
         id: equippedWeaponId,
         name: WEAPON_CONFIGS[equippedWeaponId]?.name ?? WEAPON_CONFIGS['wooden-sword'].name,
-        icon: '🗡️',
+        icon: weaponCatalogEntry?.icon ?? '🗡️',
+        iconImage: weaponCatalogEntry?.iconImage,
     };
 
     const backpackSlotsUsed = useMemo(() => {
@@ -529,6 +531,7 @@ function App ()
                         id: equippedWeaponDef.id,
                         name: equippedWeaponDef.name,
                         icon: equippedWeaponDef.icon,
+                        iconImage: equippedWeaponDef.iconImage,
                     }}
                     isGamePaused={isGamePaused}
                     health={health}

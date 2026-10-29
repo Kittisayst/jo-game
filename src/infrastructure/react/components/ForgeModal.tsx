@@ -4,6 +4,7 @@ import { WeaponUpgradeRecipe, upgradeWeaponTierUseCase } from '../../../applicat
 import { getGameContent } from '../../content/ContentCatalog';
 import { entities } from '../../composition';
 import { soundManager } from '../../audio/SoundManager';
+import { ItemIcon } from './ItemIcon';
 
 interface ForgeModalProps
 {
@@ -156,8 +157,8 @@ export const ForgeModal: React.FC<ForgeModalProps> = ({ isOpen, onClose }) =>
                                             >
                                                 <div>
                                                     <div className="flex justify-between items-start">
-                                                        <div className="flex items-center gap-2">
-                                                            <span className="text-2xl">{resultItem?.icon || '⚔️'}</span>
+                                                        <div className="flex items-center gap-2.5">
+                                                            <ItemIcon iconImage={resultItem?.iconImage} icon={resultItem?.icon || '⚔️'} size={32} />
                                                             <div>
                                                                 <h4 className="font-bold text-white">{resultItem?.name}</h4>
                                                                 <span className="text-xs text-orange-400 font-semibold">
@@ -184,11 +185,12 @@ export const ForgeModal: React.FC<ForgeModalProps> = ({ isOpen, onClose }) =>
                                                                 return (
                                                                     <span
                                                                         key={ing.itemId}
-                                                                        className={`px-1.5 py-0.5 rounded border text-xs ${
+                                                                        className={`px-1.5 py-0.5 rounded border text-xs flex items-center gap-1 ${
                                                                             ok ? 'bg-emerald-950/40 border-emerald-500/40 text-emerald-300' : 'bg-rose-950/40 border-rose-500/40 text-rose-300'
                                                                         }`}
                                                                     >
-                                                                        {itm?.name}: {count}/{ing.count}
+                                                                        <ItemIcon iconImage={itm?.iconImage} icon={itm?.icon} size={14} />
+                                                                        <span>{itm?.name}: {count}/{ing.count}</span>
                                                                     </span>
                                                                 );
                                                             })}
@@ -234,7 +236,7 @@ export const ForgeModal: React.FC<ForgeModalProps> = ({ isOpen, onClose }) =>
                                                 className="p-5 rounded-xl border bg-slate-800/80 border-slate-700/80 flex flex-col md:flex-row items-center justify-between gap-4"
                                             >
                                                 <div className="flex items-center gap-3">
-                                                    <span className="text-3xl">{wItem?.icon || '⚔️'}</span>
+                                                    <ItemIcon iconImage={wItem?.iconImage} icon={wItem?.icon || '⚔️'} size={36} />
                                                     <div>
                                                         <h4 className="font-bold text-white text-base">
                                                             {wItem?.name} {currentLevel > 0 ? `+${currentLevel}` : ''}
@@ -269,11 +271,12 @@ export const ForgeModal: React.FC<ForgeModalProps> = ({ isOpen, onClose }) =>
                                                                 return (
                                                                     <span
                                                                         key={ing.itemId}
-                                                                        className={`px-2 py-1 rounded border ${
+                                                                        className={`px-2 py-1 rounded border flex items-center gap-1 ${
                                                                             ok ? 'bg-emerald-950/40 border-emerald-500/40 text-emerald-300' : 'bg-rose-950/40 border-rose-500/40 text-rose-300'
                                                                         }`}
                                                                     >
-                                                                        {itm?.name}: {count}/{ing.count}
+                                                                        <ItemIcon iconImage={itm?.iconImage} icon={itm?.icon} size={14} />
+                                                                        <span>{itm?.name}: {count}/{ing.count}</span>
                                                                     </span>
                                                                 );
                                                             })}

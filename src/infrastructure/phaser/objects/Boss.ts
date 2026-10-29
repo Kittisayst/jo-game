@@ -2,16 +2,16 @@ import { Physics, Scene } from 'phaser';
 import { Boss as BossEntity, BossPhase } from '../../../domain/entities/Boss';
 import { damageBossUseCase } from '../../../application/DamageBossUseCase';
 
-const TEXTURE_KEY = 'boss-king-slime';
+const TEXTURE_KEY = 'boss-hardware-overlord';
 const WIDTH = 96;
-const HEIGHT = 72;
+const HEIGHT = 80;
 
 export type BossAction = 'jump_slam' | 'roll_dash' | 'summon';
 export type BossFsmState = 'idle' | 'telegraph' | 'jump_slam' | 'roll_dash' | 'summon' | 'recover';
 
 /**
- * Phaser arcade sprite representing the King Slime Boss.
- * Features a multi-phase AI state machine (Royal Phase 1, Enraged Phase 2, Berserk Phase 3).
+ * Phaser arcade sprite representing the Hardware Overlord Boss.
+ * Features a multi-phase AI state machine (Phase 1, Enraged Phase 2, Berserk Phase 3).
  * Pairs with the Boss domain entity — see CONTEXT.md.
  */
 export class Boss extends Physics.Arcade.Sprite
@@ -49,8 +49,24 @@ export class Boss extends Physics.Arcade.Sprite
         const body = this.body as Phaser.Physics.Arcade.Body;
         if (body)
         {
-            body.setSize(WIDTH - 16, HEIGHT - 14);
-            body.setOffset(8, 14);
+            body.setSize(76, 66);
+            body.setOffset(10, 14);
+        }
+
+        const loadedTex = scene.textures.get(TEXTURE_KEY);
+        if (loadedTex && loadedTex.frameTotal > 4)
+        {
+            const animKey = `${TEXTURE_KEY}-idle`;
+            if (!scene.anims.exists(animKey))
+            {
+                scene.anims.create({
+                    key: animKey,
+                    frames: scene.anims.generateFrameNumbers(TEXTURE_KEY, { start: 0, end: 3 }),
+                    frameRate: 6,
+                    repeat: -1,
+                });
+            }
+            this.play(animKey);
         }
     }
 
@@ -60,61 +76,21 @@ export class Boss extends Physics.Arcade.Sprite
 
         const graphics = scene.make.graphics({ x: 0, y: 0 });
 
-        // Royal Slime Body (deep amethyst purple)
-        graphics.fillStyle(0x7c3aed, 1);
-        graphics.fillRoundedRect(4, 20, WIDTH - 8, HEIGHT - 20, 24);
+        // Armored cyber-mech chassis fallback (96x80)
+        graphics.fillStyle(0x334155, 1);
+        graphics.fillRoundedRect(10, 14, WIDTH - 20, HEIGHT - 14, 14);
+        graphics.fillStyle(0x1e293b, 1);
+        graphics.fillRoundedRect(18, 22, WIDTH - 36, HEIGHT - 28, 10);
 
-        // Inner gelatin shade
-        graphics.fillStyle(0x6d28d9, 1);
-        graphics.fillRoundedRect(8, 26, WIDTH - 16, HEIGHT - 30, 20);
-
-        // Gelatin shine highlight
-        graphics.fillStyle(0xc4b5fd, 0.7);
-        graphics.fillEllipse(26, 34, 18, 8);
-
-        // Golden Royal Crown
-        const crownX = WIDTH / 2 - 20;
-        const crownY = 4;
+        // Glowing CPU heatsink crest
         graphics.fillStyle(0xf59e0b, 1);
-        graphics.fillRect(crownX, crownY + 12, 40, 6);
+        graphics.fillRect(WIDTH / 2 - 20, 6, 40, 10);
 
-        // 3 Crown peaks
-        graphics.fillStyle(0xfbbf24, 1);
-        graphics.beginPath();
-        graphics.moveTo(crownX, crownY + 12);
-        graphics.lineTo(crownX + 4, crownY + 2);
-        graphics.lineTo(crownX + 12, crownY + 12);
-        graphics.lineTo(crownX + 20, crownY);
-        graphics.lineTo(crownX + 28, crownY + 12);
-        graphics.lineTo(crownX + 36, crownY + 2);
-        graphics.lineTo(crownX + 40, crownY + 12);
-        graphics.closePath();
-        graphics.fillPath();
-
-        // Crown rubies
+        // Dual crimson cyber optics & core
         graphics.fillStyle(0xef4444, 1);
-        graphics.fillCircle(crownX + 4, crownY + 4, 2.5);
-        graphics.fillCircle(crownX + 20, crownY + 2, 3);
-        graphics.fillCircle(crownX + 36, crownY + 4, 2.5);
-
-        // Menacing glowing eyes
-        graphics.fillStyle(0xffffff, 1);
-        graphics.fillEllipse(32, 46, 9, 7);
-        graphics.fillEllipse(64, 46, 9, 7);
-
-        // Red angry pupils
-        graphics.fillStyle(0xdc2626, 1);
-        graphics.fillCircle(34, 46, 4);
-        graphics.fillCircle(62, 46, 4);
-
-        // Evil smile
-        graphics.fillStyle(0x1e1b4b, 1);
-        graphics.beginPath();
-        graphics.moveTo(40, 56);
-        graphics.lineTo(56, 56);
-        graphics.lineTo(48, 62);
-        graphics.closePath();
-        graphics.fillPath();
+        graphics.fillRect(28, 30, 14, 6);
+        graphics.fillRect(54, 30, 14, 6);
+        graphics.fillCircle(WIDTH / 2, 52, 9);
 
         graphics.generateTexture(TEXTURE_KEY, WIDTH, HEIGHT);
         graphics.destroy();

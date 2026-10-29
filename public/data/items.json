@@ -6,7 +6,8 @@
     "description": "ໄມ້ທ່ອນທີ່ໄດ້ຈາກການຕັດຕົ້ນໄມ້ ໃຊ້ສຳລັບສ້າງເຄື່ອງມື ແລະ ສິ່ງປຸກສ້າງ",
     "category": "material",
     "maxStack": 99,
-    "icon": "🪵"
+    "icon": "🪵",
+    "iconImage": "assets/items/wood.png"
   },
   {
     "id": "stone",
@@ -15,7 +16,8 @@
     "description": "ກ້ອນຫີນແຂງທີ່ໄດ້ຈາກການທຸບຫີນ ໃຊ້ສຳລັບຫຼອມ ແລະ ສ້າງອຸປະກອນ",
     "category": "material",
     "maxStack": 99,
-    "icon": "🪨"
+    "icon": "🪨",
+    "iconImage": "assets/items/stone.png"
   },
   {
     "id": "iron-ore",
@@ -24,7 +26,8 @@
     "description": "ແຮ່ເຫຼັກດິບທີ່ຂຸດໄດ້ຈາກສາຍແຮ່ໃນຖ້ຳ ຕ້ອງໃຊ້ Pickaxe ໃນການຂຸດ",
     "category": "material",
     "maxStack": 99,
-    "icon": "⛏️"
+    "icon": "⛏️",
+    "iconImage": "assets/items/iron-ore.png"
   },
   {
     "id": "herb",
@@ -33,7 +36,8 @@
     "description": "ພືດສະໝຸນໄພສີຂຽວສົດ ສາມາດເກັບດ້ວຍມືເປົ່າ ໃຊ້ປຸງຢາຟື້ນຟູພະລັງ",
     "category": "material",
     "maxStack": 99,
-    "icon": "🌿"
+    "icon": "🌿",
+    "iconImage": "assets/items/herb.png"
   },
   {
     "id": "fiber",
@@ -42,7 +46,8 @@
     "description": "ເສັ້ນໃຍທຳມະຊາດໃຊ້ສຳລັບມັດ ແລະ ຖັກແສ່ວເຄື່ອງມື",
     "category": "material",
     "maxStack": 99,
-    "icon": "🌾"
+    "icon": "🌾",
+    "iconImage": "assets/items/fiber.png"
   },
   {
     "id": "crystal",
@@ -52,7 +57,8 @@
     "category": "material",
     "story": true,
     "maxStack": 99,
-    "icon": "💎"
+    "icon": "💎",
+    "iconImage": "assets/items/crystal.png"
   },
   {
     "id": "boss-core",
@@ -62,7 +68,8 @@
     "category": "material",
     "story": true,
     "maxStack": 99,
-    "icon": "🔮"
+    "icon": "🔮",
+    "iconImage": "assets/items/boss-core.png"
   },
   {
     "id": "repair-kit",
@@ -71,7 +78,8 @@
     "description": "ຊຸດວັດສະດຸພິເສດປະກອບດ້ວຍໄມ້, ແຮ່ເຫຼັກ ແລະ ຜລຶກ ໃຊ້ສ້ອມແປງປະຕູໃຫຍ່ຂ້າມດ່ານ",
     "category": "consumable",
     "maxStack": 10,
-    "icon": "🧰"
+    "icon": "🧰",
+    "iconImage": "assets/items/repair-kit.png"
   },
   {
     "id": "herb-potion",
@@ -81,7 +89,8 @@
     "category": "consumable",
     "maxStack": 20,
     "healAmount": 1,
-    "icon": "🧪"
+    "icon": "🧪",
+    "iconImage": "assets/items/herb-potion.png"
   },
   {
     "id": "axe-t1",
@@ -92,7 +101,8 @@
     "toolType": "axe",
     "tier": 1,
     "maxStack": 1,
-    "icon": "🪓"
+    "icon": "🪓",
+    "iconImage": "assets/items/axe-t1.png"
   },
   {
     "id": "pickaxe-t1",
@@ -103,7 +113,8 @@
     "toolType": "pickaxe",
     "tier": 1,
     "maxStack": 1,
-    "icon": "⛏️"
+    "icon": "⛏️",
+    "iconImage": "assets/items/pickaxe-t1.png"
   },
   {
     "id": "hammer-t1",
@@ -114,7 +125,8 @@
     "toolType": "hammer",
     "tier": 1,
     "maxStack": 1,
-    "icon": "🔨"
+    "icon": "🔨",
+    "iconImage": "assets/items/hammer-t1.png"
   },
   {
     "id": "wooden-sword",
@@ -126,7 +138,8 @@
     "baseDamage": 12,
     "maxUpgradeLevel": 0,
     "maxStack": 1,
-    "icon": "🗡️"
+    "icon": "🗡️",
+    "iconImage": "assets/items/wooden-sword.png"
   },
   {
     "id": "iron-sword",
@@ -138,7 +151,8 @@
     "baseDamage": 22,
     "maxUpgradeLevel": 3,
     "maxStack": 1,
-    "icon": "⚔️"
+    "icon": "⚔️",
+    "iconImage": "assets/items/iron-sword.png"
   },
   {
     "id": "crystal-sword",
@@ -150,7 +164,7 @@
     "baseDamage": 38,
     "maxUpgradeLevel": 3,
     "maxStack": 1,
-    "icon": "✨"
+    "icon": "✨",
+    "iconImage": "assets/items/crystal-sword.png"
   }
 ]
-

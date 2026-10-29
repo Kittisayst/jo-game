@@ -3,6 +3,7 @@ import { RecipeDefinition, craftRecipeUseCase } from '../../../application/Craft
 import { getGameContent } from '../../content/ContentCatalog';
 import { entities } from '../../composition';
 import { soundManager } from '../../audio/SoundManager';
+import { ItemIcon } from './ItemIcon';
 
 interface WorkshopModalProps
 {
@@ -109,8 +110,8 @@ export const WorkshopModal: React.FC<WorkshopModalProps> = ({ isOpen, onClose })
                                 >
                                     <div className="space-y-3">
                                         <div className="flex items-center justify-between">
-                                            <div className="flex items-center gap-2">
-                                                <span className="text-2xl">{resultItem?.icon || '📦'}</span>
+                                            <div className="flex items-center gap-2.5">
+                                                <ItemIcon iconImage={resultItem?.iconImage} icon={resultItem?.icon || '📦'} size={32} />
                                                 <div>
                                                     <h3 className="font-bold text-white text-base">
                                                         {resultItem?.name || recipe.resultItemId}
@@ -151,7 +152,7 @@ export const WorkshopModal: React.FC<WorkshopModalProps> = ({ isOpen, onClose })
                                                                     : 'bg-rose-950/40 border-rose-500/40 text-rose-300'
                                                             }`}
                                                         >
-                                                            <span>{ingItem?.icon}</span>
+                                                            <ItemIcon iconImage={ingItem?.iconImage} icon={ingItem?.icon} size={16} />
                                                             <span>{ingItem?.name}: {currentCount}/{ing.count}</span>
                                                         </span>
                                                     );

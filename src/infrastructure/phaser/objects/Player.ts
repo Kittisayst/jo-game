@@ -28,6 +28,7 @@ export class Player extends Physics.Arcade.Sprite
     private wasJumpDown = false;
     private footstepTimer = 0;
     private runDustTimer = 0;
+    private attackAnimTimer = 0;
 
     onJump?: (x: number, y: number) => void;
     onLand?: (x: number, y: number) => void;
@@ -118,6 +119,31 @@ export class Player extends Physics.Arcade.Sprite
                 frames: [{ key: textureKey, frame: 11 }],
                 frameRate: 1,
             });
+        }
+
+        if (texture.frameTotal > 15)
+        {
+            const attackKey = `${skinId}-attack`;
+            const wallKey = `${skinId}-wall`;
+
+            if (!anims.exists(attackKey))
+            {
+                anims.create({
+                    key: attackKey,
+                    frames: anims.generateFrameNumbers(textureKey, { start: 12, end: 14 }),
+                    frameRate: 18,
+                    repeat: 0,
+                });
+            }
+
+            if (!anims.exists(wallKey))
+            {
+                anims.create({
+                    key: wallKey,
+                    frames: [{ key: textureKey, frame: 15 }],
+                    frameRate: 1,
+                });
+            }
         }
     }
 
@@ -231,13 +257,56 @@ export class Player extends Physics.Arcade.Sprite
 
     triggerSlashVfx (weaponId: string): void
     {
+        const attackKey = `${this.currentSkinId}-attack`;
+        this.attackAnimTimer = 170;
+        if (this.scene.anims.exists(attackKey))
+        {
+            this.play(attackKey, true);
+        }
+
+        const slashX = this.x + (this.facingDir * 30);
+        const slashY = this.y;
+
+        const slashSprites: Record<string, string> = {
+            'wooden-sword': 'slash-wood',
+            'iron-sword': 'slash-iron',
+            'crystal-sword': 'slash-crystal',
+        };
+        const slashKey = slashSprites[weaponId];
+
+        if (slashKey && this.scene.textures.exists(slashKey) && this.scene.textures.get(slashKey).frameTotal > 3)
+        {
+            const animKey = `${slashKey}-anim`;
+            if (!this.scene.anims.exists(animKey))
+            {
+                this.scene.anims.create({
+                    key: animKey,
+                    frames: this.scene.anims.generateFrameNumbers(slashKey, { start: 0, end: 2 }),
+                    frameRate: 22,
+                    repeat: 0,
+                });
+            }
+            const vfx = this.scene.add.sprite(slashX, slashY, slashKey, 0);
+            vfx.setDepth(15);
+            vfx.setFlipX(this.facingDir < 0);
+            vfx.play(animKey);
+            vfx.once('animationcomplete', () => vfx.destroy());
+
+            this.scene.tweens.add({
+                targets: this,
+                scaleX: 1.12,
+                scaleY: 0.92,
+                duration: 70,
+                yoyo: true,
+            });
+            return;
+        }
+
         const swordColors: Record<string, number> = {
             'wooden-sword': 0xd4a373,
             'iron-sword': 0xe2e8f0,
             'crystal-sword': 0xa855f7,
         };
-        const slashX = this.x + (this.facingDir * 30);
-        const slashY = this.y;
 
         const slash = this.scene.add.graphics({ x: slashX, y: slashY });
         slash.setDepth(15);
@@ -491,14 +560,25 @@ export class Player extends Physics.Arcade.Sprite
         }
 
         // Animation playback according to state & velocity
+        if (this.attackAnimTimer > 0)
+        {
+            this.attackAnimTimer = Math.max(0, this.attackAnimTimer - delta);
+            return;
+        }
+
         const idleKey = `${this.currentSkinId}-idle`;
         const runKey = `${this.currentSkinId}-run`;
         const jumpKey = `${this.currentSkinId}-jump`;
         const fallKey = `${this.currentSkinId}-fall`;
+        const wallKey = `${this.currentSkinId}-wall`;
 
         if (!onGround)
         {
-            if (body.velocity.y < 0)
+            if (this.isWallSliding && this.scene.anims.exists(wallKey))
+            {
+                this.play(wallKey, true);
+            }
+            else if (body.velocity.y < 0)
             {
                 if (this.scene.anims.exists(jumpKey))
                 {

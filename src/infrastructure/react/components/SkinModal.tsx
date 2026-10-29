@@ -15,7 +15,7 @@ export interface SkinModalProps
     onEquipSkin: (skinId: string) => void;
 }
 
-/** A skin sheet is 12 frames of 32×48; frames 0–3 are the idle loop. */
+/** A skin sheet is 16 frames of 32×48; frames 0–3 are the idle loop. */
 function SkinSprite ({ skinId, scale }: { skinId: string; scale: number })
 {
     return (
@@ -26,7 +26,7 @@ function SkinSprite ({ skinId, scale }: { skinId: string; scale: number })
                 width: 32 * scale,
                 height: 48 * scale,
                 backgroundImage: `url('assets/characters/player-skin-${skinId}.png')`,
-                backgroundSize: `${384 * scale}px ${48 * scale}px`,
+                backgroundSize: `${512 * scale}px ${48 * scale}px`,
                 ['--frames-width' as string]: `${-128 * scale}px`,
             } as React.CSSProperties}
         />
@@ -111,7 +111,9 @@ export function SkinModal ({
         <div className="outfit-overlay" onClick={onClose}>
             <div className="outfit-card" role="dialog" aria-modal="true" aria-label="ຮ້ານຊຸດຂອງ Mina" onClick={e => e.stopPropagation()}>
                 <header className="outfit-header">
-                    <span className="outfit-avatar" aria-hidden="true">🛍️</span>
+                    <span className="outfit-avatar" aria-hidden="true">
+                        <img src="assets/ui/portrait_mina.png" alt="" width={46} height={46} className="pixel-art w-full h-full object-cover" />
+                    </span>
                     <div className="outfit-title">
                         <h2>ຮ້ານຊຸດຂອງ Mina</h2>
                         <p>ຊື້ແລ້ວເປັນຂອງເຈົ້າຕະຫຼອດ · ລອງໃສ່ໄດ້ໂດຍບໍ່ເສຍ Credit</p>

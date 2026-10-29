@@ -1,6 +1,6 @@
 import { Physics, Scene } from 'phaser';
 
-const TEXTURE_KEY = 'platform-texture';
+const TEXTURE_KEY = 'moving-platform-texture';
 const FALLBACK_KEY = 'moving-platform-hover';
 const WIDTH = 140;
 const HEIGHT = 24;

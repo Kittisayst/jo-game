@@ -11,6 +11,7 @@ import {
 } from '../../../application/RepairBrokenGateUseCase';
 import { soundManager } from '../../audio/SoundManager';
 import { EventBus } from '../../EventBus';
+import { ItemIcon } from './ItemIcon';
 
 interface GateRepairModalProps
 {
@@ -107,7 +108,7 @@ export const GateRepairModal: React.FC<GateRepairModalProps> = ({
                         <span className="font-bold text-slate-300 block mb-1">ເງື່ອນໄຂການສ້ອມແປງ:</span>
                         <div className="flex items-center justify-between">
                             <span className="flex items-center gap-1.5">
-                                <span>🔨</span>
+                                <ItemIcon iconImage="assets/items/hammer-t1.png" icon="🔨" size={18} />
                                 <span>ຄ້ອນສ້ອມແປງ (Repair Hammer T1)</span>
                             </span>
                             <span className={hasHammer ? 'text-emerald-400 font-bold' : 'text-rose-400 font-bold'}>
@@ -117,7 +118,7 @@ export const GateRepairModal: React.FC<GateRepairModalProps> = ({
 
                         <div className="flex items-center justify-between">
                             <span className="flex items-center gap-1.5">
-                                <span>🧰</span>
+                                <ItemIcon iconImage="assets/items/repair-kit.png" icon="🧰" size={18} />
                                 <span>ຊຸດສ້ອມແປງ (Repair Kit)</span>
                             </span>
                             <span className={hasRepairKit ? 'text-emerald-400 font-bold' : 'text-rose-400 font-bold'}>

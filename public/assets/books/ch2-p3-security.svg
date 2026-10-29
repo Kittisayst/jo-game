@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 156" width="360" height="156">
+  <defs>
+    <pattern id="grid" width="18" height="18" patternUnits="userSpaceOnUse">
+      <path d="M 18 0 L 0 0 0 18" fill="none" stroke="#1e293b" stroke-width="1"/>
+    </pattern>
+    <marker id="arrowCyan" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#38bdf8"/>
+    </marker>
+    <marker id="arrowGold" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#f59e0b"/>
+    </marker>
+    <marker id="arrowGreen" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#22c55e"/>
+    </marker>
+  </defs>
+  <rect width="360" height="156" rx="10" fill="#0f172a"/>
+  <rect width="360" height="156" rx="10" fill="url(#grid)"/>
+  <rect x="1.5" y="1.5" width="357" height="153" rx="9" fill="none" stroke="#334155" stroke-width="1.5"/>
+
+  <!-- Threats on Left -->
+  <rect x="14" y="24" width="104" height="46" rx="6" fill="#450a0a" stroke="#ef4444" stroke-width="1.8"/>
+  <text x="66" y="44" text-anchor="middle" fill="#fca5a5" font-family="Noto Sans Lao, sans-serif" font-size="11" font-weight="bold">⚠️ Phishing</text>
+  <text x="66" y="60" text-anchor="middle" fill="#fecaca" font-family="Noto Sans Lao, sans-serif" font-size="9.5">ເວັບໄຊ/ອີເມວປອມ</text>
+  <line x1="120" y1="47" x2="154" y2="47" stroke="#ef4444" stroke-width="2.5"/>
+  <text x="146" y="42" fill="#ef4444" font-family="sans-serif" font-size="14" font-weight="bold">✕</text>
+
+  <!-- Safe Traffic Bottom Left -->
+  <rect x="14" y="88" width="104" height="44" rx="6" fill="#052e16" stroke="#22c55e" stroke-width="1.8"/>
+  <text x="66" y="108" text-anchor="middle" fill="#86efac" font-family="Noto Sans Lao, sans-serif" font-size="11" font-weight="bold">✓ ຂໍ້ມູນປອດໄພ</text>
+  <text x="66" y="123" text-anchor="middle" fill="#bbf7d0" font-family="monospace" font-size="9">HTTPS Secure</text>
+  <line x1="120" y1="110" x2="226" y2="110" stroke="#22c55e" stroke-width="2.5" marker-end="url(#arrowGreen)"/>
+
+  <!-- Firewall Barrier -->
+  <rect x="158" y="18" width="48" height="120" rx="6" fill="#1e293b" stroke="#f59e0b" stroke-width="2.2"/>
+  <line x1="158" y1="44" x2="206" y2="44" stroke="#f59e0b" stroke-width="1.2"/>
+  <line x1="158" y1="70" x2="206" y2="70" stroke="#f59e0b" stroke-width="1.2"/>
+  <line x1="158" y1="96" x2="206" y2="96" stroke="#f59e0b" stroke-width="1.2"/>
+  <text x="182" y="61" text-anchor="middle" fill="#fde047" font-family="Noto Sans Lao, sans-serif" font-size="10.5" font-weight="bold">Firewall</text>
+  <text x="182" y="86" text-anchor="middle" fill="#fed7aa" font-family="Noto Sans Lao, sans-serif" font-size="8.5">ກັ່ນຕອງໄພ</text>
+
+  <!-- Protected User & Strong Password -->
+  <rect x="230" y="30" width="116" height="96" rx="8" fill="#083344" stroke="#38bdf8" stroke-width="2.2"/>
+  <text x="288" y="54" text-anchor="middle" fill="#38bdf8" font-family="Noto Sans Lao, sans-serif" font-size="11.5" font-weight="bold">🔒 ລະຫັດຜ່ານແຂງແຮງ</text>
+  <rect x="244" y="64" width="88" height="22" rx="4" fill="#0f172a" stroke="#38bdf8" stroke-width="1.2"/>
+  <text x="288" y="79" text-anchor="middle" fill="#fde047" font-family="monospace" font-size="11" font-weight="bold">Jo#2026!Kq</text>
+  <text x="288" y="106" text-anchor="middle" fill="#bae6fd" font-family="Noto Sans Lao, sans-serif" font-size="9.5">ຢ່າບອກລະຫັດກັບໃຜ!</text>
+</svg>

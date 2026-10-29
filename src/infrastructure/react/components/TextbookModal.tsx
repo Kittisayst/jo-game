@@ -579,6 +579,16 @@ export const TextbookModal: React.FC<TextbookModalProps> = ({
                                 {activePage.title}
                             </h3>
 
+                            {activePage.illustration && (
+                                <div className="rounded-xl overflow-hidden border border-slate-700/80 bg-slate-950/60 p-2 shadow-inner">
+                                    <img
+                                        src={activePage.illustration}
+                                        alt={activePage.title}
+                                        className="w-full max-w-xl mx-auto h-auto block rounded-lg"
+                                    />
+                                </div>
+                            )}
+
                             <div className="text-slate-300 leading-relaxed whitespace-pre-line bg-slate-800/50 p-4 rounded-xl border border-slate-700/50">
                                 {activePage.content}
                             </div>
