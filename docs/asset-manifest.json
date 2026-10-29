@@ -206,13 +206,14 @@
       "hasAlpha": true,
       "transparentPixels": 15254,
       "colorCount": 11,
-      "bytes": 2443,
+      "bytes": 2423,
       "source": "Original procedural pixel art (scratch/gen_environment.py & scratch/gen_characters_and_items.py)",
       "license": "MIT (Project Original)",
       "frames": 16,
       "frameWidth": 32,
       "frameHeight": 48,
-      "anchor": "center (0.5, 0.5), soles at y=47"
+      "anchor": "center (0.5, 0.5), soles at y=47",
+      "edits": "Frame 13 blade stub removed (tools/art/remove_frame13_stub.py); the weapon is a separate Held item"
     },
     {
       "path": "assets/characters/player-skin-cyber-knight.png",
@@ -224,13 +225,14 @@
       "hasAlpha": true,
       "transparentPixels": 14550,
       "colorCount": 13,
-      "bytes": 2521,
+      "bytes": 2500,
       "source": "Original procedural pixel art (scratch/gen_environment.py & scratch/gen_characters_and_items.py)",
       "license": "MIT (Project Original)",
       "frames": 16,
       "frameWidth": 32,
       "frameHeight": 48,
-      "anchor": "center (0.5, 0.5), soles at y=47"
+      "anchor": "center (0.5, 0.5), soles at y=47",
+      "edits": "Frame 13 blade stub removed (tools/art/remove_frame13_stub.py); the weapon is a separate Held item"
     },
     {
       "path": "assets/characters/player-skin-golden-runner.png",
@@ -242,13 +244,14 @@
       "hasAlpha": true,
       "transparentPixels": 14803,
       "colorCount": 11,
-      "bytes": 2289,
+      "bytes": 2272,
       "source": "Original procedural pixel art (scratch/gen_environment.py & scratch/gen_characters_and_items.py)",
       "license": "MIT (Project Original)",
       "frames": 16,
       "frameWidth": 32,
       "frameHeight": 48,
-      "anchor": "center (0.5, 0.5), soles at y=47"
+      "anchor": "center (0.5, 0.5), soles at y=47",
+      "edits": "Frame 13 blade stub removed (tools/art/remove_frame13_stub.py); the weapon is a separate Held item"
     },
     {
       "path": "assets/characters/player-skin-neon-ninja.png",
@@ -260,13 +263,14 @@
       "hasAlpha": true,
       "transparentPixels": 15094,
       "colorCount": 12,
-      "bytes": 2403,
+      "bytes": 2389,
       "source": "Original procedural pixel art (scratch/gen_environment.py & scratch/gen_characters_and_items.py)",
       "license": "MIT (Project Original)",
       "frames": 16,
       "frameWidth": 32,
       "frameHeight": 48,
-      "anchor": "center (0.5, 0.5), soles at y=47"
+      "anchor": "center (0.5, 0.5), soles at y=47",
+      "edits": "Frame 13 blade stub removed (tools/art/remove_frame13_stub.py); the weapon is a separate Held item"
     },
     {
       "path": "assets/environment/building_academy.png",
@@ -987,6 +991,90 @@
       "viewBox": "0 0 360 156",
       "source": "Original procedural vector diagram (scratch/gen_book_diagrams.py)",
       "license": "MIT (Project Original)"
+    },
+    {
+      "path": "assets/held/wooden-sword.png",
+      "category": "held-item",
+      "format": "PNG",
+      "mode": "RGBA",
+      "width": 32,
+      "height": 32,
+      "hasAlpha": true,
+      "colorCount": 6,
+      "bytes": 266,
+      "source": "Hand-authored pixel script (tools/art/draw_held_items.py)",
+      "license": "MIT (Project Original)",
+      "anchor": "grip (16, 26), pointing up; rotated and mirrored in game"
+    },
+    {
+      "path": "assets/held/iron-sword.png",
+      "category": "held-item",
+      "format": "PNG",
+      "mode": "RGBA",
+      "width": 32,
+      "height": 32,
+      "hasAlpha": true,
+      "colorCount": 8,
+      "bytes": 274,
+      "source": "Hand-authored pixel script (tools/art/draw_held_items.py)",
+      "license": "MIT (Project Original)",
+      "anchor": "grip (16, 26), pointing up; rotated and mirrored in game"
+    },
+    {
+      "path": "assets/held/crystal-sword.png",
+      "category": "held-item",
+      "format": "PNG",
+      "mode": "RGBA",
+      "width": 32,
+      "height": 32,
+      "hasAlpha": true,
+      "colorCount": 8,
+      "bytes": 295,
+      "source": "Hand-authored pixel script (tools/art/draw_held_items.py)",
+      "license": "MIT (Project Original)",
+      "anchor": "grip (16, 26), pointing up; rotated and mirrored in game"
+    },
+    {
+      "path": "assets/held/axe-t1.png",
+      "category": "held-item",
+      "format": "PNG",
+      "mode": "RGBA",
+      "width": 32,
+      "height": 32,
+      "hasAlpha": true,
+      "colorCount": 7,
+      "bytes": 275,
+      "source": "Hand-authored pixel script (tools/art/draw_held_items.py)",
+      "license": "MIT (Project Original)",
+      "anchor": "grip (16, 26), pointing up; rotated and mirrored in game"
+    },
+    {
+      "path": "assets/held/pickaxe-t1.png",
+      "category": "held-item",
+      "format": "PNG",
+      "mode": "RGBA",
+      "width": 32,
+      "height": 32,
+      "hasAlpha": true,
+      "colorCount": 7,
+      "bytes": 309,
+      "source": "Hand-authored pixel script (tools/art/draw_held_items.py)",
+      "license": "MIT (Project Original)",
+      "anchor": "grip (16, 26), pointing up; rotated and mirrored in game"
+    },
+    {
+      "path": "assets/held/hammer-t1.png",
+      "category": "held-item",
+      "format": "PNG",
+      "mode": "RGBA",
+      "width": 32,
+      "height": 32,
+      "hasAlpha": true,
+      "colorCount": 8,
+      "bytes": 240,
+      "source": "Hand-authored pixel script (tools/art/draw_held_items.py)",
+      "license": "MIT (Project Original)",
+      "anchor": "grip (16, 26), pointing up; rotated and mirrored in game"
     }
   ]
 }

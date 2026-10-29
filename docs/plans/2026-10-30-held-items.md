@@ -1,7 +1,7 @@
 # ຕົວລະຄອນຖືອາວຸດ ແລະເຄື່ອງມືໃຫ້ເຫັນໃນມື (Held item)
 
 - **Date:** 2026-10-30
-- **Status:** done steps 1–7, 9 (system + placeholders); step 8 (real PNGs, removing the frame-13 stub) waits for art
+- **Status:** done (system; 6 held PNGs drawn by `tools/art/draw_held_items.py`; frame-13 stub removed by `tools/art/remove_frame13_stub.py`)
 - **Project:** jo-game (ພະຈົນໄພຄວາມຮູ້ / Knowledge Quest)
 
 ## ເປົ້າໝາຍ (Goal)
