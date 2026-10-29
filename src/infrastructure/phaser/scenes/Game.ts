@@ -59,7 +59,7 @@ export class Game extends Scene
     enemyProjectiles: Phaser.Physics.Arcade.Group;
     boss?: Boss;
     /** Everyone in the village the hero can talk to (the elder, Mina). */
-    villagers: { npc: NPC; prompt: string }[] = [];
+    villagers: NPC[] = [];
     isDialogueActive = false;
     particleManager: ParticleManager;
     cursors: Phaser.Types.Input.Keyboard.CursorKeys;
@@ -159,17 +159,14 @@ export class Game extends Scene
                 Boolean(entities.forgeUnlocked || entities.books['book-ch1']?.examPassed)
             );
             const baseY = WORLD_HEIGHT - GROUND_HEIGHT - 24;
-            const elder = new NPC(this, 460, baseY, 'npc-elder');
+            const elder = new NPC(this, 460, baseY, 'npc-elder', '💬 [E] ລົມກັບຫົວໜ້າໝູ່ບ້ານ');
             elder.onInteract = () => EventBus.emit('start-dialogue', 'village_elder');
 
             // Mina runs the Skin shop at the little market between the Forge and the World Gate
-            const mina = new NPC(this, 1290, baseY, 'npc-mina', '🛍️ [E] ລົມກັບ Mina');
+            const mina = new NPC(this, 1290, baseY, 'npc-mina', '🛍️ [E] ລົມກັບ Mina (ຮ້ານຊຸດ)');
             mina.onInteract = () => EventBus.emit('start-dialogue', 'skin_shop');
 
-            this.villagers = [
-                { npc: elder, prompt: '💬 [E] ລົມກັບຫົວໜ້າໝູ່ບ້ານ' },
-                { npc: mina, prompt: '🛍️ [E] ລົມກັບ Mina (ຮ້ານຊຸດ)' },
-            ];
+            this.villagers = [elder, mina];
         }
         else if (this.stage)
         {
@@ -450,7 +447,7 @@ export class Game extends Scene
             return;
         }
 
-        for (const { npc } of this.villagers)
+        for (const npc of this.villagers)
         {
             if (npc.active) npc.updateProximity(this.player.x, this.player.y);
         }

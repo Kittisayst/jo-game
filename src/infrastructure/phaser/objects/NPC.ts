@@ -54,11 +54,23 @@ export class NPC extends Physics.Arcade.Sprite
         this.promptContainer.setDepth(15);
         this.promptContainer.setAlpha(0);
 
+        const bubbleText = scene.add.text(0, 0, promptText, {
+            fontFamily: 'Noto Sans Lao, sans-serif',
+            fontSize: '13px',
+            color: '#38bdf8',
+            fontStyle: 'bold',
+        });
+        bubbleText.setOrigin(0.5, 0.5);
+
+        // The bubble grows with its text so a long prompt is never cut off
+        const bubbleWidth = Math.max(140, Math.ceil(bubbleText.width) + 28);
+        const halfWidth = bubbleWidth / 2;
+
         const bubbleBg = scene.add.graphics();
         bubbleBg.fillStyle(0x0f172a, 0.92);
         bubbleBg.lineStyle(1.5, 0x38bdf8, 1);
-        bubbleBg.fillRoundedRect(-70, -16, 140, 32, 16);
-        bubbleBg.strokeRoundedRect(-70, -16, 140, 32, 16);
+        bubbleBg.fillRoundedRect(-halfWidth, -16, bubbleWidth, 32, 16);
+        bubbleBg.strokeRoundedRect(-halfWidth, -16, bubbleWidth, 32, 16);
 
         // Pointer triangle at bottom of bubble
         bubbleBg.beginPath();
@@ -68,14 +80,6 @@ export class NPC extends Physics.Arcade.Sprite
         bubbleBg.closePath();
         bubbleBg.fillPath();
         bubbleBg.strokePath();
-
-        const bubbleText = scene.add.text(0, 0, promptText, {
-            fontFamily: 'Noto Sans Lao, sans-serif',
-            fontSize: '13px',
-            color: '#38bdf8',
-            fontStyle: 'bold',
-        });
-        bubbleText.setOrigin(0.5, 0.5);
 
         this.promptContainer.add([bubbleBg, bubbleText]);
 
@@ -90,7 +94,7 @@ export class NPC extends Physics.Arcade.Sprite
         });
 
         // Make prompt clickable for mouse/touch players
-        this.promptContainer.setSize(130, 32);
+        this.promptContainer.setSize(bubbleWidth, 32);
         this.promptContainer.setInteractive({ useHandCursor: true });
         this.promptContainer.on('pointerdown', () =>
         {
