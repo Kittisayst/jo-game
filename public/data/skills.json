@@ -1,6 +1,9 @@
 {
   "movement": {
-    "dash": { "speed": 640, "durationMs": 170, "dodgeMs": 220, "cooldownMs": 800 }
+    "dash": { "speed": 640, "durationMs": 170, "dodgeMs": 220, "cooldownMs": 800 },
+    "unlocks": [
+      { "ability": "air-dash", "afterBossStage": 10 }
+    ]
   },
   "active": [
     {
@@ -8,20 +11,28 @@
       "realm": 1,
       "name": "ຄື້ນພະລັງ (Power Wave)",
       "icon": "🌊",
-      "description": "ຍິງຄື້ນພະລັງໄປໄກ ທະລຸສັດຕູ 1 ໂຕ ແລະແຮງ 1.5 ເທົ່າຂອງດາບ",
+      "description": "ຍິງຄື້ນພະລັງໄປໄກ ທະລຸສັດຕູ ແລະແຮງເປັນເທົ່າຂອງດາບ",
       "concept": "Input → Process → Output: ໃສ່ພະລັງເຂົ້າ ປະມວນຜົນ ແລ້ວສົ່ງຜົນອອກໄປໄກ",
       "cooldownMs": 4000,
-      "effect": { "type": "wave", "damageMultiplier": 1.5, "speed": 520, "rangePx": 560, "pierce": 1, "bossShare": 0.5 }
+      "effect": { "type": "wave", "damageMultiplier": 1.5, "speed": 520, "rangePx": 560, "pierce": 1, "bossShare": 0.5 },
+      "upgrades": [
+        { "credit": 30, "ingredients": [{ "itemId": "iron-ore", "count": 8 }, { "itemId": "wood", "count": 10 }], "cooldownMs": 3500, "effect": { "damageMultiplier": 2 } },
+        { "credit": 60, "ingredients": [{ "itemId": "iron-ore", "count": 15 }, { "itemId": "crystal", "count": 3 }], "cooldownMs": 3000, "effect": { "damageMultiplier": 2.5, "pierce": 2 } }
+      ]
     },
     {
       "id": "ping",
       "realm": 2,
       "name": "ສາຍຟ້າ Ping",
       "icon": "⚡",
-      "description": "ສາຍຟ້າກະໂດດຈາກສັດຕູໂຕໜຶ່ງໄປອີກໂຕ ສູງສຸດ 3 ໂຕ ຕີ ແລະເຮັດໃຫ້ມຶນ 2.5 ວິ (ມຶນແລ້ວຂະຍັບບໍ່ໄດ້ ແລະແຕະກໍ່ບໍ່ເຈັບ)",
+      "description": "ສາຍຟ້າກະໂດດຈາກສັດຕູໂຕໜຶ່ງໄປອີກໂຕ ຕີ ແລະເຮັດໃຫ້ມຶນ (ມຶນແລ້ວຂະຍັບບໍ່ໄດ້ ແລະແຕະກໍ່ບໍ່ເຈັບ)",
       "concept": "Ping: ສົ່ງ packet ຈາກເຄື່ອງໜຶ່ງໄປອີກເຄື່ອງ ຕໍ່ໆກັນໃນເຄືອຂ່າຍ",
       "cooldownMs": 6000,
-      "effect": { "type": "chain", "damageMultiplier": 1.0, "jumps": 3, "rangePx": 420, "jumpRangePx": 240, "stunMs": 2500, "bossShare": 0.5 }
+      "effect": { "type": "chain", "damageMultiplier": 1.0, "jumps": 3, "rangePx": 420, "jumpRangePx": 240, "stunMs": 2500, "bossShare": 0.5 },
+      "upgrades": [
+        { "credit": 40, "ingredients": [{ "itemId": "blue-ore", "count": 6 }], "cooldownMs": 5000, "effect": { "stunMs": 3500 } },
+        { "credit": 80, "ingredients": [{ "itemId": "blue-ore", "count": 12 }, { "itemId": "cave-mushroom", "count": 6 }], "cooldownMs": 4500, "effect": { "jumps": 4, "stunMs": 4500 } }
+      ]
     }
   ]
 }

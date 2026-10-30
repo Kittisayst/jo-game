@@ -84,6 +84,20 @@ describe('content data integrity', () =>
         }
     });
 
+    it('costs every skill upgrade in known items and gives a Boss Stage to each movement unlock', () =>
+    {
+        const itemIds = new Set(items.map(i => i.id));
+        for (const skill of skills.active)
+        {
+            expect(skill.upgrades.length, `${skill.id} upgrades`).toBe(2);
+            for (const upgrade of skill.upgrades)
+            {
+                for (const ing of upgrade.ingredients) expect(itemIds.has(ing.itemId), `${skill.id} upgrade ingredient ${ing.itemId}`).toBe(true);
+            }
+        }
+        for (const unlock of skills.movement.unlocks) expect(unlock.afterBossStage % 10, unlock.ability).toBe(0);
+    });
+
     it('gives a build time only as a positive number of seconds', () =>
     {
         for (const recipe of recipes as (LooseRecipe & { craftSeconds?: number })[])

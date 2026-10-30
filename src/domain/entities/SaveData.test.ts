@@ -396,12 +396,12 @@ describe('Skills in a save', () =>
     it('keeps learned skills and their slots, drops what is not learned', () =>
     {
         const saved = migrateSaveSnapshot({ version: CURRENT_SAVE_VERSION, skills: { unlocked: ['power-wave', 'power-wave', 7], equipped: ['ghost', 'power-wave'] } });
-        expect(saved.skills).toEqual({ unlocked: ['power-wave'], equipped: [null, 'power-wave'] });
+        expect(saved.skills).toEqual({ unlocked: ['power-wave'], equipped: [null, 'power-wave'], ranks: {} });
     });
 
     it('starts with none in an older save', () =>
     {
-        expect(migrateSaveSnapshot({ version: CURRENT_SAVE_VERSION }).skills).toEqual({ unlocked: [], equipped: [null, null] });
+        expect(migrateSaveSnapshot({ version: CURRENT_SAVE_VERSION }).skills).toEqual({ unlocked: [], equipped: [null, null], ranks: {} });
     });
 });
 
@@ -416,5 +416,18 @@ describe('Tool upgrades in a save', () =>
     it('starts with none in an older save', () =>
     {
         expect(migrateSaveSnapshot({ version: CURRENT_SAVE_VERSION }).toolUpgrades).toEqual({});
+    });
+});
+
+describe('Skill ranks in a save', () =>
+{
+    it('keeps ranks 2 and 3 of learned skills and drops the rest', () =>
+    {
+        const saved = migrateSaveSnapshot({
+            version: CURRENT_SAVE_VERSION,
+            skills: { unlocked: ['power-wave'], equipped: ['power-wave', null], ranks: { 'power-wave': 3, ping: 2, other: 'x' } },
+        });
+        expect(saved.skills.ranks).toEqual({ 'power-wave': 3 });
+        expect(migrateSaveSnapshot({ version: CURRENT_SAVE_VERSION, skills: { unlocked: ['a'], ranks: { a: 7 } } }).skills.ranks).toEqual({});
     });
 });

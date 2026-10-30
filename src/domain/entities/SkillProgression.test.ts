@@ -64,3 +64,32 @@ describe('SkillCooldowns', () =>
         expect(c.fraction('a')).toBe(0);
     });
 });
+
+describe('SkillProgression ranks', () =>
+{
+    it('starts a learned skill at rank 1 and goes up to 3', () =>
+    {
+        const p = new SkillProgression();
+        expect(p.rankOf('a')).toBe(0);
+        p.unlock('a');
+        expect(p.rankOf('a')).toBe(1);
+        expect([p.upgradeRank('a'), p.upgradeRank('a'), p.upgradeRank('a')]).toEqual([true, true, false]);
+        expect(p.rankOf('a')).toBe(3);
+        expect(p.upgradeRank('zzz')).toBe(false);
+    });
+
+    it('saves and loads ranks, ignoring a bad one or one for a skill not learned', () =>
+    {
+        const p = new SkillProgression();
+        p.unlock('a');
+        p.upgradeRank('a');
+        const copy = new SkillProgression();
+        copy.loadFrom(p.toSnapshot());
+        expect(copy.rankOf('a')).toBe(2);
+        copy.loadFrom({ unlocked: ['a'], equipped: [null, null], ranks: { a: 9, b: 3 } });
+        expect(copy.rankOf('a')).toBe(1);
+        expect(copy.rankOf('b')).toBe(0);
+        copy.loadFrom({ unlocked: ['a'], equipped: [null, null] });
+        expect(copy.rankOf('a')).toBe(1);
+    });
+});

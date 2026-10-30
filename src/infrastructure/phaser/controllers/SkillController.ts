@@ -3,6 +3,7 @@ import { castSkillUseCase } from '../../../application/SkillUseCases';
 import { soundManager } from '../../audio/SoundManager';
 import { entities } from '../../composition';
 import { getGameContent } from '../../content/ContentCatalog';
+import { effectAtRank } from '../../content/SkillCatalog';
 import type { ChainEffect, SkillDefinition, WaveEffect } from '../../content/SkillCatalog';
 import { showLootNotification } from '../effects/FloatingText';
 import type { Boss } from '../objects/Boss';
@@ -33,7 +34,8 @@ export class SkillController
 
         // A skill that needs a target does not start its cooldown when there is nothing to hit
         const wanted = skills.find(s => s.id === entities.skills.skillInSlot(slot));
-        if (wanted?.effect.type === 'chain' && entities.skillCooldowns.remainingMs(wanted.id) <= 0 && this.chainTargets(wanted.effect).length === 0)
+        const wantedEffect = wanted ? effectAtRank(wanted, entities.skills.rankOf(wanted.id)) : undefined;
+        if (wanted && wantedEffect?.type === 'chain' && entities.skillCooldowns.remainingMs(wanted.id) <= 0 && this.chainTargets(wantedEffect).length === 0)
         {
             showLootNotification(scene, player.x, player.y - 30, 'ບໍ່ມີເປົ້າໝາຍ', '#fbbf24');
             return;
@@ -43,8 +45,9 @@ export class SkillController
         if (!result.success) return;
 
         const skill = skills.find(s => s.id === result.skillId) as SkillDefinition;
-        if (skill.effect.type === 'wave') this.castWave(skill.effect);
-        else if (skill.effect.type === 'chain') this.castChain(skill.effect);
+        const effect = effectAtRank(skill, result.rank);
+        if (effect.type === 'wave') this.castWave(effect);
+        else if (effect.type === 'chain') this.castChain(effect);
     }
 
     /** The enemies (and the Boss) a chain reaches, in order: the nearest in front of the hero, then the nearest to each one. */
