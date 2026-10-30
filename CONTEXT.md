@@ -76,6 +76,9 @@ One planting spot of the Garden: empty, growing or ready. The Garden starts with
 **Skill**:
 An active power the hero learns by passing the exam of a Realm's Textbook (one for each Realm, such as Power Wave for Realm 1). Two Skills can be on the **skill slots**, K and L; using one starts its **cooldown**, counted in Game time. A Skill never pays Credit and never makes Materials.
 
+**Tool upgrade**:
+An axe or pickaxe raised from +0 to +3 at the Workshop for Materials (never Credit). An upgraded tool counts for more of a Strike, so a tree or a rock takes fewer Strikes. The level belongs to the kind of tool (every Axe T1 is the same level). This is how chopping gets faster: it is not a Skill.
+
 **Stun**:
 An enemy held still for a few seconds by a Skill (such as Ping): it cannot patrol, attack or hurt the hero by touching, and an attack it was starting is cut short. It counts Game time. A Boss is never stunned.
 

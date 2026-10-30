@@ -36,6 +36,8 @@ export interface HarvestContext
     regrowth?: PlantRegrowth;
     /** The Stage the node stands in, to tell its plant apart from the same kind of plant elsewhere. */
     stageId?: string;
+    /** How much one Strike with this tool counts (an upgraded tool counts for more than 1). */
+    toolStrikeWeight?: (toolId: string) => number;
 }
 
 export interface ResourceHarvestedPayload
@@ -112,7 +114,7 @@ export function harvestResourceNodeUseCase (
 
     // 3. Count the Strike (half of one with a Broken tool) and wear the tool; only the last Strike gives the Materials
     const toolReading = toolId ? backpack.getDurability(toolId) : null;
-    progress.registerStrike(toolReading ? strikeWeightFor(toolReading.state) : 1);
+    progress.registerStrike((toolReading ? strikeWeightFor(toolReading.state) : 1) * (toolId ? context.toolStrikeWeight?.(toolId) ?? 1 : 1));
     if (toolId && toolReading) wearItemUseCase(backpack, toolId);
     const strikeInfo = {
         strikesTaken: progress.strikesTaken,

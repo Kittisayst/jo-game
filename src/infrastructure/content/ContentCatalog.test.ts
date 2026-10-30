@@ -704,3 +704,21 @@ describe('skills.json', () =>
             .toThrow('skills.json: movement.dash.speed must be a number above 0');
     });
 });
+
+describe('tool upgrade recipes', () =>
+{
+    const base = { id: 'u', targetToolId: 'axe-t1', targetLevel: 1, building: 'workshop', creditCost: 0, strikeWeight: 1.5, ingredients: [{ itemId: 'wood', count: 5 }] };
+
+    it('reads a tool upgrade next to the other recipes', () =>
+    {
+        const [parsed] = parseRecipes([base]);
+        expect(parsed).toMatchObject({ targetToolId: 'axe-t1', targetLevel: 1, strikeWeight: 1.5 });
+    });
+
+    it('refuses Credit, a weight that does not speed the tool up, and a level outside 1 to 3', () =>
+    {
+        expect(() => parseRecipes([{ ...base, creditCost: 5 }])).toThrow('recipes[0].creditCost must be 0');
+        expect(() => parseRecipes([{ ...base, strikeWeight: 1 }])).toThrow('recipes[0].strikeWeight must be a number above 1');
+        expect(() => parseRecipes([{ ...base, targetLevel: 4 }])).toThrow('recipes[0].targetLevel must be a whole number from 1 to 3');
+    });
+});

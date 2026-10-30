@@ -462,5 +462,157 @@
         "count": 2
       }
     ]
+  },
+  {
+    "id": "upgrade-axe-t1-1",
+    "targetToolId": "axe-t1",
+    "targetLevel": 1,
+    "building": "workshop",
+    "creditCost": 0,
+    "strikeWeight": 1.5,
+    "ingredients": [
+      { "itemId": "wood", "count": 10 },
+      { "itemId": "stone", "count": 5 }
+    ]
+  },
+  {
+    "id": "upgrade-axe-t1-2",
+    "targetToolId": "axe-t1",
+    "targetLevel": 2,
+    "building": "workshop",
+    "creditCost": 0,
+    "strikeWeight": 2,
+    "ingredients": [
+      { "itemId": "wood", "count": 15 },
+      { "itemId": "stone", "count": 10 },
+      { "itemId": "iron-ore", "count": 5 }
+    ]
+  },
+  {
+    "id": "upgrade-axe-t1-3",
+    "targetToolId": "axe-t1",
+    "targetLevel": 3,
+    "building": "workshop",
+    "creditCost": 0,
+    "strikeWeight": 3,
+    "ingredients": [
+      { "itemId": "wood", "count": 25 },
+      { "itemId": "stone", "count": 15 },
+      { "itemId": "iron-ore", "count": 10 }
+    ]
+  },
+  {
+    "id": "upgrade-pickaxe-t1-1",
+    "targetToolId": "pickaxe-t1",
+    "targetLevel": 1,
+    "building": "workshop",
+    "creditCost": 0,
+    "strikeWeight": 1.5,
+    "ingredients": [
+      { "itemId": "wood", "count": 8 },
+      { "itemId": "stone", "count": 8 }
+    ]
+  },
+  {
+    "id": "upgrade-pickaxe-t1-2",
+    "targetToolId": "pickaxe-t1",
+    "targetLevel": 2,
+    "building": "workshop",
+    "creditCost": 0,
+    "strikeWeight": 2,
+    "ingredients": [
+      { "itemId": "wood", "count": 12 },
+      { "itemId": "stone", "count": 14 },
+      { "itemId": "iron-ore", "count": 5 }
+    ]
+  },
+  {
+    "id": "upgrade-pickaxe-t1-3",
+    "targetToolId": "pickaxe-t1",
+    "targetLevel": 3,
+    "building": "workshop",
+    "creditCost": 0,
+    "strikeWeight": 3,
+    "ingredients": [
+      { "itemId": "wood", "count": 20 },
+      { "itemId": "stone", "count": 20 },
+      { "itemId": "iron-ore", "count": 10 }
+    ]
+  },
+  {
+    "id": "upgrade-axe-t2-1",
+    "targetToolId": "axe-t2",
+    "targetLevel": 1,
+    "building": "workshop",
+    "creditCost": 0,
+    "strikeWeight": 1.5,
+    "ingredients": [
+      { "itemId": "blue-ore", "count": 5 },
+      { "itemId": "wood", "count": 15 }
+    ]
+  },
+  {
+    "id": "upgrade-axe-t2-2",
+    "targetToolId": "axe-t2",
+    "targetLevel": 2,
+    "building": "workshop",
+    "creditCost": 0,
+    "strikeWeight": 2,
+    "ingredients": [
+      { "itemId": "blue-ore", "count": 10 },
+      { "itemId": "wood", "count": 20 },
+      { "itemId": "iron-ore", "count": 5 }
+    ]
+  },
+  {
+    "id": "upgrade-axe-t2-3",
+    "targetToolId": "axe-t2",
+    "targetLevel": 3,
+    "building": "workshop",
+    "creditCost": 0,
+    "strikeWeight": 3,
+    "ingredients": [
+      { "itemId": "blue-ore", "count": 18 },
+      { "itemId": "wood", "count": 30 },
+      { "itemId": "iron-ore", "count": 10 }
+    ]
+  },
+  {
+    "id": "upgrade-pickaxe-t2-1",
+    "targetToolId": "pickaxe-t2",
+    "targetLevel": 1,
+    "building": "workshop",
+    "creditCost": 0,
+    "strikeWeight": 1.5,
+    "ingredients": [
+      { "itemId": "blue-ore", "count": 6 },
+      { "itemId": "stone", "count": 12 }
+    ]
+  },
+  {
+    "id": "upgrade-pickaxe-t2-2",
+    "targetToolId": "pickaxe-t2",
+    "targetLevel": 2,
+    "building": "workshop",
+    "creditCost": 0,
+    "strikeWeight": 2,
+    "ingredients": [
+      { "itemId": "blue-ore", "count": 12 },
+      { "itemId": "stone", "count": 18 },
+      { "itemId": "iron-ore", "count": 5 }
+    ]
+  },
+  {
+    "id": "upgrade-pickaxe-t2-3",
+    "targetToolId": "pickaxe-t2",
+    "targetLevel": 3,
+    "building": "workshop",
+    "creditCost": 0,
+    "strikeWeight": 3,
+    "ingredients": [
+      { "itemId": "blue-ore", "count": 20 },
+      { "itemId": "stone", "count": 25 },
+      { "itemId": "iron-ore", "count": 10 }
+    ]
   }
 ]

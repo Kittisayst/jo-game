@@ -13,6 +13,7 @@ import type { ItemCategory, ItemDefinition } from '../../domain/entities/ItemCat
 import type { QuestionData } from '../../domain/entities/Quiz';
 import type { RecipeDefinition } from '../../application/CraftRecipeUseCase';
 import type { WeaponUpgradeRecipe } from '../../application/UpgradeWeaponTierUseCase';
+import type { ToolUpgradeRecipe } from '../../application/UpgradeToolUseCase';
 import { parseStageDefinitions, StageDefinition } from '../phaser/stages/StageDefinition';
 import { parseStageQuestion, parseStageScaling } from './ScalingCatalog';
 import { parseTutorial, TutorialStepDefinition } from './TutorialCatalog';
@@ -28,7 +29,7 @@ import { makeValidators } from './validate';
 import { HeldArt, parseHeldArt, parsePlayerAnimations, PlayerAnimations } from './HeldItemArt';
 import { parseSkills, SkillContent } from './SkillCatalog';
 
-export type RecipeEntry = RecipeDefinition | WeaponUpgradeRecipe;
+export type RecipeEntry = RecipeDefinition | WeaponUpgradeRecipe | ToolUpgradeRecipe;
 
 export interface GameContent
 {
@@ -249,6 +250,23 @@ export function parseRecipes (raw: unknown): RecipeEntry[]
         const building = v.asOneOf(recipe.building, BUILDINGS, `${p}.building`);
         const creditCost = v.asNumber(recipe.creditCost, `${p}.creditCost`);
         const ingredients = parseIngredients(v, recipe.ingredients, `${p}.ingredients`);
+
+        if (recipe.targetToolId !== undefined)
+        {
+            const strikeWeight = v.asNumber(recipe.strikeWeight, `${p}.strikeWeight`);
+            if (!(strikeWeight > 1)) v.fail(`${p}.strikeWeight`, 'a number above 1 (an upgraded tool counts for more than a plain one)');
+            if (creditCost !== 0) v.fail(`${p}.creditCost`, '0 (a tool upgrade costs Materials, never Credit)');
+            const targetLevel = v.asNumber(recipe.targetLevel, `${p}.targetLevel`);
+            if (!Number.isInteger(targetLevel) || targetLevel < 1 || targetLevel > 3) v.fail(`${p}.targetLevel`, 'a whole number from 1 to 3');
+            return {
+                id,
+                targetToolId: v.asString(recipe.targetToolId, `${p}.targetToolId`),
+                targetLevel,
+                building: v.asOneOf(building, ['workshop'] as const, `${p}.building`),
+                strikeWeight,
+                ingredients,
+            } satisfies ToolUpgradeRecipe;
+        }
 
         if (recipe.targetWeaponId !== undefined)
         {

@@ -24,6 +24,10 @@ type LooseRecipe = {
     id: string;
     resultItemId?: string;
     targetWeaponId?: string;
+    targetToolId?: string;
+    targetLevel?: number;
+    strikeWeight?: number;
+    creditCost?: number;
     requiredBookRecipe?: string | null;
     ingredients: { itemId: string; count: number }[];
 };
@@ -57,6 +61,26 @@ describe('content data integrity', () =>
             expect(realm, `${skill.id} realm ${skill.realm}`).toBeDefined();
             expect(realm?.bookId, `${skill.id}: Realm ${skill.realm} has no Textbook yet`).not.toBeNull();
             expect(bookIds.has(realm?.bookId as string), `${skill.id} book`).toBe(true);
+        }
+    });
+
+    it('gives each upgradable tool steps +1 to +3 that cost Materials only and speed it up more each time', () =>
+    {
+        const steps = (recipes as LooseRecipe[]).filter(r => r.targetToolId);
+        const toolIds = [...new Set(steps.map(r => r.targetToolId as string))];
+        expect(toolIds.length).toBeGreaterThan(0);
+        for (const toolId of toolIds)
+        {
+            const item = items.find(i => i.id === toolId) as { category?: string; durability?: number } | undefined;
+            expect(item, `${toolId} is an item`).toBeDefined();
+            expect(item?.durability, `${toolId} is a tool that wears`).toBeGreaterThan(0);
+            const mine = steps.filter(r => r.targetToolId === toolId).sort((x, y) => (x.targetLevel as number) - (y.targetLevel as number));
+            expect(mine.map(r => r.targetLevel), toolId).toEqual([1, 2, 3]);
+            for (let i = 0; i < mine.length; i++)
+            {
+                expect(mine[i].creditCost, `${mine[i].id} costs no Credit`).toBe(0);
+                expect(mine[i].strikeWeight as number, `${mine[i].id} weight`).toBeGreaterThan(i === 0 ? 1 : mine[i - 1].strikeWeight as number);
+            }
         }
     });
 
