@@ -548,7 +548,8 @@ function App ()
         autoSaveGame();
         EventBus.emit('change-level', 'village');
         const bonusText = bonus > 0 ? ` +${bonus} 🎓 Credit!` : '';
-        const abilityText = newMovement.includes('air-dash') ? ' 💨 ໄດ້ພຸ່ງກາງອາກາດ! (ກົດ Shift ໃນອາກາດ)' : '';
+        const abilityText = (newMovement.includes('air-dash') ? ' 💨 ໄດ້ພຸ່ງກາງອາກາດ! (ກົດ Shift ໃນອາກາດ)' : '')
+            + (newMovement.includes('double-jump') ? ' 🦘 ໄດ້ໂດດສອງຊັ້ນ! (ກົດໂດດອີກຄັ້ງໃນອາກາດ)' : '');
         const opened = next && clear.newlyUnlocked ? ` ດ່ານ ${stageNumberOf(next)} ເປີດແລ້ວ!` : '';
         const message = isBossStage
             ? `🏆 ຊະນະ Boss ດ່ານ ${stageNumber}!${bonusText}${abilityText} ກັບມາໝູ່ບ້ານເພື່ອຮຽນ ແລະ ສ້າງອາວຸດຕໍ່ໄປ`

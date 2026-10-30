@@ -700,7 +700,7 @@ describe('skills.json', () =>
         expect(wave.upgrades[0].credit).toBeGreaterThan(0);
         expect(effectAtRank(wave, 1)).toMatchObject({ damageMultiplier: 1.5, pierce: 1 });
         expect(effectAtRank(wave, 3)).toMatchObject({ damageMultiplier: 2.5, pierce: 2, speed: 520 });
-        expect(parsed.unlocks).toEqual([{ ability: 'air-dash', afterBossStage: 10 }]);
+        expect(parsed.unlocks).toEqual([{ ability: 'air-dash', afterBossStage: 10 }, { ability: 'double-jump', afterBossStage: 30 }]);
     });
 
     it('refuses an upgrade that is free, changes an unknown number, or an unlock for a Stage that has no Boss', async () =>
