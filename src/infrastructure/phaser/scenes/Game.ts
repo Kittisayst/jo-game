@@ -24,6 +24,8 @@ import {
 } from '../stages/StageDefinition';
 import { buildStageScenery, BrokenGate, ResourceNodeView, WaypointView } from '../scenery/StageBuilder';
 import { buildVillageScenery, InteractiveBuilding } from '../scenery/VillageBuilder';
+import { buildGarden, GardenView } from '../scenery/GardenBuilder';
+import { GARDEN_LEVEL_KEY, isHomeLevel } from '../levelCatalog';
 import {
     createGround,
     createMovingPlatforms,
@@ -100,6 +102,7 @@ export class Game extends Scene
     private waypoints: WaypointView[] = [];
     private brokenGate?: BrokenGate;
     private bossBgmStarted = false;
+    private gardenView?: GardenView;
 
     constructor ()
     {
@@ -127,6 +130,7 @@ export class Game extends Scene
         this.resourceNodes = [];
         this.waypoints = [];
         this.brokenGate = undefined;
+        this.gardenView = undefined;
         this.stage = undefined;
         this.stageExitX = undefined;
         this.bossBgmStarted = false;
@@ -161,6 +165,7 @@ export class Game extends Scene
         this.camera.setBounds(0, 0, this.level.worldWidth, WORLD_HEIGHT);
 
         const isVillage = this.level.scenery === 'village' || this.currentLevelKey === 'village';
+        const isGarden = this.currentLevelKey === GARDEN_LEVEL_KEY;
         const backdropKey = isVillage ? 'bg-village' : (this.level.scenery === 'cave' ? 'bg-cavern' : 'bg-plains');
         this.bossBgmStarted = false;
         this.skyBackdrop = createSky(this, this.level, backdropKey);
@@ -189,6 +194,11 @@ export class Game extends Scene
             mina.onInteract = () => EventBus.emit('start-dialogue', 'skin_shop');
 
             this.villagers = [elder, mina];
+        }
+        else if (isGarden)
+        {
+            this.gardenView = buildGarden(this, GROUND_Y, change => EventBus.emit('garden-changed', change));
+            this.interactiveBuildings = this.gardenView.buildings;
         }
         else if (this.stage)
         {
@@ -402,7 +412,7 @@ export class Game extends Scene
         EventBus.on('gate-repaired', onGateRepaired);
 
         // Village hub gets warm pastoral-cyber theme; Stages start with adventure and crossfade to boss in Zone C
-        soundManager.startBgm(isVillage ? 'village' : (bossSpawn && !this.stage ? 'boss' : 'adventure'));
+        soundManager.startBgm(isVillage || isGarden ? 'village' : (bossSpawn && !this.stage ? 'boss' : 'adventure'));
 
         const onSkinChanged = (payload: SkinChangedPayload) =>
         {
@@ -532,7 +542,7 @@ export class Game extends Scene
         const isRight = Boolean(this.cursors.right.isDown || this.wasdKeys?.right?.isDown || this.touchControls.right);
         const isUp = Boolean(this.cursors.up.isDown || this.wasdKeys?.up?.isDown || this.wasdKeys?.space?.isDown || this.touchControls.up);
 
-        this.heldItem.setContext(this.currentLevelKey === 'village', entities.equipment.equippedWeaponId);
+        this.heldItem.setContext(isHomeLevel(this.currentLevelKey), entities.equipment.equippedWeaponId);
         this.player.update({
             left: { isDown: isLeft },
             right: { isDown: isRight },
@@ -597,6 +607,7 @@ export class Game extends Scene
     /** Turns every Sapling whose time has come back into a whole plant that can be harvested again. */
     private growPlants (): void
     {
+        this.gardenView?.refresh();
         const now = clock.now();
         for (const node of this.resourceNodes)
         {

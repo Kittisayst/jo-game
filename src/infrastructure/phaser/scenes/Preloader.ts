@@ -1,5 +1,5 @@
 import { Scene } from 'phaser';
-import { VILLAGE_LEVEL_KEY, VILLAGE_LEVEL_PATH } from '../levelCatalog';
+import { GARDEN_LEVEL_KEY, GARDEN_LEVEL_PATH, VILLAGE_LEVEL_KEY, VILLAGE_LEVEL_PATH } from '../levelCatalog';
 import { isStageReady } from '../stages/StageDefinition';
 import { getGameContent } from '../../content/ContentCatalog';
 import { heldTextureKey } from '../objects/HeldItemSprite';
@@ -75,6 +75,10 @@ export function enqueueGameAssets (scene: Scene): void
     {
         scene.load.json(VILLAGE_LEVEL_KEY, VILLAGE_LEVEL_PATH);
     }
+    if (!scene.cache.json.exists(GARDEN_LEVEL_KEY))
+    {
+        scene.load.json(GARDEN_LEVEL_KEY, GARDEN_LEVEL_PATH);
+    }
 
     // One level JSON per built Stage, cached under the Stage's id
     for (const stage of getGameContent().stages)
@@ -136,7 +140,7 @@ export class Preloader extends Scene
     {
         const activeSession = readString(ACTIVE_SESSION_STORAGE_KEY);
         // A session saved by an older version (stage-ch1) or for a Stage that is not built has nowhere to resume
-        const resumable = activeSession === VILLAGE_LEVEL_KEY
+        const resumable = activeSession === VILLAGE_LEVEL_KEY || activeSession === GARDEN_LEVEL_KEY
             || getGameContent().stages.some(stage => stage.id === activeSession && isStageReady(stage));
         if (activeSession && resumable)
         {

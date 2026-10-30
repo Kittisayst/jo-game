@@ -1,0 +1,12 @@
+{
+    "worldWidth": 1600,
+    "scenery": "forest",
+    "spawn": {
+        "x": 140,
+        "y": 556
+    },
+    "platforms": [],
+    "enemies": [],
+    "spikes": [],
+    "movingPlatforms": []
+}

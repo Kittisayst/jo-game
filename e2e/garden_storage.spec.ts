@@ -18,8 +18,8 @@ async function startInVillage (page: Page): Promise<Bot>
 }
 
 test.describe('The Garden', () => {
-  test('a Seed is planted, grows in real time and is harvested for Materials; the Garden can grow', async ({ page }) => {
-    test.setTimeout(120000);
+  test('Plots are on the ground: a Seed is planted with E, grows in real time and is harvested with E; the Garden can grow', async ({ page }) => {
+    test.setTimeout(150000);
     const bot = await startInVillage(page);
     await page.evaluate(() => {
       const e = (window as any).__entities;
@@ -28,38 +28,47 @@ test.describe('The Garden', () => {
       e.backpack.addItem('stone', 5);
     });
 
-    // The Garden door stands right of the Workshop (x = 1010)
+    // The Garden door stands right of the Workshop (x = 1010) and leads into the Garden, a place of its own
     expect(await bot.goTo(1005, { tolerance: 25, fight: false, timeoutMs: 40000 })).toBe('arrived');
     await page.keyboard.press('KeyE');
-    await expect(page.getByTestId('garden-modal')).toBeVisible();
-    await expect(page.getByTestId('plot-0')).toHaveAttribute('data-state', 'empty');
+    await expect.poll(async () => (await bot.state()).scene, { timeout: 20000 }).toBe('garden');
+    await expect(page.locator('.level-badge')).toContainText(/ສວນຜັກ/);
+    // Everything carried over (the Garden is restored from the save like any level change)
+    await page.evaluate(() => {
+      const e = (window as any).__entities;
+      if (e.backpack.getItemCount('herb-seed') < 1) { e.backpack.addItem('herb-seed', 1); e.backpack.addItem('wood', 10); e.backpack.addItem('stone', 5); }
+    });
 
-    // Plant: the Seed is used up and the Plot starts growing
-    await page.getByTestId('plant-0').click();
+    // The first Plot is at x = 300: E opens the choice of Seed
+    expect(await bot.goTo(300, { tolerance: 25, fight: false, timeoutMs: 30000 })).toBe('arrived');
+    await page.keyboard.press('KeyE');
+    await expect(page.getByTestId('seed-picker')).toBeVisible();
     await page.getByTestId('seed-herb-seed').click();
-    await expect(page.getByTestId('plot-0')).toHaveAttribute('data-state', 'growing');
-    await expect(page.getByTestId('plot-time-0')).toContainText('10:0');
+    await expect(page.getByTestId('seed-picker')).toHaveCount(0);
     expect(await count(page, 'herb-seed')).toBe(0);
-    // Harvesting early is not offered
-    await expect(page.getByTestId('harvest-0')).toHaveCount(0);
+    expect(await page.evaluate(() => (window as any).__entities.garden.hasPlants)).toBe(true);
 
     // Eleven minutes later (the development hook moves the clock): ready, and the HUD says so
     await page.evaluate(() => (window as any).__advanceClock(11 * 60 * 1000));
-    await expect(page.getByTestId('plot-0')).toHaveAttribute('data-state', 'ready', { timeout: 5000 });
-    await expect(page.getByTestId('garden-ready')).toContainText('ສວນພ້ອມເກັບ 1');
+    await expect(page.getByTestId('garden-ready')).toContainText('ສວນພ້ອມເກັບ 1', { timeout: 5000 });
 
     const herbBefore = await count(page, 'herb');
-    await page.getByTestId('harvest-0').click();
-    await expect(page.getByTestId('plot-0')).toHaveAttribute('data-state', 'empty');
-    expect(await count(page, 'herb')).toBe(herbBefore + 4);
+    await page.keyboard.press('KeyE');
+    await expect.poll(() => count(page, 'herb')).toBe(herbBefore + 4);
     await expect(page.getByTestId('garden-ready')).toHaveCount(0);
 
-    // A seventh Plot costs Materials (wood 10, stone 5), not Credit
+    // The sign at x = 1500 adds a seventh Plot for Materials (wood 10, stone 5), not Credit
     const credit = await page.evaluate(() => (window as any).__entities.wallet.balance);
-    await page.getByTestId('expand-garden').click();
-    await expect(page.getByTestId('plot-6')).toHaveAttribute('data-state', 'empty');
+    expect(await bot.goTo(1500, { tolerance: 25, fight: false, timeoutMs: 60000 })).toBe('arrived');
+    await page.keyboard.press('KeyE');
+    await expect.poll(() => page.evaluate(() => (window as any).__entities.garden.plotCount as number)).toBe(7);
     expect(await count(page, 'wood')).toBe(0);
     expect(await page.evaluate(() => (window as any).__entities.wallet.balance)).toBe(credit);
+
+    // The door at the left end leads home
+    expect(await bot.goTo(65, { tolerance: 20, fight: false, timeoutMs: 60000 })).toBe('arrived');
+    await page.keyboard.press('KeyE');
+    await expect.poll(async () => (await bot.state()).scene, { timeout: 20000 }).toBe('village');
   });
 });
 
