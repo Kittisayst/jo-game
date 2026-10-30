@@ -276,3 +276,24 @@ describe('Opened Realms in a save', () =>
         expect(migrateSaveSnapshot({ version: CURRENT_SAVE_VERSION }).openedRealms).toEqual([1]);
     });
 });
+
+describe('Waiting story Materials in a save', () =>
+{
+    it('starts empty, keeps what waits and drops nonsense', () =>
+    {
+        expect(createDefaultSaveSnapshot().pendingRewards).toEqual([]);
+
+        const saved = migrateSaveSnapshot({
+            version: CURRENT_SAVE_VERSION,
+            pendingRewards: [
+                { itemId: 'portal-shard-green', count: 3.9 },
+                { itemId: 'boss-core', count: 0 },
+                { itemId: 7, count: 2 },
+                'x',
+            ],
+        });
+
+        expect(saved.pendingRewards).toEqual([{ itemId: 'portal-shard-green', count: 3 }]);
+        expect(migrateSaveSnapshot({ version: CURRENT_SAVE_VERSION }).pendingRewards).toEqual([]);
+    });
+});

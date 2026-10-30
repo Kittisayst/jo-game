@@ -13,6 +13,7 @@ import type { Player } from '../objects/Player';
 import type { Spike } from '../objects/Spike';
 import type { Game } from '../scenes/Game';
 import { notifyShardsCollected, notifyTutorial } from '../../tutorial';
+import { stashStoryOverflowUseCase } from '../../../application/PendingRewardsUseCases';
 
 /** Most enemies the Boss can have alive at once when it summons minions. */
 const MAX_ENEMIES_FOR_SUMMON = 3;
@@ -273,11 +274,13 @@ export class CombatController
 
         // Materials from the enemy's drop table go straight into the backpack
         const drops = collectEnemyDropsUseCase(enemy.entity, entities.backpack);
-        notifyShardsCollected(drops.collected);
+        // Story Materials that did not fit wait for room instead of being lost
+        const stash = stashStoryOverflowUseCase(drops.overflow, entities.pendingRewards, entities.itemCatalog);
+        notifyShardsCollected([...drops.collected, ...stash.stashed]);
         if (drops.collected.length === 0 && drops.overflow.length === 0) return;
 
         const parts = [describeDrops(drops.collected)].filter(Boolean);
-        if (drops.overflow.length > 0) parts.push('🎒 ກະເປົາເຕັມ!');
+        if (drops.overflow.length > 0) parts.push(stash.stashed.length > 0 ? '🎒 ກະເປົາເຕັມ! ເກັບໄວ້ໃຫ້ກ່ອນ' : '🎒 ກະເປົາເຕັມ!');
         showLootNotification(
             this.scene,
             enemy.x,

@@ -19,6 +19,7 @@ import { useDevStageEntry } from './hooks/useDevStageEntry';
 import { dismissTutorialUseCase } from '../../application/NotifyTutorialUseCase';
 import { drinkPotionUseCase } from '../../application/DrinkPotionUseCase';
 import { placePortalBlockUseCase } from '../../application/PlacePortalBlockUseCase';
+import { claimPendingRewardsUseCase } from '../../application/PendingRewardsUseCases';
 import { notifyTutorial } from '../tutorial';
 import { useGlobalShortcuts } from './hooks/useGlobalShortcuts';
 import { useModalState } from './hooks/useModalState';
@@ -469,6 +470,19 @@ function App ()
 
     const quickSlotDef = entities.quickSlotItemId ? entities.itemCatalog.get(entities.quickSlotItemId) : undefined;
 
+    // Story Materials a Boss dropped into a full Backpack move in as soon as there is room (checked when the
+    // Backpack changes or its window closes, and when the hero comes home)
+    useEffect(() =>
+    {
+        if (entities.pendingRewards.isEmpty) return;
+        const claimed = claimPendingRewardsUseCase(entities.pendingRewards, entities.backpack);
+        if (claimed.length === 0) return;
+
+        soundManager.playCoin();
+        setBackpackRevision(r => r + 1);
+        autoSaveGame();
+    }, [backpackRevision, isBackpackOpen, currentLevel]);
+
     // Opening the Backpack is a tutorial step
     useEffect(() =>
     {
@@ -665,6 +679,7 @@ function App ()
                     onTogglePause={handleTogglePause}
                     walletBalance={walletBalance}
                     armor={entities.health.armor}
+                    pendingRewardsCount={entities.pendingRewards.total}
                     activeEffects={entities.effects.active}
                     quickSlot={quickSlotDef
                         ? {
