@@ -225,7 +225,7 @@ export class InteractionController
         soundManager.playClink();
         if (result.reason === 'missing_tool')
         {
-            showLootNotification(scene, node.x, node.y - 30, `⚠️ ຕ້ອງການ ${node.requiredTool?.toUpperCase()}!`, '#f59e0b');
+            showLootNotification(scene, node.x, node.y - 30, `⚠️ ຕ້ອງການ ${node.requiredTool?.toUpperCase()}${result.requiredTier ? ` T${result.requiredTier}` : ''}!`, '#f59e0b');
         }
         else if (result.reason === 'backpack_full')
         {

@@ -200,5 +200,138 @@
         "count": 3
       }
     ]
+  },
+  {
+    "id": "sand-slime",
+    "name": "ສະໄລມ໌ຊາຍ",
+    "nameEn": "Sand Slime",
+    "kind": "normal",
+    "maxHp": 48,
+    "damage": 16,
+    "speed": 62,
+    "drops": [
+      {
+        "itemId": "cactus-pulp",
+        "chance": 1.0,
+        "count": 1
+      },
+      {
+        "itemId": "copper-ore",
+        "chance": 0.5,
+        "count": 1
+      }
+    ]
+  },
+  {
+    "id": "sand-golem",
+    "name": "ໂກເລມຫີນຊາຍ",
+    "nameEn": "Sand Golem",
+    "kind": "normal",
+    "maxHp": 105,
+    "damage": 24,
+    "speed": 42,
+    "drops": [
+      {
+        "itemId": "copper-ore",
+        "chance": 1.0,
+        "count": 2
+      },
+      {
+        "itemId": "stone",
+        "chance": 0.5,
+        "count": 2
+      }
+    ]
+  },
+  {
+    "id": "dune-sentinel",
+    "name": "ຜູ້ພິທັກເນີນຊາຍ",
+    "nameEn": "Dune Sentinel",
+    "kind": "miniboss",
+    "maxHp": 300,
+    "damage": 30,
+    "speed": 58,
+    "attacks": {
+      "engageRange": 540,
+      "cooldownMs": 2100,
+      "moves": [
+        {
+          "id": "charge",
+          "telegraphMs": 750,
+          "minDistance": 0,
+          "maxDistance": 270,
+          "speed": 400,
+          "durationMs": 720,
+          "stunMs": 850
+        },
+        {
+          "id": "rock-throw",
+          "telegraphMs": 520,
+          "minDistance": 240,
+          "maxDistance": 540,
+          "speed": 300,
+          "projectiles": 5
+        }
+      ]
+    },
+    "drops": [
+      {
+        "itemId": "crystal",
+        "chance": 1.0,
+        "count": 2
+      },
+      {
+        "itemId": "portal-shard-yellow",
+        "chance": 1.0,
+        "count": 1
+      }
+    ]
+  },
+  {
+    "id": "stage-ch3-boss",
+    "name": "ຈອມມານເຄີເນວ",
+    "nameEn": "Kernel Overlord",
+    "kind": "boss",
+    "maxHp": 600,
+    "damage": 38,
+    "speed": 80,
+    "phases": [
+      {
+        "phase": 1,
+        "hpThreshold": 1.0,
+        "description": "ໂຈມຕີປົກກະຕິ ແລະ ພຸ່ງຕຳ"
+      },
+      {
+        "phase": 2,
+        "hpThreshold": 0.66,
+        "description": "ຍິງຄື້ນຄຳສັ່ງ"
+      },
+      {
+        "phase": 3,
+        "hpThreshold": 0.33,
+        "description": "ບ້າຄັ່ງ ຄວາມໄວໂຈມຕີເພີ່ມຂຶ້ນ"
+      }
+    ],
+    "quizFinisher": {
+      "bookId": "book-ch3",
+      "requiredPass": true
+    },
+    "drops": [
+      {
+        "itemId": "boss-core",
+        "chance": 1.0,
+        "count": 1
+      },
+      {
+        "itemId": "crystal",
+        "chance": 1.0,
+        "count": 3
+      },
+      {
+        "itemId": "portal-shard-yellow",
+        "chance": 1.0,
+        "count": 3
+      }
+    ]
   }
 ]

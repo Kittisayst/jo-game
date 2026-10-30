@@ -873,16 +873,590 @@
         }
       ]
     },
-    { "number": 21, "realm": 3, "status": "placeholder" },
-    { "number": 22, "realm": 3, "status": "placeholder" },
-    { "number": 23, "realm": 3, "status": "placeholder" },
-    { "number": 24, "realm": 3, "status": "placeholder" },
-    { "number": 25, "realm": 3, "status": "placeholder" },
-    { "number": 26, "realm": 3, "status": "placeholder" },
-    { "number": 27, "realm": 3, "status": "placeholder" },
-    { "number": 28, "realm": 3, "status": "placeholder" },
-    { "number": 29, "realm": 3, "status": "placeholder" },
-    { "number": 30, "realm": 3, "status": "placeholder" },
+    {
+      "number": 21,
+      "realm": 3,
+      "status": "ready",
+      "name": "ດ່ານ 21: ຂອບທະເລຊາຍ",
+      "nameEn": "Stage 21: Desert Edge",
+      "layout": {
+        "generate": {
+          "biome": "forest",
+          "seed": 21,
+          "screens": 2
+        }
+      },
+      "lessons": [
+        "21-1"
+      ],
+      "zones": [
+        {
+          "id": "a",
+          "name": "ຂອບທະເລຊາຍ (Desert Edge)",
+          "contents": [
+            {
+              "kind": "waypoint",
+              "x": 120,
+              "name": "ຈຸດວາບປອດໄພ ດ່ານ 21",
+              "label": "🌀 ຈຸດວາບປອດໄພ ດ່ານ 21"
+            },
+            {
+              "kind": "sign",
+              "x": 240,
+              "text": "🏜️ ທະເລຊາຍ\nຮຽນ OS ແລະ ຂຸດແຮ່ທອງແດງ",
+              "color": "#fde68a",
+              "stroke": "#713f12"
+            },
+            {
+              "kind": "spawn-pool",
+              "nodes": [
+                "copper-vein",
+                "cactus-patch",
+                "iron-vein"
+              ],
+              "count": 4,
+              "enemies": [
+                "sand-slime"
+              ],
+              "enemyCount": 2,
+              "patrolDistance": 100,
+              "speed": 50
+            },
+            {
+              "kind": "exit"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 22,
+      "realm": 3,
+      "status": "ready",
+      "name": "ດ່ານ 22: ເນີນຊາຍລົມພັດ",
+      "nameEn": "Stage 22: Windy Dunes",
+      "layout": {
+        "generate": {
+          "biome": "forest",
+          "seed": 22,
+          "screens": 3
+        }
+      },
+      "lessons": [
+        "22-1"
+      ],
+      "zones": [
+        {
+          "id": "a",
+          "name": "ເນີນຊາຍລົມພັດ (Windy Dunes)",
+          "contents": [
+            {
+              "kind": "waypoint",
+              "x": 120,
+              "name": "ຈຸດວາບປອດໄພ ດ່ານ 22",
+              "label": "🌀 ຈຸດວາບປອດໄພ ດ່ານ 22"
+            },
+            {
+              "kind": "sign",
+              "x": 240,
+              "text": "🌬️ ເນີນຊາຍ\nລະວັງສະໄລມ໌ຊາຍ",
+              "color": "#fde68a",
+              "stroke": "#713f12"
+            },
+            {
+              "kind": "spawn-pool",
+              "nodes": [
+                "copper-vein",
+                "cactus-patch",
+                "stone-rock"
+              ],
+              "count": 5,
+              "enemies": [
+                "sand-slime"
+              ],
+              "enemyCount": 3,
+              "patrolDistance": 100,
+              "speed": 50
+            },
+            {
+              "kind": "exit"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 23,
+      "realm": 3,
+      "status": "ready",
+      "name": "ດ່ານ 23: ໂອເອຊິສກະບອງເພັດ",
+      "nameEn": "Stage 23: Cactus Oasis",
+      "layout": {
+        "generate": {
+          "biome": "forest",
+          "seed": 23,
+          "screens": 3
+        }
+      },
+      "lessons": [
+        "23-1"
+      ],
+      "zones": [
+        {
+          "id": "a",
+          "name": "ໂອເອຊິສກະບອງເພັດ (Cactus Oasis)",
+          "contents": [
+            {
+              "kind": "waypoint",
+              "x": 120,
+              "name": "ຈຸດວາບປອດໄພ ດ່ານ 23",
+              "label": "🌀 ຈຸດວາບປອດໄພ ດ່ານ 23"
+            },
+            {
+              "kind": "sign",
+              "x": 240,
+              "text": "🌵 ເກັບກະບອງເພັດ\nໄດ້ເມັດປູກໃນສວນ",
+              "color": "#fde68a",
+              "stroke": "#713f12"
+            },
+            {
+              "kind": "spawn-pool",
+              "nodes": [
+                "cactus-patch",
+                "copper-vein",
+                "stone-rock"
+              ],
+              "count": 5,
+              "enemies": [
+                "sand-slime",
+                "sand-golem"
+              ],
+              "enemyCount": 3,
+              "patrolDistance": 100,
+              "speed": 50
+            },
+            {
+              "kind": "exit"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 24,
+      "realm": 3,
+      "status": "ready",
+      "name": "ດ່ານ 24: ຖ້ຳຫີນຊາຍ",
+      "nameEn": "Stage 24: Sandstone Cave",
+      "layout": {
+        "generate": {
+          "biome": "cave",
+          "seed": 24,
+          "screens": 3
+        }
+      },
+      "lessons": [
+        "24-1"
+      ],
+      "zones": [
+        {
+          "id": "a",
+          "name": "ຖ້ຳຫີນຊາຍ (Sandstone Cave)",
+          "contents": [
+            {
+              "kind": "waypoint",
+              "x": 120,
+              "name": "ຈຸດວາບປອດໄພ ດ່ານ 24",
+              "label": "🌀 ຈຸດວາບປອດໄພ ດ່ານ 24"
+            },
+            {
+              "kind": "sign",
+              "x": 240,
+              "text": "⛏️ ສາຍແຮ່ທອງແດງ\nຕ້ອງໃຊ້ຈົກ T2",
+              "color": "#fde68a",
+              "stroke": "#713f12"
+            },
+            {
+              "kind": "spawn-pool",
+              "nodes": [
+                "copper-vein",
+                "iron-vein",
+                "cactus-patch"
+              ],
+              "count": 5,
+              "enemies": [
+                "sand-golem"
+              ],
+              "enemyCount": 3,
+              "patrolDistance": 100,
+              "speed": 50
+            },
+            {
+              "kind": "exit"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 25,
+      "realm": 3,
+      "status": "ready",
+      "name": "ດ່ານ 25: ຜູ້ພິທັກເນີນຊາຍ",
+      "nameEn": "Stage 25: Dune Sentinel",
+      "layout": "assets/levels/stage-025.json",
+      "lessons": [
+        "25-1"
+      ],
+      "zones": [
+        {
+          "id": "a",
+          "name": "ເນີນຊາຍຜູ້ພິທັກ (Sentinel Dune)",
+          "contents": [
+            {
+              "kind": "waypoint",
+              "x": 120,
+              "name": "ຈຸດວາບປອດໄພ ດ່ານ 25",
+              "label": "🌀 ຈຸດວາບປອດໄພ ດ່ານ 25"
+            },
+            {
+              "kind": "sign",
+              "x": 260,
+              "text": "🏜️ ເຂດຜູ້ພິທັກເນີນຊາຍ\nຂຸດແຮ່ທອງແດງດ້ວຍ Pickaxe T2",
+              "color": "#fde68a",
+              "stroke": "#713f12"
+            },
+            {
+              "kind": "node",
+              "node": "copper-vein",
+              "x": 400
+            },
+            {
+              "kind": "node",
+              "node": "cactus-patch",
+              "x": 560
+            },
+            {
+              "kind": "node",
+              "node": "copper-vein",
+              "x": 1000
+            },
+            {
+              "kind": "enemy",
+              "enemy": "sand-golem",
+              "type": "slime-armored",
+              "x": 700,
+              "y": 580,
+              "patrolDistance": 140,
+              "speed": 45
+            },
+            {
+              "kind": "miniboss",
+              "enemy": "dune-sentinel",
+              "type": "slime-armored",
+              "x": 1650,
+              "y": 560,
+              "patrolDistance": 160,
+              "speed": 40,
+              "sign": "⚠️ ຜູ້ພິທັກເນີນຊາຍ Dune Sentinel\n(ປາບເພື່ອຮັບເສດປະຕູສີເຫຼືອງ 💠)"
+            },
+            {
+              "kind": "exit",
+              "x": 2100
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 26,
+      "realm": 3,
+      "status": "ready",
+      "name": "ດ່ານ 26: ຕະຫຼາດ Process",
+      "nameEn": "Stage 26: Process Bazaar",
+      "layout": {
+        "generate": {
+          "biome": "forest",
+          "seed": 26,
+          "screens": 4
+        }
+      },
+      "lessons": [
+        "26-1"
+      ],
+      "zones": [
+        {
+          "id": "a",
+          "name": "ຕະຫຼາດ Process (Process Bazaar)",
+          "contents": [
+            {
+              "kind": "waypoint",
+              "x": 120,
+              "name": "ຈຸດວາບປອດໄພ ດ່ານ 26",
+              "label": "🌀 ຈຸດວາບປອດໄພ ດ່ານ 26"
+            },
+            {
+              "kind": "sign",
+              "x": 240,
+              "text": "🧺 ຕະຫຼາດ\nຫຼາຍ Process ແລ່ນພ້ອມກັນ",
+              "color": "#fde68a",
+              "stroke": "#713f12"
+            },
+            {
+              "kind": "spawn-pool",
+              "nodes": [
+                "copper-vein",
+                "cactus-patch",
+                "stone-rock"
+              ],
+              "count": 6,
+              "enemies": [
+                "sand-slime",
+                "sand-golem"
+              ],
+              "enemyCount": 4,
+              "patrolDistance": 100,
+              "speed": 50
+            },
+            {
+              "kind": "exit"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 27,
+      "realm": 3,
+      "status": "ready",
+      "name": "ດ່ານ 27: ເມືອງເສົາຫີນ",
+      "nameEn": "Stage 27: Pillar City",
+      "layout": {
+        "generate": {
+          "biome": "cave",
+          "seed": 27,
+          "screens": 4
+        }
+      },
+      "lessons": [
+        "27-1"
+      ],
+      "zones": [
+        {
+          "id": "a",
+          "name": "ເມືອງເສົາຫີນ (Pillar City)",
+          "contents": [
+            {
+              "kind": "waypoint",
+              "x": 120,
+              "name": "ຈຸດວາບປອດໄພ ດ່ານ 27",
+              "label": "🌀 ຈຸດວາບປອດໄພ ດ່ານ 27"
+            },
+            {
+              "kind": "sign",
+              "x": 240,
+              "text": "🏛️ ເມືອງເກົ່າ\nKernel ຢູ່ແກນກາງ",
+              "color": "#fde68a",
+              "stroke": "#713f12"
+            },
+            {
+              "kind": "spawn-pool",
+              "nodes": [
+                "copper-vein",
+                "stone-rock",
+                "cactus-patch"
+              ],
+              "count": 6,
+              "enemies": [
+                "sand-golem"
+              ],
+              "enemyCount": 4,
+              "patrolDistance": 100,
+              "speed": 50
+            },
+            {
+              "kind": "exit"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 28,
+      "realm": 3,
+      "status": "ready",
+      "name": "ດ່ານ 28: ຮ່ອມ Driver",
+      "nameEn": "Stage 28: Driver Canyon",
+      "layout": {
+        "generate": {
+          "biome": "cave",
+          "seed": 28,
+          "screens": 4
+        }
+      },
+      "lessons": [
+        "28-1"
+      ],
+      "zones": [
+        {
+          "id": "a",
+          "name": "ຮ່ອມ Driver (Driver Canyon)",
+          "contents": [
+            {
+              "kind": "waypoint",
+              "x": 120,
+              "name": "ຈຸດວາບປອດໄພ ດ່ານ 28",
+              "label": "🌀 ຈຸດວາບປອດໄພ ດ່ານ 28"
+            },
+            {
+              "kind": "sign",
+              "x": 240,
+              "text": "🔧 ຮ່ອມຜາ\nDriver ເຮັດໃຫ້ອຸປະກອນເຮັດວຽກ",
+              "color": "#fde68a",
+              "stroke": "#713f12"
+            },
+            {
+              "kind": "spawn-pool",
+              "nodes": [
+                "copper-vein",
+                "iron-vein",
+                "cactus-patch"
+              ],
+              "count": 6,
+              "enemies": [
+                "sand-slime",
+                "sand-golem"
+              ],
+              "enemyCount": 4,
+              "patrolDistance": 100,
+              "speed": 50
+            },
+            {
+              "kind": "exit"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 29,
+      "realm": 3,
+      "status": "ready",
+      "name": "ດ່ານ 29: ຫ້ອງໜ້າລານ Kernel",
+      "nameEn": "Stage 29: Kernel Antechamber",
+      "layout": {
+        "generate": {
+          "biome": "cave",
+          "seed": 29,
+          "screens": 4
+        }
+      },
+      "lessons": [
+        "29-1"
+      ],
+      "zones": [
+        {
+          "id": "a",
+          "name": "ຫ້ອງໜ້າລານ Kernel (Antechamber)",
+          "contents": [
+            {
+              "kind": "waypoint",
+              "x": 120,
+              "name": "ຈຸດວາບປອດໄພ ດ່ານ 29",
+              "label": "🌀 ຈຸດວາບປອດໄພ ດ່ານ 29"
+            },
+            {
+              "kind": "sign",
+              "x": 240,
+              "text": "⚠️ ໃກ້ລານບອສ\nກຽມຕົວ ແລະ ສ້ອມອາວຸດ",
+              "color": "#fde68a",
+              "stroke": "#713f12"
+            },
+            {
+              "kind": "spawn-pool",
+              "nodes": [
+                "copper-vein",
+                "cactus-patch",
+                "stone-rock"
+              ],
+              "count": 5,
+              "enemies": [
+                "sand-golem"
+              ],
+              "enemyCount": 5,
+              "patrolDistance": 100,
+              "speed": 50
+            },
+            {
+              "kind": "exit"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 30,
+      "realm": 3,
+      "status": "ready",
+      "name": "ດ່ານ 30: ລານບອສ Kernel",
+      "nameEn": "Stage 30: Kernel Overlord Arena",
+      "layout": "assets/levels/stage-030.json",
+      "lessons": [
+        "30-1"
+      ],
+      "zones": [
+        {
+          "id": "approach",
+          "name": "ທາງເຂົ້າລານບອສ (Arena Approach)",
+          "contents": [
+            {
+              "kind": "waypoint",
+              "x": 120,
+              "name": "ຈຸດວາບປອດໄພ ດ່ານ 30",
+              "label": "🌀 ຈຸດວາບປອດໄພ ດ່ານ 30"
+            },
+            {
+              "kind": "node",
+              "node": "copper-vein",
+              "x": 350
+            },
+            {
+              "kind": "node",
+              "node": "stone-rock",
+              "x": 520
+            },
+            {
+              "kind": "enemy",
+              "enemy": "sand-golem",
+              "type": "slime-armored",
+              "x": 450,
+              "y": 580,
+              "patrolDistance": 140,
+              "speed": 45
+            },
+            {
+              "kind": "waypoint",
+              "x": 800,
+              "name": "ຈຸດວາບປອດໄພ ໜ້າລານບອສ",
+              "label": "🌀 ຈຸດວາບປອດໄພ ໜ້າລານບອສ"
+            }
+          ]
+        },
+        {
+          "id": "boss",
+          "name": "ລານປະລອງບອສ Kernel (Boss Arena)",
+          "contents": [
+            {
+              "kind": "boss",
+              "enemy": "stage-ch3-boss",
+              "x": 1700,
+              "y": 400,
+              "banner": "👑 ຈອມມານເຄີເນວ (Kernel Overlord) 👑\n(ຫຼົບຄື້ນຄຳສັ່ງ & ປິດສາກດ້ວຍຄວາມຮູ້!)"
+            }
+          ]
+        }
+      ]
+    },
     { "number": 31, "realm": 4, "status": "placeholder" },
     { "number": 32, "realm": 4, "status": "placeholder" },
     { "number": 33, "realm": 4, "status": "placeholder" },

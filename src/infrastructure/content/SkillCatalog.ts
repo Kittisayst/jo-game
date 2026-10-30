@@ -44,7 +44,20 @@ export interface ChainEffect
     bossShare: number;
 }
 
-export type SkillEffect = WaveEffect | ChainEffect;
+/** A shock wave around the hero that hurts and stuns every enemy in a circle (End Task). */
+export interface AreaEffect
+{
+    type: 'area';
+    damageMultiplier: number;
+    /** Radius of the circle around the hero. */
+    radiusPx: number;
+    /** How long each enemy hit is stunned (not a Boss). */
+    stunMs: number;
+    /** Share of the damage a Boss takes (1 = all). A Boss is never stunned. */
+    bossShare: number;
+}
+
+export type SkillEffect = WaveEffect | ChainEffect | AreaEffect;
 
 export interface SkillDefinition extends SkillRule
 {
@@ -88,27 +101,39 @@ export function parseSkills (raw: unknown): SkillContent
     function parseEffect (value: unknown, e: string): SkillEffect
     {
         const effect = v.asObject(value, e);
-        const type = v.asOneOf(effect.type, ['wave', 'chain'] as const, `${e}.type`);
+        const type = v.asOneOf(effect.type, ['wave', 'chain', 'area'] as const, `${e}.type`);
         const bossShare = v.asNumber(effect.bossShare, `${e}.bossShare`);
         if (!(bossShare > 0 && bossShare <= 1)) v.fail(`${e}.bossShare`, 'a number above 0 and at most 1');
-        return type === 'wave'
-            ? {
+        if (type === 'wave')
+        {
+            return {
                 type,
                 damageMultiplier: positive(effect, 'damageMultiplier', e),
                 speed: positive(effect, 'speed', e),
                 rangePx: positive(effect, 'rangePx', e),
                 pierce: positive(effect, 'pierce', e),
                 bossShare,
-            }
-            : {
+            };
+        }
+        if (type === 'area')
+        {
+            return {
                 type,
                 damageMultiplier: positive(effect, 'damageMultiplier', e),
-                jumps: positive(effect, 'jumps', e),
-                rangePx: positive(effect, 'rangePx', e),
-                jumpRangePx: positive(effect, 'jumpRangePx', e),
+                radiusPx: positive(effect, 'radiusPx', e),
                 stunMs: positive(effect, 'stunMs', e),
                 bossShare,
             };
+        }
+        return {
+            type,
+            damageMultiplier: positive(effect, 'damageMultiplier', e),
+            jumps: positive(effect, 'jumps', e),
+            rangePx: positive(effect, 'rangePx', e),
+            jumpRangePx: positive(effect, 'jumpRangePx', e),
+            stunMs: positive(effect, 'stunMs', e),
+            bossShare,
+        };
     }
 
     const unlocks = v.asArray(movement.unlocks ?? [], 'movement.unlocks').map((entry, i): MovementUnlock =>

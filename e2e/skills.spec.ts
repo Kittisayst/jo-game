@@ -148,3 +148,57 @@ test.describe('Ping (chain lightning and stun)', () => {
     expect(pageErrors).toEqual([]);
   });
 });
+
+test.describe('End Task (area stun)', () => {
+  test('stuns and hurts every enemy in the circle, none outside it; nothing in the circle costs no cooldown', async ({ page }) => {
+    test.setTimeout(120000);
+    const pageErrors: string[] = [];
+    page.on('pageerror', err => pageErrors.push(err.message));
+    await openStage(page, 22);
+    await page.evaluate(() => { (window as any).__entities.skills.unlock('end-task'); });
+
+    const enemies = await page.evaluate(() => {
+      const scene = (window as any).__botGame.scene.getScene('Game');
+      return scene.enemies.getChildren().filter((e: any) => e.active).map((e: any) => ({ x: e.x as number, y: e.y as number })).sort((a: any, b: any) => a.x - b.x);
+    });
+    expect(enemies.length).toBeGreaterThan(1);
+
+    // Nothing within 260 px: K says so and keeps the skill ready
+    await page.evaluate(({ x }) => {
+      const scene = (window as any).__botGame.scene.getScene('Game');
+      scene.player.isInvincible = true;
+      scene.player.setPosition(Math.max(60, x - 900), scene.player.y);
+    }, { x: enemies[0].x });
+    await page.waitForTimeout(300);
+    const near = await page.evaluate(() => {
+      const scene = (window as any).__botGame.scene.getScene('Game');
+      return scene.enemies.getChildren().some((e: any) => e.active && Math.hypot(e.x - scene.player.x, e.y - scene.player.y) < 300);
+    });
+    if (!near) {
+      await page.keyboard.press('KeyK');
+      expect(await page.evaluate(() => (window as any).__entities.skillCooldowns.anyActive)).toBe(false);
+    }
+
+    // Beside the first enemy: it is hurt and stunned; one more than 260 px away is not touched
+    await page.evaluate(({ x }) => {
+      const scene = (window as any).__botGame.scene.getScene('Game');
+      scene.player.setPosition(x - 120, scene.player.y);
+    }, { x: enemies[0].x });
+    await page.waitForTimeout(300);
+    const before = await page.evaluate(() => {
+      const scene = (window as any).__botGame.scene.getScene('Game');
+      return scene.enemies.getChildren().filter((e: any) => e.active).map((e: any) => ({ x: e.x as number, hp: e.entity.currentHp as number, far: Math.hypot(e.x - scene.player.x, e.y - scene.player.y) > 280 }));
+    });
+    await page.keyboard.press('KeyK');
+    await expect.poll(() => page.evaluate(() => (window as any).__entities.skillCooldowns.remainingMs('end-task') as number), { timeout: 4000 }).toBeGreaterThan(0);
+
+    const after = await page.evaluate(() => {
+      const scene = (window as any).__botGame.scene.getScene('Game');
+      return scene.enemies.getChildren().filter((e: any) => e.active).map((e: any) => ({ x: e.x as number, hp: e.entity.currentHp as number, stunned: e.isStunned as boolean, far: Math.hypot(e.x - scene.player.x, e.y - scene.player.y) > 280 }));
+    });
+    expect(after.some((e: any) => e.stunned && !e.far)).toBe(true);
+    expect(after.filter((e: any) => e.far).every((e: any) => !e.stunned)).toBe(true);
+    expect(before.length).toBeGreaterThan(0);
+    expect(pageErrors).toEqual([]);
+  });
+});

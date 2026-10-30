@@ -7,6 +7,45 @@
     { "id": "iron-vein", "label": "ຂຸດແຮ່ເຫຼັກ", "icon": "⛏️", "texture": "node-iron-vein", "reach": 38, "requiredTool": "pickaxe", "toolTier": 1, "strikes": 4, "drops": [{ "itemId": "iron-ore", "count": 4 }] },
     {"id": "crystal-vein", "label": "ຂຸດຜລຶກແກ້ວ", "icon": "💎", "texture": "node-crystal-vein", "reach": 38, "requiredTool": "pickaxe", "toolTier": 1, "strikes": 4, "drops": [{"itemId": "crystal", "count": 1}]},
     {"id": "blue-ore-vein", "label": "ຂຸດແຮ່ຟ້າ", "icon": "🔷", "texture": "node-blue-ore", "reach": 38, "requiredTool": "pickaxe", "toolTier": 1, "strikes": 4, "drops": [{"itemId": "blue-ore", "count": 3}]},
-    {"id": "cave-mushroom-patch", "label": "ເກັບເຫັດຖ້ຳ", "icon": "🍄", "texture": "node-cave-mushroom", "reach": 30, "requiredTool": null, "toolTier": 0, "strikes": 1, "drops": [{"itemId": "cave-mushroom", "count": 2}], "seed": {"itemId": "mushroom-spore", "chance": 0.5}, "regrow": {"minutes": 10}}
+    {"id": "cave-mushroom-patch", "label": "ເກັບເຫັດຖ້ຳ", "icon": "🍄", "texture": "node-cave-mushroom", "reach": 30, "requiredTool": null, "toolTier": 0, "strikes": 1, "drops": [{"itemId": "cave-mushroom", "count": 2}], "seed": {"itemId": "mushroom-spore", "chance": 0.5}, "regrow": {"minutes": 10}},
+    {
+      "id": "copper-vein",
+      "label": "ຂຸດແຮ່ທອງແດງ",
+      "icon": "🟠",
+      "texture": "node-copper-vein",
+      "reach": 38,
+      "requiredTool": "pickaxe",
+      "toolTier": 2,
+      "strikes": 5,
+      "drops": [
+        {
+          "itemId": "copper-ore",
+          "count": 3
+        }
+      ]
+    },
+    {
+      "id": "cactus-patch",
+      "label": "ເກັບກະບອງເພັດ",
+      "icon": "🌵",
+      "texture": "node-cactus-patch",
+      "reach": 30,
+      "requiredTool": null,
+      "toolTier": 0,
+      "strikes": 1,
+      "drops": [
+        {
+          "itemId": "cactus-pulp",
+          "count": 2
+        }
+      ],
+      "seed": {
+        "itemId": "cactus-seed",
+        "chance": 0.5
+      },
+      "regrow": {
+        "minutes": 10
+      }
+    }
   ]
 }

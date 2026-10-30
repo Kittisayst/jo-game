@@ -614,5 +614,289 @@
       { "itemId": "stone", "count": 25 },
       { "itemId": "iron-ore", "count": 10 }
     ]
+  },
+  {
+    "id": "recipe-axe-t3",
+    "resultItemId": "axe-t3",
+    "resultCount": 1,
+    "building": "workshop",
+    "requiredBookRecipe": "axe-t3",
+    "creditCost": 0,
+    "craftSeconds": 60,
+    "ingredients": [
+      {
+        "itemId": "wood",
+        "count": 8
+      },
+      {
+        "itemId": "copper-ore",
+        "count": 5
+      }
+    ]
+  },
+  {
+    "id": "recipe-pickaxe-t3",
+    "resultItemId": "pickaxe-t3",
+    "resultCount": 1,
+    "building": "workshop",
+    "requiredBookRecipe": "pickaxe-t3",
+    "creditCost": 0,
+    "craftSeconds": 60,
+    "ingredients": [
+      {
+        "itemId": "wood",
+        "count": 6
+      },
+      {
+        "itemId": "copper-ore",
+        "count": 6
+      }
+    ]
+  },
+  {
+    "id": "recipe-hammer-t3",
+    "resultItemId": "hammer-t3",
+    "resultCount": 1,
+    "building": "workshop",
+    "requiredBookRecipe": "hammer-t3",
+    "creditCost": 0,
+    "craftSeconds": 60,
+    "ingredients": [
+      {
+        "itemId": "wood",
+        "count": 6
+      },
+      {
+        "itemId": "copper-ore",
+        "count": 4
+      }
+    ]
+  },
+  {
+    "id": "recipe-copper-sword",
+    "resultItemId": "copper-sword",
+    "resultCount": 1,
+    "building": "forge",
+    "requiredBookRecipe": "copper-sword",
+    "creditCost": 35,
+    "craftSeconds": 120,
+    "ingredients": [
+      {
+        "itemId": "copper-ore",
+        "count": 12
+      },
+      {
+        "itemId": "crystal",
+        "count": 3
+      },
+      {
+        "itemId": "blue-ore",
+        "count": 4
+      }
+    ]
+  },
+  {
+    "id": "recipe-copper-helmet",
+    "resultItemId": "copper-helmet",
+    "resultCount": 1,
+    "building": "forge",
+    "requiredBookRecipe": "copper-helmet",
+    "creditCost": 0,
+    "craftSeconds": 50,
+    "ingredients": [
+      {
+        "itemId": "copper-ore",
+        "count": 7
+      },
+      {
+        "itemId": "fiber",
+        "count": 2
+      }
+    ]
+  },
+  {
+    "id": "recipe-copper-chestplate",
+    "resultItemId": "copper-chestplate",
+    "resultCount": 1,
+    "building": "forge",
+    "requiredBookRecipe": "copper-chestplate",
+    "creditCost": 0,
+    "craftSeconds": 80,
+    "ingredients": [
+      {
+        "itemId": "copper-ore",
+        "count": 11
+      },
+      {
+        "itemId": "fiber",
+        "count": 3
+      }
+    ]
+  },
+  {
+    "id": "recipe-copper-boots",
+    "resultItemId": "copper-boots",
+    "resultCount": 1,
+    "building": "forge",
+    "requiredBookRecipe": "copper-boots",
+    "creditCost": 0,
+    "craftSeconds": 50,
+    "ingredients": [
+      {
+        "itemId": "copper-ore",
+        "count": 7
+      },
+      {
+        "itemId": "fiber",
+        "count": 2
+      }
+    ]
+  },
+  {
+    "id": "recipe-portal-block-yellow",
+    "resultItemId": "portal-block-yellow",
+    "resultCount": 1,
+    "building": "forge",
+    "requiredBookRecipe": "portal-block-yellow",
+    "creditCost": 0,
+    "craftSeconds": 120,
+    "ingredients": [
+      {
+        "itemId": "portal-shard-yellow",
+        "count": 5
+      },
+      {
+        "itemId": "crystal",
+        "count": 6
+      },
+      {
+        "itemId": "boss-core",
+        "count": 1
+      }
+    ]
+  },
+  {
+    "id": "upgrade-axe-t3-1",
+    "targetToolId": "axe-t3",
+    "targetLevel": 1,
+    "building": "workshop",
+    "creditCost": 0,
+    "strikeWeight": 1.5,
+    "ingredients": [
+      {
+        "itemId": "copper-ore",
+        "count": 6
+      },
+      {
+        "itemId": "wood",
+        "count": 20
+      }
+    ]
+  },
+  {
+    "id": "upgrade-axe-t3-2",
+    "targetToolId": "axe-t3",
+    "targetLevel": 2,
+    "building": "workshop",
+    "creditCost": 0,
+    "strikeWeight": 2,
+    "ingredients": [
+      {
+        "itemId": "copper-ore",
+        "count": 12
+      },
+      {
+        "itemId": "wood",
+        "count": 25
+      },
+      {
+        "itemId": "iron-ore",
+        "count": 8
+      }
+    ]
+  },
+  {
+    "id": "upgrade-axe-t3-3",
+    "targetToolId": "axe-t3",
+    "targetLevel": 3,
+    "building": "workshop",
+    "creditCost": 0,
+    "strikeWeight": 3,
+    "ingredients": [
+      {
+        "itemId": "copper-ore",
+        "count": 20
+      },
+      {
+        "itemId": "wood",
+        "count": 35
+      },
+      {
+        "itemId": "iron-ore",
+        "count": 14
+      }
+    ]
+  },
+  {
+    "id": "upgrade-pickaxe-t3-1",
+    "targetToolId": "pickaxe-t3",
+    "targetLevel": 1,
+    "building": "workshop",
+    "creditCost": 0,
+    "strikeWeight": 1.5,
+    "ingredients": [
+      {
+        "itemId": "copper-ore",
+        "count": 8
+      },
+      {
+        "itemId": "stone",
+        "count": 16
+      }
+    ]
+  },
+  {
+    "id": "upgrade-pickaxe-t3-2",
+    "targetToolId": "pickaxe-t3",
+    "targetLevel": 2,
+    "building": "workshop",
+    "creditCost": 0,
+    "strikeWeight": 2,
+    "ingredients": [
+      {
+        "itemId": "copper-ore",
+        "count": 14
+      },
+      {
+        "itemId": "stone",
+        "count": 24
+      },
+      {
+        "itemId": "iron-ore",
+        "count": 8
+      }
+    ]
+  },
+  {
+    "id": "upgrade-pickaxe-t3-3",
+    "targetToolId": "pickaxe-t3",
+    "targetLevel": 3,
+    "building": "workshop",
+    "creditCost": 0,
+    "strikeWeight": 3,
+    "ingredients": [
+      {
+        "itemId": "copper-ore",
+        "count": 22
+      },
+      {
+        "itemId": "stone",
+        "count": 32
+      },
+      {
+        "itemId": "iron-ore",
+        "count": 14
+      }
+    ]
   }
 ]

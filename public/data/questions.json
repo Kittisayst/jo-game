@@ -783,5 +783,455 @@
     "correctIndex": 0,
     "explanation": "ມີສຳເນົາອີກບ່ອນ ຈຶ່ງກູ້ຂໍ້ມູນຄືນໄດ້.",
     "lesson": "20-1"
+  },
+  {
+    "id": "q-ch3-p1-1",
+    "bookId": "book-ch3",
+    "pageNumber": 1,
+    "question": "ໜ້າທີ່ຫຼັກຂອງລະບົບປະຕິບັດການ (OS) ຄືຫຍັງ?",
+    "options": [
+      "ຄວບຄຸມ ແລະ ຈັດການຊັບພະຍາກອນຂອງຄອມພິວເຕີ",
+      "ຜະລິດໄຟຟ້າໃຫ້ເຄື່ອງ",
+      "ສ້າງເກມໃຫ້ຜູ້ໃຊ້",
+      "ເກັບຂໍ້ມູນຖາວອນດ້ວຍຕົວເອງ"
+    ],
+    "correctIndex": 0,
+    "explanation": "OS ຈັດການ CPU, RAM, ໄຟລ໌ ແລະອຸປະກອນ.",
+    "lesson": "21-1"
+  },
+  {
+    "id": "q-ch3-p1-2",
+    "bookId": "book-ch3",
+    "pageNumber": 1,
+    "question": "ຂໍ້ໃດບໍ່ແມ່ນໜ້າທີ່ຂອງ OS?",
+    "options": [
+      "ຄວບຄຸມອຸປະກອນ",
+      "ຜະລິດຊິບ CPU",
+      "ຈັດການໄຟລ໌",
+      "ຈັດການຄວາມຈຳ (RAM)"
+    ],
+    "correctIndex": 1,
+    "explanation": "ການຜະລິດຊິບເປັນວຽກຂອງໂຮງງານ ບໍ່ແມ່ນ OS.",
+    "lesson": "21-1"
+  },
+  {
+    "id": "q-ch3-p1-3",
+    "bookId": "book-ch3",
+    "pageNumber": 1,
+    "question": "OS ເປັນຕົວກາງລະຫວ່າງຫຍັງກັບຫຍັງ?",
+    "options": [
+      "ໄຟຟ້າກັບສາຍ",
+      "ຈໍພາບກັບເມົ້າ",
+      "ໂປຣແກຣມກັບຮາດແວ",
+      "ເຄື່ອງພິມກັບເຈ້ຍ"
+    ],
+    "correctIndex": 2,
+    "explanation": "ໂປຣແກຣມຂໍໃຊ້ຮາດແວຜ່ານ OS.",
+    "lesson": "21-1"
+  },
+  {
+    "id": "q-ch3-p2-1",
+    "bookId": "book-ch3",
+    "pageNumber": 2,
+    "question": "OS ໃດໃຊ້ຫຼາຍໃນໂທລະສັບ?",
+    "options": [
+      "Android",
+      "MS-DOS",
+      "Windows Server",
+      "Paint"
+    ],
+    "correctIndex": 0,
+    "explanation": "Android ແລະ iOS ແມ່ນ OS ຂອງໂທລະສັບ.",
+    "lesson": "22-1"
+  },
+  {
+    "id": "q-ch3-p2-2",
+    "bookId": "book-ch3",
+    "pageNumber": 2,
+    "question": "Linux ມີຈຸດພິເສດຫຍັງ?",
+    "options": [
+      "ໃຊ້ໄດ້ສະເພາະໂທລະສັບ",
+      "ບໍ່ມີ Kernel",
+      "ຕ້ອງຊື້ທຸກຄັ້ງທີ່ໃຊ້",
+      "ເປັນ Open Source ເບິ່ງ ແລະແກ້ໂຄ້ດໄດ້"
+    ],
+    "correctIndex": 3,
+    "explanation": "ໂຄ້ດຂອງ Linux ເປີດເຜີຍ ຈຶ່ງແກ້ໄຂ ແລະແຈກຕໍ່ໄດ້.",
+    "lesson": "22-1"
+  },
+  {
+    "id": "q-ch3-p2-3",
+    "bookId": "book-ch3",
+    "pageNumber": 2,
+    "question": "ຂໍ້ໃດເປັນ OS?",
+    "options": [
+      "Chrome",
+      "Word",
+      "macOS",
+      "Photoshop"
+    ],
+    "correctIndex": 2,
+    "explanation": "macOS ເປັນລະບົບປະຕິບັດການຂອງ Apple. ສ່ວນຂໍ້ອື່ນເປັນໂປຣແກຣມ.",
+    "lesson": "22-1"
+  },
+  {
+    "id": "q-ch3-p3-1",
+    "bookId": "book-ch3",
+    "pageNumber": 3,
+    "question": "GUI ຫຍໍ້ມາຈາກຫຍັງ?",
+    "options": [
+      "Great Unix Interface",
+      "Graphical User Interface",
+      "Graphic Update Index",
+      "General Unit Input"
+    ],
+    "correctIndex": 1,
+    "explanation": "GUI ຄື Graphical User Interface ໜ້າຕາແບບພາບ.",
+    "lesson": "23-1"
+  },
+  {
+    "id": "q-ch3-p3-2",
+    "bookId": "book-ch3",
+    "pageNumber": 3,
+    "question": "ການພິມຄຳສັ່ງໃນໜ້າຕ່າງຄຳສັ່ງ ເປັນການໃຊ້ແບບໃດ?",
+    "options": [
+      "BIOS",
+      "CLI",
+      "GUI",
+      "Driver"
+    ],
+    "correctIndex": 1,
+    "explanation": "CLI ແມ່ນສັ່ງງານດ້ວຍຕົວໜັງສື.",
+    "lesson": "23-1"
+  },
+  {
+    "id": "q-ch3-p3-3",
+    "bookId": "book-ch3",
+    "pageNumber": 3,
+    "question": "ຂໍ້ໃດເປັນຄຳສັ່ງໃນ CLI?",
+    "options": [
+      "Double-click",
+      "Right-click",
+      "cd (ປ່ຽນໂຟນເດີ)",
+      "Drag & Drop"
+    ],
+    "correctIndex": 2,
+    "explanation": "cd ເປັນຄຳສັ່ງພິມ. ຂໍ້ອື່ນເປັນການໃຊ້ເມົ້າ (GUI).",
+    "lesson": "23-1"
+  },
+  {
+    "id": "q-ch3-p4-1",
+    "bookId": "book-ch3",
+    "pageNumber": 4,
+    "question": "ສ່ວນໃດຂອງ OS ເຮັດວຽກໃກ້ຮາດແວທີ່ສຸດ?",
+    "options": [
+      "ໂປຣແກຣມເກມ",
+      "ຮູບພື້ນຫຼັງ",
+      "Kernel",
+      "ໄອຄອນໃນ Desktop"
+    ],
+    "correctIndex": 2,
+    "explanation": "Kernel ເປັນແກນກາງທີ່ຄຸມຮາດແວ.",
+    "lesson": "24-1"
+  },
+  {
+    "id": "q-ch3-p4-2",
+    "bookId": "book-ch3",
+    "pageNumber": 4,
+    "question": "ໂປຣແກຣມທົ່ວໄປຂໍໃຊ້ຮາດແວຜ່ານຫຍັງ?",
+    "options": [
+      "Flash drive",
+      "ສາຍໄຟ",
+      "ເມົ້າ",
+      "System Call"
+    ],
+    "correctIndex": 3,
+    "explanation": "System Call ເປັນຊ່ອງທາງທີ່ໂປຣແກຣມຂໍບໍລິການຈາກ Kernel.",
+    "lesson": "24-1"
+  },
+  {
+    "id": "q-ch3-p4-3",
+    "bookId": "book-ch3",
+    "pageNumber": 4,
+    "question": "ຖ້າ Kernel ມີຂໍ້ຜິດພາດຮ້າຍແຮງ ຈະເກີດຫຍັງ?",
+    "options": [
+      "ເຄື່ອງພິມຢຸດ",
+      "ພຽງແຕ່ຮູບພື້ນຫຼັງປ່ຽນສີ",
+      "ທັງລະບົບອາດຄ້າງ ຫຼືຈໍຟ້າ",
+      "ບໍ່ມີຫຍັງເກີດຂຶ້ນ"
+    ],
+    "correctIndex": 2,
+    "explanation": "ທຸກຢ່າງຂຶ້ນກັບ Kernel ຈຶ່ງກະທົບທັງເຄື່ອງ.",
+    "lesson": "24-1"
+  },
+  {
+    "id": "q-ch3-p5-1",
+    "bookId": "book-ch3",
+    "pageNumber": 5,
+    "question": "ໂປຣແກຣມທີ່ກຳລັງແລ່ນຢູ່ເອີ້ນວ່າຫຍັງ?",
+    "options": [
+      "Process",
+      "Driver",
+      "Folder",
+      "File"
+    ],
+    "correctIndex": 0,
+    "explanation": "Process ຄືໂປຣແກຣມທີ່ກຳລັງແລ່ນ.",
+    "lesson": "25-1"
+  },
+  {
+    "id": "q-ch3-p5-2",
+    "bookId": "book-ch3",
+    "pageNumber": 5,
+    "question": "ເຄື່ອງມືໃດໃຊ້ປິດໂປຣແກຣມທີ່ຄ້າງໃນ Windows?",
+    "options": [
+      "Paint",
+      "Notepad",
+      "Calculator",
+      "Task Manager"
+    ],
+    "correctIndex": 3,
+    "explanation": "ໃນ Task Manager ເລືອກ End Task ເພື່ອປິດ Process.",
+    "lesson": "25-1"
+  },
+  {
+    "id": "q-ch3-p5-3",
+    "bookId": "book-ch3",
+    "pageNumber": 5,
+    "question": "Thread ແມ່ນຫຍັງ?",
+    "options": [
+      "ປະເພດໄຟລ໌ຮູບ",
+      "ສາຍເຊື່ອມອຸປະກອນ",
+      "ຊື່ຜູ້ໃຊ້",
+      "ສາຍງານຍ່ອຍພາຍໃນ Process"
+    ],
+    "correctIndex": 3,
+    "explanation": "ຫຼາຍ Thread ໃນ Process ດຽວເຮັດວຽກພ້ອມກັນໄດ້.",
+    "lesson": "25-1"
+  },
+  {
+    "id": "q-ch3-p6-1",
+    "bookId": "book-ch3",
+    "pageNumber": 6,
+    "question": "ໃຜຕັດສິນວ່າໂປຣແກຣມໃດໄດ້ໃຊ້ CPU ກ່ອນ?",
+    "options": [
+      "ເຄື່ອງພິມ",
+      "ເມົ້າ",
+      "Scheduler ຂອງ OS",
+      "ຜູ້ຜະລິດຈໍ"
+    ],
+    "correctIndex": 2,
+    "explanation": "Scheduler ແບ່ງເວລາ CPU ໃຫ້ແຕ່ລະ Process.",
+    "lesson": "26-1"
+  },
+  {
+    "id": "q-ch3-p6-2",
+    "bookId": "book-ch3",
+    "pageNumber": 6,
+    "question": "CPU ຫຼັກດຽວເບິ່ງຄືແລ່ນຫຼາຍງານພ້ອມກັນ ເພາະຫຍັງ?",
+    "options": [
+      "ໃຊ້ໄຟຫຼາຍຂຶ້ນ",
+      "ສະຫຼັບງານໄວຫຼາຍ (ແບ່ງເວລາ)",
+      "ປິດໂປຣແກຣມອື່ນທັງໝົດ",
+      "ມີ RAM ບໍ່ສິ້ນສຸດ"
+    ],
+    "correctIndex": 1,
+    "explanation": "ສະຫຼັບໄວຈົນຕາຂອງເຮົາເຫັນຄືພ້ອມກັນ.",
+    "lesson": "26-1"
+  },
+  {
+    "id": "q-ch3-p6-3",
+    "bookId": "book-ch3",
+    "pageNumber": 6,
+    "question": "ຂໍ້ໃດແລ່ນຫຼາຍງານພ້ອມກັນໄດ້ຈິງ?",
+    "options": [
+      "CPU ຫຼາຍຫຼັກ",
+      "ຈໍພາບໃຫຍ່",
+      "ສາຍ HDMI",
+      "ກະດານພິມ"
+    ],
+    "correctIndex": 0,
+    "explanation": "ແຕ່ລະຫຼັກແລ່ນໜຶ່ງງານໃນເວລາດຽວກັນ.",
+    "lesson": "26-1"
+  },
+  {
+    "id": "q-ch3-p7-1",
+    "bookId": "book-ch3",
+    "pageNumber": 7,
+    "question": "ເມື່ອ RAM ບໍ່ພໍ OS ໃຊ້ອັນໃດຊ່ວຍ?",
+    "options": [
+      "ຈໍພາບ",
+      "Virtual Memory (Swap) ໃນດິດ",
+      "ເມົ້າ",
+      "ເຄື່ອງພິມ"
+    ],
+    "correctIndex": 1,
+    "explanation": "OS ຢືມພື້ນທີ່ໃນດິດມາໃຊ້ເປັນຄວາມຈຳ.",
+    "lesson": "27-1"
+  },
+  {
+    "id": "q-ch3-p7-2",
+    "bookId": "book-ch3",
+    "pageNumber": 7,
+    "question": "ເປັນຫຍັງການໃຊ້ Virtual Memory ຈຶ່ງຊ້າກວ່າ RAM?",
+    "options": [
+      "ເພາະ CPU ເສຍ",
+      "ເພາະບໍ່ມີໄຟລ໌",
+      "ເພາະໄຟຟ້າຕ່ຳ",
+      "ດິດຊ້າກວ່າ RAM"
+    ],
+    "correctIndex": 3,
+    "explanation": "ຄວາມໄວອ່ານຂຽນຂອງດິດຕ່ຳກວ່າ RAM ຫຼາຍ.",
+    "lesson": "27-1"
+  },
+  {
+    "id": "q-ch3-p7-3",
+    "bookId": "book-ch3",
+    "pageNumber": 7,
+    "question": "ຂໍ້ມູນໃນ RAM ເປັນແບບໃດ?",
+    "options": [
+      "ເຫັນໄດ້ແຕ່ໃນຈໍ",
+      "ຊົ່ວຄາວ ປິດເຄື່ອງແລ້ວຫາຍ",
+      "ຕ້ອງຊື້ເພີ່ມທຸກວັນ",
+      "ຖາວອນສະເໝີ"
+    ],
+    "correctIndex": 1,
+    "explanation": "RAM ຕ້ອງມີໄຟຟ້າລ້ຽງຢູ່ຕະຫຼອດ ຈຶ່ງເກັບໄດ້ແຕ່ຊົ່ວຄາວ.",
+    "lesson": "27-1"
+  },
+  {
+    "id": "q-ch3-p8-1",
+    "bookId": "book-ch3",
+    "pageNumber": 8,
+    "question": "NTFS ເປັນລະບົບໄຟລ໌ຂອງ OS ໃດ?",
+    "options": [
+      "Android ເທົ່ານັ້ນ",
+      "Windows",
+      "ເຄື່ອງພິມ",
+      "ເກມ"
+    ],
+    "correctIndex": 1,
+    "explanation": "NTFS ເປັນລະບົບໄຟລ໌ມາດຕະຖານຂອງ Windows.",
+    "lesson": "28-1"
+  },
+  {
+    "id": "q-ch3-p8-2",
+    "bookId": "book-ch3",
+    "pageNumber": 8,
+    "question": "ໂຄງສ້າງການຈັດໄຟລ໌ໃນ OS ເປັນແບບໃດ?",
+    "options": [
+      "ບໍ່ມີໂຄງສ້າງ",
+      "ວົງມົນ",
+      "ຕາຕະລາງ Excel ເທົ່ານັ້ນ",
+      "ຕົ້ນໄມ້ (ໂຟນເດີໃນໂຟນເດີ)"
+    ],
+    "correctIndex": 3,
+    "explanation": "ໂຟນເດີຊ້ອນກັນເປັນກິ່ງກ້ານຄືຕົ້ນໄມ້.",
+    "lesson": "28-1"
+  },
+  {
+    "id": "q-ch3-p8-3",
+    "bookId": "book-ch3",
+    "pageNumber": 8,
+    "question": ".jpg ບອກຫຍັງ?",
+    "options": [
+      "ຂະໜາດ RAM",
+      "ລະຫັດຜ່ານ",
+      "ຊື່ເຄື່ອງ",
+      "ຊະນິດຂອງໄຟລ໌ (ຮູບພາບ)"
+    ],
+    "correctIndex": 3,
+    "explanation": "ນາມສະກຸນບອກຊະນິດຂອງໄຟລ໌.",
+    "lesson": "28-1"
+  },
+  {
+    "id": "q-ch3-p9-1",
+    "bookId": "book-ch3",
+    "pageNumber": 9,
+    "question": "Driver ມີໜ້າທີ່ຫຍັງ?",
+    "options": [
+      "ສ້າງໄຟລ໌ Word",
+      "ເກັບຮູບ",
+      "ເຮັດໃຫ້ OS ຮູ້ຈັກ ແລະ ໃຊ້ອຸປະກອນ",
+      "ຄວບຄຸມອຸນຫະພູມຫ້ອງ"
+    ],
+    "correctIndex": 2,
+    "explanation": "Driver ເປັນຕົວແປຄຳສັ່ງລະຫວ່າງ OS ກັບອຸປະກອນ.",
+    "lesson": "29-1"
+  },
+  {
+    "id": "q-ch3-p9-2",
+    "bookId": "book-ch3",
+    "pageNumber": 9,
+    "question": "ເຄື່ອງພິມໃໝ່ເຊື່ອມແລ້ວໃຊ້ບໍ່ໄດ້ ມັກຂາດຫຍັງ?",
+    "options": [
+      "ສຽງເຕືອນ",
+      "Driver ຂອງເຄື່ອງພິມ",
+      "ເມົ້າໄຮ້ສາຍ",
+      "ຮູບພື້ນຫຼັງ"
+    ],
+    "correctIndex": 1,
+    "explanation": "ຕ້ອງຕິດຕັ້ງ Driver ໃຫ້ກົງກັບເຄື່ອງພິມ.",
+    "lesson": "29-1"
+  },
+  {
+    "id": "q-ch3-p9-3",
+    "bookId": "book-ch3",
+    "pageNumber": 9,
+    "question": "ເປັນຫຍັງຄວນອັບເດດ OS?",
+    "options": [
+      "ເຮັດໃຫ້ໄຟລ໌ຫາຍ",
+      "ເຮັດໃຫ້ເຄື່ອງຊ້າຕະຫຼອດ",
+      "ເພື່ອປ່ຽນສີຈໍ",
+      "ປິດຊ່ອງໂຫວ່ດ້ານຄວາມປອດໄພ ແລະແກ້ບັກ"
+    ],
+    "correctIndex": 3,
+    "explanation": "ອັບເດດແກ້ບັນຫາທີ່ຮູ້ແລ້ວ ແລະປິດຊ່ອງໂຫວ່.",
+    "lesson": "29-1"
+  },
+  {
+    "id": "q-ch3-p10-1",
+    "bookId": "book-ch3",
+    "pageNumber": 10,
+    "question": "ຫຼັງເປີດໄຟ ສິ່ງທຳອິດທີ່ກວດຮາດແວຄືຫຍັງ?",
+    "options": [
+      "Photoshop",
+      "BIOS/UEFI",
+      "ຮູບພື້ນຫຼັງ",
+      "ເກມ"
+    ],
+    "correctIndex": 1,
+    "explanation": "BIOS/UEFI ເລີ່ມກ່ອນແລ້ວຈຶ່ງເຖິງ Bootloader.",
+    "lesson": "30-1"
+  },
+  {
+    "id": "q-ch3-p10-2",
+    "bookId": "book-ch3",
+    "pageNumber": 10,
+    "question": "ຜູ້ໃຊ້ແບບໃດປ່ຽນການຕັ້ງຄ່າລະບົບໄດ້ເຕັມທີ່?",
+    "options": [
+      "ຜູ້ໃຊ້ທີ່ບໍ່ລັອກອິນ",
+      "ຜູ້ໃຊ້ແຂກ (Guest)",
+      "Administrator (ຜູ້ດູແລ)",
+      "ເມົ້າ"
+    ],
+    "correctIndex": 2,
+    "explanation": "Administrator ມີສິດສູງສຸດໃນການຕັ້ງຄ່າ.",
+    "lesson": "30-1"
+  },
+  {
+    "id": "q-ch3-p10-3",
+    "bookId": "book-ch3",
+    "pageNumber": 10,
+    "question": "ເປັນຫຍັງຄວນໃຊ້ບັນຊີຜູ້ໃຊ້ທົ່ວໄປໃນວຽກປະຈຳວັນ?",
+    "options": [
+      "ຈຳກັດສິດ ຫຼຸດຄວາມເສຍຫາຍຖ້າມີໄວຣັດ",
+      "ເພື່ອໃຫ້ເຄື່ອງໄວຂຶ້ນສອງເທົ່າ",
+      "ເພາະ Administrator ໃຊ້ບໍ່ໄດ້",
+      "ເພື່ອລົບ OS"
+    ],
+    "correctIndex": 0,
+    "explanation": "ໄວຣັດໄດ້ສິດເທົ່າທີ່ຜູ້ໃຊ້ມີ ຈຶ່ງຄວນໃຊ້ສິດໜ້ອຍທີ່ສຸດ.",
+    "lesson": "30-1"
   }
 ]

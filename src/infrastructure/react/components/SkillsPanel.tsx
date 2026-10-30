@@ -17,6 +17,11 @@ function describeChange (from: SkillEffect, to: SkillEffect, fromCooldownMs: num
     if (fromCooldownMs !== toCooldownMs) parts.push(`ລໍຖ້າໃຊ້ຊ້ຳ ${(fromCooldownMs / 1000).toFixed(1)} → ${(toCooldownMs / 1000).toFixed(1)} ວິ`);
     if (from.damageMultiplier !== to.damageMultiplier) parts.push(`ແຮງ ×${from.damageMultiplier} → ×${to.damageMultiplier}`);
     if (from.type === 'wave' && to.type === 'wave' && from.pierce !== to.pierce) parts.push(`ທະລຸ ${from.pierce} → ${to.pierce} ໂຕ`);
+    if (from.type === 'area' && to.type === 'area')
+    {
+        if (from.radiusPx !== to.radiusPx) parts.push(`ວົງ ${from.radiusPx} → ${to.radiusPx} px`);
+        if (from.stunMs !== to.stunMs) parts.push(`ມຶນ ${(from.stunMs / 1000).toFixed(1)} → ${(to.stunMs / 1000).toFixed(1)} ວິ`);
+    }
     if (from.type === 'chain' && to.type === 'chain')
     {
         if (from.jumps !== to.jumps) parts.push(`ກະໂດດ ${from.jumps} → ${to.jumps} ໂຕ`);
