@@ -390,3 +390,17 @@ describe('Movement abilities in a save', () =>
         expect(migrateSaveSnapshot({ version: CURRENT_SAVE_VERSION, movement: ['double-jump', 'fly', 3] }).movement).toEqual(['dash', 'double-jump']);
     });
 });
+
+describe('Skills in a save', () =>
+{
+    it('keeps learned skills and their slots, drops what is not learned', () =>
+    {
+        const saved = migrateSaveSnapshot({ version: CURRENT_SAVE_VERSION, skills: { unlocked: ['power-wave', 'power-wave', 7], equipped: ['ghost', 'power-wave'] } });
+        expect(saved.skills).toEqual({ unlocked: ['power-wave'], equipped: [null, 'power-wave'] });
+    });
+
+    it('starts with none in an older save', () =>
+    {
+        expect(migrateSaveSnapshot({ version: CURRENT_SAVE_VERSION }).skills).toEqual({ unlocked: [], equipped: [null, null] });
+    });
+});

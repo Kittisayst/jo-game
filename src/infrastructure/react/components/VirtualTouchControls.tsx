@@ -1,11 +1,15 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { EventBus } from '../../EventBus';
 
+import type { SkillSlotView } from '../skillSlots';
+
 export interface VirtualTouchControlsProps {
+    /** The skills on K and L, shown as two extra buttons when they are there. */
+    skillSlots?: (SkillSlotView | null)[];
     visible?: boolean;
 }
 
-export const VirtualTouchControls: React.FC<VirtualTouchControlsProps> = ({ visible = true }) =>
+export const VirtualTouchControls: React.FC<VirtualTouchControlsProps> = ({ visible = true, skillSlots = [] }) =>
 {
     const [isTouchEnvironment, setIsTouchEnvironment] = useState(false);
     const [activeButtons, setActiveButtons] = useState<{
@@ -296,6 +300,21 @@ export const VirtualTouchControls: React.FC<VirtualTouchControlsProps> = ({ visi
                     <span className="virtual-touch-icon">🔀</span>
                     <span className="virtual-touch-label">[Q]</span>
                 </button>
+
+                {skillSlots.map(view => view && (
+                    <button
+                        aria-label={view.name}
+                        className={`virtual-touch-btn virtual-touch-skill ${view.cooldown > 0 ? 'is-cooling' : ''}`}
+                        data-testid={`touch-skill-${view.key}`}
+                        key={view.slot}
+                        onPointerDown={e => { e.preventDefault(); triggerHaptic(15); EventBus.emit('virtual-skill', { slot: view.slot }); }}
+                        title={`${view.name} [${view.key}]`}
+                        type="button"
+                    >
+                        <span className="virtual-touch-icon">{view.icon}</span>
+                        <span className="virtual-touch-label">[{view.key}]</span>
+                    </button>
+                ))}
 
                 <button
                     aria-label="ພຸ່ງຫຼົບ (Dash)"

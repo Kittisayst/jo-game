@@ -1,7 +1,7 @@
 # ລະບົບທັກສະ (Skills): ພຸ່ງຫຼົບ, ສະກິວກົດໃຊ້ 10 ອັນ ແລະການອັບເກຣດເຄື່ອງມື
 
 - **Date:** 2026-10-30
-- **Status:** in progress (S1 done)
+- **Status:** in progress (S1, S2 done)
 - **Project:** jo-game (ພະຈົນໄພຄວາມຮູ້ / Knowledge Quest)
 
 ## ເປົ້າໝາຍ (Goal)
@@ -93,7 +93,7 @@
 ### ສະຖາປັດຕະຍະກຳ (ຕາມ Clean Architecture ຂອງໂປຣເຈັກ)
 
 - **domain:** `SkillDefinition` (ຂໍ້ມູນ), `SkillProgression` (ປົດລັອກ, ລະດັບ, 2 ຊ່ອງ), `SkillCooldowns` (ນັບເວລາ, ບໍ່ save), `MovementAbilities` (dash/air dash/double jump ໄດ້ແລ້ວບໍ).
-- **application:** `unlockSkillsForBookUseCase`, `equipSkillUseCase`, `upgradeSkillUseCase`, `useSkillUseCase` (ກວດ cooldown + ຄືນຄ່າຜົນ), `dashUseCase`, `upgradeToolUseCase`. ແຕ່ລະອັນມີ `.test.ts`.
+- **application:** `unlockSkillsForBookUseCase`, `equipSkillUseCase`, `upgradeSkillUseCase`, `castSkillUseCase` (ກວດ cooldown + ຄືນຄ່າຜົນ), `dashUseCase`, `upgradeToolUseCase`. ແຕ່ລະອັນມີ `.test.ts`.
 - **infrastructure:** `SkillController` (Phaser: ຄື້ນ, ສາຍຟ້າ, ໂລ່, ໂດຣນ… ຕາມ id), `Player.dash()`, ສະຖານະ "ມຶນ" ທົ່ວໄປໃນ `Enemy`, ແຖບສະກິວໃນ HUD (cooldown ເປັນວົງ), ແຖບ "ທັກສະ" ໃນ `AcademyModal`, ປຸ່ມມືຖື.
 - **save:** `skills: { unlocked, ranks, equipped }` ແລະ `movement: [...]`, ເພີ່ມແບບ additive.
 
@@ -109,7 +109,9 @@
 3. ປຸ່ມ `Shift`, ປຸ່ມມືຖື "ພຸ່ງ", ຂັ້ນຄຳແນະນຳໃນ `tutorial.json`.
 4. e2e: ພຸ່ງຜ່ານລູກຫີນຂອງ Mini-boss ດ່ານ 5 ບໍ່ເສຍຫົວໃຈ.
 
-**Phase S2: ໂຄງສ້າງສະກິວ + ສະກິວມິຕິ 1**
+**Phase S2: ໂຄງສ້າງສະກິວ + ສະກິວມິຕິ 1** ✅ (branch `feat/skills-s2`)
+
+> ສະຖານະ: ເຮັດແລ້ວ. `skills.json` `active` (ຄື້ນພະລັງ: cooldown 4 ວິ, ແຮງ 1.5×, ທະລຸ 1 ໂຕ, Boss ໄດ້ 50%), `SkillProgression`/`SkillCooldowns`, `syncSkillsWithBooksUseCase`, `castSkillUseCase` (ຊື່ `use…` ຖືກ lint ເຂົ້າໃຈວ່າເປັນ React hook ຈຶ່ງໃຊ້ `cast…`), ປຸ່ມ K/L + ປຸ່ມມືຖື, ແຖບສະກິວ + cooldown ໃນ HUD, ແຖບ "ທັກສະ" ໃນສະຖານບັນ, ປົດລັອກເມື່ອສອບຜ່ານ (ແລະຕອນໂຫຼດ save ເກົ່າ). ບໍ່ໄດ້ເຮັດ: ຮູບ icon PNG (ໃຊ້ emoji ໃນ JSON), ອັບເກຣດລະດັບສະກິວ (S5), ຂໍ້ຄວາມ tutorial ຂອງສະກິວ.
 1. `skills.json` + parser ໃນ `ContentCatalog` + `ContentIntegrity` test (ທຸກມິຕິທີ່ມີຕຳລາມີສະກິວ, icon ຢູ່ໃນ manifest).
 2. `SkillProgression`, `SkillCooldowns`, use cases + test, save `skills`.
 3. ປົດລັອກເມື່ອສອບຕຳລາຜ່ານ (ຂໍ້ຄວາມ "ໄດ້ສະກິວໃໝ່!" ໃນໜ້າຜົນສອບ).

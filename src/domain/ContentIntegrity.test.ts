@@ -10,6 +10,7 @@ import stages from '../../public/data/stages.json';
 import tutorial from '../../public/data/tutorial.json';
 import repairs from '../../public/data/repairs.json';
 import garden from '../../public/data/garden.json';
+import skills from '../../public/data/skills.json';
 
 /**
  * The game data files point at each other by id. A typo in one file silently breaks a loop
@@ -44,6 +45,18 @@ describe('content data integrity', () =>
         {
             expect(item.maxStack, item.id).toBeGreaterThan(0);
             if ((item as { story?: boolean }).story) expect(item.category, item.id).toBe('material');
+        }
+    });
+
+    it('gives every active skill a Realm whose Textbook can teach it', () =>
+    {
+        const bookIds = new Set(books.map(b => b.id));
+        for (const skill of skills.active)
+        {
+            const realm = realms.realms.find(r => r.number === skill.realm);
+            expect(realm, `${skill.id} realm ${skill.realm}`).toBeDefined();
+            expect(realm?.bookId, `${skill.id}: Realm ${skill.realm} has no Textbook yet`).not.toBeNull();
+            expect(bookIds.has(realm?.bookId as string), `${skill.id} book`).toBe(true);
         }
     });
 

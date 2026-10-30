@@ -3,6 +3,7 @@ import { ObjectiveId } from '../../../domain/utils/nextObjective';
 import { ItemIcon } from './ItemIcon';
 import { DurabilityBar } from './DurabilityBar';
 import { formatCraftTime } from '../formatCraftTime';
+import type { SkillSlotView } from '../skillSlots';
 import type { DurabilityReading } from '../../../domain/entities/Backpack';
 
 const OBJECTIVE_TEXT: Record<ObjectiveId, string> = {
@@ -62,6 +63,9 @@ export interface HudProps
     /** The Potion chosen to be drunk with R, with how many are left. */
     quickSlot?: { id: string; name: string; icon: string; iconImage?: string; count: number } | null;
     onDrinkQuickSlot?: () => void;
+    /** The skills on K and L (null = empty slot), with their cooldown. */
+    skillSlots?: (SkillSlotView | null)[];
+    onUseSkill?: (slot: number) => void;
 }
 
 export function Hud ({
@@ -90,6 +94,8 @@ export function Hud ({
     activeEffects = [],
     quickSlot = null,
     onDrinkQuickSlot,
+    skillSlots = [],
+    onUseSkill,
 }: HudProps)
 {
     const levelLabel = hudLabelOf(currentLevel);
@@ -242,6 +248,22 @@ export function Hud ({
                             <span className="badge-hint">[R]</span>
                         </button>
                     )}
+
+                    {skillSlots.map(view => view && (
+                        <button
+                            className="hud-badge skill-slot-badge"
+                            data-testid={`skill-slot-${view.key}`}
+                            data-state={view.cooldown > 0 ? 'cooling' : 'ready'}
+                            key={view.slot}
+                            onClick={e => { e.preventDefault(); e.stopPropagation(); onUseSkill?.(view.slot); }}
+                            title={`${view.name} (ກົດ ${view.key})`}
+                            type="button"
+                        >
+                            <span className="badge-icon">{view.icon}</span>
+                            <span className="badge-hint">[{view.key}]</span>
+                            <span className="skill-cooldown" style={{ height: `${Math.round(view.cooldown * 100)}%` }} />
+                        </button>
+                    ))}
 
                     {/* Equipped Weapon Badge with Cycle button */}
                     <button

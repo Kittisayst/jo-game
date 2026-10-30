@@ -51,6 +51,8 @@ import { WaypointModal } from './components/WaypointModal';
 import { QuizFinisherModal } from './components/QuizFinisherModal';
 import { StageQuestionModal } from './components/StageQuestionModal';
 import { GardenSeedPicker } from './components/GardenSeedPicker';
+import { readSkillSlots } from './skillSlots';
+import { syncSkills } from '../skills';
 import { GARDEN_LEVEL_KEY, isHomeLevel } from '../phaser/levelCatalog';
 import { StorageModal } from './components/StorageModal';
 import { answerStageQuestionUseCase, pickStageQuestion } from '../../application/AnswerStageQuestionUseCase';
@@ -71,6 +73,7 @@ function App ()
     const [currentLevel, setCurrentLevel] = useState(() => (shouldResumeInGame ? initialSession : 'village'));
     const [quizFinisherBookId, setQuizFinisherBookId] = useState('book-ch1');
     const [gardenPlot, setGardenPlot] = useState<number | null>(null);
+    const skillWasCooling = useRef(false);
     const [health, setHealth] = useState(() => entities.health.current);
     const [walletBalance, setWalletBalance] = useState(() => entities.wallet.balance);
     const [equippedWeaponId, setEquippedWeaponId] = useState(() => entities.equipment.equippedWeaponId);
@@ -467,14 +470,23 @@ function App ()
         drinkQuickSlot,
     });
 
+    // A save made before skills existed still teaches the skills of the Textbooks already passed
+    useEffect(() =>
+    {
+        if (syncSkills().length > 0) autoSaveGame();
+    }, []);
+
     // Potion effects count down on screen: redraw twice a second while one is running
     useEffect(() =>
     {
         const timer = setInterval(() =>
         {
             // Potion timers tick every half second; a growing Garden is looked at once a second (for its "ready" notice)
-            if (entities.effects.hasAny || entities.garden.hasPlants || entities.crafting.isBusy) setBackpackRevision(r => r + 1);
-        }, 500);
+            // One more redraw after the last skill cooldown ends, so the slot shows "ready"
+            const skillsCooling = entities.skillCooldowns.anyActive;
+            if (entities.effects.hasAny || entities.garden.hasPlants || entities.crafting.isBusy || skillsCooling || skillWasCooling.current) setBackpackRevision(r => r + 1);
+            skillWasCooling.current = skillsCooling;
+        }, 250);
         return () => clearInterval(timer);
     }, []);
 
@@ -651,6 +663,7 @@ function App ()
         onChangeLevel: levelKey => handleStartGame(levelKey),
         onBookExamPassed: () =>
         {
+            syncSkills();
             setWalletBalance(entities.wallet.balance);
             setBackpackRevision(r => r + 1);
             autoSaveGame();
@@ -712,6 +725,8 @@ function App ()
                     pendingRewardsCount={entities.pendingRewards.total}
                     gardenReadyCount={entities.garden.readyCount(clock.now(), growMinutesOf(entities.itemCatalog))}
                     craftingJob={entities.crafting.job}
+                    skillSlots={readSkillSlots()}
+                    onUseSkill={slot => EventBus.emit('virtual-skill', { slot })}
                     activeEffects={entities.effects.active}
                     quickSlot={quickSlotDef
                         ? {
@@ -1003,6 +1018,7 @@ function App ()
 
             <VirtualTouchControls
                 visible={!isMainMenuOpen && !isGamePaused && !isDialogueOpen && !isSkinModalOpen && !modals.isAnyModalOpen}
+                skillSlots={readSkillSlots()}
             />
         </div>
     );
