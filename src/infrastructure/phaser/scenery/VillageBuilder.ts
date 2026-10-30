@@ -1,3 +1,5 @@
+import { canSleep } from '../../../application/SleepUseCase';
+import { entities } from '../../composition';
 import { EventBus } from '../../EventBus';
 
 export interface InteractiveBuilding
@@ -9,6 +11,8 @@ export interface InteractiveBuilding
 
 const FONT = '"Noto Sans Lao", sans-serif';
 const FORGE_X = 1140;
+/** The Bed stands past the World Gate, at the east end of the village. */
+const BED_X = 1535;
 const FORGE_OPEN_LABEL = '⚔️ [E] ເຂົ້າໂຮງຕີເຫຼັກ (Forge)';
 
 /**
@@ -148,6 +152,7 @@ export function buildVillageScenery (scene: Phaser.Scene, baseY: number, forgeOp
     // The Garden door (x = 1010) and the Storage chest (x = 235): drawn with shapes until real art replaces them
     addGardenDoor(scene, 1010, baseY);
     addStorageChest(scene, 235, baseY);
+    addBed(scene, BED_X, baseY);
 
     // Welcome signpost & text at village entrance (x = 120)
     if (scene.textures.exists('signpost'))
@@ -229,6 +234,17 @@ export function buildVillageScenery (scene: Phaser.Scene, baseY: number, forgeOp
         { x: 880, label: '🔨 [E] ເຂົ້າໂຮງຊ່າງ (Workshop)', action: () => EventBus.emit('open-workshop') },
         forge,
         { x: 235, label: '📦 [E] ເປີດຫີບເກັບຂອງ (Storage)', action: () => EventBus.emit('open-storage') },
+        {
+            x: BED_X,
+            // Read again every time the prompt shows: it changes with the time of day
+            get label (): string
+            {
+                return canSleep(entities.worldTime)
+                    ? '🛏️ [E] ນອນຈົນເຊົ້າ (ຟື້ນຫົວໃຈ ແລະຂ້າມຄືນ)'
+                    : '🛏️ ຕຽງ: ນອນໄດ້ຕອນຕາເວັນຕົກ ຫາກາງຄືນ';
+            },
+            action: () => EventBus.emit('sleep-at-bed'),
+        },
         { x: 1010, label: '🌱 [E] ເຂົ້າສວນຜັກ (Garden)', action: () => EventBus.emit('change-level', 'garden') },
         { x: 1420, label: '🌀 [E] ເລືອກດ່ານຜະຈົນໄພ (World Map)', action: () => EventBus.emit('open-stage-map') },
     ];
@@ -262,6 +278,26 @@ function addGardenDoor (scene: Phaser.Scene, x: number, baseY: number): void
     g.fillStyle(0x22c55e, 0.9);
     g.fillRect(x - 28, baseY - 96, 56, 96);
     addLabel(scene, x, baseY - 134, '🌱 ສວນຜັກ (Garden)\n[E] ເຂົ້າສວນ', '#86efac', '#064e3b');
+}
+
+/** A bed with a blue blanket and a pillow. */
+function addBed (scene: Phaser.Scene, x: number, baseY: number): void
+{
+    const g = scene.add.graphics();
+    g.setDepth(1.6);
+    // frame and legs
+    g.fillStyle(0x78350f, 1);
+    g.fillRoundedRect(x - 36, baseY - 30, 72, 12, 3);
+    g.fillRect(x - 36, baseY - 30, 6, 30);
+    g.fillRect(x + 30, baseY - 44, 6, 44);
+    // mattress, blanket, pillow
+    g.fillStyle(0xe2e8f0, 1);
+    g.fillRoundedRect(x - 30, baseY - 40, 60, 12, 4);
+    g.fillStyle(0x3b82f6, 1);
+    g.fillRoundedRect(x - 6, baseY - 42, 36, 14, 4);
+    g.fillStyle(0xf8fafc, 1);
+    g.fillRoundedRect(x - 28, baseY - 46, 20, 10, 5);
+    addLabel(scene, x, baseY - 66, '🛏️ ຕຽງນອນ (Bed)', '#bfdbfe', '#1e3a8a');
 }
 
 /** A wooden chest with an iron band. */
