@@ -363,3 +363,21 @@ describe('The Garden and the Storage chest in a save', () =>
         expect(saved.storage).toEqual([]);
     });
 });
+
+describe('The crafting job in a save', () =>
+{
+    it('keeps a job in progress and starts with none in an older save', () =>
+    {
+        const job = { recipeId: 'recipe-iron-sword', resultItemId: 'iron-sword', resultCount: 1, totalMs: 30000, remainingMs: 12000 };
+        expect(migrateSaveSnapshot({ version: CURRENT_SAVE_VERSION, crafting: job }).crafting).toEqual(job);
+        expect(migrateSaveSnapshot({ version: CURRENT_SAVE_VERSION }).crafting).toBeNull();
+    });
+
+    it('clamps the time left and throws out a broken job', () =>
+    {
+        const over = migrateSaveSnapshot({ version: CURRENT_SAVE_VERSION, crafting: { recipeId: 'r', resultItemId: 'x', resultCount: 1, totalMs: 1000, remainingMs: 99999 } });
+        expect(over.crafting?.remainingMs).toBe(1000);
+        const broken = migrateSaveSnapshot({ version: CURRENT_SAVE_VERSION, crafting: { recipeId: 7, resultItemId: 'x', resultCount: 0, totalMs: -1, remainingMs: 'a' } });
+        expect(broken.crafting).toBeNull();
+    });
+});

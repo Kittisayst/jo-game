@@ -473,7 +473,7 @@ function App ()
         const timer = setInterval(() =>
         {
             // Potion timers tick every half second; a growing Garden is looked at once a second (for its "ready" notice)
-            if (entities.effects.hasAny || entities.garden.hasPlants) setBackpackRevision(r => r + 1);
+            if (entities.effects.hasAny || entities.garden.hasPlants || entities.crafting.isBusy) setBackpackRevision(r => r + 1);
         }, 500);
         return () => clearInterval(timer);
     }, []);
@@ -665,7 +665,11 @@ function App ()
             setBackpackRevision(r => r + 1);
             autoSaveGame();
         },
-        onBackpackChanged: () => setBackpackRevision(r => r + 1),
+        onBackpackChanged: () =>
+        {
+            setBackpackRevision(r => r + 1);
+            autoSaveGame();
+        },
     });
 
     return (
@@ -707,6 +711,7 @@ function App ()
                     armor={entities.health.armor}
                     pendingRewardsCount={entities.pendingRewards.total}
                     gardenReadyCount={entities.garden.readyCount(clock.now(), growMinutesOf(entities.itemCatalog))}
+                    craftingJob={entities.crafting.job}
                     activeEffects={entities.effects.active}
                     quickSlot={quickSlotDef
                         ? {

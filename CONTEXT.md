@@ -73,6 +73,9 @@ A separate scene reached from the Village Hub where Seeds are planted in Plots. 
 **Plot**:
 One planting spot of the Garden: empty, growing or ready. The Garden starts with six and can be expanded with Materials.
 
+**Crafting job**:
+What the Workshop or the Forge is making: one recipe with a build time, one at a time. The Materials and Credit are taken when it starts, the time counts Game time (only while the game is being played), and the result is collected by hand when it is done. A recipe with no build time is made at once.
+
 **Storage chest**:
 A chest in the Village Hub holding 40 items. What is in it is never lost on death.
 

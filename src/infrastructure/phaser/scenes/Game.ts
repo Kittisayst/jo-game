@@ -499,6 +499,7 @@ export class Game extends Scene
     {
         entities.attackCooldown.tick(delta);
         entities.effects.tick(delta);
+        entities.crafting.tick(delta);
         if (this.player)
         {
             this.player.speedMultiplier = entities.effects.speedMultiplier

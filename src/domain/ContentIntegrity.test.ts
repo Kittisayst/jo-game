@@ -47,6 +47,14 @@ describe('content data integrity', () =>
         }
     });
 
+    it('gives a build time only as a positive number of seconds', () =>
+    {
+        for (const recipe of recipes as (LooseRecipe & { craftSeconds?: number })[])
+        {
+            if (recipe.craftSeconds !== undefined) expect(recipe.craftSeconds, recipe.id).toBeGreaterThan(0);
+        }
+    });
+
     it('only uses known items in recipes', () =>
     {
         for (const recipe of recipes as LooseRecipe[])

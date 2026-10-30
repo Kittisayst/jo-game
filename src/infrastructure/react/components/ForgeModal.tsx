@@ -1,12 +1,16 @@
 import React, { useState } from 'react';
 import { RepairList } from './RepairList';
 import { missingIngredients, unlockedRecipeIds } from '../recipeUnlocks';
-import { RecipeDefinition, craftRecipeUseCase } from '../../../application/CraftRecipeUseCase';
+import type { RecipeDefinition } from '../../../application/CraftRecipeUseCase';
+import { craftSecondsOf, startCraftUseCase } from '../../../application/CraftingJobUseCases';
 import { WeaponUpgradeRecipe, upgradeWeaponTierUseCase } from '../../../application/UpgradeWeaponTierUseCase';
 import { getGameContent } from '../../content/ContentCatalog';
 import { entities } from '../../composition';
 import { soundManager } from '../../audio/SoundManager';
 import { ItemIcon } from './ItemIcon';
+import { CraftingStatus } from './CraftingStatus';
+import { formatCraftTime } from '../formatCraftTime';
+import { EventBus } from '../../EventBus';
 
 interface ForgeModalProps
 {
@@ -37,10 +41,11 @@ export const ForgeModal: React.FC<ForgeModalProps> = ({ isOpen, onClose }) =>
 
     const handleCraft = (recipe: RecipeDefinition) =>
     {
-        const result = craftRecipeUseCase(recipe, entities.backpack, entities.wallet, unlockedRecipes);
+        const result = startCraftUseCase(recipe, entities.backpack, entities.wallet, unlockedRecipes, entities.crafting);
         if (result.success)
         {
             soundManager.playPowerUp();
+            EventBus.emit('backpack-changed');
             setRevision(r => r + 1);
         }
         else
@@ -144,12 +149,16 @@ export const ForgeModal: React.FC<ForgeModalProps> = ({ isOpen, onClose }) =>
                         {/* Content */}
                         <div className="p-6 overflow-y-auto flex-1 space-y-4">
                             {activeTab === 'craft' ? (
+                                <>
+                                <CraftingStatus onCollected={() => setRevision(r => r + 1)} />
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     {craftRecipes.map(recipe =>
                                     {
                                         const resultItem = getItem(recipe.resultItemId);
                                         const isLocked = recipe.requiredBookRecipe && !unlockedRecipes.has(recipe.requiredBookRecipe);
-                                        const canCraft = !isLocked &&
+                                        const seconds = craftSecondsOf(recipe);
+                                        const busy = seconds > 0 && entities.crafting.isBusy;
+                                        const canCraft = !isLocked && !busy &&
                                             entities.wallet.canAfford(recipe.creditCost) &&
                                             entities.backpack.canCraftAfterRemoving(
                                                 recipe.ingredients,
@@ -224,12 +233,13 @@ export const ForgeModal: React.FC<ForgeModalProps> = ({ isOpen, onClose }) =>
                                                             : 'bg-slate-800 text-slate-500 cursor-not-allowed'
                                                     }`}
                                                 >
-                                                    {isLocked ? 'ຍັງບໍ່ທັນປົດລັອກ' : canCraft ? 'ຫຼອມອາວຸດ (Craft)' : 'ວັດສະດຸ ຫຼື ເຄຣດິດບໍ່ພໍ'}
+                                                    {isLocked ? 'ຍັງບໍ່ທັນປົດລັອກ' : busy ? 'ກຳລັງສ້າງອັນອື່ນຢູ່' : canCraft ? (seconds > 0 ? `ເລີ່ມຫຼອມ (${formatCraftTime(seconds * 1000)})` : 'ຫຼອມອາວຸດ (Craft)') : 'ວັດສະດຸ ຫຼື ເຄຣດິດບໍ່ພໍ'}
                                                 </button>
                                             </div>
                                         );
                                     })}
                                 </div>
+                                </>
                             ) : activeTab === 'upgrade' ? (
                                 /* Upgrade Tab */
                                 <div className="space-y-4">

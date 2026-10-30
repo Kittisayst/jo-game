@@ -22,7 +22,7 @@ The look and the moves of a Boss are still in code (`Boss.ts`); a new Boss is a 
 
 ## 4. Gear
 
-`items.json` (weapon/tool/armor with `durability`), `recipes.json` (`requiredBookRecipe` = the item id, taught by the Realm's book), `repairs.json` (every item that wears must be repairable; a test checks it) and `unlockedRecipes` of the book. Icons: draw them, or tint the previous tier as `build_realm2_art.py` does until real art exists.
+`items.json` (weapon/tool/armor with `durability`), `recipes.json` (`requiredBookRecipe` = the item id, taught by the Realm's book), `repairs.json` (every item that wears must be repairable; a test checks it) and `unlockedRecipes` of the book. `craftSeconds` (optional, seconds of Game time) gives a recipe a build time; gear and Portal blocks have one, potions and the repair kit are instant. Icons: draw them, or tint the previous tier as `build_realm2_art.py` does until real art exists.
 
 ## 5. The Textbook
 

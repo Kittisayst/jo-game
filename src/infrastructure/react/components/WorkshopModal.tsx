@@ -1,9 +1,13 @@
 import React, { useState } from 'react';
-import { RecipeDefinition, craftRecipeUseCase } from '../../../application/CraftRecipeUseCase';
+import type { RecipeDefinition } from '../../../application/CraftRecipeUseCase';
+import { craftSecondsOf, startCraftUseCase } from '../../../application/CraftingJobUseCases';
 import { getGameContent } from '../../content/ContentCatalog';
 import { entities } from '../../composition';
 import { soundManager } from '../../audio/SoundManager';
 import { ItemIcon } from './ItemIcon';
+import { CraftingStatus } from './CraftingStatus';
+import { formatCraftTime } from '../formatCraftTime';
+import { EventBus } from '../../EventBus';
 import { RepairList } from './RepairList';
 import { missingIngredients, unlockedRecipeIds } from '../recipeUnlocks';
 
@@ -30,16 +34,18 @@ export const WorkshopModal: React.FC<WorkshopModalProps> = ({ isOpen, onClose })
 
     const handleCraft = (recipe: RecipeDefinition) =>
     {
-        const result = craftRecipeUseCase(
+        const result = startCraftUseCase(
             recipe,
             entities.backpack,
             entities.wallet,
-            unlockedRecipes
+            unlockedRecipes,
+            entities.crafting
         );
 
         if (result.success)
         {
             soundManager.playPowerUp();
+            EventBus.emit('backpack-changed');
             setRevision(r => r + 1);
         }
         else
@@ -71,12 +77,15 @@ export const WorkshopModal: React.FC<WorkshopModalProps> = ({ isOpen, onClose })
 
                 {/* Recipe List */}
                 <div className="p-6 overflow-y-auto flex-1 space-y-4">
+                    <CraftingStatus onCollected={() => setRevision(r => r + 1)} />
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {recipes.map(recipe =>
                         {
                             const resultItem = getItem(recipe.resultItemId);
                             const isLocked = recipe.requiredBookRecipe && !unlockedRecipes.has(recipe.requiredBookRecipe);
-                            const canCraft = !isLocked && entities.backpack.canCraftAfterRemoving(
+                            const seconds = craftSecondsOf(recipe);
+                            const busy = seconds > 0 && entities.crafting.isBusy;
+                            const canCraft = !isLocked && !busy && entities.backpack.canCraftAfterRemoving(
                                 recipe.ingredients,
                                 recipe.resultItemId,
                                 recipe.resultCount
@@ -165,7 +174,7 @@ export const WorkshopModal: React.FC<WorkshopModalProps> = ({ isOpen, onClose })
                                                     : 'bg-slate-800 text-slate-500 cursor-not-allowed'
                                             }`}
                                         >
-                                            {isLocked ? 'ຍັງບໍ່ທັນປົດລັອກ' : canCraft ? 'ສ້າງ (Craft)' : 'ວັດສະດຸບໍ່ພໍ ຫຼື ກະເປົາເຕັມ'}
+                                            {isLocked ? 'ຍັງບໍ່ທັນປົດລັອກ' : busy ? 'ກຳລັງສ້າງອັນອື່ນຢູ່' : canCraft ? (seconds > 0 ? `ເລີ່ມສ້າງ (${formatCraftTime(seconds * 1000)})` : 'ສ້າງ (Craft)') : 'ວັດສະດຸບໍ່ພໍ ຫຼື ກະເປົາເຕັມ'}
                                         </button>
                                     </div>
                                 </div>

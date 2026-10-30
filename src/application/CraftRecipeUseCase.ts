@@ -13,6 +13,8 @@ export interface RecipeDefinition
     requiredBookRecipe: string | null;
     creditCost: number;
     ingredients: CraftingIngredient[];
+    /** Build time in seconds of Game time; missing or 0 = made at once (see `startCraftUseCase`). */
+    craftSeconds?: number;
 }
 
 export interface RecipeCraftedPayload
