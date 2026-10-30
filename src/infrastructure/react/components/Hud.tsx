@@ -5,6 +5,7 @@ import { DurabilityBar } from './DurabilityBar';
 import { formatCraftTime } from '../formatCraftTime';
 import type { SkillSlotView } from '../skillSlots';
 import type { HeroLevelView } from '../heroLevelView';
+import type { WorldTimeView } from '../worldTimeView';
 import type { DurabilityReading } from '../../../domain/entities/Backpack';
 
 const OBJECTIVE_TEXT: Record<ObjectiveId, string> = {
@@ -68,6 +69,8 @@ export interface HudProps
     skillSlots?: (SkillSlotView | null)[];
     /** The Hero Level and the XP towards the next one. */
     heroLevel?: HeroLevelView;
+    /** The time of day (a sun or a moon and the time to the next change). */
+    worldTime?: WorldTimeView;
     onOpenCharacter?: () => void;
     onUseSkill?: (slot: number) => void;
 }
@@ -100,6 +103,7 @@ export function Hud ({
     onDrinkQuickSlot,
     skillSlots = [],
     heroLevel,
+    worldTime,
     onOpenCharacter,
     onUseSkill,
 }: HudProps)
@@ -210,6 +214,13 @@ export function Hud ({
                                 <span data-testid="hero-xp-bar" style={{ display: 'block', height: '100%', width: `${Math.round(heroLevel.fraction * 100)}%`, background: '#a5b4fc' }} />
                             </span>
                         </button>
+                    )}
+
+                    {worldTime && (
+                        <div className="hud-badge world-time-badge" data-testid="world-time" data-phase={worldTime.phase} title={`${worldTime.label}: ອີກ ${worldTime.countdown} ຈະປ່ຽນ`}>
+                            <span className="badge-icon">{worldTime.icon}</span>
+                            <span className="badge-label">{worldTime.countdown}</span>
+                        </div>
                     )}
 
                     {/* Permanent Knowledge Credit balance */}

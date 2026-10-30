@@ -1,3 +1,4 @@
+import { tickWorldTimeUseCase } from '../application/TickWorldTimeUseCase';
 import type { WornArmorContext } from '../application/ArmorUseCases';
 import { GameState } from '../domain/entities/GameState';
 import { ItemCatalog } from '../domain/entities/ItemCatalog';
@@ -37,10 +38,12 @@ export const armorContext: WornArmorContext = {
 // get a second copy of the module (and of the state) if it does so while the app is still loading.
 if (import.meta.env.DEV)
 {
-    const dev = window as unknown as { __entities: GameState; __advanceClock: (ms: number) => void };
+    const dev = window as unknown as { __entities: GameState; __advanceClock: (ms: number) => void; __advanceWorldTime: (ms: number) => void };
     dev.__entities = entities;
     // Lets a test make a plant grow without waiting for it
     dev.__advanceClock = (ms: number) => clock.advance(ms);
+    // Lets a test move the time of day (night creatures, the Bed) without waiting
+    dev.__advanceWorldTime = (ms: number) => tickWorldTimeUseCase(entities.worldTime, ms);
 }
 
 // Push persisted audio preferences into SoundManager

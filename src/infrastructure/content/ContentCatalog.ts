@@ -17,6 +17,8 @@ import type { ToolUpgradeRecipe } from '../../application/UpgradeToolUseCase';
 import { parseStageDefinitions, StageDefinition } from '../phaser/stages/StageDefinition';
 import { parseStageQuestion, parseStageScaling } from './ScalingCatalog';
 import { parseProgression, parseStatsTuning } from './ProgressionCatalog';
+import { parseWorldTime } from './WorldTimeCatalog';
+import type { WorldTimeTuning } from '../../domain/entities/WorldTime';
 import type { StatsTuning } from '../../domain/entities/HeroStats';
 import type { ProgressionTuning } from '../../domain/entities/HeroLevel';
 import { parseTutorial, TutorialStepDefinition } from './TutorialCatalog';
@@ -53,6 +55,8 @@ export interface GameContent
     progression: ProgressionTuning;
     /** The four Stats (ceilings, size of a point) and the price of starting over. */
     statsTuning: StatsTuning;
+    /** The length of a day and when night falls. */
+    worldTime: WorldTimeTuning;
     /** Credit paid for the first correct end-of-Stage answer of each Stage. */
     stageQuestionCredit: number;
     /** The hints of the first Stage, in order. */
@@ -392,7 +396,7 @@ async function fetchJson (file: string): Promise<unknown>
 /** Fetches and validates all game data. Call once before the app starts. */
 export async function loadGameContent (): Promise<GameContent>
 {
-    const [items, books, questions, recipes, enemies, realms, nodes, stages, tutorial, repairs, garden, playerAnimations, skills, progression] = await Promise.all([
+    const [items, books, questions, recipes, enemies, realms, nodes, stages, tutorial, repairs, garden, playerAnimations, skills, progression, worldTime] = await Promise.all([
         fetchJson('items.json'),
         fetchJson('books.json'),
         fetchJson('questions.json'),
@@ -407,6 +411,7 @@ export async function loadGameContent (): Promise<GameContent>
         fetchJson('player-animations.json'),
         fetchJson('skills.json'),
         fetchJson('progression.json'),
+        fetchJson('world-time.json'),
     ]);
 
     const parsedNodes = parseNodes(nodes);
@@ -423,6 +428,7 @@ export async function loadGameContent (): Promise<GameContent>
         scaling: parseStageScaling(stages),
         progression: parseProgression(progression),
         statsTuning: parseStatsTuning(progression),
+        worldTime: parseWorldTime(worldTime),
         stageQuestionCredit: parseStageQuestion(stages).credit,
         tutorial: parseTutorial(tutorial),
         repairs: parseRepairs(repairs),

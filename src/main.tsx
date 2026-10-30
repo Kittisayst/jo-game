@@ -14,6 +14,7 @@ loadGameContent()
         entities.itemCatalog.load(content.items);
         entities.tutorial.setSteps(content.tutorial);
         entities.syncArmor();
+        entities.worldTime.configure(content.worldTime);
 
         root.render(
             <React.StrictMode>

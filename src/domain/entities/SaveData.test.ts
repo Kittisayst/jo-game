@@ -457,3 +457,14 @@ describe('Hero Stats in a save', () =>
         expect(migrateSaveSnapshot({ version: CURRENT_SAVE_VERSION }).heroStats).toEqual({ attack: 0, hearts: 0, guard: 0, agility: 0 });
     });
 });
+
+describe('World time in a save', () =>
+{
+    it('keeps where in the day it is and starts an older save with none', () =>
+    {
+        expect(migrateSaveSnapshot({ version: CURRENT_SAVE_VERSION, worldTime: { dayFraction: 0.8 } }).worldTime).toEqual({ dayFraction: 0.8 });
+        expect(migrateSaveSnapshot({ version: CURRENT_SAVE_VERSION }).worldTime).toBeNull();
+        expect(migrateSaveSnapshot({ version: CURRENT_SAVE_VERSION, worldTime: { dayFraction: 1 } }).worldTime).toBeNull();
+        expect(migrateSaveSnapshot({ version: CURRENT_SAVE_VERSION, worldTime: { dayFraction: 'x' } }).worldTime).toBeNull();
+    });
+});

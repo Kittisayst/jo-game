@@ -97,6 +97,10 @@ Given for every Hero Level (149 by level 150); the hero spends each on a Stat in
 One of four things Stat points go into: Attack (damage of the sword and Skills), Hearts (an extra heart for every 10 points), Guard (the chance that a hit does nothing) and Agility (walking speed). Each has a ceiling and the ceilings add up to the points of the top level, so the hero at level 150 has filled every Stat. A Stat is a small boost on top of the gear, never a replacement for it.
 _Avoid_: attribute, skill (that is a Skill)
 
+**World time**:
+The time of day in the world, counted in Game time (it moves only while the game runs, like the build queue, and is saved). One day is 20 minutes: dawn, day, dusk, **night** (the last 6 minutes), dawn. At night the world is darker (never so dark that the platforms and spikes cannot be read) and, in a later phase of the Hero Level plan, Night creatures walk the Stages and the hero can sleep at the Bed. Real time (the Garden's plants) does not follow it.
+_Avoid_: clock (that is the real-time `Clock` port), time of day (say World time)
+
 **Stun**:
 An enemy held still for a few seconds by a Skill (such as Ping): it cannot patrol, attack or hurt the hero by touching, and an attack it was starting is cut short. It counts Game time. A Boss is never stunned.
 
