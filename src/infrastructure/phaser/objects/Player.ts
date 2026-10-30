@@ -21,6 +21,8 @@ export interface PlayerInputControls
 export class Player extends Physics.Arcade.Sprite
 {
     isInvincible = false;
+    /** Walking speed factor: a speed Potion and boots raise it (set by the scene every frame). */
+    speedMultiplier = 1;
     facingDir = 1;
     isWallSliding = false;
     private wallJumpLockout = 0;
@@ -415,13 +417,13 @@ export class Player extends Physics.Arcade.Sprite
         {
             if (controls.left.isDown)
             {
-                this.setVelocityX(-MOVE_SPEED);
+                this.setVelocityX(-MOVE_SPEED * this.speedMultiplier);
                 this.setFlipX(true);
                 this.facingDir = -1;
             }
             else if (controls.right.isDown)
             {
-                this.setVelocityX(MOVE_SPEED);
+                this.setVelocityX(MOVE_SPEED * this.speedMultiplier);
                 this.setFlipX(false);
                 this.facingDir = 1;
             }

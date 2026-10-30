@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { RepairList } from './RepairList';
+import { missingIngredients, unlockedRecipeIds } from '../recipeUnlocks';
 import { RecipeDefinition, craftRecipeUseCase } from '../../../application/CraftRecipeUseCase';
 import { WeaponUpgradeRecipe, upgradeWeaponTierUseCase } from '../../../application/UpgradeWeaponTierUseCase';
 import { getGameContent } from '../../content/ContentCatalog';
@@ -29,16 +30,8 @@ export const ForgeModal: React.FC<ForgeModalProps> = ({ isOpen, onClose }) =>
 
     const isForgeUnlocked = entities.forgeUnlocked || entities.books['book-ch1']?.examPassed;
 
-    // Gather unlocked recipes
-    const unlockedRecipes = new Set<string>();
-    for (const bp of Object.values(entities.books))
-    {
-        if (bp.examPassed)
-        {
-            if (bp.bookId === 'book-ch1') unlockedRecipes.add('iron-sword');
-            if (bp.bookId === 'book-ch2') unlockedRecipes.add('crystal-sword');
-        }
-    }
+    // Recipes taught by the Textbooks whose exam was passed
+    const unlockedRecipes = unlockedRecipeIds();
 
     const getItem = (id: string) => items.find(i => i.id === id);
 
@@ -176,7 +169,7 @@ export const ForgeModal: React.FC<ForgeModalProps> = ({ isOpen, onClose }) =>
                                                             <div>
                                                                 <h4 className="font-bold text-white">{resultItem?.name}</h4>
                                                                 <span className="text-xs text-orange-400 font-semibold">
-                                                                    ATK {resultItem?.baseDamage}
+                                                                    {resultItem?.category === 'armor' ? `🛡️ +${resultItem.armorHearts}` : `ATK ${resultItem?.baseDamage}`}
                                                                 </span>
                                                             </div>
                                                         </div>
@@ -186,6 +179,14 @@ export const ForgeModal: React.FC<ForgeModalProps> = ({ isOpen, onClose }) =>
                                                     </div>
 
                                                     <p className="text-xs text-slate-300 mt-2">{resultItem?.description}</p>
+
+                                                    {!isLocked && !canCraft && missingIngredients(recipe.ingredients).length > 0 && (
+                                                        <p className="mt-2 text-xs text-rose-300" data-testid="missing-ingredients">
+                                                            ຂາດ: {missingIngredients(recipe.ingredients)
+                                                                .map(m => `${getItem(m.itemId)?.name ?? m.itemId} ອີກ ${m.missing}`)
+                                                                .join(', ')}
+                                                        </p>
+                                                    )}
 
                                                     {/* Ingredients */}
                                                     <div className="mt-3 space-y-1 bg-slate-900/60 p-2 rounded-lg text-xs">

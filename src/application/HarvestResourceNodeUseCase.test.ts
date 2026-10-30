@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { DomainEvents } from '../domain/DomainEvents';
 import { harvestResourceNodeUseCase, RESOURCE_HARVESTED_EVENT, ResourceNodeDefinition } from './HarvestResourceNodeUseCase';
-import { Backpack } from '../domain/entities/Backpack';
+import { Backpack, BACKPACK_MAX_SLOTS } from '../domain/entities/Backpack';
 import { ResourceNode } from '../domain/entities/ResourceNode';
 
 describe('HarvestResourceNodeUseCase', () =>
@@ -97,7 +97,7 @@ describe('HarvestResourceNodeUseCase', () =>
     {
         const backpack = backpackWithAxe();
         // Fill the remaining 19 slots with 1 item each of maxStack 1
-        for (let i = 0; i < 19; i++)
+        for (let i = 0; i < BACKPACK_MAX_SLOTS - 1; i++)
         {
             backpack.addItem(`filler-${i}`, 1);
         }
@@ -116,7 +116,7 @@ describe('HarvestResourceNodeUseCase', () =>
         harvestResourceNodeUseCase(treeDefinition, tree, backpack);
         harvestResourceNodeUseCase(treeDefinition, tree, backpack);
 
-        for (let i = 0; i < 19; i++)
+        for (let i = 0; i < BACKPACK_MAX_SLOTS - 1; i++)
         {
             backpack.addItem(`filler-${i}`, 1);
         }

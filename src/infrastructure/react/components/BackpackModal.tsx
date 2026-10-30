@@ -3,11 +3,14 @@ import { BackpackSlot } from '../../../domain/entities/Backpack';
 import { entities } from '../../composition';
 import { soundManager } from '../../audio/SoundManager';
 import { EventBus } from '../../EventBus';
-import { consumeItemUseCase } from '../../../application/ConsumeItemUseCase';
 import { equipWeaponUseCase } from '../../../application/EquipWeaponUseCase';
 import { discardItemUseCase } from '../../../application/DiscardItemUseCase';
 import { ItemIcon } from './ItemIcon';
 import { DurabilityBar } from './DurabilityBar';
+import { ARMOR_SLOTS, ARMOR_SLOT_LABEL, ArmorSlot } from '../../../domain/entities/Armor';
+import { equipArmorUseCase, unequipArmorUseCase } from '../../../application/ArmorUseCases';
+import { drinkPotionUseCase, potionEffectOf } from '../../../application/DrinkPotionUseCase';
+import { armorContext } from '../../composition';
 
 interface BackpackModalProps
 {
@@ -61,7 +64,7 @@ export const BackpackModal: React.FC<BackpackModalProps> = ({ isOpen, onClose, o
         switch (activeFilter)
         {
             case 'gear':
-                return def.category === 'weapon' || def.category === 'tool';
+                return def.category === 'weapon' || def.category === 'tool' || def.category === 'armor';
             case 'material':
                 return def.category === 'material';
             case 'consumable':
@@ -77,18 +80,24 @@ export const BackpackModal: React.FC<BackpackModalProps> = ({ isOpen, onClose, o
         if (!selectedSlot || !selectedItemDef) return;
         setNotice(null);
 
-        if (selectedItemDef.category === 'consumable')
+        if (selectedItemDef.category === 'armor')
         {
-            const result = consumeItemUseCase(entities.backpack, entities.health, selectedSlot.itemId, {
-                healAmount: selectedItemDef.healAmount,
-            });
+            const result = equipArmorUseCase(selectedSlot.itemId, entities.backpack, armorContext);
+            if (!result.success) return;
+
+            soundManager.playPowerUp();
+            setRevision(r => r + 1);
+        }
+        else if (selectedItemDef.category === 'consumable')
+        {
+            const result = drinkPotionUseCase(selectedItemDef, entities.backpack, entities.health, entities.effects);
 
             if (!result.success)
             {
                 soundManager.playHurt();
                 setNotice(
                     result.reason === 'already_full' ? '❤️ ຫົວໃຈເຕັມແລ້ວ ບໍ່ຈຳເປັນຕ້ອງໃຊ້'
-                        : result.reason === 'no_effect' ? 'ສິ່ງນີ້ໃຊ້ຕອນສ້ອມປະຕູ ບໍ່ແມ່ນດື່ມ'
+                        : result.reason === 'not_a_potion' ? 'ສິ່ງນີ້ໃຊ້ຕອນສ້ອມປະຕູ ບໍ່ແມ່ນດື່ມ'
                             : 'ໃຊ້ບໍ່ໄດ້ຕອນນີ້'
                 );
                 return;
@@ -109,6 +118,32 @@ export const BackpackModal: React.FC<BackpackModalProps> = ({ isOpen, onClose, o
             setRevision(r => r + 1);
         }
     }, [selectedSlot, selectedItemDef, onUseItem]);
+
+    const handleUnequip = (slot: ArmorSlot) =>
+    {
+        const result = unequipArmorUseCase(slot, entities.backpack, armorContext);
+        if (result.success)
+        {
+            soundManager.playSelect();
+            setNotice(null);
+            setRevision(r => r + 1);
+        }
+        else
+        {
+            soundManager.playHurt();
+            setNotice(result.reason === 'backpack_full' ? '⚠️ ກະເປົາເຕັມ ຖອດບໍ່ໄດ້' : null);
+        }
+    };
+
+    /** Chooses the Potion that R drinks. */
+    const handleSetQuickSlot = () =>
+    {
+        if (!selectedSlot) return;
+        entities.quickSlotItemId = selectedSlot.itemId;
+        soundManager.playSelect();
+        EventBus.emit('backpack-changed');
+        setRevision(r => r + 1);
+    };
 
     const handleDiscardSelected = (discardAll = false) =>
     {
@@ -320,8 +355,49 @@ export const BackpackModal: React.FC<BackpackModalProps> = ({ isOpen, onClose, o
                 {/* 2-Pane Body: Left Grid (60%), Right Inspector (40%) */}
                 <div className="grid grid-cols-1 md:grid-cols-12 gap-4 p-4 sm:p-5 overflow-y-auto flex-1">
 
-                    {/* Left Pane: 20-Slots Grid (7 Cols on desktop) */}
+                    {/* Left Pane: the worn Armor, then the slots grid (7 Cols on desktop) */}
                     <div className="md:col-span-7 bg-slate-950/40 p-3.5 rounded-2xl border border-slate-800/80 flex flex-col justify-between">
+                        {/* Worn Armor: three places, they do not take Backpack slots */}
+                        <div className="grid grid-cols-3 gap-2.5 mb-3" data-testid="armor-panel">
+                            {ARMOR_SLOTS.map(slot =>
+                            {
+                                const worn = entities.equipment.getArmor(slot);
+                                const wornDef = worn ? getItem(worn.itemId) : null;
+                                const max = worn ? entities.itemCatalog.maxDurabilityOf(worn.itemId) : undefined;
+                                const current = worn && max !== undefined ? Math.min(max, worn.durability ?? max) : 0;
+                                return (
+                                    <div
+                                        key={slot}
+                                        data-testid={`armor-slot-${slot}`}
+                                        data-item={worn?.itemId ?? ''}
+                                        className="rounded-xl border border-slate-700 bg-slate-900/60 p-2 flex flex-col items-center gap-1 min-h-[84px]"
+                                    >
+                                        <span className="text-[10px] uppercase tracking-wide text-slate-400">{ARMOR_SLOT_LABEL[slot]}</span>
+                                        {worn && wornDef ? (
+                                            <>
+                                                <ItemIcon iconImage={wornDef.iconImage} icon={wornDef.icon} size={26} />
+                                                {max !== undefined && (
+                                                    <DurabilityBar
+                                                        reading={{ current, max, state: current <= 0 ? 'broken' : current <= max * 0.2 ? 'low' : 'ok' }}
+                                                        compact
+                                                    />
+                                                )}
+                                                <button
+                                                    data-testid={`unequip-${slot}`}
+                                                    onClick={() => handleUnequip(slot)}
+                                                    className="text-[10px] px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600"
+                                                >
+                                                    ຖອດ
+                                                </button>
+                                            </>
+                                        ) : (
+                                            <span className="text-slate-600 text-lg">＋</span>
+                                        )}
+                                    </div>
+                                );
+                            })}
+                        </div>
+
                         <div className="grid grid-cols-4 sm:grid-cols-5 gap-2.5">
                             {allSlots.map((slot, index) =>
                             {
@@ -491,8 +567,34 @@ export const BackpackModal: React.FC<BackpackModalProps> = ({ isOpen, onClose, o
                                     {selectedItemDef.category === 'consumable' && (
                                         <div className="flex justify-between items-center text-emerald-300 font-bold">
                                             <span>💚 ປະສິດທິພາບ:</span>
-                                            <span>ຟື້ນຟູພະລັງຊີວິດ +1 ❤️</span>
+                                            <span>
+                                                {{
+                                                    heal: `ຟື້ນຟູພະລັງຊີວິດ +${selectedItemDef.healAmount ?? 1} ❤️`,
+                                                    strength: `ໂຈມຕີແຮງ +50% (${selectedItemDef.durationSec ?? 60} ວິ)`,
+                                                    speed: `ຍ່າງໄວ +30% (${selectedItemDef.durationSec ?? 60} ວິ)`,
+                                                    armor: `ຫົວໃຈເກາະ +${selectedItemDef.amount ?? 1} 🛡️`,
+                                                }[potionEffectOf(selectedItemDef) ?? 'heal']}
+                                            </span>
                                         </div>
+                                    )}
+
+                                    {selectedItemDef.category === 'armor' && (
+                                        <>
+                                            <div className="flex justify-between items-center text-sky-300 font-bold">
+                                                <span>🛡️ ຫົວໃຈເກາະ:</span>
+                                                <span className="text-sm font-mono">+{selectedItemDef.armorHearts}</span>
+                                            </div>
+                                            <div className="flex justify-between items-center text-slate-400">
+                                                <span>ສວມໃສ່ບ່ອນ:</span>
+                                                <span className="text-white font-medium">{selectedItemDef.slot ? ARMOR_SLOT_LABEL[selectedItemDef.slot] : '-'}</span>
+                                            </div>
+                                            {selectedItemDef.speedBonus ? (
+                                                <div className="flex justify-between items-center text-emerald-400">
+                                                    <span>ຄວາມໄວ:</span>
+                                                    <span className="font-bold">+{Math.round(selectedItemDef.speedBonus * 100)}%</span>
+                                                </div>
+                                            ) : null}
+                                        </>
                                     )}
 
                                     {selectedItemDef.category === 'tool' && (
@@ -558,6 +660,33 @@ export const BackpackModal: React.FC<BackpackModalProps> = ({ isOpen, onClose, o
                                         >
                                             <span>🧪</span>
                                             <span>ດື່ມ / ໃຊ້ງານ (Use Item) [Enter]</span>
+                                        </button>
+                                    )}
+
+                                    {selectedItemDef.category === 'consumable' && potionEffectOf(selectedItemDef) !== null && (
+                                        <button
+                                            data-testid="set-quick-slot"
+                                            onClick={handleSetQuickSlot}
+                                            disabled={entities.quickSlotItemId === selectedSlot.itemId}
+                                            className={`w-full py-2 rounded-xl font-bold text-xs transition flex items-center justify-center gap-2 ${
+                                                entities.quickSlotItemId === selectedSlot.itemId
+                                                    ? 'bg-slate-800 text-slate-500 border border-slate-700 cursor-default'
+                                                    : 'bg-slate-800 hover:bg-slate-700 text-cyan-300 border border-cyan-500/40'
+                                            }`}
+                                        >
+                                            <span>⚡</span>
+                                            <span>{entities.quickSlotItemId === selectedSlot.itemId ? 'ຢູ່ຊ່ອງດ່ວນແລ້ວ [R]' : 'ຕັ້ງເປັນຊ່ອງດ່ວນ (ກົດ R ເພື່ອດື່ມ)'}</span>
+                                        </button>
+                                    )}
+
+                                    {selectedItemDef.category === 'armor' && (
+                                        <button
+                                            data-testid="equip-armor"
+                                            onClick={handleUseSelectedItem}
+                                            className="w-full py-2.5 rounded-xl bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 text-white font-bold text-sm shadow-md transition active:scale-98 flex items-center justify-center gap-2"
+                                        >
+                                            <span>🛡️</span>
+                                            <span>ສວມໃສ່ (Wear) [Enter]</span>
                                         </button>
                                     )}
 

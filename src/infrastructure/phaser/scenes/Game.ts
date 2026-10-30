@@ -46,6 +46,7 @@ import { EnemyDefinition } from '../../../domain/entities/Enemy';
 import { scaleEnemyDefinition } from '../../../domain/entities/StageScaling';
 import { GROUND_SINK } from '../physicsConstants';
 import { notifyTutorial } from '../../tutorial';
+import { armorSpeedBonusOf } from '../../../domain/entities/Armor';
 import { ITEM_BROKEN_EVENT, ITEM_WORN_EVENT, ItemBrokenPayload, ItemWornPayload } from '../../../application/WearItemUseCase';
 
 /** How far from the start the hero has walked when the hint "walk" counts as done (px). */
@@ -470,6 +471,12 @@ export class Game extends Scene
     update (_time: number, delta: number)
     {
         entities.attackCooldown.tick(delta);
+        entities.effects.tick(delta);
+        if (this.player)
+        {
+            this.player.speedMultiplier = entities.effects.speedMultiplier
+                * (1 + armorSpeedBonusOf(entities.equipment.wornArmor.map(w => w.piece), entities.itemCatalog));
+        }
 
         if (this.isStageCleared || this.health.isDead)
         {

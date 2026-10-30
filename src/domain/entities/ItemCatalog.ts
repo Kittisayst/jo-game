@@ -1,4 +1,6 @@
-export type ItemCategory = 'material' | 'consumable' | 'tool' | 'weapon';
+import type { ArmorSlot, PotionEffect } from './Armor';
+
+export type ItemCategory = 'material' | 'consumable' | 'tool' | 'weapon' | 'armor';
 
 /** Stack size used for an item the catalog does not know. */
 export const DEFAULT_MAX_STACK = 99;
@@ -21,8 +23,20 @@ export interface ItemDefinition
     tier?: number;
     baseDamage?: number;
     maxUpgradeLevel?: number;
-    /** Hearts restored when the item is consumed. */
+    /** Hearts restored when the item is consumed (the health potion). */
     healAmount?: number;
+    /** What a Potion does besides healing: strength, armor or speed (see `amount` and `durationSec`). */
+    effect?: PotionEffect;
+    /** Size of the effect: Armor hearts for an armor potion. */
+    amount?: number;
+    /** How long a strength or speed potion lasts, in seconds. */
+    durationSec?: number;
+    /** Armor only: which of the three places on the hero it is worn. */
+    slot?: ArmorSlot;
+    /** Armor only: Armor hearts it gives while it is not Broken. */
+    armorHearts?: number;
+    /** Armor only: extra walking speed as a share (0.1 = +10 %). */
+    speedBonus?: number;
     /** How many uses a weapon or tool lasts before it is Broken. Missing = it never wears (the wooden sword). */
     durability?: number;
 }

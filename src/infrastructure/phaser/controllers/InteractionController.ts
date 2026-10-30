@@ -194,7 +194,7 @@ export class InteractionController
         }
         else if (result.reason === 'backpack_full')
         {
-            showLootNotification(scene, node.x, node.y - 30, '⚠️ ກະເປົາເຕັມ (20/20)!', '#ef4444');
+            showLootNotification(scene, node.x, node.y - 30, `⚠️ ກະເປົາເຕັມ (${entities.backpack.maxSlots}/${entities.backpack.maxSlots})!`, '#ef4444');
         }
     }
 }

@@ -1,4 +1,5 @@
 import { Backpack } from '../domain/entities/Backpack';
+import { ActiveEffects } from '../domain/entities/ActiveEffects';
 import { AttackCooldown } from '../domain/entities/Combat';
 import { damageAfterWear, DurabilityState } from '../domain/entities/Durability';
 import { EquipmentState } from '../domain/entities/EquipmentState';
@@ -17,11 +18,13 @@ export interface AttackResult
 /**
  * Executes a player attack if cooldown allows, using the equipped sword and its upgrade level.
  * With the `backpack`, the swing takes one Durability off the sword, and a Broken sword hits for half.
+ * With the running `effects`, a strength Potion adds half to the damage (on top of any wear).
  */
 export function performAttackUseCase (
     equipment: EquipmentState,
     cooldown: AttackCooldown,
-    backpack?: Backpack
+    backpack?: Backpack,
+    effects?: ActiveEffects
 ): AttackResult | null
 {
     if (!cooldown.canAttack())
@@ -37,7 +40,7 @@ export function performAttackUseCase (
 
     return {
         weaponId: id,
-        damage: reading ? damageAfterWear(baseDamage, reading.state) : baseDamage,
+        damage: Math.round((reading ? damageAfterWear(baseDamage, reading.state) : baseDamage) * (effects?.damageMultiplier ?? 1)),
         range,
         effectiveCooldown: cooldownMs,
         ...(reading ? { durabilityState: reading.state } : {}),

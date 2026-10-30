@@ -35,9 +35,9 @@ test.describe('Playwright UI Audit — Backpack & Village Hub', () => {
     const modalHeader = page.locator('h2:has-text("ກະເປົາເດີນທາງ")');
     await expect(modalHeader).toBeVisible();
 
-    // Verify 20 slots grid exists
+    // Verify the 30-slot grid exists
     const slots = page.locator('.grid-cols-4 button');
-    await expect(slots).toHaveCount(20);
+    await expect(slots).toHaveCount(30);
 
     // Verify Category Filter toolbar
     await expect(page.locator('button:has-text("ທັງໝົດ")')).toBeVisible();

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { Backpack } from './Backpack';
+import { Backpack, BACKPACK_MAX_SLOTS } from './Backpack';
 import { createTestItemCatalog } from '../testing/itemCatalog';
 
 describe('Backpack Entity', () =>
@@ -7,7 +7,7 @@ describe('Backpack Entity', () =>
     it('manages 20 slots and adds items with stack boundaries', () =>
     {
         const backpack = new Backpack([], createTestItemCatalog());
-        expect(backpack.maxSlots).toBe(20);
+        expect(backpack.maxSlots).toBe(30);
         expect(backpack.usedSlotsCount).toBe(0);
 
         // Add 150 wood (should take 2 slots: 99 and 51)
@@ -21,8 +21,8 @@ describe('Backpack Entity', () =>
     it('rejects adding items when inventory is completely full', () =>
     {
         const backpack = new Backpack([], createTestItemCatalog());
-        // Fill all 20 slots with 1 axe each
-        for (let i = 0; i < 20; i++)
+        // Fill every slot with 1 axe each
+        for (let i = 0; i < BACKPACK_MAX_SLOTS; i++)
         {
             backpack.addItem('axe-t1', 1);
         }
@@ -50,7 +50,7 @@ describe('Backpack Entity', () =>
     {
         const backpack = new Backpack([], createTestItemCatalog());
         // Fill 19 slots with random junk
-        for (let i = 0; i < 19; i++)
+        for (let i = 0; i < BACKPACK_MAX_SLOTS - 1; i++)
         {
             backpack.addItem(`junk-${i}`, 1);
         }

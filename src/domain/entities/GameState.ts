@@ -11,6 +11,8 @@ import { CURRENT_SAVE_VERSION, SaveGameSnapshot } from './SaveData';
 import { Settings } from './Settings';
 import { SkinManager } from './Skin';
 import { StageProgression } from './StageProgression';
+import { ActiveEffects } from './ActiveEffects';
+import { armorHeartsOf } from './Armor';
 import { TutorialProgress } from './TutorialProgress';
 import { Wallet } from './Wallet';
 
@@ -29,6 +31,10 @@ export class GameState
     readonly settings = new Settings();
     readonly stageProgression = new StageProgression();
     readonly tutorial = new TutorialProgress();
+    /** Timed Potion effects running on the hero (not saved). */
+    readonly effects = new ActiveEffects();
+    /** The Potion chosen to be drunk with R, or null. */
+    quickSlotItemId: string | null = null;
     readonly pauseState = new GamePauseState(false);
     readonly dialogueState = new DialogueState();
     readonly wallet = new Wallet();
@@ -80,6 +86,7 @@ export class GameState
             repairedGates: Array.from(this.repairedGates),
             forgeUnlocked: this.forgeUnlocked,
             tutorial: this.tutorial.toSnapshot(),
+            quickSlotItemId: this.quickSlotItemId,
         };
     }
 
@@ -118,6 +125,15 @@ export class GameState
 
         this.forgeUnlocked = snapshot.forgeUnlocked;
         this.tutorial.loadFrom(snapshot.tutorial);
+        this.quickSlotItemId = snapshot.quickSlotItemId ?? null;
+        this.effects.clear();
+        this.syncArmor();
         this.health.reset();
+    }
+
+    /** Makes the Armor hearts match the worn pieces. Call again once the item catalog has loaded. */
+    syncArmor (): void
+    {
+        this.health.syncMaxArmor(armorHeartsOf(this.equipment.wornArmor.map(w => w.piece), this.itemCatalog));
     }
 }

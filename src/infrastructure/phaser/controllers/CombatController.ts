@@ -3,7 +3,7 @@ import { collectEnemyDropsUseCase } from '../../../application/CollectEnemyDrops
 import { cycleEquippedWeaponUseCase } from '../../../application/CycleEquippedWeaponUseCase';
 import { performAttackUseCase } from '../../../application/PerformAttackUseCase';
 import { playerTakeDamageUseCase } from '../../../application/PlayerTakeDamageUseCase';
-import { entities } from '../../composition';
+import { armorContext, entities } from '../../composition';
 import { soundManager } from '../../audio/SoundManager';
 import { EventBus } from '../../EventBus';
 import { describeDrops, showDamageNumber, showLootNotification } from '../effects/FloatingText';
@@ -36,7 +36,7 @@ export class CombatController
         const { scene } = this;
         if (scene.isDialogueActive || scene.health.isDead || scene.isStageCleared) return;
 
-        const attack = performAttackUseCase(entities.equipment, entities.attackCooldown, entities.backpack);
+        const attack = performAttackUseCase(entities.equipment, entities.attackCooldown, entities.backpack, entities.effects);
         if (!attack) return;
 
         const { weaponId, damage, range } = attack;
@@ -62,7 +62,7 @@ export class CombatController
         player.triggerDamage(enemy.x);
         scene.cameras.main.shake(160, 0.008);
         scene.cameras.main.flash(110, 239, 68, 68, true);
-        playerTakeDamageUseCase(scene.health);
+        playerTakeDamageUseCase(scene.health, armorContext);
     }
 
     /** Overlap callback: hero touches a spike. */
@@ -75,7 +75,7 @@ export class CombatController
         scene.particleManager.emitSpikeHit(spike.x, spike.y);
         scene.cameras.main.shake(180, 0.009);
         scene.cameras.main.flash(110, 239, 68, 68, true);
-        playerTakeDamageUseCase(scene.health);
+        playerTakeDamageUseCase(scene.health, armorContext);
     }
 
     /** Overlap callback: touching the Boss costs a heart. */
@@ -87,7 +87,7 @@ export class CombatController
         player.triggerDamage(boss.x);
         scene.cameras.main.shake(220, 0.012);
         scene.cameras.main.flash(140, 239, 68, 68, true);
-        playerTakeDamageUseCase(scene.health);
+        playerTakeDamageUseCase(scene.health, armorContext);
     }
 
     /** Overlap callback: an enemy spit hits the hero. */
@@ -101,7 +101,7 @@ export class CombatController
         scene.particleManager.emitSpikeHit(scene.player.x, scene.player.y);
         scene.cameras.main.shake(150, 0.007);
         scene.cameras.main.flash(100, 34, 197, 94, true);
-        playerTakeDamageUseCase(scene.health);
+        playerTakeDamageUseCase(scene.health, armorContext);
     }
 
     /** A spitter enemy fires a glob in `(dirX, dirY)`. */

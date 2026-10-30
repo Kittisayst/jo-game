@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { Backpack } from '../domain/entities/Backpack';
+import { Backpack, BACKPACK_MAX_SLOTS } from '../domain/entities/Backpack';
 import { Enemy, EnemyDefinition } from '../domain/entities/Enemy';
 import { collectEnemyDropsUseCase } from './CollectEnemyDropsUseCase';
 
@@ -36,7 +36,7 @@ describe('CollectEnemyDropsUseCase', () =>
     it('reports overflow instead of losing track when the backpack is full', () =>
     {
         const backpack = new Backpack();
-        for (let i = 0; i < 20; i++)
+        for (let i = 0; i < BACKPACK_MAX_SLOTS; i++)
         {
             backpack.addItem(`filler-${i}`, 1);
         }

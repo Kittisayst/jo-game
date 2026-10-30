@@ -10,6 +10,8 @@ export interface ShortcutHandlers
     escape: () => void;
     /** I */
     toggleBackpack: () => void;
+    /** R: drink the Potion in the Quick slot (Q swaps the sword, which the Phaser scene owns) */
+    drinkQuickSlot: () => void;
 }
 
 /**
@@ -45,6 +47,10 @@ export function useGlobalShortcuts (handlers: ShortcutHandlers): void
                 case 'i':
                 case 'I':
                     current.toggleBackpack();
+                    break;
+                case 'r':
+                case 'R':
+                    current.drinkQuickSlot();
                     break;
             }
         };

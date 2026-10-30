@@ -1,3 +1,4 @@
+import { ARMOR_SLOTS, ArmorSlot, WornPiece } from './Armor';
 import { TutorialSnapshot } from './TutorialProgress';
 import { SettingsData, StageProgressionData } from '../ports';
 import { BookProgressSnapshot } from './Book';
@@ -39,6 +40,8 @@ export interface SaveGameSnapshot
     practiceStats: DailyPracticeProgressSnapshot;
     repairedGates: string[];
     forgeUnlocked: boolean;
+    /** The Potion chosen to be drunk with R, or null. Missing in older saves. */
+    quickSlotItemId: string | null;
     /** Hints of the first Stage that were done, and whether the player skipped them. Missing in older saves. */
     tutorial: TutorialSnapshot;
 }
@@ -93,6 +96,7 @@ export function createDefaultSaveSnapshot (slotId = 'slot_1'): SaveGameSnapshot
         repairedGates: [],
         forgeUnlocked: false,
         tutorial: { done: [], dismissed: false },
+        quickSlotItemId: null,
     };
 }
 
@@ -209,6 +213,21 @@ export function migrateSaveSnapshot (raw: unknown, fallbackSlotId = 'slot_1'): S
     const equippedWeaponId = typeof rawEquip.equippedWeaponId === 'string' && WEAPON_CONFIGS[rawEquip.equippedWeaponId]
         ? rawEquip.equippedWeaponId
         : DEFAULT_WEAPON_ID;
+    // Armor being worn: only the three known places, each with an item id and optionally what is left of it
+    const rawArmor = asRecord(rawEquip.armor);
+    const armor: Partial<Record<ArmorSlot, WornPiece>> = {};
+    for (const slot of ARMOR_SLOTS)
+    {
+        const piece = asRecord(rawArmor[slot]);
+        if (typeof piece.itemId === 'string' && piece.itemId.length > 0)
+        {
+            armor[slot] = {
+                itemId: piece.itemId,
+                ...(typeof piece.durability === 'number' && !isNaN(piece.durability) ? { durability: Math.max(0, Math.floor(piece.durability)) } : {}),
+            };
+        }
+    }
+    const quickSlotItemId = typeof data.quickSlotItemId === 'string' && data.quickSlotItemId.length > 0 ? data.quickSlotItemId : null;
     const upgradeLevels: Record<string, number> = {};
     for (const [weaponId, level] of Object.entries(asRecord(rawEquip.upgradeLevels)))
     {
@@ -250,10 +269,11 @@ export function migrateSaveSnapshot (raw: unknown, fallbackSlotId = 'slot_1'): S
         wallet: { balance },
         books,
         backpack,
-        equipment: { equippedWeaponId, upgradeLevels },
+        equipment: { equippedWeaponId, upgradeLevels, armor },
         practiceStats,
         repairedGates,
         forgeUnlocked,
         tutorial,
+        quickSlotItemId,
     };
 }

@@ -48,6 +48,13 @@ export interface HudProps
     /** The hint of the first Stage the player has not done yet; nothing once they have or skipped it. */
     tutorialText?: string;
     onDismissTutorial?: () => void;
+    /** Armor hearts left (they are lost before the hearts of Health). */
+    armor?: number;
+    /** Timed Potion effects running, with the seconds left. */
+    activeEffects?: { effect: 'strength' | 'speed'; remainingSeconds: number }[];
+    /** The Potion chosen to be drunk with R, with how many are left. */
+    quickSlot?: { id: string; name: string; icon: string; iconImage?: string; count: number } | null;
+    onDrinkQuickSlot?: () => void;
 }
 
 export function Hud ({
@@ -66,9 +73,13 @@ export function Hud ({
     onOpenLibrary,
     ownedBooksCount = 0,
     backpackCount = 0,
-    maxBackpackSlots = 20,
+    maxBackpackSlots = 30,
     tutorialText,
     onDismissTutorial,
+    armor = 0,
+    activeEffects = [],
+    quickSlot = null,
+    onDrinkQuickSlot,
 }: HudProps)
 {
     const levelLabel = hudLabelOf(currentLevel);
@@ -88,6 +99,24 @@ export function Hud ({
                             {'❤️'.repeat(Math.max(0, health)) + '🖤'.repeat(Math.max(0, maxHealth - health))}
                         </span>
                     </div>
+
+                    {armor > 0 && (
+                        <div className="hud-badge armor-badge" data-testid="armor-hearts" data-armor={armor} title="ຫົວໃຈເກາະ: ເສຍກ່ອນຫົວໃຈປົກກະຕິ ແລະ ຟື້ນເມື່ອກັບໝູ່ບ້ານ">
+                            <span className="badge-icon">{'🛡️'.repeat(Math.min(armor, 10))}</span>
+                        </div>
+                    )}
+
+                    {activeEffects.map(active => (
+                        <div
+                            key={active.effect}
+                            className="hud-badge effect-badge"
+                            data-testid={`effect-${active.effect}`}
+                            title={active.effect === 'strength' ? 'ພະລັງໂຈມຕີ +50%' : 'ຄວາມໄວ +30%'}
+                        >
+                            <span className="badge-icon">{active.effect === 'strength' ? '💪' : '💨'}</span>
+                            <span className="badge-label">{active.remainingSeconds}s</span>
+                        </div>
+                    ))}
 
                     {objective && (
                         <div className="hud-badge objective-badge" title="ເປົ້າໝາຍຕໍ່ໄປ">
@@ -153,6 +182,22 @@ export function Hud ({
                         >
                             <span className="badge-icon">📚</span>
                             <span className="badge-label">ຕຳລາ ({ownedBooksCount})</span>
+                        </button>
+                    )}
+
+                    {quickSlot && (
+                        <button
+                            className="hud-badge quick-slot-badge"
+                            data-testid="quick-slot"
+                            onClick={e => { e.preventDefault(); e.stopPropagation(); onDrinkQuickSlot?.(); }}
+                            title={`ດື່ມ ${quickSlot.name} (ກົດ R)`}
+                            type="button"
+                        >
+                            <span className="badge-icon flex items-center">
+                                <ItemIcon iconImage={quickSlot.iconImage} icon={quickSlot.icon} size={20} />
+                            </span>
+                            <span className="badge-label">x{quickSlot.count}</span>
+                            <span className="badge-hint">[R]</span>
                         </button>
                     )}
 

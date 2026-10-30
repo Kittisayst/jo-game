@@ -176,5 +176,81 @@
     "icon": "✨",
     "iconImage": "assets/items/crystal-sword.png",
     "held": { "image": "assets/held/crystal-sword.png", "gripX": 16, "gripY": 26 }
+  },
+  {
+    "id": "iron-helmet",
+    "name": "ໝວກເຫຼັກ",
+    "nameEn": "Iron Helmet",
+    "description": "ໝວກເຫຼັກກັນຫົວ ໃຫ້ຫົວໃຈເກາະ 1 ຫົວໃຈ (ໃສ່ໄດ້ໃນກະເປົາ)",
+    "category": "armor",
+    "slot": "head",
+    "armorHearts": 1,
+    "maxStack": 1,
+    "durability": 60,
+    "icon": "⛑️",
+    "iconImage": "assets/items/iron-helmet.png"
+  },
+  {
+    "id": "iron-chestplate",
+    "name": "ເສື້ອເກາະເຫຼັກ",
+    "nameEn": "Iron Chestplate",
+    "description": "ເສື້ອເກາະເຫຼັກປ້ອງລຳຕົວ ໃຫ້ຫົວໃຈເກາະ 2 ຫົວໃຈ",
+    "category": "armor",
+    "slot": "body",
+    "armorHearts": 2,
+    "maxStack": 1,
+    "durability": 80,
+    "icon": "🛡️",
+    "iconImage": "assets/items/iron-chestplate.png"
+  },
+  {
+    "id": "iron-boots",
+    "name": "ເກີບເຫຼັກ",
+    "nameEn": "Iron Boots",
+    "description": "ເກີບເຫຼັກ ໃຫ້ຫົວໃຈເກາະ 1 ຫົວໃຈ ແລະ ຍ່າງໄວຂຶ້ນ 10%",
+    "category": "armor",
+    "slot": "feet",
+    "armorHearts": 1,
+    "speedBonus": 0.1,
+    "maxStack": 1,
+    "durability": 60,
+    "icon": "🥾",
+    "iconImage": "assets/items/iron-boots.png"
+  },
+  {
+    "id": "strength-potion",
+    "name": "ຢາເພີ່ມພະລັງໂຈມຕີ",
+    "nameEn": "Strength Potion",
+    "description": "ດື່ມແລ້ວ ໂຈມຕີແຮງຂຶ້ນ 50% ເປັນເວລາ 60 ວິນາທີ",
+    "category": "consumable",
+    "effect": "strength",
+    "durationSec": 60,
+    "maxStack": 20,
+    "icon": "💪",
+    "iconImage": "assets/items/strength-potion.png"
+  },
+  {
+    "id": "armor-potion",
+    "name": "ຢາຫົວໃຈເກາະ",
+    "nameEn": "Armor Potion",
+    "description": "ດື່ມແລ້ວ ໄດ້ຫົວໃຈເກາະເພີ່ມ 1 ຫົວໃຈ (ຢູ່ຈົນກວ່າຈະກັບໝູ່ບ້ານ)",
+    "category": "consumable",
+    "effect": "armor",
+    "amount": 1,
+    "maxStack": 20,
+    "icon": "🛡️",
+    "iconImage": "assets/items/armor-potion.png"
+  },
+  {
+    "id": "speed-potion",
+    "name": "ຢາເພີ່ມຄວາມໄວ",
+    "nameEn": "Speed Potion",
+    "description": "ດື່ມແລ້ວ ຍ່າງໄວຂຶ້ນ 30% ເປັນເວລາ 60 ວິນາທີ",
+    "category": "consumable",
+    "effect": "speed",
+    "durationSec": 60,
+    "maxStack": 20,
+    "icon": "💨",
+    "iconImage": "assets/items/speed-potion.png"
   }
 ]

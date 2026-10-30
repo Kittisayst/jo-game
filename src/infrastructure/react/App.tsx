@@ -10,13 +10,14 @@ import {
     togglePauseUseCase,
 } from '../../application/TogglePauseUseCase';
 import { EventBus } from '../EventBus';
-import { entities, repositories } from '../composition';
+import { armorContext, entities, repositories } from '../composition';
 import { Hud } from './components/Hud';
 import { SkinModal } from './components/SkinModal';
 import { useDialogue } from './hooks/useDialogue';
 import { useGameEvents } from './hooks/useGameEvents';
 import { useDevStageEntry } from './hooks/useDevStageEntry';
 import { dismissTutorialUseCase } from '../../application/NotifyTutorialUseCase';
+import { drinkPotionUseCase } from '../../application/DrinkPotionUseCase';
 import { notifyTutorial } from '../tutorial';
 import { useGlobalShortcuts } from './hooks/useGlobalShortcuts';
 import { useModalState } from './hooks/useModalState';
@@ -428,6 +429,22 @@ function App ()
 
     useDevStageEntry(handleStartGame);
 
+    /** R drinks the Potion in the Quick slot, but only while playing: not on the title, paused or in a window. */
+    const drinkQuickSlot = () =>
+    {
+        if (isMainMenuOpen || isGamePaused || isDialogueOpen || isSkinModalOpen || modals.isAnyModalOpen) return;
+        const itemId = entities.quickSlotItemId;
+        if (!itemId) return;
+
+        const result = drinkPotionUseCase(entities.itemCatalog.get(itemId), entities.backpack, entities.health, entities.effects);
+        if (result.success) soundManager.playPowerUp(); else soundManager.playHurt();
+        // A Potion that is used up (or gone) empties the slot
+        if (entities.backpack.getItemCount(itemId) === 0) entities.quickSlotItemId = null;
+        setBackpackRevision(r => r + 1);
+        autoSaveGame();
+    };
+
+
     useGlobalShortcuts({
         toggleSound: () => setIsMuted(toggleSoundUseCase(entities.settings, repositories.settings).soundMuted),
         toggleMusic: () => setIsMusicMuted(toggleMusicUseCase(entities.settings, repositories.settings).musicMuted),
@@ -436,7 +453,20 @@ function App ()
         {
             if (!isMainMenuOpen && !isSkinModalOpen) setIsBackpackOpen(prev => !prev);
         },
+        drinkQuickSlot,
     });
+
+    // Potion effects count down on screen: redraw twice a second while one is running
+    useEffect(() =>
+    {
+        const timer = setInterval(() =>
+        {
+            if (entities.effects.hasAny) setBackpackRevision(r => r + 1);
+        }, 500);
+        return () => clearInterval(timer);
+    }, []);
+
+    const quickSlotDef = entities.quickSlotItemId ? entities.itemCatalog.get(entities.quickSlotItemId) : undefined;
 
     // Opening the Backpack is a tutorial step
     useEffect(() =>
@@ -490,13 +520,18 @@ function App ()
             }
             setStageQuestion({ stageId: payload.stageId, question });
         },
-        onPlayerHealthChanged: payload => setHealth(payload.currentHealth),
+        onPlayerHealthChanged: payload =>
+        {
+            setHealth(payload.currentHealth);
+            // A hit can be taken by an Armor heart, which leaves the health unchanged but the HUD must redraw
+            setBackpackRevision(r => r + 1);
+        },
         onPlayerDied: () =>
         {
             // Dying costs half the carried Materials, then the player wakes up healed in the village.
             // A safe Stage (the first one) costs nothing.
             const isSafeStage = getStageDefinition(getGameContent().stages, currentLevel)?.safe === true;
-            const result = returnToVillageUseCase(isSafeStage ? 'safe_waypoint' : 'death', entities.backpack);
+            const result = returnToVillageUseCase(isSafeStage ? 'safe_waypoint' : 'death', entities.backpack, undefined, armorContext);
             setBackpackRevision(r => r + 1);
             autoSaveGame();
 
@@ -611,6 +646,18 @@ function App ()
                     maxBackpackSlots={entities.backpack.maxSlots}
                     onTogglePause={handleTogglePause}
                     walletBalance={walletBalance}
+                    armor={entities.health.armor}
+                    activeEffects={entities.effects.active}
+                    quickSlot={quickSlotDef
+                        ? {
+                            id: quickSlotDef.id,
+                            name: quickSlotDef.name,
+                            icon: quickSlotDef.icon,
+                            iconImage: quickSlotDef.iconImage,
+                            count: entities.backpack.getItemCount(quickSlotDef.id),
+                        }
+                        : null}
+                    onDrinkQuickSlot={drinkQuickSlot}
                     tutorialText={tutorialText}
                     onDismissTutorial={() =>
                     {

@@ -1,3 +1,5 @@
+import { ARMOR_SLOTS, ArmorSlot, WornPiece } from './Armor';
+
 export interface WeaponConfig
 {
     id: string;
@@ -43,18 +45,28 @@ export interface EquipmentSnapshot
 {
     equippedWeaponId: string;
     upgradeLevels: Record<string, number>;
+    /** The Armor being worn, by place on the hero. Missing in older saves. */
+    armor?: Partial<Record<ArmorSlot, WornPiece>>;
 }
 
 export class EquipmentState
 {
     private _equippedWeaponId: string;
     private _upgradeLevels: Map<string, number>;
+    private _armor: Record<ArmorSlot, WornPiece | null> = { head: null, body: null, feet: null };
 
     constructor (
         equippedWeaponId = 'wooden-sword',
-        upgradeLevels: Record<string, number> = {}
+        upgradeLevels: Record<string, number> = {},
+        armor: Partial<Record<ArmorSlot, WornPiece>> = {}
     )
     {
+        for (const slot of ARMOR_SLOTS)
+        {
+            const piece = armor[slot];
+            if (piece && typeof piece.itemId === 'string') this._armor[slot] = { ...piece };
+        }
+
         this._equippedWeaponId = WEAPON_CONFIGS[equippedWeaponId] ? equippedWeaponId : 'wooden-sword';
         this._upgradeLevels = new Map(Object.entries(upgradeLevels));
     }
@@ -62,6 +74,42 @@ export class EquipmentState
     get equippedWeaponId (): string
     {
         return this._equippedWeaponId;
+    }
+
+    /** The piece worn in `slot`, or null. */
+    getArmor (slot: ArmorSlot): WornPiece | null
+    {
+        const piece = this._armor[slot];
+        return piece ? { ...piece } : null;
+    }
+
+    /** Every piece being worn, in head, body, feet order. */
+    get wornArmor (): { slot: ArmorSlot; piece: WornPiece }[]
+    {
+        return ARMOR_SLOTS.flatMap(slot => this._armor[slot] ? [{ slot, piece: { ...this._armor[slot]! } }] : []);
+    }
+
+    /** Puts a piece on. Returns the piece that was in that place, if any (the caller puts it back in the Backpack). */
+    equipArmor (slot: ArmorSlot, piece: WornPiece): WornPiece | null
+    {
+        const previous = this._armor[slot];
+        this._armor[slot] = { ...piece };
+        return previous;
+    }
+
+    /** Takes the piece off `slot` and returns it, or null when nothing was worn there. */
+    unequipArmor (slot: ArmorSlot): WornPiece | null
+    {
+        const previous = this._armor[slot];
+        this._armor[slot] = null;
+        return previous;
+    }
+
+    /** Sets how much Durability the worn piece in `slot` has left. */
+    setArmorDurability (slot: ArmorSlot, durability: number): void
+    {
+        const piece = this._armor[slot];
+        if (piece) piece.durability = Math.max(0, Math.floor(durability));
     }
 
     equipWeapon (weaponId: string): boolean
@@ -131,9 +179,16 @@ export class EquipmentState
         {
             levels[key] = val;
         }
+        const armor: Partial<Record<ArmorSlot, WornPiece>> = {};
+        for (const slot of ARMOR_SLOTS)
+        {
+            const piece = this._armor[slot];
+            if (piece) armor[slot] = { ...piece };
+        }
         return {
             equippedWeaponId: this._equippedWeaponId,
             upgradeLevels: levels,
+            armor,
         };
     }
 
@@ -143,6 +198,7 @@ export class EquipmentState
         const loaded = EquipmentState.fromSnapshot(snapshot);
         this._equippedWeaponId = loaded._equippedWeaponId;
         this._upgradeLevels = loaded._upgradeLevels;
+        this._armor = loaded._armor;
     }
 
     static fromSnapshot (snapshot?: EquipmentSnapshot | null): EquipmentState
@@ -153,7 +209,8 @@ export class EquipmentState
         }
         return new EquipmentState(
             snapshot.equippedWeaponId,
-            snapshot.upgradeLevels || {}
+            snapshot.upgradeLevels || {},
+            snapshot.armor || {}
         );
     }
 }
