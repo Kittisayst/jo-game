@@ -1,3 +1,5 @@
+import { autoSaveGame } from '../../saveSnapshot';
+import { canSleep, sleepUseCase } from '../../../application/SleepUseCase';
 import { nightCreatureCount, nightCreatureIdsFor, scaleNightCreature, stageHasNightCreatures } from '../../../domain/entities/NightCreatures';
 import { DayNightOverlay } from '../effects/DayNightOverlay';
 import { tickWorldTimeUseCase, WORLD_PHASE_CHANGED_EVENT, type WorldPhaseChangedPayload } from '../../../application/TickWorldTimeUseCase';
@@ -113,6 +115,8 @@ export class Game extends Scene
     private dayNight?: DayNightOverlay;
     /** The night creatures walking this Stage now (they are in `enemies` too). */
     private nightCreatures: Enemy[] = [];
+    /** The hero is asleep at the Bed (the screen fades, the clock jumps to the morning). */
+    private isSleeping = false;
     /** The smiths in front of the Workshop and the Forge (village only). */
     private craftingWorkers: CraftingWorker[] = [];
 
@@ -505,6 +509,11 @@ export class Game extends Scene
             if (payload.phase === 'night') this.spawnNightCreatures();
             if (payload.phase === 'dawn') this.despawnNightCreatures();
         };
+        // The Bed in the village
+        this.isSleeping = false;
+        const onSleepAtBed = () => this.sleepAtBed();
+        EventBus.on('sleep-at-bed', onSleepAtBed);
+
         // Night already when the Stage is entered
         this.nightCreatures = [];
         if (entities.worldTime.isNight) this.spawnNightCreatures();
@@ -513,6 +522,7 @@ export class Game extends Scene
         this.events.on('shutdown', () =>
         {
             DomainEvents.off(WORLD_PHASE_CHANGED_EVENT, onWorldPhaseChanged);
+            EventBus.off('sleep-at-bed', onSleepAtBed);
             this.dayNight = undefined;
             DomainEvents.off<SkinChangedPayload>(SKIN_CHANGED_EVENT, onSkinChanged);
             DomainEvents.off<ItemWornPayload>(ITEM_WORN_EVENT, onItemWorn);
@@ -775,6 +785,46 @@ export class Game extends Scene
             this.nightCreatures.push(creature);
         }
         if (this.nightCreatures.length > 0) showLootNotification(this, player.x, player.y - 90, '👻 ມີ monster ກາງຄືນ!', '#c4b5fd');
+    }
+
+    /**
+     * The Bed: by day it says it is not the time; from dusk the screen fades out, the clock jumps to the morning (a
+     * build job moves on, hearts are full), and the screen fades back in on a new day. The hero cannot move meanwhile.
+     */
+    private sleepAtBed (): void
+    {
+        const { player } = this;
+        if (this.isSleeping || !player || this.health.isDead || !isHomeLevel(this.currentLevelKey)) return;
+
+        if (!canSleep(entities.worldTime))
+        {
+            showLootNotification(this, player.x, player.y - 60, '☀️ ຍັງບໍ່ເຖິງເວລານອນ', '#fde68a');
+            soundManager.playHurt();
+            return;
+        }
+
+        this.isSleeping = true;
+        player.setVelocity(0, 0);
+        this.physics.pause();
+        const FADE_MS = 900;
+        this.cameras.main.once('camerafadeoutcomplete', () =>
+        {
+            const result = sleepUseCase(entities.worldTime, entities.crafting, this.health);
+            autoSaveGame();
+            this.cameras.main.fadeIn(FADE_MS, 0, 0, 0);
+            if (result.success)
+            {
+                const done = result.craftingFinished ? ' 🔨 ຂອງທີ່ສ້າງແລ້ວ!' : '';
+                showLootNotification(this, player.x, player.y - 60, `☀️ ເຊົ້າແລ້ວ! ຟື້ນຫົວໃຈເຕັມ${done}`, '#fde68a');
+                soundManager.playPowerUp();
+            }
+        });
+        this.cameras.main.once('camerafadeincomplete', () =>
+        {
+            this.physics.resume();
+            this.isSleeping = false;
+        });
+        this.cameras.main.fadeOut(FADE_MS, 0, 0, 0);
     }
 
     /** Dawn: the night creatures still standing fade away (no drop, no XP). */

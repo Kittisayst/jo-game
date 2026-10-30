@@ -105,6 +105,10 @@ _Avoid_: clock (that is the real-time `Clock` port), time of day (say World time
 A special monster that walks a Stage only while it is night (one per Realm so far, listed in the `night` block of `stages.json`). It is tougher than the day's monsters of its Realm and pays more XP, it never appears near the hero, it drops Moon Dust, and it fades away at dawn (no drop, no XP). The first Stage and a Mini-boss or Boss Stage have none.
 _Avoid_: ghost, nightmare, boss (it is not one)
 
+**Bed**:
+The place in the Village Hub (east end, past the World Gate) where the hero sleeps. From dusk until the morning, E there fades the screen, jumps World time to the morning, fills the hearts and Armor hearts, moves a build job on by the time that went by (it counts Game time) and saves. By day it does nothing. The Garden does not change: it is on real time, so sleeping never grows a plant.
+_Avoid_: inn, rest point (a Waypoint is the safe Stage spot)
+
 **Moon Dust**:
 The Material night creatures drop. Taking back every Stat point costs Moon Dust, so starting over is a night's hunting (never Credit). A plain Material: halved on death.
 
