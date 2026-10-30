@@ -9,7 +9,7 @@ test.describe('Generated stages', () => {
       await makeHeroInvincible(page);
 
       expect(await exitXOf(page)).toBeGreaterThan(1400);
-      await walkOutOfStage(page, bot);
+      await walkOutOfStage(page, bot, { fight: false });
 
       // Walking out asks the Stage's question, then clears it and sends the hero home
       await answerStageQuestion(page, true);

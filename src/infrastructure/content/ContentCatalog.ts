@@ -13,6 +13,7 @@ import type { RecipeDefinition } from '../../application/CraftRecipeUseCase';
 import type { WeaponUpgradeRecipe } from '../../application/UpgradeWeaponTierUseCase';
 import { parseStageDefinitions, StageDefinition } from '../phaser/stages/StageDefinition';
 import { parseStageQuestion, parseStageScaling } from './ScalingCatalog';
+import { parseTutorial, TutorialStepDefinition } from './TutorialCatalog';
 import { isLessonNumber } from '../../domain/entities/StageNumber';
 import type { StageScaling } from '../../domain/entities/StageScaling';
 import { NodeDefinition, parseNodes } from './NodeCatalog';
@@ -39,6 +40,8 @@ export interface GameContent
     scaling: StageScaling;
     /** Credit paid for the first correct end-of-Stage answer of each Stage. */
     stageQuestionCredit: number;
+    /** The hints of the first Stage, in order. */
+    tutorial: TutorialStepDefinition[];
     /** How weapons and tools look in the hero's hand, by item id. */
     heldArt: Record<string, HeldArt>;
     /** The rows of the player skin sheets (animations) and where the hand is in each frame. */
@@ -277,7 +280,7 @@ async function fetchJson (file: string): Promise<unknown>
 /** Fetches and validates all game data. Call once before the app starts. */
 export async function loadGameContent (): Promise<GameContent>
 {
-    const [items, books, questions, recipes, enemies, realms, nodes, stages, playerAnimations] = await Promise.all([
+    const [items, books, questions, recipes, enemies, realms, nodes, stages, tutorial, playerAnimations] = await Promise.all([
         fetchJson('items.json'),
         fetchJson('books.json'),
         fetchJson('questions.json'),
@@ -286,6 +289,7 @@ export async function loadGameContent (): Promise<GameContent>
         fetchJson('realms.json'),
         fetchJson('nodes.json'),
         fetchJson('stages.json'),
+        fetchJson('tutorial.json'),
         fetchJson('player-animations.json'),
     ]);
 
@@ -302,6 +306,7 @@ export async function loadGameContent (): Promise<GameContent>
         stages: parseStageDefinitions(stages, parsedNodes),
         scaling: parseStageScaling(stages),
         stageQuestionCredit: parseStageQuestion(stages).credit,
+        tutorial: parseTutorial(tutorial),
         heldArt: parseHeldArt(items),
         playerAnimations: parsePlayerAnimations(playerAnimations),
     };

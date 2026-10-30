@@ -45,6 +45,10 @@ import { entities } from '../../composition';
 import { EnemyDefinition } from '../../../domain/entities/Enemy';
 import { scaleEnemyDefinition } from '../../../domain/entities/StageScaling';
 import { GROUND_SINK } from '../physicsConstants';
+import { notifyTutorial } from '../../tutorial';
+
+/** How far from the start the hero has walked when the hint "walk" counts as done (px). */
+const MOVED_AWAY_DISTANCE = 120;
 import { awardBossRewardUseCase, reviveBossAfterFailedFinisherUseCase } from '../../../application/AwardBossRewardUseCase';
 
 /**
@@ -77,6 +81,8 @@ export class Game extends Scene
     stage?: StageDefinition;
     /** True once the stage boss is beaten and the stage-cleared event has been sent. */
     isStageCleared = false;
+    /** True once the hero has walked far enough from the start to count for the first tutorial hint. */
+    private hasMovedAway = false;
     /** Walking past this x clears a Stage that has no boss (see `exit` in stages.json). */
     private stageExitX?: number;
     health: Health;
@@ -137,6 +143,7 @@ export class Game extends Scene
         this.stage = getStageDefinition(getGameContent().stages, this.currentLevelKey);
         this.stageExitX = this.stage ? getStageExit(this.stage)?.x : undefined;
         this.isStageCleared = false;
+        this.hasMovedAway = false;
         // One Health for the whole session so the backpack UI can heal the same hearts the scene damages
         this.health = entities.health;
         this.health.reset();
@@ -465,6 +472,12 @@ export class Game extends Scene
         }
 
         this.interaction.update();
+
+        if (!this.hasMovedAway && Math.abs(this.player.x - this.level.spawn.x) > MOVED_AWAY_DISTANCE)
+        {
+            this.hasMovedAway = true;
+            notifyTutorial('moved');
+        }
 
         if (this.stageExitX !== undefined && this.player.x >= this.stageExitX)
         {

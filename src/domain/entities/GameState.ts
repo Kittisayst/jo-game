@@ -11,6 +11,7 @@ import { CURRENT_SAVE_VERSION, SaveGameSnapshot } from './SaveData';
 import { Settings } from './Settings';
 import { SkinManager } from './Skin';
 import { StageProgression } from './StageProgression';
+import { TutorialProgress } from './TutorialProgress';
 import { Wallet } from './Wallet';
 
 const FIRST_BOOK_ID = 'book-ch1';
@@ -27,6 +28,7 @@ export class GameState
     readonly skinManager = new SkinManager();
     readonly settings = new Settings();
     readonly stageProgression = new StageProgression();
+    readonly tutorial = new TutorialProgress();
     readonly pauseState = new GamePauseState(false);
     readonly dialogueState = new DialogueState();
     readonly wallet = new Wallet();
@@ -77,6 +79,7 @@ export class GameState
             practiceStats: this.spacedRepetition.toSnapshot(),
             repairedGates: Array.from(this.repairedGates),
             forgeUnlocked: this.forgeUnlocked,
+            tutorial: this.tutorial.toSnapshot(),
         };
     }
 
@@ -114,6 +117,7 @@ export class GameState
         for (const gateId of snapshot.repairedGates) this.repairedGates.add(gateId);
 
         this.forgeUnlocked = snapshot.forgeUnlocked;
+        this.tutorial.loadFrom(snapshot.tutorial);
         this.health.reset();
     }
 }

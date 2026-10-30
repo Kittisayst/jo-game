@@ -22,7 +22,7 @@ test.describe('The question at the end of a Stage', () => {
     await makeHeroInvincible(page);
     const before = await progress(page);
 
-    await walkOutOfStage(page, bot);
+    await walkOutOfStage(page, bot, { fight: false });
     await expect(page.getByTestId('stage-question')).toContainText('ຄຳຖາມທ້າຍດ່ານ 2');
     // The Stage is frozen until it is answered: nothing is cleared yet
     expect((await progress(page)).cleared2).toBe(false);
@@ -41,7 +41,7 @@ test.describe('The question at the end of a Stage', () => {
     await makeHeroInvincible(page);
     const before = await progress(page);
 
-    await walkOutOfStage(page, bot);
+    await walkOutOfStage(page, bot, { fight: false });
     await answerStageQuestion(page, false);
     await expect(page.locator('.level-badge')).toContainText(/ໝູ່ບ້ານ/, { timeout: 15000 });
 

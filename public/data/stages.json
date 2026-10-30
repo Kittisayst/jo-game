@@ -3,7 +3,7 @@
   "scaling": {"enemyHpPerStage": 0.08, "enemyDamagePerRealm": 1, "dropBonusPerRealm": 0.1},
   "stages": [
     {
-      "number": 1, "realm": 1, "status": "ready",
+      "number": 1, "realm": 1, "status": "ready", "safe": true,
       "name": "ດ່ານ 1: ປາກທາງປ່າ", "nameEn": "Stage 1: Forest Edge",
       "layout": "assets/levels/stage-001.json",
       "lessons": ["1-1"],

@@ -12,6 +12,7 @@ loadGameContent()
     {
         installGameContent(content);
         entities.itemCatalog.load(content.items);
+        entities.tutorial.setSteps(content.tutorial);
 
         root.render(
             <React.StrictMode>
