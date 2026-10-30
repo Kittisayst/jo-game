@@ -27,6 +27,17 @@ export interface NodeDefinition
     /** How many Strikes it takes to deplete the node (see "Strike" in CONTEXT.md). */
     strikes: number;
     drops: StageDrop[];
+    /** A Seed the plant may drop when depleted. */
+    seed?: NodeSeed;
+    /** Minutes of real time before a harvested small plant is grown again. Missing = comes back each time the Stage is entered. */
+    regrowMinutes?: number;
+}
+
+export interface NodeSeed
+{
+    itemId: string;
+    /** Chance 0 to 1 that depleting the node drops one Seed. */
+    chance: number;
 }
 
 type Validators = ReturnType<typeof makeValidators>;
@@ -43,6 +54,15 @@ export function parseDrops (v: Validators, value: unknown, path: string): StageD
     });
 }
 
+/** Reads `{ itemId, chance }` of a Seed drop. */
+export function parseSeed (v: Validators, value: unknown, path: string): NodeSeed
+{
+    const seed = v.asObject(value, path);
+    const chance = v.asNumber(seed.chance, `${path}.chance`);
+    if (chance < 0 || chance > 1) v.fail(`${path}.chance`, 'between 0 and 1');
+    return { itemId: v.asString(seed.itemId, `${path}.itemId`), chance };
+}
+
 export function parseNodes (raw: unknown): NodeDefinition[]
 {
     const v = makeValidators('nodes.json');
@@ -55,6 +75,15 @@ export function parseNodes (raw: unknown): NodeDefinition[]
         const reach = v.asNumber(node.reach, `${p}.reach`);
         if (reach <= 0) v.fail(`${p}.reach`, 'more than 0');
 
+        // "on-enter" (or nothing) = intact at every visit; { minutes } = a Sapling for that long after a harvest
+        let regrowMinutes: number | undefined;
+        if (node.regrow !== undefined && node.regrow !== 'on-enter')
+        {
+            const regrow = v.asObject(node.regrow, `${p}.regrow`);
+            regrowMinutes = v.asNumber(regrow.minutes, `${p}.regrow.minutes`);
+            if (regrowMinutes <= 0) v.fail(`${p}.regrow.minutes`, 'more than 0 (or use "on-enter")');
+        }
+
         return {
             id: v.asString(node.id, `${p}.id`),
             label: v.asString(node.label, `${p}.label`),
@@ -65,6 +94,8 @@ export function parseNodes (raw: unknown): NodeDefinition[]
             toolTier: v.asNumber(node.toolTier, `${p}.toolTier`),
             strikes,
             drops: parseDrops(v, node.drops, `${p}.drops`),
+            ...(node.seed !== undefined ? { seed: parseSeed(v, node.seed, `${p}.seed`) } : {}),
+            ...(regrowMinutes !== undefined ? { regrowMinutes } : {}),
         };
     });
 

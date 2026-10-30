@@ -178,6 +178,24 @@ describe('content data integrity', () =>
         expect(dropOf(boss, 'portal-shard-green')).toBe(3);
     });
 
+    it('gives Seeds that are ordinary Materials, and only to nodes that exist, with a texture to show them', () =>
+    {
+        type Item = { id: string; category: string; story?: boolean };
+        const all = items as Item[];
+
+        for (const node of nodes.nodes as { id: string; texture: string; seed?: { itemId: string; chance: number }; regrow?: unknown }[])
+        {
+            if (node.seed)
+            {
+                const seed = all.find(i => i.id === node.seed!.itemId);
+                expect(seed, `${node.id} drops ${node.seed.itemId}`).toBeDefined();
+                // A Seed is lost 50% on death like any Material, unlike story Materials
+                expect(seed!.category, `${node.seed.itemId} is a Material`).toBe('material');
+                expect(seed!.story, `${node.seed.itemId} is not a story Material`).not.toBe(true);
+            }
+        }
+    });
+
     describe('lessons', () =>
     {
         type LessonPage = { pageNumber: number; lesson?: string };

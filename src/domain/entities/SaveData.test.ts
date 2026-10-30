@@ -297,3 +297,19 @@ describe('Waiting story Materials in a save', () =>
         expect(migrateSaveSnapshot({ version: CURRENT_SAVE_VERSION }).pendingRewards).toEqual([]);
     });
 });
+
+describe('Plant regrowth in a save', () =>
+{
+    it('starts empty, keeps the harvest times and drops anything that is not a time', () =>
+    {
+        expect(createDefaultSaveSnapshot().plantRegrowth).toEqual({});
+
+        const saved = migrateSaveSnapshot({
+            version: CURRENT_SAVE_VERSION,
+            plantRegrowth: { 'stage-001:wild-herb-420': 1700000000000, bad: 'x', worse: null, inf: Infinity },
+        });
+
+        expect(saved.plantRegrowth).toEqual({ 'stage-001:wild-herb-420': 1700000000000 });
+        expect(migrateSaveSnapshot({ version: CURRENT_SAVE_VERSION }).plantRegrowth).toEqual({});
+    });
+});

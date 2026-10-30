@@ -41,6 +41,8 @@ export interface SaveGameSnapshot
     practiceStats: DailyPracticeProgressSnapshot;
     repairedGates: string[];
     forgeUnlocked: boolean;
+    /** When each small plant was last harvested (key = Stage id + node id, value = ms). Missing in older saves. */
+    plantRegrowth: Record<string, number>;
     /** Story Materials waiting for room in the Backpack. Missing in older saves. */
     pendingRewards: PendingReward[];
     /** Realms opened by placing Portal blocks, always including Realm 1. Missing in older saves. */
@@ -104,6 +106,7 @@ export function createDefaultSaveSnapshot (slotId = 'slot_1'): SaveGameSnapshot
         quickSlotItemId: null,
         openedRealms: [1],
         pendingRewards: [],
+        plantRegrowth: {},
     };
 }
 
@@ -265,6 +268,11 @@ export function migrateSaveSnapshot (raw: unknown, fallbackSlotId = 'slot_1'): S
         dismissed: typeof rawTutorial.dismissed === 'boolean' ? rawTutorial.dismissed : data.tutorial === undefined && hasProgress,
         triggered: Array.isArray(rawTutorial.triggered) ? rawTutorial.triggered.filter((id): id is string => typeof id === 'string') : [],
     };
+    const plantRegrowth: Record<string, number> = {};
+    for (const [key, at] of Object.entries(asRecord(data.plantRegrowth)))
+    {
+        if (typeof at === 'number' && Number.isFinite(at)) plantRegrowth[key] = at;
+    }
     const pendingRewards: PendingReward[] = [];
     for (const entry of Array.isArray(data.pendingRewards) ? data.pendingRewards : [])
     {
@@ -296,5 +304,6 @@ export function migrateSaveSnapshot (raw: unknown, fallbackSlotId = 'slot_1'): S
         quickSlotItemId,
         openedRealms,
         pendingRewards,
+        plantRegrowth,
     };
 }

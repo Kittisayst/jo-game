@@ -2,6 +2,8 @@ import { Backpack } from '../domain/entities/Backpack';
 import { DomainEvents } from '../domain/DomainEvents';
 import { ResourceNode } from '../domain/entities/ResourceNode';
 import { findTool } from '../domain/entities/HeldItem';
+import { PlantRegrowth } from '../domain/entities/PlantRegrowth';
+import type { Clock, Random } from '../domain/ports';
 import { DurabilityState, strikeWeightFor } from '../domain/entities/Durability';
 import { wearItemUseCase } from './WearItemUseCase';
 
@@ -20,6 +22,20 @@ export interface ResourceNodeDefinition
     requiredTool: string | null; // e.g. 'axe' | 'pickaxe' | 'hammer'
     toolTier: number;
     drops: ResourceDrop[];
+    /** A Seed this plant may drop when it is depleted (chance 0 to 1). */
+    seed?: { itemId: string; chance: number };
+    /** A small plant: minutes of real time before it can be harvested again (it stays a Sapling meanwhile). */
+    regrowMinutes?: number;
+}
+
+/** What `harvestResourceNodeUseCase` needs besides the node: chance, time and where plants are remembered. */
+export interface HarvestContext
+{
+    random?: Random;
+    clock?: Clock;
+    regrowth?: PlantRegrowth;
+    /** The Stage the node stands in, to tell its plant apart from the same kind of plant elsewhere. */
+    stageId?: string;
 }
 
 export interface ResourceHarvestedPayload
@@ -38,6 +54,10 @@ export interface HarvestResult
     completed?: boolean;
     strikesTaken?: number;
     strikesNeeded?: number;
+    /** The Seed this last Strike dropped, when one did and it fitted in the Backpack. */
+    seed?: ResourceDrop;
+    /** True when the plant is now a Sapling and grows back after `regrowMinutes`. */
+    regrowing?: boolean;
     /** How worn the tool was for this Strike; a Broken tool counts half a Strike. Missing for a tool that never wears. */
     toolState?: DurabilityState;
     drops: ResourceDrop[];
@@ -51,7 +71,8 @@ export interface HarvestResult
 export function harvestResourceNodeUseCase (
     node: ResourceNodeDefinition,
     progress: ResourceNode,
-    backpack: Backpack
+    backpack: Backpack,
+    context: HarvestContext = {}
 ): HarvestResult
 {
     if (progress.isDepleted)
@@ -110,10 +131,26 @@ export function harvestResourceNodeUseCase (
         backpack.addItem(drop.itemId, drop.count);
     }
 
+    // 5. A plant may drop a Seed (best effort: it is lost when the Backpack has no room for it)
+    let seed: ResourceDrop | undefined;
+    if (node.seed && (context.random ?? { next: Math.random }).next() < node.seed.chance)
+    {
+        const { added } = backpack.addItem(node.seed.itemId, 1);
+        if (added > 0) seed = { itemId: node.seed.itemId, count: added };
+    }
+
+    // 6. A small plant becomes a Sapling: remember when, so it stays one for its minutes (even with the game closed)
+    let regrowing = false;
+    if (node.regrowMinutes && context.regrowth && context.clock && context.stageId)
+    {
+        context.regrowth.markHarvested(PlantRegrowth.keyOf(context.stageId, node.id), context.clock.now());
+        regrowing = true;
+    }
+
     DomainEvents.emit<ResourceHarvestedPayload>(RESOURCE_HARVESTED_EVENT, {
         nodeId: node.id,
         nodeType: node.type,
-        drops: node.drops,
+        drops: seed ? [...node.drops, seed] : node.drops,
     });
 
     return {
@@ -121,6 +158,8 @@ export function harvestResourceNodeUseCase (
         completed: true,
         ...strikeInfo,
         drops: node.drops,
+        ...(seed ? { seed } : {}),
+        ...(regrowing ? { regrowing } : {}),
     };
 }
 

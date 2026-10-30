@@ -20,7 +20,7 @@ import {
     stageIdOf,
     STAGE_COUNT,
 } from '../../../domain/entities/StageNumber';
-import { NodeDefinition, parseDrops, StageDrop } from '../../content/NodeCatalog';
+import { NodeDefinition, NodeSeed, parseDrops, parseSeed, StageDrop } from '../../content/NodeCatalog';
 import {
     BIOMES, Biome, GeneratedLevel, generateLevel, placePool,
 } from '../../content/StageGenerator';
@@ -51,6 +51,10 @@ export interface StageResourceNode
     /** How many Strikes it takes to deplete the node (see "Strike" in CONTEXT.md). */
     strikes: number;
     drops: StageDrop[];
+    /** The Seed this plant may drop, from `nodes.json` or the Stage's override. */
+    seed?: NodeSeed;
+    /** Minutes before a harvested small plant is grown again (from `nodes.json`). */
+    regrowMinutes?: number;
 }
 
 export interface StageEnemySpawn
@@ -202,12 +206,13 @@ function parseNode (
     const x = asNumber(entry.x, `${path}.x`);
     let strikes = kind!.strikes;
     let drops = kind!.drops;
+    let seed = kind!.seed;
     if (entry.overrides !== undefined)
     {
         const overrides = asObject(entry.overrides, `${path}.overrides`);
         for (const key of Object.keys(overrides))
         {
-            if (key !== 'strikes' && key !== 'drops') fail(`${path}.overrides.${key}`, 'one of strikes, drops');
+            if (key !== 'strikes' && key !== 'drops' && key !== 'seed') fail(`${path}.overrides.${key}`, 'one of strikes, drops, seed');
         }
         if (overrides.strikes !== undefined)
         {
@@ -215,6 +220,7 @@ function parseNode (
             if (!Number.isInteger(strikes) || strikes < 1) fail(`${path}.overrides.strikes`, 'a whole number of Strikes, at least 1');
         }
         if (overrides.drops !== undefined) drops = parseDrops(v, overrides.drops, `${path}.overrides.drops`);
+        if (overrides.seed !== undefined) seed = parseSeed(v, overrides.seed, `${path}.overrides.seed`);
     }
 
     return {
@@ -229,6 +235,8 @@ function parseNode (
         x,
         strikes,
         drops,
+        ...(seed ? { seed } : {}),
+        ...(kind!.regrowMinutes !== undefined ? { regrowMinutes: kind!.regrowMinutes } : {}),
     };
 }
 

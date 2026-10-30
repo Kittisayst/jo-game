@@ -38,10 +38,11 @@ import {
 import { enqueueGameAssets } from './Preloader';
 import { DomainEvents } from '../../../domain/DomainEvents';
 import { Health } from '../../../domain/entities/Health';
+import { ResourceNode } from '../../../domain/entities/ResourceNode';
 import { PLAYER_DIED_EVENT } from '../../../application/PlayerTakeDamageUseCase';
 import { SKIN_CHANGED_EVENT, SkinChangedPayload } from '../../../application/SelectSkinUseCase';
 import { GAME_PAUSED_EVENT, GAME_RESUMED_EVENT } from '../../../application/TogglePauseUseCase';
-import { entities } from '../../composition';
+import { clock, entities } from '../../composition';
 import { EnemyDefinition } from '../../../domain/entities/Enemy';
 import { scaleEnemyDefinition } from '../../../domain/entities/StageScaling';
 import { GROUND_SINK } from '../physicsConstants';
@@ -191,11 +192,17 @@ export class Game extends Scene
         }
         else if (this.stage)
         {
-            const built = buildStageScenery(this, this.stage, GROUND_Y, entities.repairedGates);
+            const built = buildStageScenery(this, this.stage, GROUND_Y, entities.repairedGates, {
+                regrowth: entities.plantRegrowth,
+                now: clock.now(),
+            });
             this.resourceNodes = built.resourceNodes;
             this.waypoints = built.waypoints;
             this.brokenGate = built.brokenGate;
         }
+
+        // Saplings grow in real time, also while the hero stands next to one: look twice a second
+        this.time.addEvent({ delay: 500, loop: true, callback: () => this.growPlants() });
 
         this.interaction = new InteractionController(this, {
             buildings: this.interactiveBuildings,
@@ -583,6 +590,22 @@ export class Game extends Scene
             world.debugGraphic.clear();
         }
         soundManager.playSelect();
+    }
+
+    /** Turns every Sapling whose time has come back into a whole plant that can be harvested again. */
+    private growPlants (): void
+    {
+        const now = clock.now();
+        for (const node of this.resourceNodes)
+        {
+            if (node.growingUntil === undefined || now < node.growingUntil) continue;
+
+            node.growingUntil = undefined;
+            node.harvested = false;
+            node.progress = new ResourceNode(node.strikes);
+            if (node.plantKey) entities.plantRegrowth.clear(node.plantKey);
+            node.showGrown();
+        }
     }
 
     /**
