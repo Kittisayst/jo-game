@@ -4,6 +4,7 @@ import { getGameContent } from '../../content/ContentCatalog';
 import { entities } from '../../composition';
 import { soundManager } from '../../audio/SoundManager';
 import { ItemIcon } from './ItemIcon';
+import { RepairList } from './RepairList';
 
 interface WorkshopModalProps
 {
@@ -178,6 +179,15 @@ export const WorkshopModal: React.FC<WorkshopModalProps> = ({ isOpen, onClose })
                                 </div>
                             );
                         })}
+                    </div>
+
+                    {/* Tools wear out: the Workshop mends them for Materials, never Credit */}
+                    <div className="pt-2 space-y-3" data-testid="workshop-repairs">
+                        <h3 className="font-bold text-emerald-300 text-base flex items-center gap-2">
+                            <span>🛠️</span>
+                            <span>ສ້ອມແປງເຄື່ອງມື (Repair Tools)</span>
+                        </h3>
+                        <RepairList building="workshop" />
                     </div>
                 </div>
 

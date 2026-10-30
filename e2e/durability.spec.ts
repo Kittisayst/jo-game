@@ -88,15 +88,46 @@ test.describe('Weapons wear out and are repaired at the Forge', () => {
     await page.keyboard.press('KeyE');
 
     await page.getByTestId('forge-repair-tab').click();
-    // The starting axe is listed too, but it is not worn so there is nothing to repair
-    await expect(page.getByTestId('forge-repair-row')).toHaveCount(2);
-    const axeRow = page.getByTestId('forge-repair-row').filter({ hasText: 'ຂວານ' });
-    await expect(axeRow.getByTestId('forge-repair-button')).toBeDisabled();
-    await page.getByTestId('forge-repair-row').filter({ hasText: 'ດາບເຫຼັກກ້າ' }).getByTestId('forge-repair-button').click();
+    // The Forge mends swords (tools are mended at the Workshop)
+    await expect(page.getByTestId('repair-row')).toHaveCount(1);
+    await page.getByTestId('repair-button').click();
 
     expect(await sword(page)).toMatchObject({ current: 80, state: 'ok' });
     expect(await page.evaluate(() => (window as any).__entities.backpack.getItemCount('iron-ore'))).toBe(0);
     expect(await page.evaluate(() => (window as any).__entities.wallet.balance)).toBe(credit);
     await expect.poll(() => hudBarState(page)).toBe('ok');
+  });
+
+  test('a worn axe is mended at the Workshop for Materials', async ({ page }) => {
+    test.setTimeout(90000);
+    page.on('pageerror', err => console.log('PAGE ERROR:', err.message));
+    await page.goto('/');
+    await page.getByRole('button', { name: /ເຂົ້າເກມ/i }).click();
+    await expect(page.locator('.game-hud')).toBeVisible({ timeout: 12000 });
+    const bot = new Bot(page, false);
+    await expect.poll(async () => (await bot.state()).scene, { timeout: 20000 }).toBe('village');
+
+    const axe = () => page.evaluate(() => (window as any).__entities.backpack.getDurability('axe-t1'));
+    // The starting axe lasts 60 uses; wear 59, and give the Materials a repair costs (wood 3, stone 1)
+    await page.evaluate(() => {
+      const e = (window as any).__entities;
+      e.backpack.wearItem('axe-t1', 59);
+      e.backpack.addItem('wood', 3);
+      e.backpack.addItem('stone', 1);
+    });
+    expect(await axe()).toMatchObject({ current: 1, max: 60, state: 'low' });
+    const credit = await page.evaluate(() => (window as any).__entities.wallet.balance);
+
+    // The Workshop stands at x = 880
+    expect(await bot.goTo(875, { tolerance: 25, fight: false, timeoutMs: 40000 })).toBe('arrived');
+    await page.keyboard.press('KeyE');
+
+    const repairs = page.getByTestId('workshop-repairs');
+    await expect(repairs.getByTestId('repair-row')).toHaveCount(1); // only the axe is carried
+    await repairs.getByTestId('repair-row').filter({ hasText: 'ຂວານ' }).getByTestId('repair-button').click();
+
+    expect(await axe()).toMatchObject({ current: 60, state: 'ok' });
+    expect(await page.evaluate(() => (window as any).__entities.backpack.getItemCount('stone'))).toBe(0);
+    expect(await page.evaluate(() => (window as any).__entities.wallet.balance)).toBe(credit);
   });
 });
