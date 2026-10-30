@@ -19,6 +19,7 @@ import { MovementAbilities } from './MovementAbilities';
 import { SkillCooldowns } from './SkillCooldowns';
 import { SkillProgression } from './SkillProgression';
 import { ToolUpgrades } from './ToolUpgrades';
+import { HeroLevel } from './HeroLevel';
 import { PendingRewards } from './PendingRewards';
 import { PlantRegrowth } from './PlantRegrowth';
 import { RealmProgression } from './RealmProgression';
@@ -61,6 +62,8 @@ export class GameState
     readonly skillCooldowns = new SkillCooldowns();
     /** How far the axes and pickaxes are upgraded (more of a Strike each). */
     readonly toolUpgrades = new ToolUpgrades();
+    /** The hero's Hero Level and XP (XP comes only from defeating monsters). */
+    readonly heroLevel = new HeroLevel();
     /** The Storage chest: 40 slots, never touched by dying. */
     readonly storage: Backpack;
     /** Timed Potion effects running on the hero (not saved). */
@@ -128,6 +131,7 @@ export class GameState
             movement: this.movement.toSnapshot(),
             skills: this.skills.toSnapshot(),
             toolUpgrades: this.toolUpgrades.toSnapshot(),
+            heroLevel: this.heroLevel.toSnapshot(),
             storage: this.storage.toSnapshot(),
         };
     }
@@ -177,6 +181,7 @@ export class GameState
         this.skills.loadFrom(snapshot.skills);
         this.skillCooldowns.clear();
         this.toolUpgrades.loadFrom(snapshot.toolUpgrades);
+        this.heroLevel.loadFrom(snapshot.heroLevel);
         this.storage.loadFromSnapshot(snapshot.storage ?? []);
         this.effects.clear();
         this.syncArmor();

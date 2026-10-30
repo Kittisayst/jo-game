@@ -8,11 +8,13 @@ export interface StageScaling
     enemyHpPerStage: number;
     /** Damage added per Realm after the first. */
     enemyDamagePerRealm: number;
+    /** Share of base XP added per Stage after the first (1.7 = +170 % of base XP each), so later monsters pay more. */
+    enemyXpPerStage: number;
     /** Chance added to every drop per Realm after the first (a chance never goes above 1). */
     dropBonusPerRealm: number;
 }
 
-export const NO_SCALING: StageScaling = { enemyHpPerStage: 0, enemyDamagePerRealm: 0, dropBonusPerRealm: 0 };
+export const NO_SCALING: StageScaling = { enemyHpPerStage: 0, enemyDamagePerRealm: 0, dropBonusPerRealm: 0, enemyXpPerStage: 0 };
 
 /**
  * The definition an enemy has in Stage `stageNumber`. Only ordinary enemies grow: a Mini-boss and a Boss
@@ -33,6 +35,7 @@ export function scaleEnemyDefinition (
         ...definition,
         maxHp: Math.max(1, Math.round(definition.maxHp * (1 + scaling.enemyHpPerStage * stagesBeyondFirst))),
         damage: definition.damage + scaling.enemyDamagePerRealm * realmsBeyondFirst,
+        xp: Math.round(definition.xp * (1 + scaling.enemyXpPerStage * stagesBeyondFirst)),
         drops: definition.drops.map(drop => ({
             ...drop,
             chance: Math.min(1, drop.chance + scaling.dropBonusPerRealm * realmsBeyondFirst),

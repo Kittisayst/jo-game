@@ -90,6 +90,7 @@ describe('Enemy entity', () =>
             kind: 'normal',
             maxHp: 80,
             damage: 15,
+            xp: 15,
             drops: [{ itemId: 'stone', chance: 1, count: 2 }],
         };
 

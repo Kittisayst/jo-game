@@ -4,6 +4,7 @@ import type { GardenSnapshot } from './Garden';
 import { MOVEMENT_ABILITY_IDS, MovementAbilityId } from './MovementAbilities';
 import { MAX_SKILL_RANK, SKILL_SLOT_COUNT, SkillProgressionSnapshot } from './SkillProgression';
 import { MAX_TOOL_LEVEL } from './ToolUpgrades';
+import { HERO_LEVEL_CAP, type HeroLevelSnapshot } from './HeroLevel';
 import type { PendingReward } from './PendingRewards';
 import { TutorialSnapshot } from './TutorialProgress';
 import { SettingsData, StageProgressionData } from '../ports';
@@ -56,6 +57,8 @@ export interface SaveGameSnapshot
     skills: SkillProgressionSnapshot;
     /** How far each tool (by item id) is upgraded, +1 to +3. Missing in older saves. */
     toolUpgrades: Record<string, number>;
+    /** The Hero Level, the XP towards the next one and the Stat points not spent. Missing in older saves. */
+    heroLevel: HeroLevelSnapshot;
     /** What is in the Storage chest. Missing in older saves. */
     storage: BackpackSlotSnapshot[];
     /** When each small plant was last harvested (key = Stage id + node id, value = ms). Missing in older saves. */
@@ -129,6 +132,7 @@ export function createDefaultSaveSnapshot (slotId = 'slot_1'): SaveGameSnapshot
         movement: ['dash'],
         skills: { unlocked: [], equipped: [null, null], ranks: {} },
         toolUpgrades: {},
+        heroLevel: { level: 1, xp: 0, unspentPoints: 0 },
         storage: [],
     };
 }
@@ -339,6 +343,14 @@ export function migrateSaveSnapshot (raw: unknown, fallbackSlotId = 'slot_1'): S
     {
         if (typeof level === 'number' && Number.isInteger(level) && level >= 1 && level <= MAX_TOOL_LEVEL) toolUpgrades[id] = level;
     }
+    const rawHero = asRecord(data.heroLevel);
+    const wholeIn = (value: unknown, min: number, max: number, fallback: number): number =>
+        typeof value === 'number' && Number.isInteger(value) && value >= min && value <= max ? value : fallback;
+    const heroLevel: HeroLevelSnapshot = {
+        level: wholeIn(rawHero.level, 1, HERO_LEVEL_CAP, 1),
+        xp: wholeIn(rawHero.xp, 0, Number.MAX_SAFE_INTEGER, 0),
+        unspentPoints: wholeIn(rawHero.unspentPoints, 0, 10000, 0),
+    };
     const storage: BackpackSlotSnapshot[] = [];
     for (const slot of Array.isArray(data.storage) ? data.storage : [])
     {
@@ -395,6 +407,7 @@ export function migrateSaveSnapshot (raw: unknown, fallbackSlotId = 'slot_1'): S
         movement,
         skills,
         toolUpgrades,
+        heroLevel,
         storage,
     };
 }

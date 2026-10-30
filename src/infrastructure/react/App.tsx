@@ -52,6 +52,7 @@ import { QuizFinisherModal } from './components/QuizFinisherModal';
 import { StageQuestionModal } from './components/StageQuestionModal';
 import { GardenSeedPicker } from './components/GardenSeedPicker';
 import { readSkillSlots } from './skillSlots';
+import { readHeroLevel } from './heroLevelView';
 import { syncMovement, syncSkills } from '../skills';
 import { GARDEN_LEVEL_KEY, isHomeLevel } from '../phaser/levelCatalog';
 import { StorageModal } from './components/StorageModal';
@@ -729,6 +730,7 @@ function App ()
                     gardenReadyCount={entities.garden.readyCount(clock.now(), growMinutesOf(entities.itemCatalog))}
                     craftingJob={entities.crafting.job}
                     skillSlots={readSkillSlots()}
+                    heroLevel={readHeroLevel()}
                     onUseSkill={slot => EventBus.emit('virtual-skill', { slot })}
                     activeEffects={entities.effects.active}
                     quickSlot={quickSlotDef

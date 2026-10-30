@@ -82,6 +82,17 @@ A high platform in a Stage that one jump cannot reach: the gap to its launch pla
 **Tool upgrade**:
 An axe or pickaxe raised from +0 to +3 at the Workshop for Materials (never Credit). An upgraded tool counts for more of a Strike, so a tree or a rock takes fewer Strikes. The level belongs to the kind of tool (every Axe T1 is the same level). This is how chopping gets faster: it is not a Skill.
 
+**Hero Level**:
+The hero's level, 1 to 150 (in code `HeroLevel`; the bare word *level* stays banned because the old platformer's levels and `Level.ts` are Stage layouts). Every level gained gives a Stat point. It is a small boost on top of the gear the Textbooks teach, never a replacement for it.
+_Avoid_: level (alone), rank (that is a Skill's)
+
+**XP**:
+What a defeated monster pays towards the next Hero Level. It is not Credit: it cannot be turned into Credit and buys nothing. A monster in a Stage far below the hero's level pays a fifth, so leaving and re-entering a low Stage is no way to farm.
+_Avoid_: experience points, exp
+
+**Stat point**:
+Given for every Hero Level; the hero spends it on a Stat (a later phase of the Hero Level plan).
+
 **Stun**:
 An enemy held still for a few seconds by a Skill (such as Ping): it cannot patrol, attack or hurt the hero by touching, and an attack it was starting is cut short. It counts Game time. A Boss is never stunned.
 

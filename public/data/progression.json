@@ -1,0 +1,6 @@
+{
+  "maxLevel": 150,
+  "xpCurve": { "base": 10, "exponent": 1.5 },
+  "pointsPerLevel": 1,
+  "overlevel": { "levelsPerStage": 1.5, "offset": 10, "xpShare": 0.2 }
+}

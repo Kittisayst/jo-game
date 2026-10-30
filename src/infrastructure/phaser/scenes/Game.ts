@@ -296,6 +296,7 @@ export class Game extends Scene
         {
             const bossDefinition = this.getEnemyDefinition(bossSpawn.enemyId);
             this.boss = new Boss(this, bossSpawn.x, bossSpawn.y, bossDefinition?.maxHp ?? 5);
+            this.boss.xp = bossDefinition?.xp ?? 0;
             this.boss.awaitFinisher = true;
             this.combat.bindBoss(this.boss, () =>
             {

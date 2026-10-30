@@ -31,6 +31,8 @@ export class Boss extends Physics.Arcade.Sprite
     onDefeated?: (x: number, y: number) => void;
     onSummonMinion?: (x: number, y: number) => void;
     onPhaseChanged?: (newPhase: BossPhase) => void;
+    /** XP the hero gets when the Boss falls (set by the scene from `enemies.json`). */
+    xp = 0;
 
     constructor (scene: Scene, x: number, y: number, maxHp = 5)
     {

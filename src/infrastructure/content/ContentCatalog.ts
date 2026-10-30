@@ -16,6 +16,8 @@ import type { WeaponUpgradeRecipe } from '../../application/UpgradeWeaponTierUse
 import type { ToolUpgradeRecipe } from '../../application/UpgradeToolUseCase';
 import { parseStageDefinitions, StageDefinition } from '../phaser/stages/StageDefinition';
 import { parseStageQuestion, parseStageScaling } from './ScalingCatalog';
+import { parseProgression } from './ProgressionCatalog';
+import type { ProgressionTuning } from '../../domain/entities/HeroLevel';
 import { parseTutorial, TutorialStepDefinition } from './TutorialCatalog';
 import { parseRepairs } from './RepairCatalog';
 import { parseGardenExpansions } from './GardenCatalog';
@@ -46,6 +48,8 @@ export interface GameContent
     stages: StageDefinition[];
     /** How ordinary enemies grow with the Stage number. */
     scaling: StageScaling;
+    /** The Hero Level curve (XP per level, the over-level rule). */
+    progression: ProgressionTuning;
     /** Credit paid for the first correct end-of-Stage answer of each Stage. */
     stageQuestionCredit: number;
     /** The hints of the first Stage, in order. */
@@ -337,6 +341,13 @@ function parseEnemyAttacks (v: ReturnType<typeof makeValidators>, raw: unknown, 
     return { engageRange, cooldownMs, moves };
 }
 
+function readXp (v: ReturnType<typeof makeValidators>, value: unknown, path: string): number
+{
+    const xp = v.asNumber(value, path);
+    if (!Number.isInteger(xp) || xp < 0) v.fail(path, 'a whole number of XP, 0 or more');
+    return xp;
+}
+
 export function parseEnemies (raw: unknown): EnemyDefinition[]
 {
     const v = makeValidators('enemies.json');
@@ -354,6 +365,7 @@ export function parseEnemies (raw: unknown): EnemyDefinition[]
             kind,
             maxHp,
             damage: v.asNumber(enemy.damage, `${p}.damage`),
+            xp: readXp(v, enemy.xp, `${p}.xp`),
             ...(enemy.attacks !== undefined ? { attacks: parseEnemyAttacks(v, enemy.attacks, `${p}.attacks`) } : {}),
             drops: v.asArray(enemy.drops, `${p}.drops`).map((rawDrop, j) =>
             {
@@ -377,7 +389,7 @@ async function fetchJson (file: string): Promise<unknown>
 /** Fetches and validates all game data. Call once before the app starts. */
 export async function loadGameContent (): Promise<GameContent>
 {
-    const [items, books, questions, recipes, enemies, realms, nodes, stages, tutorial, repairs, garden, playerAnimations, skills] = await Promise.all([
+    const [items, books, questions, recipes, enemies, realms, nodes, stages, tutorial, repairs, garden, playerAnimations, skills, progression] = await Promise.all([
         fetchJson('items.json'),
         fetchJson('books.json'),
         fetchJson('questions.json'),
@@ -391,6 +403,7 @@ export async function loadGameContent (): Promise<GameContent>
         fetchJson('garden.json'),
         fetchJson('player-animations.json'),
         fetchJson('skills.json'),
+        fetchJson('progression.json'),
     ]);
 
     const parsedNodes = parseNodes(nodes);
@@ -405,6 +418,7 @@ export async function loadGameContent (): Promise<GameContent>
         nodes: parsedNodes,
         stages: parseStageDefinitions(stages, parsedNodes),
         scaling: parseStageScaling(stages),
+        progression: parseProgression(progression),
         stageQuestionCredit: parseStageQuestion(stages).credit,
         tutorial: parseTutorial(tutorial),
         repairs: parseRepairs(repairs),
