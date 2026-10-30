@@ -55,6 +55,7 @@ const SPRITESHEET_ASSETS: readonly { key: string; path: string; frameWidth: numb
     // Village NPCs (4 frames of 32x48)
     { key: 'npc-elder', path: 'assets/characters/npc_elder.png', frameWidth: 32, frameHeight: 48 },
     { key: 'npc-mina', path: 'assets/characters/npc_mina.png', frameWidth: 32, frameHeight: 48 },
+    { key: 'npc-smith', path: 'assets/characters/npc_smith.png', frameWidth: 48, frameHeight: 48 },
 
     // Enemies, Mini-Boss & Chapter Boss (4 frames each)
     { key: 'enemy-slime', path: 'assets/characters/enemy_slime.png', frameWidth: 32, frameHeight: 28 },

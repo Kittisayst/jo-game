@@ -6,6 +6,7 @@ import { Spike } from '../objects/Spike';
 import { MovingPlatform } from '../objects/MovingPlatform';
 import { Boss } from '../objects/Boss';
 import { NPC } from '../objects/NPC';
+import { CraftingWorker } from '../objects/CraftingWorker';
 import { ParticleManager } from '../effects/ParticleManager';
 import { describeDrops, showLootNotification } from '../effects/FloatingText';
 import { CombatController } from '../controllers/CombatController';
@@ -103,6 +104,8 @@ export class Game extends Scene
     private brokenGate?: BrokenGate;
     private bossBgmStarted = false;
     private gardenView?: GardenView;
+    /** The smiths in front of the Workshop and the Forge (village only). */
+    private craftingWorkers: CraftingWorker[] = [];
 
     constructor ()
     {
@@ -131,6 +134,7 @@ export class Game extends Scene
         this.waypoints = [];
         this.brokenGate = undefined;
         this.gardenView = undefined;
+        this.craftingWorkers = [];
         this.stage = undefined;
         this.stageExitX = undefined;
         this.bossBgmStarted = false;
@@ -194,6 +198,12 @@ export class Game extends Scene
             mina.onInteract = () => EventBus.emit('start-dialogue', 'skin_shop');
 
             this.villagers = [elder, mina];
+
+            // Whoever builds something stands in front of its building, with the time left over the head
+            this.craftingWorkers = [
+                new CraftingWorker(this, 'workshop', 810, GROUND_Y),
+                new CraftingWorker(this, 'forge', 1215, GROUND_Y),
+            ];
         }
         else if (isGarden)
         {
@@ -500,6 +510,7 @@ export class Game extends Scene
         entities.attackCooldown.tick(delta);
         entities.effects.tick(delta);
         entities.crafting.tick(delta);
+        for (const worker of this.craftingWorkers) worker.update(entities.crafting.job);
         if (this.player)
         {
             this.player.speedMultiplier = entities.effects.speedMultiplier

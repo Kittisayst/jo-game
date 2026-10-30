@@ -2,6 +2,14 @@
 import { test, expect, Page } from '@playwright/test';
 import { Bot } from './helpers/bot';
 
+/** The text over the smith's head, when he is there ('' when he is not). */
+const smithText = (page: Page) => page.evaluate(() => {
+  const scene = (window as any).__botGame.scene.getScene('Game');
+  const containers = scene.children.list.filter((o: any) => o.type === 'Container' && o.visible && o.alpha > 0.5);
+  const text = containers.flatMap((c: any) => c.list).find((o: any) => o.type === 'Text' && /^(🔨 \d+:\d\d|✅ ສຳເລັດ!)$/.test(o.text));
+  return (text?.text ?? '') as string;
+});
+
 const count = (page: Page, id: string) => page.evaluate((item: string) => (window as any).__entities.backpack.getItemCount(item) as number, id);
 
 async function startInVillage (page: Page): Promise<Bot>
@@ -48,13 +56,18 @@ test.describe('Build time at the Workshop', () => {
     const before = await page.evaluate(() => (window as any).__entities.crafting.job.remainingMs as number);
     await expect.poll(() => page.evaluate(() => (window as any).__entities.crafting.job.remainingMs as number), { timeout: 5000 }).toBeLessThan(before);
     await expect(page.getByTestId('crafting-badge')).toContainText('ກຳລັງສ້າງ');
+    // The smith is at the Workshop hammering, with the time left over his head
+    await expect.poll(() => smithText(page), { timeout: 5000 }).toMatch(/^🔨 0:\d\d$/);
 
     // Done: the badge says so, and the tool is collected at the Workshop
     await page.evaluate(() => (window as any).__entities.crafting.tick(15000));
     await expect(page.getByTestId('crafting-badge')).toContainText('ສ້າງສຳເລັດ');
+    await expect.poll(() => smithText(page), { timeout: 5000 }).toBe('✅ ສຳເລັດ!');
     await page.keyboard.press('KeyE');
     await page.getByTestId('crafting-collect').click();
     expect(await count(page, 'axe-t1')).toBe(axesBefore + 1);
     await expect(page.getByTestId('crafting-status')).toHaveCount(0);
+    // Nothing left to make: the smith goes
+    await expect.poll(() => smithText(page), { timeout: 5000 }).toBe('');
   });
 });
