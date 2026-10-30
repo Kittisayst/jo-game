@@ -1,5 +1,6 @@
 import { harvestResourceNodeUseCase } from '../../../application/HarvestResourceNodeUseCase';
-import { entities } from '../../composition';
+import { clock, entities, random } from '../../composition';
+import { autoSaveGame } from '../../saveSnapshot';
 import { findTool } from '../../../domain/entities/HeldItem';
 import { soundManager } from '../../audio/SoundManager';
 import { EventBus } from '../../EventBus';
@@ -131,7 +132,17 @@ export class InteractionController
         // 4. Resource nodes
         for (const node of this.interactables.resourceNodes)
         {
-            if (!node.harvested && Math.abs(px - node.x) < node.reach && Math.abs(py - node.y) <= REACH_HEIGHT)
+            const near = Math.abs(px - node.x) < node.reach && Math.abs(py - node.y) <= REACH_HEIGHT;
+
+            // A Sapling cannot be harvested yet: say how long it still needs
+            if (near && node.growingUntil !== undefined)
+            {
+                const seconds = Math.max(1, Math.ceil((node.growingUntil - clock.now()) / 1000));
+                show(node.x, `🌱 ຕົ້ນອ່ອນ ໃຫຍ່ໃນ ${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`, () => undefined);
+                return;
+            }
+
+            if (!node.harvested && near)
             {
                 show(node.x, node.label, () => this.harvest(node));
                 return;
@@ -159,7 +170,12 @@ export class InteractionController
         if (scene.time.now - this.lastStrikeAt < STRIKE_COOLDOWN_MS) return;
         this.lastStrikeAt = scene.time.now;
 
-        const result = harvestResourceNodeUseCase(node, node.progress, entities.backpack);
+        const result = harvestResourceNodeUseCase(node, node.progress, entities.backpack, {
+            random,
+            clock,
+            regrowth: entities.plantRegrowth,
+            stageId: scene.currentLevelKey,
+        });
 
         if (result.success)
         {
@@ -178,12 +194,22 @@ export class InteractionController
 
             soundManager.playCoin();
             node.harvested = true;
-            node.markHarvestedVisual();
+            if (result.regrowing && node.regrowMinutes)
+            {
+                // A small plant becomes a Sapling for its minutes; remember it in the save
+                node.growingUntil = clock.now() + node.regrowMinutes * 60_000;
+                node.showSapling();
+                autoSaveGame();
+            }
+            else
+            {
+                node.markHarvestedVisual();
+            }
             scene.particleManager.emitCelebration(node.x, node.y - 20);
 
             notifyTutorial(`harvested:${node.type}`);
             EventBus.emit('backpack-changed');
-            showLootNotification(scene, node.x, node.y - 30, `🎒 ${describeDrops(result.drops)}`, '#22c55e');
+            showLootNotification(scene, node.x, node.y - 30, `🎒 ${describeDrops(result.seed ? [...result.drops, result.seed] : result.drops)}`, '#22c55e');
             return;
         }
 

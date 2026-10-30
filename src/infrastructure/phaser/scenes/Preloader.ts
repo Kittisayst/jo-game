@@ -37,6 +37,7 @@ const SPRITESHEET_ASSETS: readonly { key: string; path: string; frameWidth: numb
     { key: 'world-gate', path: 'assets/environment/world_gate.png', frameWidth: 112, frameHeight: 160 },
     { key: 'node-tree', path: 'assets/environment/node_tree.png', frameWidth: 80, frameHeight: 112 },
     { key: 'node-herb', path: 'assets/environment/node_herb.png', frameWidth: 48, frameHeight: 48 },
+    { key: 'node-fiber-grass', path: 'assets/environment/node_fiber_grass.png', frameWidth: 48, frameHeight: 48 },
     { key: 'node-stone', path: 'assets/environment/node_stone.png', frameWidth: 56, frameHeight: 56 },
     { key: 'node-iron-vein', path: 'assets/environment/node_iron_vein.png', frameWidth: 64, frameHeight: 64 },
     { key: 'waypoint-shrine', path: 'assets/environment/waypoint_shrine.png', frameWidth: 48, frameHeight: 80 },

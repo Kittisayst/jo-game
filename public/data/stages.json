@@ -13,7 +13,7 @@
           "contents": [
             {"kind": "waypoint", "x": 120, "name": "ຈຸດວາບປອດໄພ ປາກທາງປ່າ", "label": "🌀 ຈຸດວາບປອດໄພ ປາກທາງປ່າ"},
             {"kind": "sign", "x": 240, "text": "🌲 ດ່ານ 1: ປາກທາງປ່າ\n[E] ເກັບສະໝຸນໄພ ແລະ ຕັດໄມ້", "color": "#86efac", "stroke": "#064e3b"},
-            {"kind": "node", "node": "wild-herb", "x": 420},
+            {"kind": "node", "node": "wild-herb", "x": 420, "overrides": {"seed": {"itemId": "herb-seed", "chance": 1}}},
             {"kind": "node", "node": "oak-tree", "x": 560},
             {"kind": "enemy", "enemy": "forest-slime", "type": "slime", "x": 800, "y": 580, "patrolDistance": 60, "speed": 30},
             {"kind": "exit", "x": 1200}
@@ -32,7 +32,7 @@
           "contents": [
             {"kind": "waypoint", "x": 120, "name": "ຈຸດວາບປອດໄພ ດ່ານ 2", "label": "🌀 ຈຸດວາບປອດໄພ ດ່ານ 2"},
             {"kind": "sign", "x": 240, "text": "🌲 ເສັ້ນທາງປ່າ", "color": "#86efac", "stroke": "#064e3b"},
-            {"kind": "spawn-pool", "nodes": ["oak-tree", "wild-herb"], "count": 5, "enemies": ["forest-slime"], "enemyCount": 3, "patrolDistance": 100, "speed": 50},
+            {"kind": "spawn-pool", "nodes": ["oak-tree", "wild-herb", "fiber-grass"], "count": 5, "enemies": ["forest-slime"], "enemyCount": 3, "patrolDistance": 100, "speed": 50},
             {"kind": "exit"}
           ]
         }
@@ -49,7 +49,7 @@
           "contents": [
             {"kind": "waypoint", "x": 120, "name": "ຈຸດວາບປອດໄພ ດ່ານ 3", "label": "🌀 ຈຸດວາບປອດໄພ ດ່ານ 3"},
             {"kind": "sign", "x": 240, "text": "🌲 ລຳທານໍ້າໃນປ່າ", "color": "#86efac", "stroke": "#064e3b"},
-            {"kind": "spawn-pool", "nodes": ["oak-tree", "wild-herb"], "count": 6, "enemies": ["forest-slime"], "enemyCount": 3, "patrolDistance": 100, "speed": 50},
+            {"kind": "spawn-pool", "nodes": ["oak-tree", "wild-herb", "fiber-grass"], "count": 6, "enemies": ["forest-slime"], "enemyCount": 3, "patrolDistance": 100, "speed": 50},
             {"kind": "exit"}
           ]
         }
@@ -66,7 +66,7 @@
           "contents": [
             {"kind": "waypoint", "x": 120, "name": "ຈຸດວາບປອດໄພ ດ່ານ 4", "label": "🌀 ຈຸດວາບປອດໄພ ດ່ານ 4"},
             {"kind": "sign", "x": 240, "text": "🌲 ປາກຖ້ຳ ຂ້າງໜ້າແມ່ນຖ້ຳສາຍແຮ່", "color": "#86efac", "stroke": "#064e3b"},
-            {"kind": "spawn-pool", "nodes": ["oak-tree", "wild-herb"], "count": 5, "enemies": ["forest-slime"], "enemyCount": 3, "patrolDistance": 100, "speed": 50},
+            {"kind": "spawn-pool", "nodes": ["oak-tree", "wild-herb", "fiber-grass"], "count": 5, "enemies": ["forest-slime"], "enemyCount": 3, "patrolDistance": 100, "speed": 50},
             {"kind": "exit"}
           ]
         }

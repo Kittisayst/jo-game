@@ -472,5 +472,35 @@
     "maxStack": 10,
     "icon": "🚪",
     "iconImage": "assets/items/portal-block-black.png"
+  },
+  {
+    "id": "herb-seed",
+    "name": "ເມັດສະໝຸນໄພ",
+    "nameEn": "Herb Seed",
+    "description": "ເມັດຈາກຕົ້ນສະໝຸນໄພໃນດ່ານ ໃຊ້ປູກເປັນສະໝຸນໄພໄດ້ (ເສຍເຄິ່ງໜຶ່ງເມື່ອຕາຍ)",
+    "category": "material",
+    "maxStack": 99,
+    "icon": "🌱",
+    "iconImage": "assets/items/herb-seed.png"
+  },
+  {
+    "id": "fiber-seed",
+    "name": "ເມັດຫຍ້າເສັ້ນໃຍ",
+    "nameEn": "Fiber Seed",
+    "description": "ເມັດຈາກຫຍ້າເສັ້ນໃຍໃນດ່ານ ໃຊ້ປູກເປັນເສັ້ນໃຍໄດ້ (ເສຍເຄິ່ງໜຶ່ງເມື່ອຕາຍ)",
+    "category": "material",
+    "maxStack": 99,
+    "icon": "🌱",
+    "iconImage": "assets/items/fiber-seed.png"
+  },
+  {
+    "id": "oak-sapling",
+    "name": "ກ້າໄມ້ໂອ໊ກ",
+    "nameEn": "Oak Sapling",
+    "description": "ກ້າໄມ້ທີ່ໄດ້ຈາກການຕັດຕົ້ນໄມ້ ໃຊ້ປູກເປັນຕົ້ນໄມ້ໄດ້ (ເສຍເຄິ່ງໜຶ່ງເມື່ອຕາຍ)",
+    "category": "material",
+    "maxStack": 99,
+    "icon": "🌳",
+    "iconImage": "assets/items/oak-sapling.png"
   }
 ]

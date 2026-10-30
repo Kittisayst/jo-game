@@ -14,6 +14,7 @@ import { StageProgression } from './StageProgression';
 import { ActiveEffects } from './ActiveEffects';
 import { armorHeartsOf } from './Armor';
 import { PendingRewards } from './PendingRewards';
+import { PlantRegrowth } from './PlantRegrowth';
 import { RealmProgression } from './RealmProgression';
 import { TutorialProgress } from './TutorialProgress';
 import { Wallet } from './Wallet';
@@ -37,6 +38,8 @@ export class GameState
     readonly realms = new RealmProgression();
     /** Story Materials a Boss dropped while the Backpack was full, waiting to be claimed. */
     readonly pendingRewards = new PendingRewards();
+    /** When each small plant of a Stage was last harvested. */
+    readonly plantRegrowth = new PlantRegrowth();
     /** Timed Potion effects running on the hero (not saved). */
     readonly effects = new ActiveEffects();
     /** The Potion chosen to be drunk with R, or null. */
@@ -95,6 +98,7 @@ export class GameState
             quickSlotItemId: this.quickSlotItemId,
             openedRealms: this.realms.openedRealms,
             pendingRewards: this.pendingRewards.toSnapshot(),
+            plantRegrowth: this.plantRegrowth.toSnapshot(),
         };
     }
 
@@ -136,6 +140,7 @@ export class GameState
         this.quickSlotItemId = snapshot.quickSlotItemId ?? null;
         this.realms.loadFrom(snapshot.openedRealms ?? [1]);
         this.pendingRewards.loadFrom(snapshot.pendingRewards ?? []);
+        this.plantRegrowth.loadFrom(snapshot.plantRegrowth ?? {});
         this.effects.clear();
         this.syncArmor();
         this.health.reset();

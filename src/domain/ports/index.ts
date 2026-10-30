@@ -45,3 +45,15 @@ export interface SavePort
     getActiveSlot(): string;
     clearSlot(slotId: string): void;
 }
+
+/** The current time in milliseconds (real time). A fake in tests makes growth and waiting predictable. */
+export interface Clock
+{
+    now(): number;
+}
+
+/** A random number in [0, 1). A fake in tests makes drops predictable. */
+export interface Random
+{
+    next(): number;
+}

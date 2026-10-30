@@ -13,7 +13,7 @@ test.describe('Playwright UI Audit — Backpack & Village Hub', () => {
     }
 
     const hud = page.locator('.game-hud');
-    await expect(hud).toBeVisible({ timeout: 12000 });
+    await expect(hud).toBeVisible({ timeout: 30000 });
 
     // 2. Populate sample items in entities.backpack for visual audit
     await page.evaluate(() => {

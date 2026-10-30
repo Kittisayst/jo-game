@@ -1,7 +1,8 @@
 {
   "nodes": [
-    { "id": "oak-tree", "label": "ຕັດຕົ້ນໄມ້", "icon": "🪵", "texture": "node-tree", "reach": 44, "requiredTool": "axe", "toolTier": 1, "strikes": 3, "drops": [{ "itemId": "wood", "count": 3 }] },
-    { "id": "wild-herb", "label": "ເກັບສະໝຸນໄພ", "icon": "🌿", "texture": "node-herb", "reach": 30, "requiredTool": null, "toolTier": 0, "strikes": 1, "drops": [{ "itemId": "herb", "count": 2 }] },
+    { "id": "oak-tree", "label": "ຕັດຕົ້ນໄມ້", "icon": "🪵", "texture": "node-tree", "reach": 44, "requiredTool": "axe", "toolTier": 1, "strikes": 3, "drops": [{ "itemId": "wood", "count": 3 }], "seed": { "itemId": "oak-sapling", "chance": 0.3 } },
+    { "id": "wild-herb", "label": "ເກັບສະໝຸນໄພ", "icon": "🌿", "texture": "node-herb", "reach": 30, "requiredTool": null, "toolTier": 0, "strikes": 1, "drops": [{ "itemId": "herb", "count": 2 }], "seed": { "itemId": "herb-seed", "chance": 0.5 }, "regrow": { "minutes": 8 } },
+    { "id": "fiber-grass", "label": "ເກັບເສັ້ນໃຍຫຍ້າ", "icon": "🌾", "texture": "node-fiber-grass", "reach": 30, "requiredTool": null, "toolTier": 0, "strikes": 1, "drops": [{ "itemId": "fiber", "count": 2 }], "seed": { "itemId": "fiber-seed", "chance": 0.4 }, "regrow": { "minutes": 8 } },
     { "id": "stone-rock", "label": "ທຸບຫີນ", "icon": "🪨", "texture": "node-stone", "reach": 34, "requiredTool": "pickaxe", "toolTier": 1, "strikes": 3, "drops": [{ "itemId": "stone", "count": 3 }] },
     { "id": "iron-vein", "label": "ຂຸດແຮ່ເຫຼັກ", "icon": "⛏️", "texture": "node-iron-vein", "reach": 38, "requiredTool": "pickaxe", "toolTier": 1, "strikes": 4, "drops": [{ "itemId": "iron-ore", "count": 4 }] }
   ]

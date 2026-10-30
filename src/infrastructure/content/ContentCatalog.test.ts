@@ -12,11 +12,11 @@ import { parseStageDefinitions } from '../phaser/stages/StageDefinition';
 import { parseStageQuestion, parseStageScaling } from './ScalingCatalog';
 import { parseTutorial } from './TutorialCatalog';
 import { parseRepairs } from './RepairCatalog';
+import { parseNodes } from './NodeCatalog';
 import repairs from '../../../public/data/repairs.json';
 import tutorial from '../../../public/data/tutorial.json';
 import { scaleEnemyDefinition } from '../../domain/entities/StageScaling';
 import { parseBooks, parseEnemies, parseItems, parseQuestions, parseRecipes } from './ContentCatalog';
-import { parseNodes } from './NodeCatalog';
 import { parseRealms } from './RealmCatalog';
 
 describe('the shipped game data', () =>
@@ -376,6 +376,63 @@ describe('validator errors', () =>
                 const broken = copy(stages) as unknown as { stageQuestion: { credit: number } };
                 broken.stageQuestion.credit = 2.5;
                 expect(() => parseStageQuestion(broken)).toThrow(/stageQuestion\.credit must be a whole number of Credit/);
+            });
+        });
+
+        describe('seeds and regrowing plants', () =>
+        {
+            const copyNodes = () => JSON.parse(JSON.stringify(nodes)) as { nodes: Record<string, unknown>[] };
+            const find = (list: { nodes: Record<string, unknown>[] }, id: string) => list.nodes.find(n => n.id === id)!;
+
+            it('reads the Seed and the Regrow rule of each plant', () =>
+            {
+                const parsed = parseNodes(nodes);
+                const byId = (id: string) => parsed.find(n => n.id === id)!;
+
+                expect(byId('wild-herb')).toMatchObject({ seed: { itemId: 'herb-seed', chance: 0.5 }, regrowMinutes: 8 });
+                expect(byId('fiber-grass')).toMatchObject({ seed: { itemId: 'fiber-seed', chance: 0.4 }, regrowMinutes: 8 });
+                // A tree gives a sapling item but comes back on enter, with no minutes
+                expect(byId('oak-tree').seed).toEqual({ itemId: 'oak-sapling', chance: 0.3 });
+                expect(byId('oak-tree').regrowMinutes).toBeUndefined();
+                expect(byId('stone-rock').seed).toBeUndefined();
+            });
+
+            it('rejects a Seed chance outside 0 to 1 and a Regrow that is not a time', () =>
+            {
+                const tooSure = copyNodes();
+                (find(tooSure, 'wild-herb').seed as { chance: number }).chance = 1.5;
+                expect(() => parseNodes(tooSure)).toThrow(/seed\.chance must be between 0 and 1/);
+
+                const noTime = copyNodes();
+                find(noTime, 'wild-herb').regrow = { minutes: 0 };
+                expect(() => parseNodes(noTime)).toThrow(/regrow\.minutes must be more than 0/);
+
+                const noSeedItem = copyNodes();
+                delete (find(noSeedItem, 'wild-herb').seed as { itemId?: string }).itemId;
+                expect(() => parseNodes(noSeedItem)).toThrow(/seed\.itemId must be a non-empty string/);
+            });
+
+            it('lets a Stage override the Seed of one plant and carries the Regrow into the Stage', () =>
+            {
+                const stage1 = parse(stages)[0].zones[0].resourceNodes.find(n => n.type === 'wild-herb')!;
+
+                expect(stage1.seed).toEqual({ itemId: 'herb-seed', chance: 1 });
+                expect(stage1.regrowMinutes).toBe(8);
+
+                const broken = JSON.parse(JSON.stringify(stages));
+                broken.stages[0].zones[0].contents.find((c: Record<string, unknown>) => c.node === 'wild-herb').overrides.seed.chance = 2;
+                expect(() => parse(broken)).toThrow(/overrides\.seed\.chance must be between 0 and 1/);
+            });
+
+            it('gives every generated plant the same id each time, so a Sapling stays where it was', () =>
+            {
+                const idsOf = (n: number) => parse(stages)[n - 1].zones.flatMap(z => z.resourceNodes.map(r => r.id));
+
+                for (const n of [2, 3, 4, 7])
+                {
+                    expect(idsOf(n)).toEqual(idsOf(n));
+                    expect(new Set(idsOf(n)).size).toBe(idsOf(n).length);
+                }
             });
         });
 

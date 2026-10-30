@@ -1,4 +1,5 @@
 import type { GateRequirements } from '../../../application/RepairBrokenGateUseCase';
+import { PlantRegrowth } from '../../../domain/entities/PlantRegrowth';
 import { ResourceNode } from '../../../domain/entities/ResourceNode';
 import type {
     StageDefinition,
@@ -18,6 +19,14 @@ export interface ResourceNodeView extends StageResourceNode {
     shakeOnStrike: () => void;
     /** Updates the node's visual from intact to harvested (stump / rubble / cut stems). */
     markHarvestedVisual: () => void;
+    /** Shows the small plant as a Sapling while it grows back (see "Sapling" in CONTEXT.md). */
+    showSapling: () => void;
+    /** Shows the plant whole again once it has grown back. */
+    showGrown: () => void;
+    /** A small plant's identity for the regrow records: Stage id plus node id. Missing for nodes that regrow on enter. */
+    plantKey?: string;
+    /** Real time (ms) at which a Sapling is grown again; undefined when the node is not growing. */
+    growingUntil?: number;
     /** Interaction prompt shown while the player stands next to it. */
     label: string;
     /** How close to the node's centre the hero must stand to strike it (px). */
@@ -46,7 +55,7 @@ function createNodeVisual(
     scene: Phaser.Scene,
     node: StageResourceNode,
     baseY: number
-): { shakeOnStrike: () => void; markHarvestedVisual: () => void } {
+): Pick<ResourceNodeView, 'shakeOnStrike' | 'markHarvestedVisual' | 'showSapling' | 'showGrown'> {
     const textureKey = node.texture;
 
     if (scene.textures.exists(textureKey)) {
@@ -77,6 +86,9 @@ function createNodeVisual(
                     ease: 'Quad.easeOut',
                 });
             },
+            // Frame 2 of a plant's sheet is its Sapling (frameTotal counts the base frame too); a sheet without one falls back to the cut frame
+            showSapling: () => sprite.setFrame(scene.textures.get(textureKey).frameTotal > 3 ? 2 : 1),
+            showGrown: () => sprite.setFrame(0),
         };
     }
 
@@ -85,7 +97,12 @@ function createNodeVisual(
     g.setDepth(2);
     g.fillStyle(0x16a34a, 1);
     g.fillCircle(node.x, baseY - 24, 18);
-    return { shakeOnStrike: () => undefined, markHarvestedVisual: () => g.clear() };
+    return {
+        shakeOnStrike: () => undefined,
+        markHarvestedVisual: () => g.clear(),
+        showSapling: () => g.setAlpha(0.35),
+        showGrown: () => g.setAlpha(1),
+    };
 }
 
 function addWaypoint(scene: Phaser.Scene, wp: StageWaypoint, baseY: number): WaypointView {
@@ -234,7 +251,9 @@ export function buildStageScenery(
     scene: Phaser.Scene,
     stage: StageDefinition,
     baseY: number,
-    repairedGateIds: ReadonlySet<string>
+    repairedGateIds: ReadonlySet<string>,
+    /** The plants' records and the time now: a plant harvested too recently is built as a Sapling. */
+    plants?: { regrowth: PlantRegrowth; now: number }
 ): BuiltStage {
     const built: BuiltStage = { resourceNodes: [], waypoints: [] };
 
@@ -244,17 +263,42 @@ export function buildStageScenery(
         }
 
         for (const node of zone.resourceNodes) {
-            const { shakeOnStrike, markHarvestedVisual } = createNodeVisual(scene, node, baseY);
+            const { shakeOnStrike, markHarvestedVisual, showSapling, showGrown } = createNodeVisual(scene, node, baseY);
 
-            built.resourceNodes.push({
+            const view: ResourceNodeView = {
                 ...node,
                 y: baseY - 30,
                 progress: new ResourceNode(node.strikes),
                 shakeOnStrike,
                 markHarvestedVisual,
+                showSapling,
+                showGrown,
                 label: nodePrompt(node),
                 harvested: false,
-            });
+            };
+
+            // A small plant harvested earlier is still a Sapling until its minutes have passed, even after a restart
+            if (node.regrowMinutes && plants)
+            {
+                view.plantKey = PlantRegrowth.keyOf(stage.id, node.id);
+                const remaining = plants.regrowth.remainingMs(view.plantKey, plants.now, node.regrowMinutes);
+                if (remaining > 0)
+                {
+                    view.harvested = true;
+                    view.growingUntil = plants.now + remaining;
+                    showSapling();
+                }
+                else
+                {
+                    plants.regrowth.clear(view.plantKey);
+                }
+            }
+            else if (node.regrowMinutes)
+            {
+                view.plantKey = PlantRegrowth.keyOf(stage.id, node.id);
+            }
+
+            built.resourceNodes.push(view);
         }
 
         for (const sign of zone.signs) {
