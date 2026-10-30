@@ -15,6 +15,7 @@ import { Hud } from './components/Hud';
 import { SkinModal } from './components/SkinModal';
 import { useDialogue } from './hooks/useDialogue';
 import { useGameEvents } from './hooks/useGameEvents';
+import { useDevStageEntry } from './hooks/useDevStageEntry';
 import { useGlobalShortcuts } from './hooks/useGlobalShortcuts';
 import { useModalState } from './hooks/useModalState';
 import { useSkinShop } from './hooks/useSkinShop';
@@ -417,6 +418,8 @@ function App ()
 
         togglePauseUseCase(pauseState);
     };
+
+    useDevStageEntry(handleStartGame);
 
     useGlobalShortcuts({
         toggleSound: () => setIsMuted(toggleSoundUseCase(entities.settings, repositories.settings).soundMuted),

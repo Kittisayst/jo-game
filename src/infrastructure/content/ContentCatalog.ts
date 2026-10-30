@@ -12,6 +12,8 @@ import type { QuestionData } from '../../domain/entities/Quiz';
 import type { RecipeDefinition } from '../../application/CraftRecipeUseCase';
 import type { WeaponUpgradeRecipe } from '../../application/UpgradeWeaponTierUseCase';
 import { parseStageDefinitions, StageDefinition } from '../phaser/stages/StageDefinition';
+import { parseStageScaling } from './ScalingCatalog';
+import type { StageScaling } from '../../domain/entities/StageScaling';
 import { NodeDefinition, parseNodes } from './NodeCatalog';
 import { parseRealms, RealmDefinition } from './RealmCatalog';
 import { makeValidators } from './validate';
@@ -32,6 +34,8 @@ export interface GameContent
     nodes: NodeDefinition[];
     /** All 100 Stages in order; the ones not built yet are `placeholder`. */
     stages: StageDefinition[];
+    /** How ordinary enemies grow with the Stage number. */
+    scaling: StageScaling;
     /** How weapons and tools look in the hero's hand, by item id. */
     heldArt: Record<string, HeldArt>;
     /** The rows of the player skin sheets (animations) and where the hand is in each frame. */
@@ -283,6 +287,7 @@ export async function loadGameContent (): Promise<GameContent>
         realms: parseRealms(realms),
         nodes: parsedNodes,
         stages: parseStageDefinitions(stages, parsedNodes),
+        scaling: parseStageScaling(stages),
         heldArt: parseHeldArt(items),
         playerAnimations: parsePlayerAnimations(playerAnimations),
     };

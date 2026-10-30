@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import villageLevel from '../../../public/assets/levels/village.json';
 import stages from '../../../public/data/stages.json';
+import nodesJson from '../../../public/data/nodes.json';
+import { isStageReady, parseStageDefinitions } from '../phaser/stages/StageDefinition';
+import { parseNodes } from './NodeCatalog';
+import { BIOMES, generateLevel } from './StageGenerator';
 import { MAX_JUMP_RISE, MOVE_SPEED, JUMP_SPEED, GRAVITY_Y, PLATFORM_SURFACE_OFFSET } from '../phaser/physicsConstants';
 
 /**
@@ -25,9 +29,19 @@ type LevelData = {
     spikes?: { x: number; y: number }[];
 };
 
-const stageLevels = Object.entries(
+const levelFiles = Object.entries(
     import.meta.glob<LevelData>('../../../public/assets/levels/stage-*.json', { eager: true, import: 'default' })
 ).map(([path, level]) => ({ name: path.split('/').pop()!, level }));
+
+/** Every built Stage as the game reads it: parsed from stages.json, with its level from a file or from the generator. */
+const builtStages = parseStageDefinitions(stages, parseNodes(nodesJson)).filter(isStageReady);
+const stageLevels = builtStages.map(stage => ({
+    name: stage.id,
+    stage,
+    level: stage.generated
+        ? (stage.generated.level as LevelData & { worldWidth: number })
+        : (levelFiles.find(f => f.name === `${stage.id}.json`)!.level as LevelData & { worldWidth: number }),
+}));
 
 function surfacesOf (level: LevelData): Surface[]
 {
@@ -90,6 +104,48 @@ describe('level layout', () =>
         for (const { name, level } of stageLevels) expect(unreachable(level), name).toEqual([]);
     });
 
+    it('lets the hero reach every platform of 500 generated Stages in each biome', () =>
+    {
+        for (const biome of BIOMES)
+        {
+            for (let seed = 0; seed < 500; seed++)
+            {
+                const { level } = generateLevel({ biome, seed, screens: 2 + (seed % 4) });
+                expect(unreachable(level), `${biome} seed ${seed}`).toEqual([]);
+            }
+        }
+    });
+
+    it('keeps everything of a built Stage inside its world and its exit before the end', () =>
+    {
+        for (const { name, stage, level } of stageLevels)
+        {
+            for (const zone of stage.zones)
+            {
+                const xs = [
+                    ...zone.resourceNodes.map(n => n.x),
+                    ...zone.enemySpawns.map(e => e.x),
+                    ...zone.waypoints.map(w => w.x),
+                    ...zone.signs.map(sign => sign.x),
+                    ...(zone.exit ? [zone.exit.x] : []),
+                    ...(zone.bossSpawn ? [zone.bossSpawn.x] : []),
+                ];
+                for (const x of xs) expect(x, name).toBeLessThan(level.worldWidth);
+            }
+        }
+    });
+
+    it('keeps the enemies of a generated Stage away from its spikes', () =>
+    {
+        for (const { name, stage, level } of stageLevels.filter(l => l.stage.generated))
+        {
+            for (const enemy of stage.zones.flatMap(z => z.enemySpawns))
+            {
+                for (const spike of level.spikes ?? []) expect(Math.abs(spike.x - enemy.x), name).toBeGreaterThanOrEqual(150);
+            }
+        }
+    });
+
     it('gives the platforms of a Stage that has any a way up, not just one low step', () =>
     {
         for (const { name, level } of stageLevels.filter(l => l.level.platforms.length > 0))
@@ -107,17 +163,13 @@ describe('level layout', () =>
 
     it('keeps spikes away from anything the hero has to stand next to', () =>
     {
-        type Content = { kind: string; x?: number };
-        const entries = stages.stages as { number: number; status: string; zones?: { contents: Content[] }[] }[];
-
-        for (const stage of entries.filter(s => s.status === 'ready'))
+        for (const { stage, level } of stageLevels)
         {
-            const level = stageLevels.find(l => l.name === `stage-${String(stage.number).padStart(3, '0')}.json`)!.level;
-            const standingKinds = ['node', 'waypoint', 'gate'];
-            const standingSpots = stage.zones!
-                .flatMap(z => z.contents)
-                .filter(c => standingKinds.includes(c.kind) && c.x !== undefined)
-                .map(c => c.x!);
+            const standingSpots = stage.zones.flatMap(z => [
+                ...z.resourceNodes.map(n => n.x),
+                ...z.waypoints.map(w => w.x),
+                ...(z.gate ? [z.gate.x] : []),
+            ]);
 
             for (const spike of level.spikes ?? [])
             {

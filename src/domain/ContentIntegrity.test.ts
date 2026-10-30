@@ -110,9 +110,12 @@ describe('content data integrity', () =>
             x?: number;
             requiredItem?: string;
             quizBookId?: string;
+            /** A `spawn-pool` lists the kinds it scatters. */
+            nodes?: string[];
+            enemies?: string[];
             overrides?: { drops?: { itemId: string }[] };
         };
-        type StageEntry = { number: number; realm: number; status: string; layout?: string; zones?: { contents: Content[] }[] };
+        type StageEntry = { number: number; realm: number; status: string; layout?: string | { generate: unknown }; zones?: { contents: Content[] }[] };
 
         const levels = import.meta.glob<{ worldWidth: number }>('../../public/assets/levels/stage-*.json', { eager: true, import: 'default' });
         const worldWidthOf = (layout: string) =>
@@ -145,6 +148,11 @@ describe('content data integrity', () =>
                 {
                     const where = `stage ${stage.number} ${content.kind}`;
                     if (content.kind === 'node') expect(nodeIds.has(content.node!), `${where} ${content.node}`).toBe(true);
+                    if (content.kind === 'spawn-pool')
+                    {
+                        for (const id of content.nodes ?? []) expect(nodeIds.has(id), `${where} node ${id}`).toBe(true);
+                        for (const id of content.enemies ?? []) expect(['normal', 'elite'], `${where} enemy ${id}`).toContain(enemyKinds.get(id));
+                    }
                     for (const drop of content.overrides?.drops ?? []) expect(itemIds.has(drop.itemId), `${where} drop ${drop.itemId}`).toBe(true);
                     if (content.kind === 'enemy') expect(['normal', 'elite'], `${where} ${content.enemy}`).toContain(enemyKinds.get(content.enemy!));
                     if (content.kind === 'miniboss') expect(enemyKinds.get(content.enemy!), where).toBe('miniboss');
@@ -160,9 +168,10 @@ describe('content data integrity', () =>
 
         it('keeps everything inside the width of its level', () =>
         {
-            for (const stage of readyStages)
+            // A generated Stage has no file: its content is placed by the generator, checked in LevelReachability.test.ts
+            for (const stage of readyStages.filter(s => typeof s.layout === 'string'))
             {
-                const width = worldWidthOf(stage.layout!);
+                const width = worldWidthOf(stage.layout as string);
                 expect(width, `layout of stage ${stage.number}`).toBeDefined();
                 for (const content of stage.zones!.flatMap(z => z.contents))
                 {

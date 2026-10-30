@@ -334,7 +334,7 @@
   - [x] 1.8 `kind: "exit"`: ຍ່າງຮອດ → ຜ່ານດ່ານ → ກັບໝູ່ບ້ານ ຫຼືໄປດ່ານຕໍ່ໄປ. ຄຳຖາມມາໃນ Phase 3.
 - **UI ແລະ save**
   - [x] 1.9 StageMap modal 10×10: ສີມິຕິ, ສະຖານະ 4 ຢ່າງ, ໄອຄອນດ່ານ 5/10, ບອກຊື່/ວິຊາມິຕິ. ສີເທົາກົດບໍ່ໄດ້.
-  - [ ] 1.10 Dev: `?stage=N` ເປີດດ່ານ N ໂດຍກົງ (ແຕ່ໃນ dev build).
+  - [x] 1.10 Dev: `?stage=N` ເປີດດ່ານ N ໂດຍກົງ (ແຕ່ໃນ dev build).
   - [x] 1.11 Save version 7 (ເລກດ່ານ), ອັບເດດ `SaveData.test.ts`.
 - **ທົດສອບ ແລະເອກະສານ**
   - [x] 1.12 e2e: ດ່ານ 1 → exit → ດ່ານ 2 ເປີດ. ແຜນທີ່ມີ 100 ຊ່ອງ ແລະ 90 ເປັນສີເທົາ. ແກ້ spec ເກົ່າທີ່ໃຊ້ `stage-ch1`.
@@ -356,17 +356,25 @@
 ### Phase 2: ຕົວສ້າງດ່ານອັດຕະໂນມັດ + ສູດສົມດຸນ
 **ເປົ້າ:** ດ່ານທຳມະດາສ້າງຈາກ biome + seed, ແລະຄວາມຍາກເພີ່ມຕາມເລກດ່ານ.
 - **ຕົວສ້າງດ່ານ**
-  - [ ] 2.1 `StageGenerator`: ສ້າງ platform, spike ແລະຄວາມກວ້າງຈາກ seed (ສຸ່ມແບບກຳນົດໄດ້). seed ດຽວກັນ = ດ່ານດຽວກັນ.
-  - [ ] 2.2 ກົດ "ຍ່າງຜ່ານໄດ້": ໄລຍະ/ຄວາມສູງລະຫວ່າງ platform ຢູ່ໃນໄລຍະໂດດຂອງຜູ້ຫຼິ້ນ. Test ກວດ 500 seed.
-  - [ ] 2.3 `spawn-pool`: ວາງ node/ສັດຕູ ເທິງພື້ນ ບໍ່ຊ້ອນກັນ ແລະບໍ່ຢູ່ເທິງ spike. Test.
-  - [ ] 2.4 Biome `forest` ແລະ `cave`: ພື້ນຫຼັງ, tile, ລາຍຊື່ node/ສັດຕູ ທີ່ໃຊ້ໄດ້ (ຂໍ້ມູນໃນ `realms.json` ຫຼື `biomes.json`).
-  - [ ] 2.5 ດ່ານ 2–4 (forest) ແລະ 6–9 (cave) ປ່ຽນເປັນ `generate`.
+  - [x] 2.1 `StageGenerator`: ສ້າງ platform, spike ແລະຄວາມກວ້າງຈາກ seed (ສຸ່ມແບບກຳນົດໄດ້). seed ດຽວກັນ = ດ່ານດຽວກັນ.
+  - [x] 2.2 ກົດ "ຍ່າງຜ່ານໄດ້": ໄລຍະ/ຄວາມສູງລະຫວ່າງ platform ຢູ່ໃນໄລຍະໂດດຂອງຜູ້ຫຼິ້ນ. Test ກວດ 500 seed.
+  - [x] 2.3 `spawn-pool`: ວາງ node/ສັດຕູ ເທິງພື້ນ ບໍ່ຊ້ອນກັນ ແລະບໍ່ຢູ່ເທິງ spike. Test.
+  - [x] 2.4 Biome `forest` ແລະ `cave`: ພື້ນຫຼັງ, tile, ລາຍຊື່ node/ສັດຕູ ທີ່ໃຊ້ໄດ້ (ຂໍ້ມູນໃນ `realms.json` ຫຼື `biomes.json`).
+  - [x] 2.5 ດ່ານ 2–4 (forest) ແລະ 6–9 (cave) ປ່ຽນເປັນ `generate`.
 - **ຄວາມຍາກ ແລະການແກ້ບັນຫາ**
-  - [ ] 2.6 `scaling` ໃນ `stages.json` → HP/damage/drops ຂອງສັດຕູຕາມເລກດ່ານ (domain function + test).
-  - [ ] 2.7 ກວດ ແລະແກ້ສັດຕູຈົມພື້ນທີ່ fps ຕ່ຳ (ຈຳກັດ delta ຫຼື step ຟີຊິກ). ເປີດ e2e `cave_guardian` ຄືນ.
-  - [ ] 2.8 e2e: ເປີດ `?stage=3` ແລະ `?stage=7`, ຍ່າງຈາກຕົ້ນຮອດ exit ດ້ວຍ bot.
+  - [x] 2.6 `scaling` ໃນ `stages.json` → HP/damage/drops ຂອງສັດຕູຕາມເລກດ່ານ (domain function + test).
+  - [x] 2.7 ກວດ ແລະແກ້ສັດຕູຈົມພື້ນທີ່ fps ຕ່ຳ (ຈຳກັດ delta ຫຼື step ຟີຊິກ). ເປີດ e2e `cave_guardian` ຄືນ.
+  - [x] 2.8 e2e: ເປີດ `?stage=3` ແລະ `?stage=7`, ຍ່າງຈາກຕົ້ນຮອດ exit ດ້ວຍ bot.
 
 **ເງື່ອນໄຂຈົບ:** ດ່ານ 2–4 ແລະ 6–9 ສ້າງອັດຕະໂນມັດ, ຍ່າງຜ່ານໄດ້ທຸກດ່ານ, ແລະສັດຕູດ່ານ 9 ແຂງກວ່າດ່ານ 2.
+
+**ສະຖານະ Phase 2: ເຮັດແລ້ວ.** ສິ່ງທີ່ເຮັດຕ່າງຈາກແຜນ:
+- **2.1–2.3:** `src/infrastructure/content/StageGenerator.ts` (`generateLevel`, `placePool`) ເປັນ TypeScript ລ້ວນ ບໍ່ມີ Phaser, ຢູ່ໃນ `content/` ເພື່ອໃຫ້ Vitest ຮັນໄດ້. Parser ຂອງດ່ານເອີ້ນມັນຕອນໂຫຼດ ແລະເກັບ level ໄວ້ໃນ `StageDefinition.generated`; `Preloader` ໃສ່ມັນເຂົ້າ cache ແທນການໂຫຼດໄຟລ໌. ກວດ 500 seed ຕໍ່ biome ວ່າທຸກ platform ຂຶ້ນໄດ້ (`LevelReachability.test.ts`) ແລະ node/ສັດຕູຢູ່ຫ່າງ spike.
+- **2.4:** biome ມີ 2 ຢ່າງ (`forest`, `cave`) ແລະຕົວເລກລະອຽດ (ໄລຍະຫ່າງ, ຈຳນວນ spike) ຢູ່ໃນ `StageGenerator.ts` ບໍ່ແມ່ນ `biomes.json`. ຍ້າຍອອກເປັນ JSON ເມື່ອມີ biome ທີ 3. ລາຍຊື່ node/ສັດຕູ ຂອງແຕ່ລະດ່ານຢູ່ໃນ `spawn-pool` ຂອງ `stages.json`.
+- **2.5:** ດ່ານ 2–4 (forest, 2 ໜ້າຈໍ) ແລະ 6–9 (cave, 2–3 ໜ້າຈໍ) ເປັນ `generate`; ລຶບ level JSON ຂອງມັນແລ້ວ. ດ່ານ 1, 5, 10 ຍັງຂຽນດ້ວຍມື.
+- **2.6:** `scaling` ຢູ່ເທິງສຸດຂອງ `stages.json`; ສູດຢູ່ `domain/entities/StageScaling.ts`. ມີແຕ່ສັດຕູ `normal`/`elite` ທີ່ເພີ່ມ (Mini-boss ແລະ Boss ປັບດ້ວຍມື). `damage` ເພີ່ມໃນຂໍ້ມູນແລ້ວ ແຕ່ເກມຍັງບໍ່ໄດ້ອ່ານ `damage` ຂອງສັດຕູ (ເປັນຂອງ Phase 5/6).
+- **2.7:** ບໍ່ໄດ້ຫາສາເຫດຂອງການຈົມພື້ນ. ເພີ່ມຕາຂ່າຍນິລະໄພ: ສັດຕູທີ່ຕົກຕ່ຳກວ່າ y=800 ຖືກວາງຄືນຈຸດເກີດ. spec `cave_guardian` ຍັງ skip ເມື່ອເຫັນມັນຕົກ ເພື່ອບໍ່ໃຫ້ຜົນທົດສອບຫຼອກ; ບໍ່ໄດ້ພິສູດວ່າ fps ຕ່ຳ (~17) ໃຊ້ໄດ້.
+- **1.10 / 2.8:** `?stage=N` (dev ເທົ່ານັ້ນ, `useDevStageEntry.ts`) ເປີດດ່ານ 1..N ແລ້ວເຂົ້າດ່ານ N. `e2e/generated_stages.spec.ts` ຍ່າງດ່ານ 3 ແລະ 7 ຈາກຕົ້ນຮອດ exit ແລະກວດ HP ຂອງ golem ດ່ານ 9.
 
 ### Phase 3: ບົດຮຽນ "ດ່ານ-ລຳດັບ" + ຄຳຖາມທ້າຍດ່ານ
 **ເປົ້າ:** ທຸກດ່ານຂອງມິຕິ 1 ມີບົດຮຽນ ແລະຄຳຖາມ. ປຶ້ມມິຕິສະແດງເລກບົດ.

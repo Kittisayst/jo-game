@@ -1,7 +1,9 @@
 /**
  * Layout of every Stage as authored in `public/data/stages.json`. Everything in a Stage is an entry of
  * a Zone's `contents`, told apart by its `kind` (node, enemy, miniboss, boss, sign, waypoint, gate, exit).
- * Platforms, spikes and the player spawn stay in the level JSON named by `layout` (see Level.ts).
+ * Platforms, spikes and the player spawn stay in the level JSON named by `layout` (see Level.ts), or, for an
+ * ordinary Stage, are generated from `layout: { "generate": { biome, seed, screens } }` (see StageGenerator.ts),
+ * in which case a `spawn-pool` entry scatters nodes and enemies over the generated ground.
  *
  * `parseStageDefinitions` checks the shape once at load time so a typo in the JSON fails loudly with the
  * offending path instead of as an undefined deep in a scene, and turns the `contents` of each Zone into the
@@ -18,12 +20,17 @@ import {
     STAGE_COUNT,
 } from '../../../domain/entities/StageNumber';
 import { NodeDefinition, parseDrops, StageDrop } from '../../content/NodeCatalog';
+import {
+    BIOMES, Biome, GeneratedLevel, generateLevel, placePool,
+} from '../../content/StageGenerator';
 import { makeValidators } from '../../content/validate';
 
 export type { StageDrop };
 
 const ENEMY_TYPES: EnemyType[] = ['slime', 'slime-flying', 'slime-armored', 'slime-spitter'];
-export const STAGE_CONTENT_KINDS = ['node', 'enemy', 'miniboss', 'boss', 'sign', 'waypoint', 'gate', 'exit'] as const;
+export const STAGE_CONTENT_KINDS = [
+    'node', 'enemy', 'miniboss', 'boss', 'sign', 'waypoint', 'gate', 'exit', 'spawn-pool',
+] as const;
 export type StageContentKind = typeof STAGE_CONTENT_KINDS[number];
 /** Where enemies stand when a Stage does not say (the top of the ground minus the enemy). */
 const DEFAULT_ENEMY_Y = 580;
@@ -126,8 +133,10 @@ export interface StageDefinition
     status: 'ready' | 'placeholder';
     name: string;
     nameEn: string;
-    /** Path of the level JSON (platforms, spikes, world width), null for a placeholder. */
+    /** Path of the level JSON (platforms, spikes, world width), null for a placeholder or a generated Stage. */
     layout: string | null;
+    /** The level built from `layout.generate`, for a generated Stage. */
+    generated?: GeneratedLevel;
     zones: StageZone[];
 }
 
@@ -234,7 +243,69 @@ function parseEnemy (entry: Record<string, unknown>, path: string, miniboss: boo
     };
 }
 
-function parseZone (raw: unknown, path: string, nodes: ReadonlyMap<string, NodeDefinition>): StageZone
+/** What a Zone needs from the generated level of its Stage, to expand `spawn-pool` and an `exit` without an x. */
+interface GeneratedContext
+{
+    generated: GeneratedLevel;
+    /** Seed of the pool in this Zone: the Stage's seed plus a step per Zone. */
+    poolSeed: number;
+}
+
+function parseSpawnPool (
+    entry: Record<string, unknown>,
+    path: string,
+    nodes: ReadonlyMap<string, NodeDefinition>,
+    context: GeneratedContext | undefined,
+    parsed: StageZone
+): void
+{
+    if (!context) fail(path, 'used only in a Stage with a generated layout ("layout": { "generate": ... })');
+
+    const nodeIds = asArray(entry.nodes ?? [], `${path}.nodes`).map((id, i) => asString(id, `${path}.nodes[${i}]`));
+    const enemyIds = asArray(entry.enemies ?? [], `${path}.enemies`).map((id, i) => asString(id, `${path}.enemies[${i}]`));
+    const nodeCount = optionalNumber(entry.count, `${path}.count`) ?? 0;
+    const enemyCount = optionalNumber(entry.enemyCount, `${path}.enemyCount`) ?? 0;
+    if (!Number.isInteger(nodeCount) || nodeCount < 0) fail(`${path}.count`, 'a whole number of nodes, 0 or more');
+    if (!Number.isInteger(enemyCount) || enemyCount < 0) fail(`${path}.enemyCount`, 'a whole number of enemies, 0 or more');
+    if (nodeCount > 0 && nodeIds.length === 0) fail(`${path}.nodes`, 'a list of node ids when count is more than 0');
+    if (enemyCount > 0 && enemyIds.length === 0) fail(`${path}.enemies`, 'a list of enemy ids when enemyCount is more than 0');
+
+    let placed;
+    try
+    {
+        placed = placePool(
+            context!.generated,
+            { nodes: nodeIds, nodeCount, enemies: enemyIds, enemyCount },
+            context!.poolSeed
+        );
+    }
+    catch (error)
+    {
+        fail(path, `a pool that fits the generated Stage (${(error as Error).message})`);
+    }
+
+    for (const node of placed!.nodes)
+    {
+        parsed.resourceNodes.push(parseNode({ node: node.id, x: node.x }, path, nodes));
+    }
+    for (const enemy of placed!.enemies)
+    {
+        parsed.enemySpawns.push(parseEnemy({
+            enemy: enemy.id,
+            x: enemy.x,
+            type: entry.enemyType,
+            patrolDistance: entry.patrolDistance,
+            speed: entry.speed,
+        }, path, false));
+    }
+}
+
+function parseZone (
+    raw: unknown,
+    path: string,
+    nodes: ReadonlyMap<string, NodeDefinition>,
+    context?: GeneratedContext
+): StageZone
 {
     const zone = asObject(raw, path);
     const parsed: StageZone = {
@@ -303,12 +374,30 @@ function parseZone (raw: unknown, path: string, nodes: ReadonlyMap<string, NodeD
                 break;
             case 'exit':
                 if (parsed.exit) fail(entryPath, 'the only exit of its zone');
-                parsed.exit = { x: asNumber(entry.x, `${entryPath}.x`) };
+                parsed.exit = {
+                    x: entry.x === undefined && context
+                        ? context.generated.exitX
+                        : asNumber(entry.x, `${entryPath}.x`),
+                };
+                break;
+            case 'spawn-pool':
+                parseSpawnPool(entry, entryPath, nodes, context, parsed);
                 break;
         }
     });
 
     return parsed;
+}
+
+function parseGenerate (raw: unknown, path: string): { biome: Biome; seed: number; screens: number }
+{
+    const generate = asObject(asObject(raw, path).generate, `${path}.generate`);
+    const biome = asString(generate.biome, `${path}.generate.biome`) as Biome;
+    if (!BIOMES.includes(biome)) fail(`${path}.generate.biome`, `one of ${BIOMES.join(', ')}`);
+    const seed = asNumber(generate.seed, `${path}.generate.seed`);
+    if (!Number.isInteger(seed)) fail(`${path}.generate.seed`, 'a whole number');
+    const screens = asNumber(generate.screens, `${path}.generate.screens`);
+    return { biome, seed, screens };
 }
 
 function parseStage (raw: unknown, index: number, nodes: ReadonlyMap<string, NodeDefinition>): StageDefinition
@@ -323,6 +412,11 @@ function parseStage (raw: unknown, index: number, nodes: ReadonlyMap<string, Nod
     if (entry.status !== 'ready' && entry.status !== 'placeholder') fail(`${path}.status`, 'ready or placeholder');
     if (entry.status === 'placeholder') return placeholder(number);
 
+    const generate = typeof entry.layout === 'object' && entry.layout !== null
+        ? parseGenerate(entry.layout, `${path}.layout`)
+        : undefined;
+    const generated = generate ? generateLevel(generate) : undefined;
+
     const stage: StageDefinition = {
         id: stageIdOf(number),
         number,
@@ -330,8 +424,14 @@ function parseStage (raw: unknown, index: number, nodes: ReadonlyMap<string, Nod
         status: 'ready',
         name: asString(entry.name, `${path}.name`),
         nameEn: asString(entry.nameEn, `${path}.nameEn`),
-        layout: asString(entry.layout, `${path}.layout`),
-        zones: asArray(entry.zones, `${path}.zones`).map((z, j) => parseZone(z, `${path}.zones[${j}]`, nodes)),
+        layout: generate ? null : asString(entry.layout, `${path}.layout`),
+        generated,
+        zones: asArray(entry.zones, `${path}.zones`).map((z, j) => parseZone(
+            z,
+            `${path}.zones[${j}]`,
+            nodes,
+            generated && generate ? { generated, poolSeed: generate.seed + j * 131 } : undefined
+        )),
     };
     if (stage.zones.length === 0) fail(`${path}.zones`, 'at least one zone');
 
