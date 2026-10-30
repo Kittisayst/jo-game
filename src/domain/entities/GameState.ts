@@ -18,6 +18,7 @@ import { Garden } from './Garden';
 import { MovementAbilities } from './MovementAbilities';
 import { SkillCooldowns } from './SkillCooldowns';
 import { SkillProgression } from './SkillProgression';
+import { ToolUpgrades } from './ToolUpgrades';
 import { PendingRewards } from './PendingRewards';
 import { PlantRegrowth } from './PlantRegrowth';
 import { RealmProgression } from './RealmProgression';
@@ -58,6 +59,8 @@ export class GameState
     readonly skills = new SkillProgression();
     /** Time until each skill can be used again (not saved). */
     readonly skillCooldowns = new SkillCooldowns();
+    /** How far the axes and pickaxes are upgraded (more of a Strike each). */
+    readonly toolUpgrades = new ToolUpgrades();
     /** The Storage chest: 40 slots, never touched by dying. */
     readonly storage: Backpack;
     /** Timed Potion effects running on the hero (not saved). */
@@ -124,6 +127,7 @@ export class GameState
             crafting: this.crafting.toSnapshot(),
             movement: this.movement.toSnapshot(),
             skills: this.skills.toSnapshot(),
+            toolUpgrades: this.toolUpgrades.toSnapshot(),
             storage: this.storage.toSnapshot(),
         };
     }
@@ -172,6 +176,7 @@ export class GameState
         this.movement.loadFrom(snapshot.movement);
         this.skills.loadFrom(snapshot.skills);
         this.skillCooldowns.clear();
+        this.toolUpgrades.loadFrom(snapshot.toolUpgrades);
         this.storage.loadFromSnapshot(snapshot.storage ?? []);
         this.effects.clear();
         this.syncArmor();

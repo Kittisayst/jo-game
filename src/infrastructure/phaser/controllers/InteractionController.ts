@@ -1,4 +1,6 @@
 import { harvestResourceNodeUseCase } from '../../../application/HarvestResourceNodeUseCase';
+import { toolStrikeWeight, ToolUpgradeRecipe } from '../../../application/UpgradeToolUseCase';
+import { getGameContent } from '../../content/ContentCatalog';
 import { clock, entities, random } from '../../composition';
 import { autoSaveGame } from '../../saveSnapshot';
 import { findTool } from '../../../domain/entities/HeldItem';
@@ -176,6 +178,11 @@ export class InteractionController
             clock,
             regrowth: entities.plantRegrowth,
             stageId: scene.currentLevelKey,
+            toolStrikeWeight: toolId => toolStrikeWeight(
+                entities.toolUpgrades,
+                getGameContent().recipes.filter((r): r is ToolUpgradeRecipe => 'targetToolId' in r),
+                toolId
+            ),
         });
 
         if (result.success)

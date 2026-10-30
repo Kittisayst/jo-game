@@ -1,7 +1,7 @@
 # ລະບົບທັກສະ (Skills): ພຸ່ງຫຼົບ, ສະກິວກົດໃຊ້ 10 ອັນ ແລະການອັບເກຣດເຄື່ອງມື
 
 - **Date:** 2026-10-30
-- **Status:** in progress (S1, S2, S3 done)
+- **Status:** in progress (S1 to S4 done)
 - **Project:** jo-game (ພະຈົນໄພຄວາມຮູ້ / Knowledge Quest)
 
 ## ເປົ້າໝາຍ (Goal)
@@ -125,7 +125,9 @@
 1. ສະຖານະ "ມຶນ" ທົ່ວໄປໃນ `Enemy` (ໃຊ້ຮ່ວມກັບທ່າ charge), `bossResist`.
 2. Ping: ຫາສັດຕູໃກ້ສຸດ ແລ້ວກະໂດດຕໍ່ 3 ໂຕ, ມຶນ.
 
-**Phase S4: ອັບເກຣດເຄື່ອງມື**
+**Phase S4: ອັບເກຣດເຄື່ອງມື** ✅ (branch `feat/skills-s4`)
+
+> ສະຖານະ: ເຮັດແລ້ວ ແຕ່ແຕກຕ່າງຈາກແຜນ 3 ຢ່າງ: (1) ໃຊ້ entity ໃໝ່ `ToolUpgrades` (+ save `toolUpgrades`) ແທນ `EquipmentState.upgradeLevels` ເພາະ `upgradeWeapon` ຜູກກັບ `WEAPON_CONFIGS` ຂອງດາບ; (2) ນ້ຳໜັກ Strike ເປັນ 1.5 / 2 / 3 (ບໍ່ແມ່ນ 1.25 / 1.5 / 2) ເພື່ອໃຫ້ທຸກລະດັບເຫັນຜົນກັບຕົ້ນໄມ້ 3 ເທື່ອ (3 → 2 → 2 → 1); (3) ອັບເກຣດສຳເລັດທັນທີ ບໍ່ໃຊ້ຄິວເວລາສ້າງ. ຂວານ/ຈົກ T1 ແລະ T2 ມີ 12 ຂັ້ນ, ຄ້ອນບໍ່ອັບເກຣດ. ບໍ່ໄດ້ເຮັດ: Durability ສູງສຸດເພີ່ມ, ປ້າຍ `×3` ຂອງ node ຍັງບອກຕົວເລກເດີມ (ຂໍ້ຄວາມລອຍສະແດງ 1.5/3, 3.0/3 ຕອນຕີ).
 1. `upgradeToolUseCase` + test, `strikeBonus` ໃນ `harvestResourceNodeUseCase`.
 2. ແຖບອັບເກຣດໃນ Workshop, ຂໍ້ມູນ +1..+3 ສຳລັບ T1 ແລະ T2 ໃນ `recipes.json`.
 3. e2e: ຂວານ +3 ຕັດຕົ້ນໄມ້ 2 ເທື່ອ.

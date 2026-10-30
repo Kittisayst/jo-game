@@ -6,6 +6,7 @@ import { entities } from '../../composition';
 import { soundManager } from '../../audio/SoundManager';
 import { ItemIcon } from './ItemIcon';
 import { CraftingStatus } from './CraftingStatus';
+import { ToolUpgradePanel } from './ToolUpgradePanel';
 import { formatCraftTime } from '../formatCraftTime';
 import { EventBus } from '../../EventBus';
 import { RepairList } from './RepairList';
@@ -24,6 +25,7 @@ export const WorkshopModal: React.FC<WorkshopModalProps> = ({ isOpen, onClose })
     ));
     const items = entities.itemCatalog.all();
     const [, setRevision] = useState(0);
+    const [tab, setTab] = useState<'craft' | 'upgrade'>('craft');
 
     if (!isOpen) return null;
 
@@ -75,9 +77,31 @@ export const WorkshopModal: React.FC<WorkshopModalProps> = ({ isOpen, onClose })
                     </button>
                 </div>
 
+                {/* Tabs */}
+                <div className="flex gap-4 px-6 pt-3 border-b border-slate-700/60 bg-slate-900/40">
+                    {([['craft', '🔨', 'ສ້າງ (Craft)'], ['upgrade', '⬆️', 'ອັບເກຣດເຄື່ອງມື (Upgrade)']] as const).map(([id, icon, label]) => (
+                        <button
+                            key={id}
+                            type="button"
+                            data-testid={`workshop-tab-${id}`}
+                            onClick={() => { setTab(id); soundManager.playSelect(); }}
+                            className={`pb-2.5 font-bold text-sm transition flex items-center gap-2 border-b-2 ${
+                                tab === id ? 'border-emerald-400 text-emerald-300' : 'border-transparent text-slate-400 hover:text-slate-200'
+                            }`}
+                        >
+                            <span>{icon}</span>
+                            <span>{label}</span>
+                        </button>
+                    ))}
+                </div>
+
                 {/* Recipe List */}
                 <div className="p-6 overflow-y-auto flex-1 space-y-4">
                     <CraftingStatus onCollected={() => setRevision(r => r + 1)} />
+                    {tab === 'upgrade' ? (
+                        <ToolUpgradePanel onChanged={() => setRevision(r => r + 1)} />
+                    ) : (
+                    <>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {recipes.map(recipe =>
                         {
@@ -190,6 +214,8 @@ export const WorkshopModal: React.FC<WorkshopModalProps> = ({ isOpen, onClose })
                         </h3>
                         <RepairList building="workshop" />
                     </div>
+                    </>
+                    )}
                 </div>
 
                 {/* Footer Backpack Status */}

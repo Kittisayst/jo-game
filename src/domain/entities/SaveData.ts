@@ -3,6 +3,7 @@ import type { CraftingJobSnapshot } from './CraftingQueue';
 import type { GardenSnapshot } from './Garden';
 import { MOVEMENT_ABILITY_IDS, MovementAbilityId } from './MovementAbilities';
 import { SKILL_SLOT_COUNT, SkillProgressionSnapshot } from './SkillProgression';
+import { MAX_TOOL_LEVEL } from './ToolUpgrades';
 import type { PendingReward } from './PendingRewards';
 import { TutorialSnapshot } from './TutorialProgress';
 import { SettingsData, StageProgressionData } from '../ports';
@@ -53,6 +54,8 @@ export interface SaveGameSnapshot
     movement: MovementAbilityId[];
     /** The active skills learned and the two skill slots. Missing in older saves. */
     skills: SkillProgressionSnapshot;
+    /** How far each tool (by item id) is upgraded, +1 to +3. Missing in older saves. */
+    toolUpgrades: Record<string, number>;
     /** What is in the Storage chest. Missing in older saves. */
     storage: BackpackSlotSnapshot[];
     /** When each small plant was last harvested (key = Stage id + node id, value = ms). Missing in older saves. */
@@ -125,6 +128,7 @@ export function createDefaultSaveSnapshot (slotId = 'slot_1'): SaveGameSnapshot
         crafting: null,
         movement: ['dash'],
         skills: { unlocked: [], equipped: [null, null] },
+        toolUpgrades: {},
         storage: [],
     };
 }
@@ -325,6 +329,11 @@ export function migrateSaveSnapshot (raw: unknown, fallbackSlotId = 'slot_1'): S
         return typeof id === 'string' && unlockedSkills.includes(id) ? id : null;
     });
     const skills: SkillProgressionSnapshot = { unlocked: unlockedSkills, equipped: equippedSkills };
+    const toolUpgrades: Record<string, number> = {};
+    for (const [id, level] of Object.entries(asRecord(data.toolUpgrades)))
+    {
+        if (typeof level === 'number' && Number.isInteger(level) && level >= 1 && level <= MAX_TOOL_LEVEL) toolUpgrades[id] = level;
+    }
     const storage: BackpackSlotSnapshot[] = [];
     for (const slot of Array.isArray(data.storage) ? data.storage : [])
     {
@@ -380,6 +389,7 @@ export function migrateSaveSnapshot (raw: unknown, fallbackSlotId = 'slot_1'): S
         crafting,
         movement,
         skills,
+        toolUpgrades,
         storage,
     };
 }

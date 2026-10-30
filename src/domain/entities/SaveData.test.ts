@@ -404,3 +404,17 @@ describe('Skills in a save', () =>
         expect(migrateSaveSnapshot({ version: CURRENT_SAVE_VERSION }).skills).toEqual({ unlocked: [], equipped: [null, null] });
     });
 });
+
+describe('Tool upgrades in a save', () =>
+{
+    it('keeps levels 1 to 3 and drops the rest', () =>
+    {
+        const saved = migrateSaveSnapshot({ version: CURRENT_SAVE_VERSION, toolUpgrades: { 'axe-t1': 2, 'pickaxe-t1': 9, 'axe-t2': 'x', 'hammer-t1': 1.5 } });
+        expect(saved.toolUpgrades).toEqual({ 'axe-t1': 2 });
+    });
+
+    it('starts with none in an older save', () =>
+    {
+        expect(migrateSaveSnapshot({ version: CURRENT_SAVE_VERSION }).toolUpgrades).toEqual({});
+    });
+});
