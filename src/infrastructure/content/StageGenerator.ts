@@ -19,6 +19,8 @@ export interface GenerateSpec
     seed: number;
     /** How many screens (800 px each) wide the Stage is. */
     screens: number;
+    /** Add a secret ledge that only the air dash reaches (see `placeSecretLedge`). */
+    secret?: boolean;
 }
 
 export interface GeneratedLevel
@@ -26,6 +28,8 @@ export interface GeneratedLevel
     level: Level;
     /** Where walking out clears the Stage. */
     exitX: number;
+    /** The secret ledge, when one was asked for and fits: its x and the y of the surface to stand on. */
+    secret?: { x: number; surfaceY: number };
 }
 
 export const SCREEN_WIDTH = 800;
@@ -45,6 +49,19 @@ const PLATFORM_ROW_MARGIN = 600;
 /** How far a node must stand from a spike so the hero is never pushed onto it, and an enemy so its patrol stays clear. */
 export const NODE_SPIKE_CLEARANCE = 110;
 export const ENEMY_SPIKE_CLEARANCE = 150;
+
+/**
+ * The secret ledge: a high platform with an edge-to-edge gap to its launch platform of 200 to 230 px: more than
+ * a running jump to a platform 72 px higher can cross (about 160 px) and less than a jump with the air dash at its top
+ * can (about 270 px), and so high above the
+ * ground (160 px, a jump lifts about 107) that it cannot be climbed to either. LevelReachability.test.ts checks
+ * these numbers against the real jump and dash.
+ */
+export const SECRET_GAPS: readonly number[] = [210, 220, 200, 230];
+/** No other platform may be nearer than this (edge to edge) to the ledge, so only the air dash gets there. */
+export const SECRET_CLEARANCE = 205;
+/** Centre y of the secret ledge: 72 px above a high step (an easy jump) but 232 px above the ground and 152 above a low step (too high for one). */
+const SECRET_Y = 440;
 
 interface BiomeTuning
 {
@@ -124,16 +141,50 @@ export function generateLevel (spec: GenerateSpec): GeneratedLevel
     }
     spikes.sort((a, b) => a.x - b.x);
 
+    // The secret ledge is added last and uses no random numbers, so a Stage without one is laid out as before
+    const secretX = spec.secret ? placeSecretLedge(platforms, exitX) : undefined;
+    const secretPlatforms = secretX === undefined ? [] : [{ x: secretX, y: SECRET_Y }];
+    if (secretX !== undefined) platforms.push({ x: secretX, y: SECRET_Y });
+
     return {
         level: {
             worldWidth,
             scenery: spec.biome,
             spawn: { x: 80, y: 556 },
             platforms,
+            ...(secretPlatforms.length > 0 ? { secretPlatforms } : {}),
             spikes,
         },
         exitX,
+        ...(secretX !== undefined ? { secret: { x: secretX, surfaceY: SECRET_Y - 16 } } : {}),
     };
+}
+
+/**
+ * Finds the x of a secret ledge: beside a platform, one of `SECRET_GAPS` away from its edge, on the right if that fits
+ * and on the left if not, and clear of every other platform. Undefined when no platform has such a spot.
+ */
+function placeSecretLedge (platforms: { x: number; y: number }[], exitX: number): number | undefined
+{
+    const minX = START_MARGIN + PLATFORM_WIDTH / 2;
+    // The ledge may reach over the exit sign: it is high above it, and the hero walks out below
+    const maxX = exitX - 40;
+    // Only a high step can launch to the ledge (a low step is too far below it), and only high steps can be jumped to it from
+    const high = platforms.filter(p => p.y === HIGH_Y);
+    for (const launch of [...high].reverse())
+    {
+        for (const gap of SECRET_GAPS)
+        {
+            for (const direction of [1, -1])
+            {
+                const x = launch.x + direction * (PLATFORM_WIDTH + gap);
+                if (x < minX || x > maxX) continue;
+                const others = high.filter(p => p !== launch);
+                if (others.every(p => Math.abs(p.x - x) - PLATFORM_WIDTH >= SECRET_CLEARANCE)) return x;
+            }
+        }
+    }
+    return undefined;
 }
 
 export interface PoolSpec

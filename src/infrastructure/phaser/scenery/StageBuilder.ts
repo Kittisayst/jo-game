@@ -57,6 +57,8 @@ function createNodeVisual(
     baseY: number
 ): Pick<ResourceNodeView, 'shakeOnStrike' | 'markHarvestedVisual' | 'showSapling' | 'showGrown'> {
     const textureKey = node.texture;
+    // A node on the secret ledge stands on that surface; every other one stands on the ground
+    baseY = node.surfaceY ?? baseY;
 
     if (scene.textures.exists(textureKey)) {
         const sprite = scene.add.sprite(node.x, baseY + 2, textureKey, 0);
@@ -103,6 +105,12 @@ function createNodeVisual(
         showSapling: () => g.setAlpha(0.35),
         showGrown: () => g.setAlpha(1),
     };
+}
+
+/** A bobbing sparkle over the reward of a secret ledge, so it can be seen from afar and wanted. */
+function addSecretSparkle(scene: Phaser.Scene, x: number, surfaceY: number): void {
+    const sparkle = scene.add.text(x, surfaceY - 74, '✨', { fontSize: '26px' }).setOrigin(0.5).setDepth(3);
+    scene.tweens.add({ targets: sparkle, y: sparkle.y - 8, alpha: { from: 1, to: 0.55 }, duration: 800, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
 }
 
 function addWaypoint(scene: Phaser.Scene, wp: StageWaypoint, baseY: number): WaypointView {
@@ -264,10 +272,12 @@ export function buildStageScenery(
 
         for (const node of zone.resourceNodes) {
             const { shakeOnStrike, markHarvestedVisual, showSapling, showGrown } = createNodeVisual(scene, node, baseY);
+            const standY = node.surfaceY ?? baseY;
+            if (node.secret) addSecretSparkle(scene, node.x, standY);
 
             const view: ResourceNodeView = {
                 ...node,
-                y: baseY - 30,
+                y: standY - 30,
                 progress: new ResourceNode(node.strikes),
                 shakeOnStrike,
                 markHarvestedVisual,

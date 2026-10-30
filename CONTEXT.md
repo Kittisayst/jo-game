@@ -76,6 +76,9 @@ One planting spot of the Garden: empty, growing or ready. The Garden starts with
 **Skill**:
 An active power the hero learns by passing the exam of a Realm's Textbook (one for each Realm, such as Power Wave for Realm 1). A Skill has a **rank** from 1 to 3, raised at the Academy for Credit and Materials: a higher rank has a shorter cooldown and a stronger effect. Two Skills can be on the **skill slots**, K and L; using one starts its **cooldown**, counted in Game time. A Skill never pays Credit and never makes Materials.
 
+**Secret ledge**:
+A high platform in a Stage that one jump cannot reach: the gap to its launch platform is wider than a jump crosses but within a jump with the air dash. It has a reward on it (a rich Resource node, with a ✨ over it so it can be seen from afar), so the air dash is worth having.
+
 **Tool upgrade**:
 An axe or pickaxe raised from +0 to +3 at the Workshop for Materials (never Credit). An upgraded tool counts for more of a Strike, so a tree or a rock takes fewer Strikes. The level belongs to the kind of tool (every Axe T1 is the same level). This is how chopping gets faster: it is not a Skill.
 

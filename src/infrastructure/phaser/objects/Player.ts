@@ -1,7 +1,7 @@
 import { Physics, Scene } from 'phaser';
 import { soundManager } from '../../audio/SoundManager';
 import { getGameContent } from '../../content/ContentCatalog';
-import { GROUND_SINK, JUMP_SPEED, MOVE_SPEED } from '../physicsConstants';
+import { FALL_GRAVITY_EXTRA, GROUND_SINK, JUMP_SPEED, MOVE_SPEED } from '../physicsConstants';
 import type { DashTuning } from '../../../domain/entities/MovementAbilities';
 
 const WIDTH = 32;
@@ -641,7 +641,7 @@ export class Player extends Physics.Arcade.Sprite
         // Asymmetric fall gravity: snappier, weighty descent
         if (body.velocity.y > 0)
         {
-            body.setGravityY(420);
+            body.setGravityY(FALL_GRAVITY_EXTRA);
         }
         else
         {
