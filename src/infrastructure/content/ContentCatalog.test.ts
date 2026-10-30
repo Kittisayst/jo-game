@@ -387,7 +387,7 @@ describe('validator errors', () =>
                 const durabilityOf = (id: string) => parsed.find(i => i.id === id)?.durability;
 
                 expect(durabilityOf('iron-sword')).toBe(80);
-                expect(durabilityOf('axe-t1')).toBe(40);
+                expect(durabilityOf('axe-t1')).toBe(60);
                 expect(durabilityOf('wooden-sword')).toBeUndefined();
             });
 
@@ -407,7 +407,9 @@ describe('validator errors', () =>
             {
                 const parsed = parseRepairs(repairs);
                 expect(parsed.map(r => r.itemId)).toEqual(['axe-t1', 'pickaxe-t1', 'iron-sword', 'crystal-sword']);
-                expect(parsed.every(r => r.building === 'forge' && r.ingredients.length > 0)).toBe(true);
+                expect(parsed.filter(r => r.building === 'workshop').map(r => r.itemId)).toEqual(['axe-t1', 'pickaxe-t1']);
+                expect(parsed.filter(r => r.building === 'forge').map(r => r.itemId)).toEqual(['iron-sword', 'crystal-sword']);
+                expect(parsed.every(r => r.ingredients.length > 0)).toBe(true);
 
                 const free = JSON.parse(JSON.stringify(repairs));
                 free.repairs[0].ingredients = [];

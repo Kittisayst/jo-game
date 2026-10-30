@@ -22,7 +22,7 @@ export function parseRepairs (raw: unknown): RepairRecipe[]
 
         return {
             itemId,
-            building: v.asOneOf(repair.building, ['forge'] as const, `${p}.building`),
+            building: v.asOneOf(repair.building, ['forge', 'workshop'] as const, `${p}.building`),
             ingredients: ingredients.map(i => ({ itemId: i.itemId, count: i.count })),
         };
     });

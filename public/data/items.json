@@ -101,7 +101,7 @@
     "toolType": "axe",
     "tier": 1,
     "maxStack": 1,
-    "durability": 40,
+    "durability": 60,
     "icon": "🪓",
     "iconImage": "assets/items/axe-t1.png",
     "held": { "image": "assets/held/axe-t1.png", "gripX": 16, "gripY": 26 }
@@ -115,7 +115,7 @@
     "toolType": "pickaxe",
     "tier": 1,
     "maxStack": 1,
-    "durability": 40,
+    "durability": 60,
     "icon": "⛏️",
     "iconImage": "assets/items/pickaxe-t1.png",
     "held": { "image": "assets/held/pickaxe-t1.png", "gripX": 16, "gripY": 26 }

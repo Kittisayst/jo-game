@@ -6,7 +6,8 @@ import { ITEM_REPAIRED_EVENT } from './WearItemUseCase';
 export interface RepairRecipe
 {
     itemId: string;
-    building: 'forge';
+    /** The Forge mends swords, the Workshop mends tools. */
+    building: 'forge' | 'workshop';
     ingredients: CraftingIngredient[];
 }
 
