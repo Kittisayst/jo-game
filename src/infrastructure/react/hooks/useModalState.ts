@@ -1,6 +1,14 @@
 import { useRef, useState } from 'react';
 import type { GateRequirements } from '../../../application/RepairBrokenGateUseCase';
+import type { QuestionData } from '../../../domain/entities/Quiz';
 import type { TextbookModalMode } from '../components/TextbookModal';
+
+/** The question waiting for an answer at the end of a Stage. */
+export interface StageQuestionState
+{
+    stageId: string;
+    question: QuestionData;
+}
 
 /**
  * Open/closed state of every modal and screen laid over the game, with the small bits of
@@ -27,6 +35,8 @@ export function useModalState ()
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
     const [isStageSelectOpen, setIsStageSelectOpen] = useState(false);
     const [isStageMapOpen, setIsStageMapOpen] = useState(false);
+    // Not closed by Esc: the Stage is frozen until the player has answered
+    const [stageQuestion, setStageQuestion] = useState<StageQuestionState | null>(null);
 
     // Newest state for `closeTopModal`, which key handlers may call from an older render
     const open = {
@@ -41,6 +51,7 @@ export function useModalState ()
         settings: isSettingsOpen,
         stageSelect: isStageSelectOpen,
         stageMap: isStageMapOpen,
+        stageQuestion: stageQuestion !== null,
     };
     const openRef = useRef(open);
     openRef.current = open;
@@ -84,6 +95,7 @@ export function useModalState ()
         isSettingsOpen, setIsSettingsOpen,
         isStageSelectOpen, setIsStageSelectOpen,
         isStageMapOpen, setIsStageMapOpen,
+        stageQuestion, setStageQuestion,
         closeTopModal,
         isAnyModalOpen,
     };

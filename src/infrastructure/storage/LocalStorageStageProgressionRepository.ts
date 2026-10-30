@@ -6,6 +6,7 @@ const STORAGE_KEY = 'jo_stage_progression_v1';
 const DEFAULT_DATA: StageProgressionData = {
     unlockedStages: ['village', 'level-1'],
     completedStages: [],
+    questionRewardedStages: [],
 };
 
 /**
@@ -24,9 +25,14 @@ export class LocalStorageStageProgressionRepository implements StageProgressionP
             ? Array.from(new Set(parsed.completedStages))
             : DEFAULT_DATA.completedStages;
 
+        const rewarded = Array.isArray(parsed?.questionRewardedStages)
+            ? Array.from(new Set(parsed.questionRewardedStages))
+            : [];
+
         return {
             unlockedStages: unlocked,
             completedStages: completed,
+            questionRewardedStages: rewarded,
         };
     }
 

@@ -12,7 +12,8 @@ import type { QuestionData } from '../../domain/entities/Quiz';
 import type { RecipeDefinition } from '../../application/CraftRecipeUseCase';
 import type { WeaponUpgradeRecipe } from '../../application/UpgradeWeaponTierUseCase';
 import { parseStageDefinitions, StageDefinition } from '../phaser/stages/StageDefinition';
-import { parseStageScaling } from './ScalingCatalog';
+import { parseStageQuestion, parseStageScaling } from './ScalingCatalog';
+import { isLessonNumber } from '../../domain/entities/StageNumber';
 import type { StageScaling } from '../../domain/entities/StageScaling';
 import { NodeDefinition, parseNodes } from './NodeCatalog';
 import { parseRealms, RealmDefinition } from './RealmCatalog';
@@ -36,6 +37,8 @@ export interface GameContent
     stages: StageDefinition[];
     /** How ordinary enemies grow with the Stage number. */
     scaling: StageScaling;
+    /** Credit paid for the first correct end-of-Stage answer of each Stage. */
+    stageQuestionCredit: number;
     /** How weapons and tools look in the hero's hand, by item id. */
     heldArt: Record<string, HeldArt>;
     /** The rows of the player skin sheets (animations) and where the hand is in each frame. */
@@ -85,6 +88,14 @@ export function parseItems (raw: unknown): ItemDefinition[]
     });
 }
 
+/** A lesson number such as `3-1` (Stage 3, first lesson). */
+function parseLesson (v: ReturnType<typeof makeValidators>, value: unknown, path: string): string
+{
+    const lesson = v.asString(value, path);
+    if (!isLessonNumber(lesson)) v.fail(path, 'a lesson number written <stage>-<order>, such as 3-1');
+    return lesson;
+}
+
 export function parseBooks (raw: unknown): BookDefinition[]
 {
     const v = makeValidators('books.json');
@@ -115,6 +126,7 @@ export function parseBooks (raw: unknown): BookDefinition[]
                     content: v.asText(page.content, `${pp}.content`),
                     keyPoints: v.asArray(page.keyPoints, `${pp}.keyPoints`).map((k, n) => v.asText(k, `${pp}.keyPoints[${n}]`)),
                     illustration: v.optionalString(page.illustration, `${pp}.illustration`),
+                    lesson: parseLesson(v, page.lesson, `${pp}.lesson`),
                 };
             }),
         };
@@ -136,6 +148,7 @@ export function parseQuestions (raw: unknown): QuestionData[]
             id: v.asString(q.id, `${p}.id`),
             bookId: v.asString(q.bookId, `${p}.bookId`),
             pageNumber: v.asNumber(q.pageNumber, `${p}.pageNumber`),
+            lesson: parseLesson(v, q.lesson, `${p}.lesson`),
             question: v.asText(q.question, `${p}.question`),
             options,
             correctIndex,
@@ -288,6 +301,7 @@ export async function loadGameContent (): Promise<GameContent>
         nodes: parsedNodes,
         stages: parseStageDefinitions(stages, parsedNodes),
         scaling: parseStageScaling(stages),
+        stageQuestionCredit: parseStageQuestion(stages).credit,
         heldArt: parseHeldArt(items),
         playerAnimations: parsePlayerAnimations(playerAnimations),
     };

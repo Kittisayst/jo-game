@@ -68,6 +68,7 @@ export class GameState
             stageProgression: {
                 unlockedStages: this.stageProgression.unlockedStages,
                 completedStages: this.stageProgression.completedStages,
+                questionRewardedStages: this.stageProgression.questionRewardedStages,
             },
             wallet: { balance: this.wallet.balance },
             books,
@@ -85,7 +86,11 @@ export class GameState
         this.skinManager.restore(snapshot.activeSkinId, snapshot.ownedSkins);
         this.settings.setSoundMuted(snapshot.settings.soundMuted);
         this.settings.setMusicMuted(snapshot.settings.musicMuted);
-        this.stageProgression.loadFrom(snapshot.stageProgression.unlockedStages, snapshot.stageProgression.completedStages);
+        this.stageProgression.loadFrom(
+            snapshot.stageProgression.unlockedStages,
+            snapshot.stageProgression.completedStages,
+            snapshot.stageProgression.questionRewardedStages ?? []
+        );
         this.wallet.setBalance(snapshot.wallet.balance);
 
         for (const key of Object.keys(this.books))

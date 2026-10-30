@@ -35,6 +35,7 @@ export interface GameEventHandlers
     onBackpackItemUsed?: () => void;
     onBackpackChanged?: () => void;
     onStageCleared?: (payload: { stageId: string }) => void;
+    onOpenStageQuestion?: (payload: { stageId: string }) => void;
 
     // From the domain (DomainEvents)
     onPlayerHealthChanged?: (payload: PlayerDamagedPayload | PlayerHealedPayload) => void;
@@ -62,6 +63,7 @@ const EVENT_BUS_EVENTS: [string, keyof GameEventHandlers][] = [
     ['backpack-item-used', 'onBackpackItemUsed'],
     ['backpack-changed', 'onBackpackChanged'],
     ['stage-cleared', 'onStageCleared'],
+    ['open-stage-question', 'onOpenStageQuestion'],
 ];
 
 const DOMAIN_EVENTS: [string, keyof GameEventHandlers][] = [

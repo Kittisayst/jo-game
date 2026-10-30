@@ -468,7 +468,7 @@ export class Game extends Scene
 
         if (this.stageExitX !== undefined && this.player.x >= this.stageExitX)
         {
-            this.handleStageCleared();
+            this.handleStageExit();
             return;
         }
 
@@ -536,6 +536,26 @@ export class Game extends Scene
             world.debugGraphic.clear();
         }
         soundManager.playSelect();
+    }
+
+    /**
+     * The hero walked out of a Stage. A Stage with lessons asks its question first (React answers it and then
+     * clears the Stage); one without clears at once. The scene freezes either way.
+     */
+    private handleStageExit ()
+    {
+        if (this.isStageCleared) return;
+        if (!this.stage || this.stage.lessons.length === 0)
+        {
+            this.handleStageCleared();
+            return;
+        }
+
+        this.isStageCleared = true;
+        this.physics.pause();
+        soundManager.stopBgm();
+        soundManager.playLevelComplete();
+        EventBus.emit('open-stage-question', { stageId: this.currentLevelKey });
     }
 
     private handleStageCleared ()

@@ -55,6 +55,7 @@ export function createDefaultSaveSnapshot (slotId = 'slot_1'): SaveGameSnapshot
         stageProgression: {
             unlockedStages: [...ALWAYS_UNLOCKED_STAGES],
             completedStages: [],
+            questionRewardedStages: [],
         },
         // Exactly enough Credit to buy the first textbook, so a new player can never get stuck
         wallet: {
@@ -147,6 +148,7 @@ export function migrateSaveSnapshot (raw: unknown, fallbackSlotId = 'slot_1'): S
         : [];
     const unlockedStages = Array.from(new Set([...ALWAYS_UNLOCKED_STAGES, ...stageList(rawProg.unlockedStages)]));
     const completedStages = Array.from(new Set(stageList(rawProg.completedStages)));
+    const questionRewardedStages = Array.from(new Set(stageList(rawProg.questionRewardedStages)));
 
     // Books
     const books: Record<string, BookProgressSnapshot> = {
@@ -227,7 +229,7 @@ export function migrateSaveSnapshot (raw: unknown, fallbackSlotId = 'slot_1'): S
         activeSkinId,
         ownedSkins,
         settings,
-        stageProgression: { unlockedStages, completedStages },
+        stageProgression: { unlockedStages, completedStages, questionRewardedStages },
         wallet: { balance },
         books,
         backpack,

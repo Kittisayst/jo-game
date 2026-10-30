@@ -1,13 +1,13 @@
 import { test, expect, Page } from '@playwright/test';
 import { Bot } from './helpers/bot';
-import { enterStage, unlockStages } from './helpers/stage';
+import { answerStageQuestion, enterStage, unlockStages, walkOutOfStage } from './helpers/stage';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 async function progress (page: Page): Promise<{ cleared1: boolean; open2: boolean; open3: boolean }>
 {
   return page.evaluate(async () => {
-    const { entities } = await import('/src/infrastructure/composition.ts');
+    const entities = (window as any).__entities; // the app's own state (a second import() can be a second copy)
     return {
       cleared1: entities.stageProgression.isStageCompleted('stage-001'),
       open2: entities.stageProgression.isStageUnlocked('stage-002'),
@@ -51,7 +51,8 @@ test.describe('The map of 100 stages', () => {
     expect(await progress(page)).toEqual({ cleared1: false, open2: false, open3: false });
 
     const bot = new Bot(page, false);
-    await bot.goTo(1255, { tolerance: 15, timeoutMs: 60000 });
+    await walkOutOfStage(page, bot);
+    await answerStageQuestion(page, true);
 
     await expect(page.locator('.level-badge')).toContainText(/ໝູ່ບ້ານ/, { timeout: 15000 });
     expect(await progress(page)).toEqual({ cleared1: true, open2: true, open3: false });

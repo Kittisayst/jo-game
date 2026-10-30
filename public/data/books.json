@@ -15,55 +15,80 @@
         "title": "ອົງປະກອບຂອງລະບົບຄອມພິວເຕີ",
         "illustration": "assets/books/ch1-p1-system.svg",
         "content": "ຄອມພິວເຕີເຮັດວຽກປະສານກັນ 3 ສ່ວນຫຼັກຄື:\n1. ຮາດແວ (Hardware): ອຸປະກອນທີ່ຈັບຕ້ອງໄດ້ ເຊັ່ນ ຈໍພາບ, ຄີບອດ, ເຄສ.\n2. ຊອບແວ (Software): ໂປຣແກຣມ ຫຼື ຊຸດຄຳສັ່ງທີ່ສັ່ງໃຫ້ຮາດແວເຮັດວຽກ ເຊັ່ນ Windows, Browser.\n3. ບຸກຄະລາກອນ (Peopleware): ຜູ້ໃຊ້ງານ, ຜູ້ພັດທະນາໂປຣແກຣມ ຫຼື ຊ່າງເຕັກນິກ.",
-        "keyPoints": [
-          "Hardware = ຈັບຕ້ອງໄດ້",
-          "Software = ຊຸດຄຳສັ່ງ/ໂປຣແກຣມ",
-          "Peopleware = ຜູ້ໃຊ້ງານ/ຜູ້ຄວບຄຸມ"
-        ]
+        "keyPoints": ["Hardware = ຈັບຕ້ອງໄດ້", "Software = ຊຸດຄຳສັ່ງ/ໂປຣແກຣມ", "Peopleware = ຜູ້ໃຊ້ງານ/ຜູ້ຄວບຄຸມ"],
+        "lesson": "1-1"
       },
       {
         "pageNumber": 2,
         "title": "ອຸປະກອນປ້ອນຂໍ້ມູນ (Input Devices)",
         "illustration": "assets/books/ch1-p2-input.svg",
         "content": "ອຸປະກອນ Input ເຮັດໜ້າທີ່ຮັບຂໍ້ມູນ ຫຼື ຄຳສັ່ງຈາກມະນຸດເຂົ້າສູ່ຄອມພິວເຕີ:\n- ຄີບອດ (Keyboard): ປ້ອນຕົວອັກສອນ ແລະ ຕົວເລກ\n- ເມົາສ໌ (Mouse): ຊີ້ຕຳແໜ່ງ ແລະ ຄລິກເລືອກຄຳສັ່ງ\n- ໄມໂຄຣໂຟນ (Microphone): ຮັບສັນຍານສຽງ\n- ສະແກນເນີ (Scanner) & ກ້ອງ (Webcam): ຮັບພາບ ແລະ ເອກະສານ.",
-        "keyPoints": [
-          "Input = ນຳຂໍ້ມູນເຂົ້າ",
-          "ຕົວຢ່າງ: Keyboard, Mouse, Microphone, Webcam, Scanner",
-          "Monitor ແລະ Printer ບໍ່ແມ່ນ Input"
-        ]
+        "keyPoints": ["Input = ນຳຂໍ້ມູນເຂົ້າ", "ຕົວຢ່າງ: Keyboard, Mouse, Microphone, Webcam, Scanner", "Monitor ແລະ Printer ບໍ່ແມ່ນ Input"],
+        "lesson": "2-1"
       },
       {
         "pageNumber": 3,
         "title": "ອຸປະກອນສະແດງຜົນ (Output Devices)",
         "illustration": "assets/books/ch1-p3-output.svg",
         "content": "ອຸປະກອນ Output ເຮັດໜ້າທີ່ນຳຜົນການປະມວນຜົນມາສະແດງໃຫ້ຜູ້ໃຊ້ຮັບຮູ້:\n- ຈໍພາບ (Monitor): ສະແດງພາບ ແລະ ຂໍ້ຄວາມ\n- ເຄື່ອງພິມ (Printer): ພິມຂໍ້ຄວາມ/ຮູບພາບລົງເຈ້ຍ\n- ລຳໂພງ (Speaker) & ຫູຟັງ (Headphones): ສົ່ງສັນຍານສຽງອອກມາ\n- ໂປຣເຈັກເຕີ (Projector): ຂະຫຍາຍພາບສູ່ສາກໃຫຍ່.",
-        "keyPoints": [
-          "Output = ສົ່ງຜົນຮັບອອກມາໃຫ້ຄົນເຫັນ/ໄດ້ຍິນ",
-          "ຕົວຢ່າງ: Monitor, Printer, Speaker, Projector",
-          "Keyboard ແລະ Mouse ບໍ່ແມ່ນ Output"
-        ]
+        "keyPoints": ["Output = ສົ່ງຜົນຮັບອອກມາໃຫ້ຄົນເຫັນ/ໄດ້ຍິນ", "ຕົວຢ່າງ: Monitor, Printer, Speaker, Projector", "Keyboard ແລະ Mouse ບໍ່ແມ່ນ Output"],
+        "lesson": "3-1"
       },
       {
         "pageNumber": 4,
         "title": "CPU ແລະ ໜ່ວຍຄວາມຈຳ (Memory & Storage)",
         "illustration": "assets/books/ch1-p4-cpu-memory.svg",
         "content": "ການປະມວນຜົນ ແລະ ເກັບກຳຂໍ້ມູນ:\n- CPU (Central Processing Unit): ສະໝອງຂອງຄອມພິວເຕີ ເຮັດໜ້າທີ່ຄຳນວນ ແລະ ປະມວນຜົນຄຳສັ່ງທັງໝົດ\n- RAM (Random Access Memory): ໜ່ວຍຄວາມຈຳຫຼັກຊົ່ວຄາວ ໄວສູງ ຖ້າປິດເຄື່ອງຂໍ້ມູນຈະຫາຍ\n- Storage (SSD / HDD): ໜ່ວຍເກັບຂໍ້ມູນຖາວອນ ປິດເຄື່ອງຂໍ້ມູນກໍຍັງຢູ່ ເຊັ່ນ ໄຟລ໌ງານ, ລະບົບປະຕິບັດການ.",
-        "keyPoints": [
-          "CPU = ສະໝອງປະມວນຜົນຄຳນວນ",
-          "RAM = ຄວາມຈຳຊົ່ວຄາວ (ໄຟດັບຂໍ້ມູນຫາຍ)",
-          "SSD / HDD = ເກັບຂໍ້ມູນຖາວອນ"
-        ]
+        "keyPoints": ["CPU = ສະໝອງປະມວນຜົນຄຳນວນ", "RAM = ຄວາມຈຳຊົ່ວຄາວ (ໄຟດັບຂໍ້ມູນຫາຍ)", "SSD / HDD = ເກັບຂໍ້ມູນຖາວອນ"],
+        "lesson": "4-1"
       },
       {
         "pageNumber": 5,
         "title": "ປະເພດຂອງຊອບແວ (Software Types)",
         "illustration": "assets/books/ch1-p5-software.svg",
         "content": "ຊອບແວແບ່ງອອກເປັນ 2 ປະເພດຫຼັກ:\n1. ຊອບແວລະບົບ (System Software): ຄວບຄຸມຮາດແວ ແລະ ເປັນພື້ນຖານໃຫ້ໂປຣແກຣມອື່ນ ເຊັ່ນ Windows, Linux, macOS, Android.\n2. ຊອບແວປະຍຸກ (Application Software): ໂປຣແກຣມທີ່ສ້າງຂຶ້ນເພື່ອເຮັດວຽກສະເພາະດ້ານ ເຊັ່ນ Microsoft Word, Web Browser, ເກມ, Photoshop.",
-        "keyPoints": [
-          "System Software = ລະບົບປະຕິບັດການ (OS)",
-          "Application Software = ແອັບ/ໂປຣແກຣມເຮັດວຽກສະເພາະດ້ານ",
-          "Windows ເປັນ System Software; Word ເປັນ Application Software"
-        ]
+        "keyPoints": ["System Software = ລະບົບປະຕິບັດການ (OS)", "Application Software = ແອັບ/ໂປຣແກຣມເຮັດວຽກສະເພາະດ້ານ", "Windows ເປັນ System Software; Word ເປັນ Application Software"],
+        "lesson": "5-1"
+      },
+      {
+        "pageNumber": 6,
+        "title": "ລະບົບປະຕິບັດການ (Operating System)",
+        "illustration": "assets/books/ch1-p6-os.svg",
+        "content": "ລະບົບປະຕິບັດການ (OS) ແມ່ນຊອບແວຫຼັກທີ່ຄວບຄຸມຄອມພິວເຕີທັງໝົດ:\n1. ຈັດການຮາດແວ: ບອກວ່າຈໍພາບ, ຄີບອດ ແລະ ເມົາສ໌ ເຮັດຫຍັງ ແລະ ເມື່ອໃດ.\n2. ເປີດ ແລະ ຈັດການໂປຣແກຣມ: ໃຫ້ຫຼາຍໂປຣແກຣມແບ່ງໃຊ້ CPU ແລະ ໜ່ວຍຄວາມຈຳ.\n3. ຈັດການໄຟລ໌ ແລະ ໃຫ້ໜ້າຈໍທີ່ຜູ້ໃຊ້ໃຊ້ງານໄດ້.\nຕົວຢ່າງ: Windows, macOS, Linux ໃນຄອມພິວເຕີ; Android ແລະ iOS ໃນໂທລະສັບ.",
+        "keyPoints": ["OS = ຊອບແວຫຼັກທີ່ຄວບຄຸມເຄື່ອງ", "ຕົວຢ່າງ: Windows, macOS, Linux, Android", "ຈັດການຮາດແວ, ໂປຣແກຣມ ແລະ ໄຟລ໌"],
+        "lesson": "6-1"
+      },
+      {
+        "pageNumber": 7,
+        "title": "ໄຟລ໌ ແລະ ໂຟນເດີ (Files & Folders)",
+        "illustration": "assets/books/ch1-p7-files.svg",
+        "content": "ໄຟລ໌ (File) ແມ່ນຂໍ້ມູນທີ່ບັນທຶກໄວ້ໜຶ່ງກ້ອນ ເຊັ່ນ ເອກະສານ, ຮູບ ຫຼື ເພງ. ຊື່ໄຟລ໌ມີນາມສະກຸນບອກຊະນິດ:\n- .docx ເປັນເອກະສານ Word\n- .jpg ແລະ .png ເປັນຮູບພາບ\n- .mp3 ເປັນສຽງ\nໂຟນເດີ (Folder) ແມ່ນບ່ອນເກັບໄຟລ໌ໃຫ້ເປັນລະບຽບ, ໂຟນເດີໜຶ່ງມີໂຟນເດີຍ່ອຍໄດ້.",
+        "keyPoints": ["ໄຟລ໌ = ຂໍ້ມູນທີ່ບັນທຶກໄວ້", "ນາມສະກຸນບອກຊະນິດໄຟລ໌ (.jpg ແມ່ນຮູບ)", "ໂຟນເດີ = ບ່ອນຈັດເກັບໄຟລ໌"],
+        "lesson": "7-1"
+      },
+      {
+        "pageNumber": 8,
+        "title": "ຫົວໜ່ວຍຂໍ້ມູນ (Bit ແລະ Byte)",
+        "illustration": "assets/books/ch1-p8-bytes.svg",
+        "content": "ຄອມພິວເຕີເກັບຂໍ້ມູນເປັນຕົວເລກ 0 ແລະ 1:\n- ບິດ (Bit) ແມ່ນຫົວໜ່ວຍນ້ອຍສຸດ, ເກັບໄດ້ 0 ຫຼື 1.\n- 1 ໄບຕ໌ (Byte) = 8 ບິດ, ພໍເກັບໜຶ່ງຕົວອັກສອນ.\n- 1 KB = 1,024 Byte, 1 MB = 1,024 KB, 1 GB = 1,024 MB.\nສະນັ້ນຮູບໜຶ່ງໃບອາດເປັນ MB, ແລະ ຮາດດິດເກັບໄດ້ເປັນ GB ຫຼື TB.",
+        "keyPoints": ["Bit = 0 ຫຼື 1", "1 Byte = 8 Bit", "KB < MB < GB < TB"],
+        "lesson": "8-1"
+      },
+      {
+        "pageNumber": 9,
+        "title": "ເລກຖານສອງ (Binary)",
+        "illustration": "assets/books/ch1-p9-binary.svg",
+        "content": "ຄອມພິວເຕີນັບແບບຖານສອງ ໃຊ້ແຕ່ 0 ແລະ 1. ແຕ່ລະຕຳແໜ່ງມີຄ່າເພີ່ມເທົ່າໂຕຈາກຂວາໄປຊ້າຍ: 1, 2, 4, 8...\nຕົວຢ່າງ: 101 ໃນຖານສອງ = 4 + 0 + 1 = 5.\nຕົວຢ່າງ: 11 ໃນຖານສອງ = 2 + 1 = 3.\nເລກ 0 ຄື 0, ເລກ 1 ຄື 1, ເລກ 2 ຂຽນເປັນ 10.",
+        "keyPoints": ["ຖານສອງໃຊ້ແຕ່ 0 ແລະ 1", "ຄ່າຕຳແໜ່ງ: 1, 2, 4, 8...", "101 (ຖານສອງ) = 5"],
+        "lesson": "9-1"
+      },
+      {
+        "pageNumber": 10,
+        "title": "ໃຊ້ຄອມພິວເຕີຢ່າງປອດໄພ",
+        "illustration": "assets/books/ch1-p10-safety.svg",
+        "content": "ນິໄສງ່າຍໆທີ່ຊ່ວຍປ້ອງກັນຂໍ້ມູນ:\n1. ຕັ້ງລະຫັດຜ່ານທີ່ຍາວ ແລະ ບໍ່ໃຊ້ຊ້ຳກັບບັນຊີອື່ນ.\n2. ສຳຮອງຂໍ້ມູນ (Backup) ໄວ້ອີກບ່ອນ ເພື່ອບໍ່ໃຫ້ເສຍຖ້າເຄື່ອງເສຍ.\n3. ອັບເດດລະບົບ ແລະ ໂປຣແກຣມເປັນປະຈຳ.\n4. ບໍ່ເປີດໄຟລ໌ ຫຼື ລິ້ງຈາກຄົນທີ່ບໍ່ຮູ້ຈັກ ເພາະອາດມີມັນແວຣ໌ (Malware).",
+        "keyPoints": ["ລະຫັດຜ່ານຍາວ ແລະ ບໍ່ຊ້ຳ", "Backup = ສຳຮອງຂໍ້ມູນ", "ບໍ່ເປີດລິ້ງ/ໄຟລ໌ຈາກຄົນແປກໜ້າ"],
+        "lesson": "10-1"
       }
     ]
   },
@@ -83,32 +108,24 @@
         "title": "ເຄືອຂ່າຍ LAN ແລະ WAN",
         "illustration": "assets/books/ch2-p1-lan-wan.svg",
         "content": "ເຄືອຂ່າຍຄອມພິວເຕີຄືການນຳເອົາອຸປະກອນມາເຊື່ອມຕໍ່ກັນ:\n- LAN (Local Area Network): ເຄືອຂ່າຍໄລຍະໃກ້ ເຊັ່ນ ໃນຫ້ອງຮຽນ, ໃນອາຄານ.\n- WAN (Wide Area Network): ເຄືອຂ່າຍໄລຍະໄກ ເຊື່ອມຕໍ່ຂ້າມເມືອງ ຫຼື ຂ້າມປະເທດ ເຊິ່ງ ອິນເຕີເນັດ (Internet) ແມ່ນເຄືອຂ່າຍ WAN ທີ່ໃຫຍ່ທີ່ສຸດໃນໂລກ.",
-        "keyPoints": [
-          "LAN = ເຄືອຂ່າຍພາຍໃນອາຄານ/ໄລຍະໃກ້",
-          "WAN = ເຄືອຂ່າຍໄລຍະໄກ",
-          "Internet = ເຄືອຂ່າຍ WAN ທີ່ໃຫຍ່ທີ່ສຸດ"
-        ]
+        "keyPoints": ["LAN = ເຄືອຂ່າຍພາຍໃນອາຄານ/ໄລຍະໃກ້", "WAN = ເຄືອຂ່າຍໄລຍະໄກ", "Internet = ເຄືອຂ່າຍ WAN ທີ່ໃຫຍ່ທີ່ສຸດ"],
+        "lesson": "11-1"
       },
       {
         "pageNumber": 2,
         "title": "IP Address ແລະ Router",
         "illustration": "assets/books/ch2-p2-ip-router.svg",
         "content": "ການສົ່ງຂໍ້ມູນໃນເຄືອຂ່າຍ:\n- IP Address: ໝາຍເລກປະຈຳຕົວຂອງອຸປະກອນໃນເຄືອຂ່າຍ ຄ້າຍກັບບ້ານເລກທີ.\n- Router: ອຸປະກອນທີ່ເຮັດໜ້າທີ່ຊອກຫາເສັ້ນທາງ ແລະ ສົ່ງຕໍ່ຂໍ້ມູນລະຫວ່າງເຄືອຂ່າຍຕ່າງໆ.\n- Wi-Fi: ການເຊື່ອມຕໍ່ເຄືອຂ່າຍແບບໄຮ້ສາຍໂດຍໃຊ້ຄື້ນວິທະຍຸ.",
-        "keyPoints": [
-          "IP Address = ໝາຍເລກປະຈຳເຄື່ອງໃນເຄືອຂ່າຍ",
-          "Router = ອຸປະກອນກຳນົດເສັ້ນທາງສົ່ງຂໍ້ມູນ"
-        ]
+        "keyPoints": ["IP Address = ໝາຍເລກປະຈຳເຄື່ອງໃນເຄືອຂ່າຍ", "Router = ອຸປະກອນກຳນົດເສັ້ນທາງສົ່ງຂໍ້ມູນ"],
+        "lesson": "12-1"
       },
       {
         "pageNumber": 3,
         "title": "ຄວາມປອດໄພ ແລະ ໄພຄຸກຄາມທາງໄຊເບີ",
         "illustration": "assets/books/ch2-p3-security.svg",
         "content": "ການປ້ອງກັນຕົວເອງໃນໂລກດິຈິທອນ:\n- ລະຫັດຜ່ານ (Password): ຄວນຕັ້ງໃຫ້ຍາວ ແລະ ປະສົມຕົວເລກ/ອັກສອນພິເສດ.\n- Phishing: ການຫຼອກລວງເອົາຂໍ້ມູນຜ່ານອີເມວ ຫຼື ເວັບໄຊປອມ.\n- Firewall: ລະບົບປ້ອງກັນການບຸກລຸກລະຫວ່າງເຄືອຂ່າຍ.",
-        "keyPoints": [
-          "ຢ່າບອກລະຫັດຜ່ານກັບໃຜ",
-          "ລະວັງ Phishing ເວັບໄຊປອມ",
-          "Firewall ຊ່ວຍກັ່ນຕອງຂໍ້ມູນທີ່ບໍ່ປອດໄພ"
-        ]
+        "keyPoints": ["ຢ່າບອກລະຫັດຜ່ານກັບໃຜ", "ລະວັງ Phishing ເວັບໄຊປອມ", "Firewall ຊ່ວຍກັ່ນຕອງຂໍ້ມູນທີ່ບໍ່ປອດໄພ"],
+        "lesson": "13-1"
       }
     ]
   }

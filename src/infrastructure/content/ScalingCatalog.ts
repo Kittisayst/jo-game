@@ -1,4 +1,4 @@
-/** The `scaling` block of `public/data/stages.json`: how enemies grow with the Stage number. */
+/** The top-level blocks of `public/data/stages.json` besides the Stage list: `scaling` and `stageQuestion`. */
 
 import type { StageScaling } from '../../domain/entities/StageScaling';
 import { makeValidators } from './validate';
@@ -20,4 +20,14 @@ export function parseStageScaling (raw: unknown): StageScaling
         enemyDamagePerRealm: read('enemyDamagePerRealm'),
         dropBonusPerRealm: read('dropBonusPerRealm'),
     };
+}
+
+/** The question asked at the end of a Stage: how much Credit the first correct answer of a Stage pays. */
+export function parseStageQuestion (raw: unknown): { credit: number }
+{
+    const v = makeValidators('stages.json');
+    const block = v.asObject(v.asObject(raw, 'root').stageQuestion, 'stageQuestion');
+    const credit = v.asNumber(block.credit, 'stageQuestion.credit');
+    if (!Number.isInteger(credit) || credit < 0) v.fail('stageQuestion.credit', 'a whole number of Credit, 0 or more');
+    return { credit };
 }

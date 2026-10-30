@@ -20,5 +20,9 @@ const itemCatalog = new ItemCatalog();
 export const entities = new GameState(itemCatalog);
 entities.loadFromSnapshot(saveManager.load());
 
+// Development only: lets the browser tests read the live state. A test that `import()`s this file itself can
+// get a second copy of the module (and of the state) if it does so while the app is still loading.
+if (import.meta.env.DEV) (window as unknown as { __entities: GameState }).__entities = entities;
+
 // Push persisted audio preferences into SoundManager
 applySettingsUseCase(entities.settings);

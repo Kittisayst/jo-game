@@ -43,6 +43,8 @@ import { BackpackModal } from './components/BackpackModal';
 import { GateRepairModal } from './components/GateRepairModal';
 import { WaypointModal } from './components/WaypointModal';
 import { QuizFinisherModal } from './components/QuizFinisherModal';
+import { StageQuestionModal } from './components/StageQuestionModal';
+import { answerStageQuestionUseCase, pickStageQuestion } from '../../application/AnswerStageQuestionUseCase';
 import { returnToVillageUseCase } from '../../application/ReturnToVillageUseCase';
 import {
     ACTIVE_SESSION_STORAGE_KEY,
@@ -126,6 +128,7 @@ function App ()
         isSettingsOpen, setIsSettingsOpen,
         isStageSelectOpen, setIsStageSelectOpen,
         isStageMapOpen, setIsStageMapOpen,
+        stageQuestion, setStageQuestion,
     } = modals;
 
     // Bumped when books or the backpack change, so memoised values that read them recompute
@@ -431,25 +434,39 @@ function App ()
         },
     });
 
+    /** Clearing a Stage sends the player home to learn and craft, not to a score screen. */
+    const clearStage = (stageId: string) =>
+    {
+        // The next Stage of the Realm opens; the Realm's boss Stage opens nothing by itself.
+        const stageNumber = stageNumberOf(stageId);
+        const isBossStage = stageNumber !== null && positionInRealm(stageNumber) === BOSS_STAGE_IN_REALM;
+        const next = nextStageIdInRealm(stageId);
+        const clear = completeStageUseCase(stageProgression, repositories.stageProgression, stageId, next);
+        const bonus = isBossStage ? awardChapterClearUseCase(entities.wallet, clear.isFirstTimeClear) : 0;
+        setWalletBalance(entities.wallet.balance);
+        autoSaveGame();
+        EventBus.emit('change-level', 'village');
+        const bonusText = bonus > 0 ? ` +${bonus} 🎓 Credit!` : '';
+        const opened = next && clear.newlyUnlocked ? ` ດ່ານ ${stageNumberOf(next)} ເປີດແລ້ວ!` : '';
+        const message = isBossStage
+            ? `🏆 ຊະນະ Boss ດ່ານ ${stageNumber}!${bonusText} ກັບມາໝູ່ບ້ານເພື່ອຮຽນ ແລະ ສ້າງອາວຸດຕໍ່ໄປ`
+            : `✅ ຜ່ານດ່ານ ${stageNumber}!${opened} ກັບມາໝູ່ບ້ານເພື່ອຮຽນ ແລະ ສ້າງອາວຸດ`;
+        setTimeout(() => setVillageWelcomeToast(message), 300);
+    };
+
     useGameEvents({
-        onStageCleared: payload =>
+        onStageCleared: payload => clearStage(payload.stageId),
+        onOpenStageQuestion: payload =>
         {
-            // Clearing a Stage sends the player home to learn and craft, not to a score screen.
-            // The next Stage of the Realm opens; the Realm's boss Stage opens nothing by itself.
-            const stageNumber = stageNumberOf(payload.stageId);
-            const isBossStage = stageNumber !== null && positionInRealm(stageNumber) === BOSS_STAGE_IN_REALM;
-            const next = nextStageIdInRealm(payload.stageId);
-            const clear = completeStageUseCase(stageProgression, repositories.stageProgression, payload.stageId, next);
-            const bonus = isBossStage ? awardChapterClearUseCase(entities.wallet, clear.isFirstTimeClear) : 0;
-            setWalletBalance(entities.wallet.balance);
-            autoSaveGame();
-            EventBus.emit('change-level', 'village');
-            const bonusText = bonus > 0 ? ` +${bonus} 🎓 Credit!` : '';
-            const opened = next && clear.newlyUnlocked ? ` ດ່ານ ${stageNumberOf(next)} ເປີດແລ້ວ!` : '';
-            const message = isBossStage
-                ? `🏆 ຊະນະ Boss ດ່ານ ${stageNumber}!${bonusText} ກັບມາໝູ່ບ້ານເພື່ອຮຽນ ແລະ ສ້າງອາວຸດຕໍ່ໄປ`
-                : `✅ ຜ່ານດ່ານ ${stageNumber}!${opened} ກັບມາໝູ່ບ້ານເພື່ອຮຽນ ແລະ ສ້າງອາວຸດ`;
-            setTimeout(() => setVillageWelcomeToast(message), 300);
+            // Walking out of a Stage asks one question about its lessons; a Stage with none to ask clears at once
+            const stage = getStageDefinition(getGameContent().stages, payload.stageId);
+            const question = stage ? pickStageQuestion(stage.lessons, getGameContent().questions) : null;
+            if (!question)
+            {
+                clearStage(payload.stageId);
+                return;
+            }
+            setStageQuestion({ stageId: payload.stageId, question });
         },
         onPlayerHealthChanged: payload => setHealth(payload.currentHealth),
         onPlayerDied: () =>
@@ -767,6 +784,33 @@ function App ()
                     handleStartGame('village');
                 }}
             />
+
+            {stageQuestion && (
+                <StageQuestionModal
+                    stageNumber={stageNumberOf(stageQuestion.stageId) ?? 0}
+                    question={stageQuestion.question}
+                    onAnswer={selectedIndex =>
+                    {
+                        const result = answerStageQuestionUseCase(
+                            stageProgression,
+                            entities.wallet,
+                            stageQuestion.stageId,
+                            stageQuestion.question,
+                            selectedIndex,
+                            getGameContent().stageQuestionCredit
+                        );
+                        setWalletBalance(entities.wallet.balance);
+                        autoSaveGame();
+                        return result;
+                    }}
+                    onContinue={() =>
+                    {
+                        const { stageId } = stageQuestion;
+                        setStageQuestion(null);
+                        clearStage(stageId);
+                    }}
+                />
+            )}
 
             <QuizFinisherModal
                 isOpen={isQuizFinisherOpen}

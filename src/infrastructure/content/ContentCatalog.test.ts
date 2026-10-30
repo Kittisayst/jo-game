@@ -9,7 +9,7 @@ import nodes from '../../../public/data/nodes.json';
 import realms from '../../../public/data/realms.json';
 import stages from '../../../public/data/stages.json';
 import { parseStageDefinitions } from '../phaser/stages/StageDefinition';
-import { parseStageScaling } from './ScalingCatalog';
+import { parseStageQuestion, parseStageScaling } from './ScalingCatalog';
 import { scaleEnemyDefinition } from '../../domain/entities/StageScaling';
 import { parseBooks, parseEnemies, parseItems, parseQuestions, parseRecipes } from './ContentCatalog';
 import { parseNodes } from './NodeCatalog';
@@ -327,6 +327,51 @@ describe('validator errors', () =>
                 broken.stages[2].zones[0].contents.find(c => c.kind === 'spawn-pool')!.nodes = ['moon-tree'];
 
                 expect(() => parse(broken)).toThrow(/\.node must be an id from nodes\.json/);
+            });
+        });
+
+        describe('lessons', () =>
+        {
+            const copyBooks = () => JSON.parse(JSON.stringify(books));
+
+            it('reads the lesson of a page and of a question', () =>
+            {
+                expect(parseBooks(books)[0].pages[2].lesson).toBe('3-1');
+                expect(parseQuestions(questions).find(q => q.id === 'q-ch1-p6-1')?.lesson).toBe('6-1');
+            });
+
+            it('rejects a page or a question without a proper lesson number', () =>
+            {
+                const noLesson = copyBooks();
+                delete noLesson[0].pages[0].lesson;
+                expect(() => parseBooks(noLesson)).toThrow(/books\[0\]\.pages\[0\]\.lesson must be a non-empty string/);
+
+                const badLesson = copyBooks();
+                badLesson[0].pages[0].lesson = 'one-one';
+                expect(() => parseBooks(badLesson)).toThrow(/lesson must be a lesson number written <stage>-<order>/);
+
+                const badQuestion = JSON.parse(JSON.stringify(questions));
+                badQuestion[0].lesson = '0-1';
+                expect(() => parseQuestions(badQuestion)).toThrow(/questions\[0\]\.lesson must be a lesson number/);
+            });
+
+            it('gives built stages their lessons and refuses a lesson of another stage', () =>
+            {
+                expect(parse(stages)[2].lessons).toEqual(['3-1']);
+                expect(parse(stages)[36].lessons).toEqual([]);
+
+                const broken = copy(stages) as unknown as { stages: { lessons?: string[] }[] };
+                broken.stages[2].lessons = ['4-1'];
+                expect(() => parse(broken)).toThrow(/stages\[2\]\.lessons\[0\] must be a lesson number of stage 3, written 3-<order>/);
+            });
+
+            it('reads the Credit of the stage question and rejects a fraction', () =>
+            {
+                expect(parseStageQuestion(stages)).toEqual({ credit: 5 });
+
+                const broken = copy(stages) as unknown as { stageQuestion: { credit: number } };
+                broken.stageQuestion.credit = 2.5;
+                expect(() => parseStageQuestion(broken)).toThrow(/stageQuestion\.credit must be a whole number of Credit/);
             });
         });
 

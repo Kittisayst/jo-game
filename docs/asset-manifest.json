@@ -1071,6 +1071,46 @@
       "source": "pxl source tools/art/held-items.px.js (built with the vendored pxl skill)",
       "license": "MIT (Project Original)",
       "anchor": "grip (16, 26), pointing up; rotated and mirrored in game"
+    },
+    {
+      "path": "assets/books/ch1-p6-os.svg",
+      "category": "book-diagram",
+      "format": "SVG",
+      "viewBox": "0 0 360 156",
+      "source": "Original vector diagram written by hand for the Realm 1 lessons 6-1 to 10-1",
+      "license": "MIT (Project Original)"
+    },
+    {
+      "path": "assets/books/ch1-p7-files.svg",
+      "category": "book-diagram",
+      "format": "SVG",
+      "viewBox": "0 0 360 156",
+      "source": "Original vector diagram written by hand for the Realm 1 lessons 6-1 to 10-1",
+      "license": "MIT (Project Original)"
+    },
+    {
+      "path": "assets/books/ch1-p8-bytes.svg",
+      "category": "book-diagram",
+      "format": "SVG",
+      "viewBox": "0 0 360 156",
+      "source": "Original vector diagram written by hand for the Realm 1 lessons 6-1 to 10-1",
+      "license": "MIT (Project Original)"
+    },
+    {
+      "path": "assets/books/ch1-p9-binary.svg",
+      "category": "book-diagram",
+      "format": "SVG",
+      "viewBox": "0 0 360 156",
+      "source": "Original vector diagram written by hand for the Realm 1 lessons 6-1 to 10-1",
+      "license": "MIT (Project Original)"
+    },
+    {
+      "path": "assets/books/ch1-p10-safety.svg",
+      "category": "book-diagram",
+      "format": "SVG",
+      "viewBox": "0 0 360 156",
+      "source": "Original vector diagram written by hand for the Realm 1 lessons 6-1 to 10-1",
+      "license": "MIT (Project Original)"
     }
   ],
   "plannedAssets": {

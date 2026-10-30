@@ -3,6 +3,8 @@ export interface QuestionData
     id: string;
     bookId: string;
     pageNumber: number;
+    /** Lesson number of the page this question is about (`3-1`). */
+    lesson?: string;
     question: string;
     options: string[];
     correctIndex: number;

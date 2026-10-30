@@ -28,6 +28,8 @@ export interface StageProgressionData
 {
     unlockedStages: string[];
     completedStages: string[];
+    /** Stages whose end-of-Stage question has paid its Credit; missing in older saves. */
+    questionRewardedStages?: string[];
 }
 
 export interface StageProgressionPort

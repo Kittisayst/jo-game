@@ -92,6 +92,70 @@ describe('content data integrity', () =>
         }
     });
 
+    describe('lessons', () =>
+    {
+        type LessonPage = { pageNumber: number; lesson?: string };
+        type LessonBook = { id: string; chapter: number; pages: LessonPage[] };
+        type LessonQuestion = { id: string; bookId: string; pageNumber: number; lesson?: string };
+        const lessonBooks = books as unknown as LessonBook[];
+        const lessonQuestions = questions as unknown as LessonQuestion[];
+        const stageOf = (lesson: string) => Number(lesson.split('-')[0]);
+
+        it('numbers every textbook page <stage>-<order>, once, inside the Realm of its book', () =>
+        {
+            for (const book of lessonBooks)
+            {
+                const seen = new Set<string>();
+                for (const page of book.pages)
+                {
+                    const where = `${book.id} page ${page.pageNumber}`;
+                    expect(page.lesson, where).toMatch(/^\d{1,3}-\d{1,2}$/);
+                    expect(seen.has(page.lesson!), `${where} repeats ${page.lesson}`).toBe(false);
+                    seen.add(page.lesson!);
+                    expect(Math.ceil(stageOf(page.lesson!) / 10), `${where} lesson ${page.lesson}`).toBe(book.chapter);
+                }
+            }
+        });
+
+        it('gives every question the lesson of its page', () =>
+        {
+            for (const q of lessonQuestions)
+            {
+                const page = lessonBooks.find(b => b.id === q.bookId)?.pages.find(p => p.pageNumber === q.pageNumber);
+                expect(q.lesson, `${q.id} lesson`).toBe(page?.lesson);
+            }
+        });
+
+        it('has at least two questions for every lesson, so a repeat visit can ask another', () =>
+        {
+            for (const book of lessonBooks)
+            {
+                for (const page of book.pages)
+                {
+                    const count = lessonQuestions.filter(q => q.lesson === page.lesson).length;
+                    expect(count, `lesson ${page.lesson}`).toBeGreaterThanOrEqual(2);
+                }
+            }
+        });
+
+        it('lets every built Stage ask only about lessons that exist in its Realm textbook', () =>
+        {
+            type S = { number: number; realm: number; status: string; lessons?: string[] };
+            const bookOfRealm = new Map(realms.realms.map(r => [r.number, r.bookId]));
+            for (const stage of (stages.stages as S[]).filter(x => x.status === 'ready'))
+            {
+                const book = lessonBooks.find(b => b.id === bookOfRealm.get(stage.realm));
+                expect(book, `stage ${stage.number} has a textbook`).toBeDefined();
+                expect(stage.lessons?.length ?? 0, `stage ${stage.number} lessons`).toBeGreaterThan(0);
+                for (const lesson of stage.lessons ?? [])
+                {
+                    expect(stageOf(lesson), `stage ${stage.number} ${lesson}`).toBe(stage.number);
+                    expect(book!.pages.some(p => p.lesson === lesson), `stage ${stage.number} lesson ${lesson} is in ${book!.id}`).toBe(true);
+                }
+            }
+        });
+    });
+
     it('only drops known items and uses a valid kind for enemies', () =>
     {
         for (const enemy of enemies)

@@ -120,6 +120,7 @@ describe('restoreSaveSnapshotUseCase', () =>
         expect(ports.stageProgression.save).toHaveBeenCalledWith({
             unlockedStages: snapshot.stageProgression.unlockedStages,
             completedStages: ['stage-001'],
+            questionRewardedStages: [],
         });
         expect(onSettings).toHaveBeenCalledWith({ soundMuted: true, musicMuted: false });
     });

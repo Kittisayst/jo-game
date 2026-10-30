@@ -60,6 +60,12 @@ export function nextStageIdInRealm (stageId: string): string | null
     return stageIdOf(stageNumber + 1);
 }
 
+/** The Stage a lesson number belongs to (`12-3` is Stage 12), or null when it is not a lesson number. */
+export function stageOfLesson (lesson: string): number | null
+{
+    return isLessonNumber(lesson) ? Number(lesson.split('-')[0]) : null;
+}
+
 /** Lesson numbers are `<stage number>-<order>`, such as `12-3`. */
 export function isLessonNumber (value: string): boolean
 {

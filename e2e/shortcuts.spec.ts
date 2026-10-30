@@ -1,9 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { test, expect, Page } from '@playwright/test';
 
 /** Reads live game state through the dev server's module graph (same instance the app uses). */
 async function readState (page: Page) {
   return page.evaluate(async () => {
-    const { entities } = await import('/src/infrastructure/composition.ts');
+    const entities = (window as any).__entities; // the app's own state (a second import() can be a second copy)
     return {
       weapon: entities.equipment.equippedWeaponId,
       paused: entities.pauseState.isPaused,
@@ -25,7 +26,7 @@ test.describe('Keyboard shortcuts', () => {
 
     // Carry a second sword so there is something to swap to
     await page.evaluate(async () => {
-      const { entities } = await import('/src/infrastructure/composition.ts');
+      const entities = (window as any).__entities; // the app's own state (a second import() can be a second copy)
       entities.backpack.addItem('iron-sword', 1);
     });
 
@@ -33,6 +34,8 @@ test.describe('Keyboard shortcuts', () => {
     expect((await readState(page)).weapon).toBe('wooden-sword');
     await page.keyboard.press('KeyQ');
     await expect.poll(async () => (await readState(page)).weapon).toBe('iron-sword');
+    // Phaser reads keys once per frame: give it one before the next press, or a busy machine can merge the two
+    await page.waitForTimeout(150);
     await page.keyboard.press('KeyQ');
     await expect.poll(async () => (await readState(page)).weapon).toBe('wooden-sword');
 

@@ -32,6 +32,7 @@ export function completeStageUseCase (
     port.save({
         unlockedStages: progression.unlockedStages,
         completedStages: progression.completedStages,
+        questionRewardedStages: progression.questionRewardedStages,
     });
 
     DomainEvents.emit<StageCompletedPayload>(STAGE_COMPLETED_EVENT, {
