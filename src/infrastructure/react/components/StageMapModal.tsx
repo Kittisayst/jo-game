@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { StageProgression } from '../../../domain/entities/StageProgression';
 import { BOSS_STAGE_IN_REALM, MINIBOSS_STAGE_IN_REALM, STAGES_PER_REALM } from '../../../domain/entities/StageNumber';
 import { soundManager } from '../../audio/SoundManager';
@@ -10,6 +11,12 @@ export interface StageMapModalProps
     stageProgression: StageProgression;
     onClose: () => void;
     onSelectStage: (stageKey: string) => void;
+    /** Realms opened so far (Realm 1 always). */
+    openedRealms: ReadonlySet<number>;
+    /** How many of each Portal block the hero carries, by item id. */
+    blockCounts: Readonly<Record<string, number>>;
+    /** Places the Portal block that opens `realm`; says whether it worked. */
+    onPlaceBlock: (realm: number) => boolean;
 }
 
 type CellState = 'placeholder' | 'locked' | 'open' | 'cleared';
@@ -28,9 +35,21 @@ export function StageMapModal ({
     stageProgression,
     onClose,
     onSelectStage,
+    openedRealms,
+    blockCounts,
+    onPlaceBlock,
 }: StageMapModalProps)
 {
     const { realms, stages } = getGameContent();
+    /** The Realm that just opened, for a moment, so its row and its gate can light up. */
+    const [justOpened, setJustOpened] = useState<number | null>(null);
+
+    const placeBlock = (realm: number) =>
+    {
+        if (!onPlaceBlock(realm)) return;
+        setJustOpened(realm);
+        setTimeout(() => setJustOpened(null), 1800);
+    };
 
     const stateOf = (stage: StageDefinition): CellState =>
     {
@@ -72,6 +91,44 @@ export function StageMapModal ({
                     </button>
                 </div>
 
+                {/* The World Gate: ten Portal slots, one colour per Realm. A block placed in slot N opens Realm N+1 for good. */}
+                <div className="portal-gate" data-testid="portal-gate">
+                    <span className="portal-gate-title">🌀 ປະຕູມິຕິ (World Gate)</span>
+                    <div className="portal-slots">
+                        {realms.map(realm =>
+                        {
+                            const isFinal = realm.number === realms.length;
+                            const filled = !isFinal && openedRealms.has(realm.number + 1);
+                            const carried = blockCounts[realm.blockItem] ?? 0;
+                            const ready = !isFinal && !filled && openedRealms.has(realm.number) && carried > 0;
+                            const state = isFinal ? 'final' : filled ? 'filled' : ready ? 'ready' : 'empty';
+
+                            return (
+                                <button
+                                    key={realm.number}
+                                    type="button"
+                                    data-testid={`portal-slot-${realm.number}`}
+                                    data-state={state}
+                                    className={`portal-slot portal-${state} ${justOpened === realm.number + 1 ? 'portal-burst' : ''}`}
+                                    style={{ ['--realm-color' as string]: realm.color }}
+                                    disabled={!ready}
+                                    onClick={() => placeBlock(realm.number + 1)}
+                                    title={isFinal
+                                        ? 'ປະຕູສຸດທ້າຍ: ຍັງບໍ່ມີມິຕິຖັດໄປ'
+                                        : filled
+                                            ? `ມິຕິ ${realm.number + 1} ເປີດແລ້ວ`
+                                            : ready
+                                                ? `ໃສ່ກ້ອນປະຕູ ເພື່ອເປີດມິຕິ ${realm.number + 1}`
+                                                : `ຕ້ອງມີກ້ອນປະຕູ ${realm.name}${openedRealms.has(realm.number) ? '' : ` (ມິຕິ ${realm.number} ຕ້ອງເປີດກ່ອນ)`}`}
+                                >
+                                    <span className="portal-slot-icon">{filled ? '🌀' : ready ? '⬆️' : isFinal ? '⭐' : '▫️'}</span>
+                                    <span className="portal-slot-label">{ready ? 'ໃສ່ກ້ອນ' : filled ? `→ ${realm.number + 1}` : realm.number}</span>
+                                </button>
+                            );
+                        })}
+                    </div>
+                </div>
+
                 <div className="realm-map">
                     <button
                         className={`realm-village-btn ${currentLevel === 'village' ? 'is-current' : ''}`}
@@ -85,11 +142,15 @@ export function StageMapModal ({
                     {
                         const realmStages = stages.filter(stage => stage.realm === realm.number);
                         const builtCount = realmStages.filter(isStageReady).length;
+                        const isOpen = openedRealms.has(realm.number);
+                        const previous = realms[realm.number - 2];
 
                         return (
                             <section
                                 key={realm.number}
-                                className="realm-row"
+                                className={`realm-row ${isOpen ? '' : 'realm-closed'} ${justOpened === realm.number ? 'realm-opening' : ''}`}
+                                data-testid={`realm-row-${realm.number}`}
+                                data-open={isOpen}
                                 style={{ ['--realm-color' as string]: realm.color }}
                                 aria-label={`ມິຕິ ${realm.number}: ${realm.name}`}
                             >
@@ -97,7 +158,13 @@ export function StageMapModal ({
                                     <span className="realm-row-icon">{realm.icon}</span>
                                     <span className="realm-row-name">ມິຕິ {realm.number}: {realm.name}</span>
                                     <span className="realm-row-subject">{realm.subject}</span>
-                                    <span className="realm-row-count">{builtCount}/{STAGES_PER_REALM} ດ່ານ</span>
+                                    {isOpen
+                                        ? <span className="realm-row-count">{builtCount}/{STAGES_PER_REALM} ດ່ານ</span>
+                                        : (
+                                            <span className="realm-row-count realm-row-locked" data-testid={`realm-locked-${realm.number}`}>
+                                                🔒 ຕ້ອງໃຊ້ກ້ອນປະຕູ <span className="portal-dot" style={{ background: previous?.color }} /> ຂອງມິຕິ {realm.number - 1}
+                                            </span>
+                                        )}
                                 </header>
 
                                 <div className="realm-cells">

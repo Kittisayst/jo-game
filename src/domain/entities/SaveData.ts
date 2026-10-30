@@ -40,6 +40,8 @@ export interface SaveGameSnapshot
     practiceStats: DailyPracticeProgressSnapshot;
     repairedGates: string[];
     forgeUnlocked: boolean;
+    /** Realms opened by placing Portal blocks, always including Realm 1. Missing in older saves. */
+    openedRealms: number[];
     /** The Potion chosen to be drunk with R, or null. Missing in older saves. */
     quickSlotItemId: string | null;
     /** Hints of the first Stage that were done, and whether the player skipped them. Missing in older saves. */
@@ -97,6 +99,7 @@ export function createDefaultSaveSnapshot (slotId = 'slot_1'): SaveGameSnapshot
         forgeUnlocked: false,
         tutorial: { done: [], dismissed: false },
         quickSlotItemId: null,
+        openedRealms: [1],
     };
 }
 
@@ -256,7 +259,10 @@ export function migrateSaveSnapshot (raw: unknown, fallbackSlotId = 'slot_1'): S
     const tutorial: TutorialSnapshot = {
         done: Array.isArray(rawTutorial.done) ? rawTutorial.done.filter((id): id is string => typeof id === 'string') : [],
         dismissed: typeof rawTutorial.dismissed === 'boolean' ? rawTutorial.dismissed : data.tutorial === undefined && hasProgress,
+        triggered: Array.isArray(rawTutorial.triggered) ? rawTutorial.triggered.filter((id): id is string => typeof id === 'string') : [],
     };
+    const openedRealms = Array.from(new Set([1, ...(Array.isArray(data.openedRealms) ? data.openedRealms : [])
+        .filter((n): n is number => Number.isInteger(n) && n >= 2 && n <= 10)])).sort((a, b) => a - b);
 
     return {
         version: CURRENT_SAVE_VERSION,
@@ -275,5 +281,6 @@ export function migrateSaveSnapshot (raw: unknown, fallbackSlotId = 'slot_1'): S
         forgeUnlocked,
         tutorial,
         quickSlotItemId,
+        openedRealms,
     };
 }

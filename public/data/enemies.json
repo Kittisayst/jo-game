@@ -41,7 +41,8 @@
       ]
     },
     "drops": [
-      { "itemId": "crystal", "chance": 1.0, "count": 2 }
+      { "itemId": "crystal", "chance": 1.0, "count": 2 },
+      { "itemId": "portal-shard-green", "chance": 1.0, "count": 1 }
     ]
   },
   {
@@ -63,7 +64,8 @@
     },
     "drops": [
       { "itemId": "boss-core", "chance": 1.0, "count": 1 },
-      { "itemId": "crystal", "chance": 1.0, "count": 3 }
+      { "itemId": "crystal", "chance": 1.0, "count": 3 },
+      { "itemId": "portal-shard-green", "chance": 1.0, "count": 3 }
     ]
   }
 ]

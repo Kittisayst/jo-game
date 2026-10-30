@@ -45,7 +45,7 @@ import { entities } from '../../composition';
 import { EnemyDefinition } from '../../../domain/entities/Enemy';
 import { scaleEnemyDefinition } from '../../../domain/entities/StageScaling';
 import { GROUND_SINK } from '../physicsConstants';
-import { notifyTutorial } from '../../tutorial';
+import { notifyShardsCollected, notifyTutorial } from '../../tutorial';
 import { armorSpeedBonusOf } from '../../../domain/entities/Armor';
 import { ITEM_BROKEN_EVENT, ITEM_WORN_EVENT, ItemBrokenPayload, ItemWornPayload } from '../../../application/WearItemUseCase';
 
@@ -332,7 +332,10 @@ export class Game extends Scene
         const onQuizFinisherPassed = () =>
         {
             this.boss?.playDefeatTween();
-            const reward = awardBossRewardUseCase(entities.backpack);
+            const bossSpawn = this.stage ? getStageBossSpawn(this.stage) : undefined;
+            const bossDrops = bossSpawn ? this.getEnemyDefinition(bossSpawn.enemyId)?.drops ?? [] : [];
+            const reward = awardBossRewardUseCase(entities.backpack, bossDrops);
+            notifyShardsCollected(reward.collected);
             EventBus.emit('backpack-changed');
             const rewardText = describeDrops(reward.collected, ' & ');
             showLootNotification(

@@ -3536,6 +3536,79 @@ button,
 .cursor-not-allowed { cursor: not-allowed !important; }
 
 /* Next-objective hint under the vitals */
+.portal-gate {
+    margin: 0 0 8px;
+    padding: 8px 10px;
+    border-radius: 10px;
+    background: rgba(15, 23, 42, 0.7);
+    border: 1px solid rgba(148, 163, 184, 0.35);
+}
+
+.portal-gate-title {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 700;
+    color: #e2e8f0;
+}
+
+.portal-slots {
+    display: grid;
+    grid-template-columns: repeat(10, 1fr);
+    gap: 6px;
+}
+
+.portal-slot {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 4px 2px;
+    border-radius: 8px;
+    border: 2px solid var(--realm-color, #64748b);
+    background: rgba(15, 23, 42, 0.8);
+    color: #e2e8f0;
+    font-size: 11px;
+    cursor: default;
+}
+
+.portal-slot-icon { font-size: 18px; }
+
+.portal-empty { opacity: 0.45; }
+.portal-final { opacity: 0.55; border-style: dashed; }
+.portal-filled { background: color-mix(in srgb, var(--realm-color) 35%, #0f172a); }
+
+.portal-ready {
+    cursor: pointer;
+    background: color-mix(in srgb, var(--realm-color) 25%, #0f172a);
+    animation: portal-pulse 1.2s ease-in-out infinite;
+}
+
+.portal-burst { animation: portal-burst 1.6s ease-out; }
+
+@keyframes portal-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 var(--realm-color); }
+    50% { box-shadow: 0 0 10px 3px var(--realm-color); }
+}
+
+@keyframes portal-burst {
+    0% { transform: scale(1); box-shadow: 0 0 0 0 var(--realm-color); }
+    30% { transform: scale(1.25); box-shadow: 0 0 24px 10px var(--realm-color); }
+    100% { transform: scale(1); box-shadow: 0 0 0 0 transparent; }
+}
+
+.realm-closed .realm-row-header { opacity: 0.6; }
+.realm-opening { animation: portal-burst 1.6s ease-out; }
+.realm-row-locked { color: #fca5a5; }
+
+.portal-dot {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    vertical-align: middle;
+    border: 1px solid #e2e8f0;
+}
+
 .armor-badge {
     background: rgba(30, 58, 138, 0.85);
     border: 1px solid rgba(96, 165, 250, 0.7);

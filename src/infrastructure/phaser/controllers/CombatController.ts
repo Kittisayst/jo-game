@@ -12,7 +12,7 @@ import { Enemy, ROCK_PROJECTILE_KEY, SPIT_PROJECTILE_KEY } from '../objects/Enem
 import type { Player } from '../objects/Player';
 import type { Spike } from '../objects/Spike';
 import type { Game } from '../scenes/Game';
-import { notifyTutorial } from '../../tutorial';
+import { notifyShardsCollected, notifyTutorial } from '../../tutorial';
 
 /** Most enemies the Boss can have alive at once when it summons minions. */
 const MAX_ENEMIES_FOR_SUMMON = 3;
@@ -273,6 +273,7 @@ export class CombatController
 
         // Materials from the enemy's drop table go straight into the backpack
         const drops = collectEnemyDropsUseCase(enemy.entity, entities.backpack);
+        notifyShardsCollected(drops.collected);
         if (drops.collected.length === 0 && drops.overflow.length === 0) return;
 
         const parts = [describeDrops(drops.collected)].filter(Boolean);

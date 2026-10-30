@@ -1,5 +1,6 @@
 import { Backpack } from '../domain/entities/Backpack';
-import { Boss, BOSS_FINISHER_REWARD } from '../domain/entities/Boss';
+import { Boss } from '../domain/entities/Boss';
+import type { EnemyDrop } from '../domain/entities/Enemy';
 import { DropEntry } from './CollectEnemyDropsUseCase';
 
 export interface AwardBossRewardResult
@@ -8,14 +9,22 @@ export interface AwardBossRewardResult
     overflow: DropEntry[];
 }
 
-/** Gives the Boss's story Materials after the finisher question is answered correctly. */
-export function awardBossRewardUseCase (backpack: Backpack): AwardBossRewardResult
+/**
+ * Gives what the Boss drops (its drop table in `enemies.json`: boss core, crystal and Portal shards) after the
+ * finisher question is answered correctly, every time the Boss is beaten.
+ */
+export function awardBossRewardUseCase (
+    backpack: Backpack,
+    drops: readonly EnemyDrop[],
+    rng: () => number = Math.random
+): AwardBossRewardResult
 {
     const collected: DropEntry[] = [];
     const overflow: DropEntry[] = [];
 
-    for (const reward of BOSS_FINISHER_REWARD)
+    for (const reward of drops)
     {
+        if (rng() >= reward.chance) continue;
         const { added, overflow: leftover } = backpack.addItem(reward.itemId, reward.count);
         if (added > 0) collected.push({ itemId: reward.itemId, count: added });
         if (leftover > 0) overflow.push({ itemId: reward.itemId, count: leftover });

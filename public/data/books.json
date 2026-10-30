@@ -8,7 +8,7 @@
     "price": 20,
     "prerequisiteBookId": null,
     "requiredCompletedStageId": null,
-    "unlockedRecipes": ["pickaxe-t1", "hammer-t1", "repair-kit", "iron-sword", "iron-helmet", "iron-chestplate", "iron-boots"],
+    "unlockedRecipes": ["pickaxe-t1", "hammer-t1", "repair-kit", "iron-sword", "iron-helmet", "iron-chestplate", "iron-boots", "portal-block-green"],
     "pages": [
       {
         "pageNumber": 1,
@@ -101,7 +101,7 @@
     "price": 60,
     "prerequisiteBookId": "book-ch1",
     "requiredCompletedStageId": "stage-010",
-    "unlockedRecipes": ["crystal-sword"],
+    "unlockedRecipes": ["crystal-sword", "portal-block-blue"],
     "pages": [
       {
         "pageNumber": 1,

@@ -259,5 +259,49 @@
         "count": 2
       }
     ]
+  },
+  {
+    "id": "recipe-portal-block-green",
+    "resultItemId": "portal-block-green",
+    "resultCount": 1,
+    "building": "forge",
+    "requiredBookRecipe": "portal-block-green",
+    "creditCost": 0,
+    "ingredients": [
+      {
+        "itemId": "portal-shard-green",
+        "count": 5
+      },
+      {
+        "itemId": "iron-ore",
+        "count": 8
+      },
+      {
+        "itemId": "crystal",
+        "count": 2
+      }
+    ]
+  },
+  {
+    "id": "recipe-portal-block-blue",
+    "resultItemId": "portal-block-blue",
+    "resultCount": 1,
+    "building": "forge",
+    "requiredBookRecipe": "portal-block-blue",
+    "creditCost": 0,
+    "ingredients": [
+      {
+        "itemId": "portal-shard-blue",
+        "count": 5
+      },
+      {
+        "itemId": "crystal",
+        "count": 6
+      },
+      {
+        "itemId": "boss-core",
+        "count": 1
+      }
+    ]
   }
 ]

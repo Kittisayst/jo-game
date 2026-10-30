@@ -13,6 +13,7 @@ import { SkinManager } from './Skin';
 import { StageProgression } from './StageProgression';
 import { ActiveEffects } from './ActiveEffects';
 import { armorHeartsOf } from './Armor';
+import { RealmProgression } from './RealmProgression';
 import { TutorialProgress } from './TutorialProgress';
 import { Wallet } from './Wallet';
 
@@ -31,6 +32,8 @@ export class GameState
     readonly settings = new Settings();
     readonly stageProgression = new StageProgression();
     readonly tutorial = new TutorialProgress();
+    /** Which Realms the World Gate has opened. */
+    readonly realms = new RealmProgression();
     /** Timed Potion effects running on the hero (not saved). */
     readonly effects = new ActiveEffects();
     /** The Potion chosen to be drunk with R, or null. */
@@ -87,6 +90,7 @@ export class GameState
             forgeUnlocked: this.forgeUnlocked,
             tutorial: this.tutorial.toSnapshot(),
             quickSlotItemId: this.quickSlotItemId,
+            openedRealms: this.realms.openedRealms,
         };
     }
 
@@ -126,6 +130,7 @@ export class GameState
         this.forgeUnlocked = snapshot.forgeUnlocked;
         this.tutorial.loadFrom(snapshot.tutorial);
         this.quickSlotItemId = snapshot.quickSlotItemId ?? null;
+        this.realms.loadFrom(snapshot.openedRealms ?? [1]);
         this.effects.clear();
         this.syncArmor();
         this.health.reset();

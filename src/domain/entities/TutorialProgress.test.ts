@@ -73,7 +73,7 @@ describe('TutorialProgress', () =>
         tutorial.notify('moved');
         tutorial.dismiss();
         const snapshot = tutorial.toSnapshot();
-        expect(snapshot).toEqual({ done: ['move'], dismissed: true });
+        expect(snapshot).toEqual({ done: ['move'], dismissed: true, triggered: [] });
 
         const loaded = makeTutorial();
         loaded.loadFrom(snapshot);
@@ -81,7 +81,7 @@ describe('TutorialProgress', () =>
         expect(loaded.isDismissed).toBe(true);
 
         loaded.reset();
-        expect(loaded.toSnapshot()).toEqual({ done: [], dismissed: false });
+        expect(loaded.toSnapshot()).toEqual({ done: [], dismissed: false, triggered: [] });
         expect(loaded.currentStep?.id).toBe('move');
     });
 
@@ -91,5 +91,53 @@ describe('TutorialProgress', () =>
 
         expect(tutorial.currentStep).toBeNull();
         expect(tutorial.isActive).toBe(false);
+    });
+});
+
+describe('a hint that is hidden until something happens', () =>
+{
+    const make = () =>
+    {
+        const tutorial = new TutorialProgress();
+        tutorial.setSteps([
+            { id: 'move', event: 'moved' },
+            { id: 'portal', event: 'portal-block-placed', showAfter: 'portal-shard-collected' },
+        ]);
+        return tutorial;
+    };
+
+    it('stays hidden until its event has happened', () =>
+    {
+        const tutorial = make();
+        tutorial.notify('moved');
+
+        expect(tutorial.currentStep).toBeNull();
+        expect(tutorial.isActive).toBe(false);
+
+        tutorial.notify('portal-shard-collected');
+        expect(tutorial.currentStep?.id).toBe('portal');
+        expect(tutorial.isActive).toBe(true);
+    });
+
+    it('finishes with its own event and remembers the reveal in a save', () =>
+    {
+        const tutorial = make();
+        tutorial.notify('moved');
+        tutorial.notify('portal-shard-collected');
+
+        const loaded = make();
+        loaded.loadFrom(tutorial.toSnapshot());
+        expect(loaded.currentStep?.id).toBe('portal');
+
+        loaded.notify('portal-block-placed');
+        expect(loaded.currentStep).toBeNull();
+    });
+
+    it('does not show the hint to a save that predates it and has already finished the others', () =>
+    {
+        const loaded = make();
+        loaded.loadFrom({ done: ['move'], dismissed: false });
+
+        expect(loaded.currentStep).toBeNull();
     });
 });

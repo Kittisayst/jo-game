@@ -8,12 +8,16 @@ export interface TutorialStep
     id: string;
     /** The thing the player has to do, such as `harvested:oak-tree` (see `TUTORIAL_EVENTS`). */
     event: string;
+    /** When set, the hint stays hidden until this event has happened (a hint about something that is not met at the start). */
+    showAfter?: string;
 }
 
 export interface TutorialSnapshot
 {
     done: string[];
     dismissed: boolean;
+    /** The events that unlocked a hidden hint (`showAfter`). Missing in older saves. */
+    triggered?: string[];
 }
 
 export class TutorialProgress
@@ -21,6 +25,7 @@ export class TutorialProgress
     private _steps: readonly TutorialStep[] = [];
     private _done = new Set<string>();
     private _dismissed = false;
+    private _triggered = new Set<string>();
 
     /** Gives the steps once the game data is loaded. What was done stays done. */
     setSteps (steps: readonly TutorialStep[]): void
@@ -58,7 +63,7 @@ export class TutorialProgress
     get currentStep (): TutorialStep | null
     {
         if (this._dismissed) return null;
-        return this._steps.find(step => !this._done.has(step.id)) ?? null;
+        return this._steps.find(step => !this._done.has(step.id) && (!step.showAfter || this._triggered.has(step.showAfter))) ?? null;
     }
 
     /**
@@ -69,6 +74,9 @@ export class TutorialProgress
     notify (event: string): TutorialStep[]
     {
         if (this._dismissed) return [];
+
+        // Remember the events that reveal a hidden hint
+        if (this._steps.some(step => step.showAfter === event)) this._triggered.add(event);
 
         const finished = this._steps.filter(step => step.event === event && !this._done.has(step.id));
         for (const step of finished) this._done.add(step.id);
@@ -85,16 +93,18 @@ export class TutorialProgress
     {
         this._done = new Set();
         this._dismissed = false;
+        this._triggered = new Set();
     }
 
     loadFrom (snapshot: TutorialSnapshot): void
     {
         this._done = new Set(snapshot.done);
         this._dismissed = snapshot.dismissed;
+        this._triggered = new Set(snapshot.triggered ?? []);
     }
 
     toSnapshot (): TutorialSnapshot
     {
-        return { done: this.doneSteps, dismissed: this._dismissed };
+        return { done: this.doneSteps, dismissed: this._dismissed, triggered: Array.from(this._triggered) };
     }
 }
