@@ -172,7 +172,7 @@ export class InteractionController
             {
                 node.shakeOnStrike();
                 const tool = isMining ? '⛏' : '🪓';
-                showLootNotification(scene, node.x, node.y - 30, `${tool} ${result.strikesTaken}/${result.strikesNeeded}`, '#fde68a');
+                showLootNotification(scene, node.x, node.y - 30, `${tool} ${Number.isInteger(result.strikesTaken) ? result.strikesTaken : result.strikesTaken?.toFixed(1)}/${result.strikesNeeded}${result.toolState === 'broken' ? ' 💥' : ''}`, '#fde68a');
                 return;
             }
 

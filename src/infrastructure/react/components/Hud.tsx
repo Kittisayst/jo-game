@@ -1,6 +1,8 @@
 import { hudLabelOf } from '../../phaser/levelCatalog';
 import { ObjectiveId } from '../../../domain/utils/nextObjective';
 import { ItemIcon } from './ItemIcon';
+import { DurabilityBar } from './DurabilityBar';
+import type { DurabilityReading } from '../../../domain/entities/Backpack';
 
 const OBJECTIVE_TEXT: Record<ObjectiveId, string> = {
     'buy-book': '📚 ຊື້ປຶ້ມຕຳລາບົດທີ 1 ທີ່ຫໍສະໝຸດ',
@@ -20,6 +22,8 @@ export interface EquippedWeaponView
     name: string;
     icon: string;
     iconImage?: string;
+    /** How worn the sword is; missing for one that never wears (the wooden sword). */
+    durability?: DurabilityReading;
 }
 
 export interface HudProps
@@ -168,6 +172,7 @@ export function Hud ({
                             <ItemIcon iconImage={equippedWeapon.iconImage} icon={equippedWeapon.icon} size={20} />
                         </span>
                         <span className="badge-label">{equippedWeapon.name}</span>
+                        {equippedWeapon.durability && <DurabilityBar reading={equippedWeapon.durability} compact />}
                         <span className="badge-hint">[Q]</span>
                     </button>
 

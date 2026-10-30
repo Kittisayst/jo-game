@@ -188,3 +188,26 @@ describe('Tutorial hints in a save', () =>
         expect(newcomer.tutorial).toEqual({ done: [], dismissed: false });
     });
 });
+
+describe('Durability in a save', () =>
+{
+    it('keeps how worn a weapon is, leaves a never-worn one without the field and ignores nonsense', () =>
+    {
+        const saved = migrateSaveSnapshot({
+            version: CURRENT_SAVE_VERSION,
+            backpack: [
+                { slotIndex: 0, itemId: 'iron-sword', count: 1, durability: 37.9 },
+                { slotIndex: 1, itemId: 'axe-t1', count: 1 },
+                { slotIndex: 2, itemId: 'pickaxe-t1', count: 1, durability: 'lots' },
+                { slotIndex: 3, itemId: 'crystal-sword', count: 1, durability: -5 },
+            ],
+        });
+
+        expect(saved.backpack).toEqual([
+            { slotIndex: 0, itemId: 'iron-sword', count: 1, durability: 37 },
+            { slotIndex: 1, itemId: 'axe-t1', count: 1 },
+            { slotIndex: 2, itemId: 'pickaxe-t1', count: 1 },
+            { slotIndex: 3, itemId: 'crystal-sword', count: 1, durability: 0 },
+        ]);
+    });
+});

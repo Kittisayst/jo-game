@@ -11,6 +11,8 @@ import stages from '../../../public/data/stages.json';
 import { parseStageDefinitions } from '../phaser/stages/StageDefinition';
 import { parseStageQuestion, parseStageScaling } from './ScalingCatalog';
 import { parseTutorial } from './TutorialCatalog';
+import { parseRepairs } from './RepairCatalog';
+import repairs from '../../../public/data/repairs.json';
 import tutorial from '../../../public/data/tutorial.json';
 import { scaleEnemyDefinition } from '../../domain/entities/StageScaling';
 import { parseBooks, parseEnemies, parseItems, parseQuestions, parseRecipes } from './ContentCatalog';
@@ -374,6 +376,46 @@ describe('validator errors', () =>
                 const broken = copy(stages) as unknown as { stageQuestion: { credit: number } };
                 broken.stageQuestion.credit = 2.5;
                 expect(() => parseStageQuestion(broken)).toThrow(/stageQuestion\.credit must be a whole number of Credit/);
+            });
+        });
+
+        describe('durability and repairs', () =>
+        {
+            it('reads the durability of the swords and tools that wear, and none for the wooden sword', () =>
+            {
+                const parsed = parseItems(items);
+                const durabilityOf = (id: string) => parsed.find(i => i.id === id)?.durability;
+
+                expect(durabilityOf('iron-sword')).toBe(80);
+                expect(durabilityOf('axe-t1')).toBe(40);
+                expect(durabilityOf('wooden-sword')).toBeUndefined();
+            });
+
+            it('rejects a durability that is not a whole number and one on an item that stacks', () =>
+            {
+                const fraction = JSON.parse(JSON.stringify(items));
+                fraction.find((i: { id: string }) => i.id === 'iron-sword').durability = 2.5;
+                expect(() => parseItems(fraction)).toThrow(/durability must be a whole number of uses, at least 1/);
+
+                const stacks = JSON.parse(JSON.stringify(items));
+                const wood = stacks.find((i: { id: string }) => i.id === 'wood');
+                wood.durability = 10;
+                expect(() => parseItems(stacks)).toThrow(/maxStack must be 1 for an item that wears/);
+            });
+
+            it('reads the repair recipes and rejects a free repair and a repeated item', () =>
+            {
+                const parsed = parseRepairs(repairs);
+                expect(parsed.map(r => r.itemId)).toEqual(['axe-t1', 'pickaxe-t1', 'iron-sword', 'crystal-sword']);
+                expect(parsed.every(r => r.building === 'forge' && r.ingredients.length > 0)).toBe(true);
+
+                const free = JSON.parse(JSON.stringify(repairs));
+                free.repairs[0].ingredients = [];
+                expect(() => parseRepairs(free)).toThrow(/repairs\[0\]\.ingredients must be at least one Material/);
+
+                const twice = JSON.parse(JSON.stringify(repairs));
+                twice.repairs[1].itemId = twice.repairs[0].itemId;
+                expect(() => parseRepairs(twice)).toThrow(/repairs\[1\]\.itemId must be an item with one repair recipe/);
             });
         });
 

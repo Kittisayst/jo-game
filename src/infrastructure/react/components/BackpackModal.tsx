@@ -7,6 +7,7 @@ import { consumeItemUseCase } from '../../../application/ConsumeItemUseCase';
 import { equipWeaponUseCase } from '../../../application/EquipWeaponUseCase';
 import { discardItemUseCase } from '../../../application/DiscardItemUseCase';
 import { ItemIcon } from './ItemIcon';
+import { DurabilityBar } from './DurabilityBar';
 
 interface BackpackModalProps
 {
@@ -48,6 +49,7 @@ export const BackpackModal: React.FC<BackpackModalProps> = ({ isOpen, onClose, o
 
     const selectedSlot: BackpackSlot | null = allSlots[selectedSlotIndex] || null;
     const selectedItemDef = selectedSlot ? getItem(selectedSlot.itemId) : null;
+    const selectedWear = selectedSlot ? entities.backpack.getSlotDurability(selectedSlot.slotIndex) : null;
 
     // Filter check helper
     const matchesFilter = useCallback((slot: BackpackSlot | null): boolean =>
@@ -327,6 +329,7 @@ export const BackpackModal: React.FC<BackpackModalProps> = ({ isOpen, onClose, o
                                 const isSelected = selectedSlotIndex === index;
                                 const isEquipped = itemDef && itemDef.category === 'weapon' && entities.equipment.equippedWeaponId === itemDef.id;
                                 const isFilteredOut = !matchesFilter(slot);
+                                const wear = slot ? entities.backpack.getSlotDurability(index) : null;
 
                                 // Category Accent Colors
                                 let categoryStyle = 'border-slate-800 bg-slate-900/40 hover:border-slate-700';
@@ -372,6 +375,15 @@ export const BackpackModal: React.FC<BackpackModalProps> = ({ isOpen, onClose, o
                                             </span>
                                         )}
 
+                                        {wear?.state === 'broken' && (
+                                            <span
+                                                data-testid="broken-badge"
+                                                className="absolute -top-1.5 -right-1.5 bg-rose-600 text-white text-[9px] font-black px-1.5 py-0.2 rounded-full border border-rose-300 shadow"
+                                            >
+                                                ພັງ
+                                            </span>
+                                        )}
+
                                         {slot && itemDef ? (
                                             <>
                                                 <span className="text-2xl sm:text-3xl filter drop-shadow flex items-center justify-center">
@@ -380,6 +392,11 @@ export const BackpackModal: React.FC<BackpackModalProps> = ({ isOpen, onClose, o
                                                 <span className="text-[10px] sm:text-[11px] font-medium text-slate-200 truncate w-full text-center leading-tight mt-1">
                                                     {itemDef.name}
                                                 </span>
+                                                {wear && (
+                                                    <span className="absolute bottom-1 left-1.5 right-1.5">
+                                                        <DurabilityBar reading={wear} compact />
+                                                    </span>
+                                                )}
                                                 {slot.count > 1 && (
                                                     <span className="absolute bottom-1 right-1.5 bg-slate-950/90 text-cyan-300 font-mono text-[9px] sm:text-[10px] font-bold px-1 rounded border border-cyan-500/40">
                                                         x{slot.count}
@@ -495,6 +512,20 @@ export const BackpackModal: React.FC<BackpackModalProps> = ({ isOpen, onClose, o
                                         <div className="flex justify-between items-center text-slate-400">
                                             <span>📦 ຈຳນວນສູງສຸດຕໍ່ຊ່ອງ:</span>
                                             <span className="text-cyan-300 font-mono font-bold">{selectedItemDef.maxStack} ອັນ</span>
+                                        </div>
+                                    )}
+
+                                    {selectedWear && (
+                                        <div className="space-y-1 pt-1 border-t border-slate-800" data-testid="durability-detail">
+                                            <div className="flex justify-between items-center text-slate-400">
+                                                <span>🛠️ ຄວາມທົນທານ:</span>
+                                            </div>
+                                            <DurabilityBar reading={selectedWear} />
+                                            {selectedWear.state === 'broken' && (
+                                                <p className="text-rose-300 text-[11px]">
+                                                    💥 ພັງແລ້ວ: ອາວຸດໃຊ້ໄດ້ພຽງເຄິ່ງໜຶ່ງຂອງພະລັງ, ເຄື່ອງມືຕ້ອງໃຊ້ເວລາເປັນສອງເທົ່າ. ສ້ອມໄດ້ທີ່ Forge ດ້ວຍວັດສະດຸ.
+                                                </p>
+                                            )}
                                         </div>
                                     )}
 

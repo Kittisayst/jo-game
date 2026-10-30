@@ -23,6 +23,8 @@ export interface ItemDefinition
     maxUpgradeLevel?: number;
     /** Hearts restored when the item is consumed. */
     healAmount?: number;
+    /** How many uses a weapon or tool lasts before it is Broken. Missing = it never wears (the wooden sword). */
+    durability?: number;
 }
 
 /**
@@ -63,6 +65,12 @@ export class ItemCatalog
     {
         const maxStack = this._byId.get(itemId)?.maxStack;
         return maxStack && maxStack > 0 ? maxStack : DEFAULT_MAX_STACK;
+    }
+
+    /** The Durability of a new item, or undefined when the item never wears. */
+    maxDurabilityOf (itemId: string): number | undefined
+    {
+        return this._byId.get(itemId)?.durability;
     }
 
     isMaterial (itemId: string): boolean

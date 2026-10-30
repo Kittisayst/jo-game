@@ -36,7 +36,7 @@ export class CombatController
         const { scene } = this;
         if (scene.isDialogueActive || scene.health.isDead || scene.isStageCleared) return;
 
-        const attack = performAttackUseCase(entities.equipment, entities.attackCooldown);
+        const attack = performAttackUseCase(entities.equipment, entities.attackCooldown, entities.backpack);
         if (!attack) return;
 
         const { weaponId, damage, range } = attack;

@@ -14,6 +14,8 @@ import type { WeaponUpgradeRecipe } from '../../application/UpgradeWeaponTierUse
 import { parseStageDefinitions, StageDefinition } from '../phaser/stages/StageDefinition';
 import { parseStageQuestion, parseStageScaling } from './ScalingCatalog';
 import { parseTutorial, TutorialStepDefinition } from './TutorialCatalog';
+import { parseRepairs } from './RepairCatalog';
+import type { RepairRecipe } from '../../application/RepairItemUseCase';
 import { isLessonNumber } from '../../domain/entities/StageNumber';
 import type { StageScaling } from '../../domain/entities/StageScaling';
 import { NodeDefinition, parseNodes } from './NodeCatalog';
@@ -42,6 +44,8 @@ export interface GameContent
     stageQuestionCredit: number;
     /** The hints of the first Stage, in order. */
     tutorial: TutorialStepDefinition[];
+    /** What it costs to repair each weapon and tool at the Forge (Materials, never Credit). */
+    repairs: RepairRecipe[];
     /** How weapons and tools look in the hero's hand, by item id. */
     heldArt: Record<string, HeldArt>;
     /** The rows of the player skin sheets (animations) and where the hand is in each frame. */
@@ -71,6 +75,12 @@ export function parseItems (raw: unknown): ItemDefinition[]
         const item = v.asObject(entry, p);
         const maxStack = v.asNumber(item.maxStack, `${p}.maxStack`);
         if (maxStack < 1) v.fail(`${p}.maxStack`, 'at least 1');
+        const durability = v.optionalNumber(item.durability, `${p}.durability`);
+        if (durability !== undefined)
+        {
+            if (!Number.isInteger(durability) || durability < 1) v.fail(`${p}.durability`, 'a whole number of uses, at least 1');
+            if (maxStack !== 1) v.fail(`${p}.maxStack`, '1 for an item that wears (each one has its own Durability)');
+        }
 
         return {
             id: v.asString(item.id, `${p}.id`),
@@ -87,6 +97,7 @@ export function parseItems (raw: unknown): ItemDefinition[]
             baseDamage: v.optionalNumber(item.baseDamage, `${p}.baseDamage`),
             maxUpgradeLevel: v.optionalNumber(item.maxUpgradeLevel, `${p}.maxUpgradeLevel`),
             healAmount: v.optionalNumber(item.healAmount, `${p}.healAmount`),
+            durability,
         };
     });
 }
@@ -280,7 +291,7 @@ async function fetchJson (file: string): Promise<unknown>
 /** Fetches and validates all game data. Call once before the app starts. */
 export async function loadGameContent (): Promise<GameContent>
 {
-    const [items, books, questions, recipes, enemies, realms, nodes, stages, tutorial, playerAnimations] = await Promise.all([
+    const [items, books, questions, recipes, enemies, realms, nodes, stages, tutorial, repairs, playerAnimations] = await Promise.all([
         fetchJson('items.json'),
         fetchJson('books.json'),
         fetchJson('questions.json'),
@@ -290,6 +301,7 @@ export async function loadGameContent (): Promise<GameContent>
         fetchJson('nodes.json'),
         fetchJson('stages.json'),
         fetchJson('tutorial.json'),
+        fetchJson('repairs.json'),
         fetchJson('player-animations.json'),
     ]);
 
@@ -307,6 +319,7 @@ export async function loadGameContent (): Promise<GameContent>
         scaling: parseStageScaling(stages),
         stageQuestionCredit: parseStageQuestion(stages).credit,
         tutorial: parseTutorial(tutorial),
+        repairs: parseRepairs(repairs),
         heldArt: parseHeldArt(items),
         playerAnimations: parsePlayerAnimations(playerAnimations),
     };

@@ -1,0 +1,8 @@
+{
+  "repairs": [
+    {"itemId": "axe-t1", "building": "forge", "ingredients": [{"itemId": "wood", "count": 3}, {"itemId": "stone", "count": 1}]},
+    {"itemId": "pickaxe-t1", "building": "forge", "ingredients": [{"itemId": "wood", "count": 3}, {"itemId": "stone", "count": 2}]},
+    {"itemId": "iron-sword", "building": "forge", "ingredients": [{"itemId": "iron-ore", "count": 3}, {"itemId": "wood", "count": 1}]},
+    {"itemId": "crystal-sword", "building": "forge", "ingredients": [{"itemId": "crystal", "count": 1}, {"itemId": "iron-ore", "count": 3}]}
+  ]
+}

@@ -46,6 +46,7 @@ import { EnemyDefinition } from '../../../domain/entities/Enemy';
 import { scaleEnemyDefinition } from '../../../domain/entities/StageScaling';
 import { GROUND_SINK } from '../physicsConstants';
 import { notifyTutorial } from '../../tutorial';
+import { ITEM_BROKEN_EVENT, ITEM_WORN_EVENT, ItemBrokenPayload, ItemWornPayload } from '../../../application/WearItemUseCase';
 
 /** How far from the start the hero has walked when the hint "walk" counts as done (px). */
 const MOVED_AWAY_DISTANCE = 120;
@@ -393,6 +394,22 @@ export class Game extends Scene
         };
         DomainEvents.on<SkinChangedPayload>(SKIN_CHANGED_EVENT, onSkinChanged);
 
+        const itemName = (itemId: string) => entities.itemCatalog.get(itemId)?.name ?? itemId;
+        const onItemWorn = (payload: ItemWornPayload) =>
+        {
+            if (payload.state !== 'low' || payload.previousState !== 'ok') return;
+            soundManager.playClink();
+            showLootNotification(this, this.player.x, this.player.y - 70, `⚠️ ${itemName(payload.itemId)} ເກືອບພັງ (${payload.current}/${payload.max})`, '#f59e0b');
+        };
+        DomainEvents.on<ItemWornPayload>(ITEM_WORN_EVENT, onItemWorn);
+
+        const onItemBroken = (payload: ItemBrokenPayload) =>
+        {
+            soundManager.playHurt();
+            showLootNotification(this, this.player.x, this.player.y - 70, `💥 ${itemName(payload.itemId)} ພັງ! ອ່ອນລົງ ສ້ອມໄດ້ທີ່ Forge`, '#ef4444');
+        };
+        DomainEvents.on<ItemBrokenPayload>(ITEM_BROKEN_EVENT, onItemBroken);
+
         const onGamePaused = () =>
         {
             if (this.scene.isActive())
@@ -423,6 +440,8 @@ export class Game extends Scene
         this.events.on('shutdown', () =>
         {
             DomainEvents.off<SkinChangedPayload>(SKIN_CHANGED_EVENT, onSkinChanged);
+            DomainEvents.off<ItemWornPayload>(ITEM_WORN_EVENT, onItemWorn);
+            DomainEvents.off<ItemBrokenPayload>(ITEM_BROKEN_EVENT, onItemBroken);
             DomainEvents.off(GAME_PAUSED_EVENT, onGamePaused);
             DomainEvents.off(GAME_RESUMED_EVENT, onGameResumed);
             DomainEvents.off(PLAYER_DIED_EVENT, onGameOver);

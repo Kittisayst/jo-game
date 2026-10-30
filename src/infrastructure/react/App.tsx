@@ -472,6 +472,7 @@ function App ()
 
     useGameEvents({
         onStageCleared: payload => clearStage(payload.stageId),
+        onItemWornOrRepaired: () => setBackpackRevision(r => r + 1),
         onTutorialChanged: payload =>
         {
             if (payload.finished.length > 0) soundManager.playPowerUp();
@@ -591,6 +592,7 @@ function App ()
                         name: equippedWeaponDef.name,
                         icon: equippedWeaponDef.icon,
                         iconImage: equippedWeaponDef.iconImage,
+                        durability: entities.backpack.getDurability(equippedWeaponDef.id) ?? undefined,
                     }}
                     isGamePaused={isGamePaused}
                     health={health}
