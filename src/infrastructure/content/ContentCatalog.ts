@@ -26,6 +26,7 @@ import { NodeDefinition, parseNodes } from './NodeCatalog';
 import { parseRealms, RealmDefinition } from './RealmCatalog';
 import { makeValidators } from './validate';
 import { HeldArt, parseHeldArt, parsePlayerAnimations, PlayerAnimations } from './HeldItemArt';
+import { parseSkills, SkillContent } from './SkillCatalog';
 
 export type RecipeEntry = RecipeDefinition | WeaponUpgradeRecipe;
 
@@ -56,6 +57,8 @@ export interface GameContent
     heldArt: Record<string, HeldArt>;
     /** The rows of the player skin sheets (animations) and where the hand is in each frame. */
     playerAnimations: PlayerAnimations;
+    /** The hero's skills: how the Dash feels. */
+    skills: SkillContent;
 }
 
 const ITEM_CATEGORIES: readonly ItemCategory[] = ['material', 'consumable', 'tool', 'weapon', 'armor'];
@@ -356,7 +359,7 @@ async function fetchJson (file: string): Promise<unknown>
 /** Fetches and validates all game data. Call once before the app starts. */
 export async function loadGameContent (): Promise<GameContent>
 {
-    const [items, books, questions, recipes, enemies, realms, nodes, stages, tutorial, repairs, garden, playerAnimations] = await Promise.all([
+    const [items, books, questions, recipes, enemies, realms, nodes, stages, tutorial, repairs, garden, playerAnimations, skills] = await Promise.all([
         fetchJson('items.json'),
         fetchJson('books.json'),
         fetchJson('questions.json'),
@@ -369,6 +372,7 @@ export async function loadGameContent (): Promise<GameContent>
         fetchJson('repairs.json'),
         fetchJson('garden.json'),
         fetchJson('player-animations.json'),
+        fetchJson('skills.json'),
     ]);
 
     const parsedNodes = parseNodes(nodes);
@@ -389,6 +393,7 @@ export async function loadGameContent (): Promise<GameContent>
         gardenExpansions: parseGardenExpansions(garden),
         heldArt: parseHeldArt(items),
         playerAnimations: parsePlayerAnimations(playerAnimations),
+        skills: parseSkills(skills),
     };
 }
 

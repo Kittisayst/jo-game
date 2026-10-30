@@ -4,6 +4,7 @@
     {"id": "herb", "event": "harvested:wild-herb", "text": "🌿 ຍ່າງໄປຫາຕົ້ນສະໝຸນໄພ ແລ້ວກົດ E ເພື່ອເກັບ"},
     {"id": "tree", "event": "harvested:oak-tree", "text": "🪓 ໄປຫາຕົ້ນໄມ້ ແລ້ວກົດ E ຊ້ຳໆ 3 ຄັ້ງ ເພື່ອຕັດ (ມີຂວານຕິດຕົວແລ້ວ)"},
     {"id": "fight", "event": "enemy-defeated", "text": "⚔️ ກົດ J ຫຼື Z ເພື່ອຕີສະໄລມ໌ໃຫ້ມັນແພ້"},
+    {"id": "dash", "event": "dashed", "text": "💨 ກົດ Shift (ຫຼືປຸ່ມ ພຸ່ງ) ເພື່ອພຸ່ງຫຼົບ: ຕອນພຸ່ງ ສັດຕູ ແລະລູກຫີນຕີບໍ່ໂດນ"},
     {"id": "backpack", "event": "backpack-opened", "text": "🎒 ກົດ I ເພື່ອເບິ່ງກະເປົາ ແລະ ຂອງທີ່ເກັບໄດ້"},
     {"id": "exit", "event": "stage-cleared", "text": "🚪 ຍ່າງໄປທາງຂວາສຸດ (ທາງອອກ) ແລ້ວຕອບຄຳຖາມ ເພື່ອຜ່ານດ່ານ"},
     {"id": "garden", "event": "seed-planted", "showAfter": "seed-collected", "text": "🌱 ໄດ້ເມັດແລ້ວ! ໄປປະຕູສວນໃນໝູ່ບ້ານ (ຂວາຂອງໂຮງຊ່າງ) ແລ້ວປູກເມັດ ລໍເວລາ ແລ້ວເກັບຜົນ"},

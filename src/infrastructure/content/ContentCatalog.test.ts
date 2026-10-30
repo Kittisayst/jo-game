@@ -596,9 +596,10 @@ describe('validator errors', () =>
             {
                 const steps = parseTutorial(tutorial);
 
-                expect(steps.map(s => s.id)).toEqual(['move', 'herb', 'tree', 'fight', 'backpack', 'exit', 'garden', 'learn', 'portal']);
-                expect(steps[6]).toMatchObject({ event: 'seed-planted', showAfter: 'seed-collected' });
-                expect(steps[8]).toMatchObject({ event: 'portal-block-placed', showAfter: 'portal-shard-collected' });
+                expect(steps.map(s => s.id)).toEqual(['move', 'herb', 'tree', 'fight', 'dash', 'backpack', 'exit', 'garden', 'learn', 'portal']);
+                expect(steps[4]).toMatchObject({ event: 'dashed' });
+                expect(steps[7]).toMatchObject({ event: 'seed-planted', showAfter: 'seed-collected' });
+                expect(steps[9]).toMatchObject({ event: 'portal-block-placed', showAfter: 'portal-shard-collected' });
                 expect(steps[1]).toMatchObject({ event: 'harvested:wild-herb' });
                 expect(steps.every(s => s.text.length > 0)).toBe(true);
             });
@@ -658,5 +659,24 @@ describe('validator errors', () =>
             noStrike.nodes[0].strikes = 0;
             expect(() => parseNodes(noStrike)).toThrow(/nodes\[0\]\.strikes must be a whole number of Strikes, at least 1/);
         });
+    });
+});
+
+describe('skills.json', () =>
+{
+    it('gives the Dash its feel, all above zero', async () =>
+    {
+        const { parseSkills } = await import('./SkillCatalog');
+        const skills = (await import('../../../public/data/skills.json')).default;
+        const parsed = parseSkills(skills);
+        expect(parsed.dash.speed).toBeGreaterThan(0);
+        expect(parsed.dash.dodgeMs).toBeGreaterThanOrEqual(parsed.dash.durationMs);
+    });
+
+    it('names the file and the path of a bad value', async () =>
+    {
+        const { parseSkills } = await import('./SkillCatalog');
+        expect(() => parseSkills({ movement: { dash: { speed: 0, durationMs: 1, dodgeMs: 1, cooldownMs: 1 } } }))
+            .toThrow('skills.json: movement.dash.speed must be a number above 0');
     });
 });

@@ -2,6 +2,7 @@ import { Physics, Scene } from 'phaser';
 import { soundManager } from '../../audio/SoundManager';
 import { getGameContent } from '../../content/ContentCatalog';
 import { GROUND_SINK, JUMP_SPEED, MOVE_SPEED } from '../physicsConstants';
+import type { DashTuning } from '../../../domain/entities/MovementAbilities';
 
 const WIDTH = 32;
 const HEIGHT = 48;
@@ -18,9 +19,16 @@ export interface PlayerInputControls
     up: { isDown: boolean };
 }
 
+/** Fastest the hero moves sideways, except during a Dash (limits tunneling through thin walls). */
+const MAX_SPEED_X = 320;
+
 export class Player extends Physics.Arcade.Sprite
 {
     isInvincible = false;
+    /** True for the first moments of a Dash: nothing can hurt the hero (the dodge). */
+    isDodging = false;
+    /** An air dash was used since the hero last stood on the ground. */
+    airDashUsed = false;
     /** Walking speed factor: a speed Potion and boots raise it (set by the scene every frame). */
     speedMultiplier = 1;
     facingDir = 1;
@@ -36,6 +44,9 @@ export class Player extends Physics.Arcade.Sprite
     private runDustTimer = 0;
     private attackAnimTimer = 0;
     private isFainted = false;
+    private dashMsLeft = 0;
+    private dashSpeed = 0;
+    private dashGhostTimer = 0;
 
     onJump?: (x: number, y: number) => void;
     onLand?: (x: number, y: number) => void;
@@ -61,7 +72,7 @@ export class Player extends Physics.Arcade.Sprite
         this.setDepth(10);
 
         // Terminal velocity limits to prevent tunneling during extreme leaps/falls
-        this.setMaxVelocity(320, 650);
+        this.setMaxVelocity(MAX_SPEED_X, 650);
 
         this.initAnimations(skinId);
     }
@@ -202,6 +213,68 @@ export class Player extends Physics.Arcade.Sprite
         this.isFainted = true;
         this.setVelocity(0, 0);
         this.playAnimation('faint');
+    }
+
+    /** Whether a hit would count right now (not after a hit, not while dodging). */
+    get canBeHurt (): boolean
+    {
+        return !this.isInvincible && !this.isDodging;
+    }
+
+    /** True while a Dash moves the hero (it can be refused then: nothing else steers). */
+    get isDashing (): boolean
+    {
+        return this.dashMsLeft > 0;
+    }
+
+    /** True when knocked back or fainted: the hero cannot act. */
+    get isStunned (): boolean
+    {
+        return this.isKnockedBack || this.isFainted;
+    }
+
+    /** A quick burst towards `dir`, flat (no gravity) and dodging for `dodgeMs`. The rules are in `dashUseCase`. */
+    dash (dir: -1 | 1, tuning: DashTuning): void
+    {
+        const body = this.body as Phaser.Physics.Arcade.Body;
+        this.facingDir = dir;
+        this.setFlipX(dir < 0);
+        this.dashMsLeft = tuning.durationMs;
+        this.dashSpeed = dir * tuning.speed;
+        this.dashGhostTimer = 0;
+        if (!body.blocked.down) this.airDashUsed = true;
+        body.setAllowGravity(false);
+        body.setMaxVelocityX(Math.max(MAX_SPEED_X, tuning.speed));
+        this.setVelocity(this.dashSpeed, 0);
+
+        this.isDodging = true;
+        this.scene.time.delayedCall(tuning.dodgeMs, () =>
+        {
+            this.isDodging = false;
+        });
+    }
+
+    /** Ends a Dash: gravity back, keep a little of the speed. */
+    private endDash (): void
+    {
+        this.dashMsLeft = 0;
+        const body = this.body as Phaser.Physics.Arcade.Body;
+        body.setAllowGravity(true);
+        body.setMaxVelocityX(MAX_SPEED_X);
+        this.setVelocityX(Math.sign(this.dashSpeed) * MOVE_SPEED * this.speedMultiplier);
+    }
+
+    /** A fading copy of the hero left behind during a Dash. */
+    private dropDashGhost (): void
+    {
+        const ghost = this.scene.add.image(this.x, this.y, this.texture.key, this.frame.name)
+            .setFlipX(this.flipX)
+            .setOrigin(this.originX, this.originY)
+            .setScale(this.scaleX, this.scaleY)
+            .setDepth(this.depth - 1)
+            .setAlpha(0.55)
+            .setTint(0x38bdf8);
+        this.scene.tweens.add({ targets: ghost, alpha: 0, duration: 220, onComplete: () => ghost.destroy() });
     }
 
     triggerDamage (sourceX: number): void
@@ -395,6 +468,30 @@ export class Player extends Physics.Arcade.Sprite
             });
         }
         this.wasInAir = !onGround;
+        if (onGround) this.airDashUsed = false;
+
+        // A Dash steers the hero by itself until it ends (or hits a wall)
+        if (this.dashMsLeft > 0)
+        {
+            this.dashMsLeft = Math.max(0, this.dashMsLeft - delta);
+            this.dashGhostTimer -= delta;
+            if (this.dashGhostTimer <= 0)
+            {
+                this.dashGhostTimer = 40;
+                this.dropDashGhost();
+            }
+            const blocked = this.dashSpeed < 0 ? body.blocked.left : body.blocked.right;
+            if (this.dashMsLeft === 0 || blocked)
+            {
+                this.endDash();
+            }
+            else
+            {
+                this.setVelocity(this.dashSpeed, 0);
+                this.playAnimation('run');
+                return;
+            }
+        }
 
         // Coyote Time tracking (allows jumping briefly after running off a ledge)
         if (onGround)

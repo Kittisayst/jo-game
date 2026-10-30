@@ -15,6 +15,7 @@ import { ActiveEffects } from './ActiveEffects';
 import { armorHeartsOf } from './Armor';
 import { CraftingQueue } from './CraftingQueue';
 import { Garden } from './Garden';
+import { MovementAbilities } from './MovementAbilities';
 import { PendingRewards } from './PendingRewards';
 import { PlantRegrowth } from './PlantRegrowth';
 import { RealmProgression } from './RealmProgression';
@@ -49,6 +50,8 @@ export class GameState
     readonly garden = new Garden();
     /** What the Workshop or the Forge is making (one job at a time, counted in Game time). */
     readonly crafting = new CraftingQueue();
+    /** The Dash (and later the air dash and double jump). */
+    readonly movement = new MovementAbilities();
     /** The Storage chest: 40 slots, never touched by dying. */
     readonly storage: Backpack;
     /** Timed Potion effects running on the hero (not saved). */
@@ -113,6 +116,7 @@ export class GameState
             plantRegrowth: this.plantRegrowth.toSnapshot(),
             garden: this.garden.toSnapshot(),
             crafting: this.crafting.toSnapshot(),
+            movement: this.movement.toSnapshot(),
             storage: this.storage.toSnapshot(),
         };
     }
@@ -158,6 +162,7 @@ export class GameState
         this.plantRegrowth.loadFrom(snapshot.plantRegrowth ?? {});
         this.garden.loadFrom(snapshot.garden ?? { plotCount: 6, plots: [] });
         this.crafting.loadFrom(snapshot.crafting ?? null);
+        this.movement.loadFrom(snapshot.movement);
         this.storage.loadFromSnapshot(snapshot.storage ?? []);
         this.effects.clear();
         this.syncArmor();

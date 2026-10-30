@@ -1,0 +1,5 @@
+{
+  "movement": {
+    "dash": { "speed": 640, "durationMs": 170, "dodgeMs": 220, "cooldownMs": 800 }
+  }
+}

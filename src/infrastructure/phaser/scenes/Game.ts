@@ -27,6 +27,7 @@ import { buildStageScenery, BrokenGate, ResourceNodeView, WaypointView } from '.
 import { buildVillageScenery, InteractiveBuilding } from '../scenery/VillageBuilder';
 import { buildGarden, GardenView } from '../scenery/GardenBuilder';
 import { GARDEN_LEVEL_KEY, isHomeLevel } from '../levelCatalog';
+import { dashUseCase } from '../../../application/DashUseCase';
 import {
     createGround,
     createMovingPlatforms,
@@ -341,11 +342,13 @@ export class Game extends Scene
         const zKey = this.input.keyboard?.addKey('Z');
         const qKey = this.input.keyboard?.addKey('Q');
         const f2Key = this.input.keyboard?.addKey(Input.Keyboard.KeyCodes.F2);
+        const shiftKey = this.input.keyboard?.addKey(Input.Keyboard.KeyCodes.SHIFT);
 
         jKey?.on('down', () => this.combat.attack());
         zKey?.on('down', () => this.combat.attack());
         qKey?.on('down', () => this.combat.cycleWeapon());
         f2Key?.on('down', () => this.togglePhysicsDebug());
+        shiftKey?.on('down', () => this.tryDash());
 
         const onVirtualInput = (inputs: { left?: boolean; right?: boolean; up?: boolean }) =>
         {
@@ -357,6 +360,7 @@ export class Game extends Scene
         const onVirtualInteract = () => this.interaction.interact();
         const onVirtualAttack = () => this.combat.attack();
         const onVirtualCycleWeapon = () => this.combat.cycleWeapon();
+        const onVirtualDash = () => this.tryDash();
         const onTogglePhysicsDebug = () => this.togglePhysicsDebug();
 
         const onQuizFinisherPassed = () =>
@@ -415,6 +419,7 @@ export class Game extends Scene
         EventBus.on('virtual-input', onVirtualInput);
         EventBus.on('virtual-interact', onVirtualInteract);
         EventBus.on('virtual-attack', onVirtualAttack);
+        EventBus.on('virtual-dash', onVirtualDash);
         EventBus.on('virtual-cycle-weapon', onVirtualCycleWeapon);
         EventBus.on('toggle-physics-debug', onTogglePhysicsDebug);
         EventBus.on('quiz-finisher-passed', onQuizFinisherPassed);
@@ -487,6 +492,7 @@ export class Game extends Scene
             EventBus.removeListener('virtual-input', onVirtualInput);
             EventBus.removeListener('virtual-interact', onVirtualInteract);
             EventBus.removeListener('virtual-attack', onVirtualAttack);
+            EventBus.removeListener('virtual-dash', onVirtualDash);
             EventBus.removeListener('virtual-cycle-weapon', onVirtualCycleWeapon);
             EventBus.removeListener('toggle-physics-debug', onTogglePhysicsDebug);
             EventBus.removeListener('quiz-finisher-passed', onQuizFinisherPassed);
@@ -510,6 +516,7 @@ export class Game extends Scene
         entities.attackCooldown.tick(delta);
         entities.effects.tick(delta);
         entities.crafting.tick(delta);
+        entities.movement.tick(delta);
         for (const worker of this.craftingWorkers) worker.update(entities.crafting.job);
         if (this.player)
         {
@@ -617,6 +624,26 @@ export class Game extends Scene
     }
 
     /** Turns every Sapling whose time has come back into a whole plant that can be harvested again. */
+    /** Shift or the touch Dash button: a quick dodge towards the arrow held, or the way the hero faces. */
+    private tryDash (): void
+    {
+        const player = this.player;
+        if (!player?.body || player.isStunned || player.isDashing || this.isDialogueActive || this.health.isDead || this.isStageCleared) return;
+        if (this.scene.isPaused()) return;
+
+        const isLeft = Boolean(this.cursors?.left.isDown || this.wasdKeys?.left?.isDown || this.touchControls.left);
+        const isRight = Boolean(this.cursors?.right.isDown || this.wasdKeys?.right?.isDown || this.touchControls.right);
+        const dir: -1 | 1 = isLeft && !isRight ? -1 : isRight && !isLeft ? 1 : (player.facingDir < 0 ? -1 : 1);
+        const inAir = !(player.body as Phaser.Physics.Arcade.Body).blocked.down;
+
+        const result = dashUseCase(entities.movement, getGameContent().skills.dash, { inAir, airDashUsed: player.airDashUsed });
+        if (!result.success) return;
+
+        player.dash(dir, result.tuning);
+        soundManager.playJump();
+        notifyTutorial('dashed');
+    }
+
     private growPlants (): void
     {
         this.gardenView?.refresh();
