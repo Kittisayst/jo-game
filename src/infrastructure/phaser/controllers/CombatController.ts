@@ -6,7 +6,7 @@ import { grantXpUseCase } from '../../../application/GrantXpUseCase';
 import { autoSaveGame } from '../../saveSnapshot';
 import { getGameContent } from '../../content/ContentCatalog';
 import { playerTakeDamageUseCase } from '../../../application/PlayerTakeDamageUseCase';
-import { armorContext, entities } from '../../composition';
+import { armorContext, entities, random } from '../../composition';
 import { soundManager } from '../../audio/SoundManager';
 import { EventBus } from '../../EventBus';
 import { describeDrops, showDamageNumber, showLootNotification } from '../effects/FloatingText';
@@ -40,7 +40,10 @@ export class CombatController
         const { scene } = this;
         if (scene.isDialogueActive || scene.health.isDead || scene.isStageCleared) return;
 
-        const attack = performAttackUseCase(entities.equipment, entities.attackCooldown, entities.backpack, entities.effects);
+        const attack = performAttackUseCase(
+            entities.equipment, entities.attackCooldown, entities.backpack, entities.effects,
+            entities.heroStats.attackMultiplier(getGameContent().statsTuning)
+        );
         if (!attack) return;
 
         const { weaponId, damage, range } = attack;
@@ -66,7 +69,24 @@ export class CombatController
         player.triggerDamage(enemy.x);
         scene.cameras.main.shake(160, 0.008);
         scene.cameras.main.flash(110, 239, 68, 68, true);
-        playerTakeDamageUseCase(scene.health, armorContext);
+        this.hurtPlayer();
+    }
+
+    /**
+     * A hit on the hero. The Guard Stat may stop it ("🛡️ ກັນໄດ້!" and nothing is lost); every hit site goes
+     * through here.
+     */
+    private hurtPlayer (): void
+    {
+        const outcome = playerTakeDamageUseCase(this.scene.health, armorContext, {
+            blockChance: entities.heroStats.blockChance(getGameContent().statsTuning),
+            random,
+        });
+        if (outcome === 'blocked')
+        {
+            showLootNotification(this.scene, this.scene.player.x, this.scene.player.y - 30, '🛡️ ກັນໄດ້!', '#7dd3fc');
+            soundManager.playSelect();
+        }
     }
 
     /** Overlap callback: hero touches a spike. */
@@ -79,7 +99,7 @@ export class CombatController
         scene.particleManager.emitSpikeHit(spike.x, spike.y);
         scene.cameras.main.shake(180, 0.009);
         scene.cameras.main.flash(110, 239, 68, 68, true);
-        playerTakeDamageUseCase(scene.health, armorContext);
+        this.hurtPlayer();
     }
 
     /** Overlap callback: touching the Boss costs a heart. */
@@ -91,7 +111,7 @@ export class CombatController
         player.triggerDamage(boss.x);
         scene.cameras.main.shake(220, 0.012);
         scene.cameras.main.flash(140, 239, 68, 68, true);
-        playerTakeDamageUseCase(scene.health, armorContext);
+        this.hurtPlayer();
     }
 
     /** Overlap callback: an enemy spit hits the hero. */
@@ -105,7 +125,7 @@ export class CombatController
         scene.particleManager.emitSpikeHit(scene.player.x, scene.player.y);
         scene.cameras.main.shake(150, 0.007);
         scene.cameras.main.flash(100, 34, 197, 94, true);
-        playerTakeDamageUseCase(scene.health, armorContext);
+        this.hurtPlayer();
     }
 
     /** A spitter enemy fires a glob in `(dirX, dirY)`. */

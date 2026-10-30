@@ -16,7 +16,8 @@ import type { WeaponUpgradeRecipe } from '../../application/UpgradeWeaponTierUse
 import type { ToolUpgradeRecipe } from '../../application/UpgradeToolUseCase';
 import { parseStageDefinitions, StageDefinition } from '../phaser/stages/StageDefinition';
 import { parseStageQuestion, parseStageScaling } from './ScalingCatalog';
-import { parseProgression } from './ProgressionCatalog';
+import { parseProgression, parseStatsTuning } from './ProgressionCatalog';
+import type { StatsTuning } from '../../domain/entities/HeroStats';
 import type { ProgressionTuning } from '../../domain/entities/HeroLevel';
 import { parseTutorial, TutorialStepDefinition } from './TutorialCatalog';
 import { parseRepairs } from './RepairCatalog';
@@ -50,6 +51,8 @@ export interface GameContent
     scaling: StageScaling;
     /** The Hero Level curve (XP per level, the over-level rule). */
     progression: ProgressionTuning;
+    /** The four Stats (ceilings, size of a point) and the price of starting over. */
+    statsTuning: StatsTuning;
     /** Credit paid for the first correct end-of-Stage answer of each Stage. */
     stageQuestionCredit: number;
     /** The hints of the first Stage, in order. */
@@ -419,6 +422,7 @@ export async function loadGameContent (): Promise<GameContent>
         stages: parseStageDefinitions(stages, parsedNodes),
         scaling: parseStageScaling(stages),
         progression: parseProgression(progression),
+        statsTuning: parseStatsTuning(progression),
         stageQuestionCredit: parseStageQuestion(stages).credit,
         tutorial: parseTutorial(tutorial),
         repairs: parseRepairs(repairs),

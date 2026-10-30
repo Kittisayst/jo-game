@@ -10,6 +10,8 @@ export interface ShortcutHandlers
     escape: () => void;
     /** I */
     toggleBackpack: () => void;
+    /** C: the Character window (Hero Level and Stat points) */
+    toggleCharacter: () => void;
     /** R: drink the Potion in the Quick slot (Q swaps the sword, which the Phaser scene owns) */
     drinkQuickSlot: () => void;
 }
@@ -47,6 +49,10 @@ export function useGlobalShortcuts (handlers: ShortcutHandlers): void
                 case 'i':
                 case 'I':
                     current.toggleBackpack();
+                    break;
+                case 'c':
+                case 'C':
+                    current.toggleCharacter();
                     break;
                 case 'r':
                 case 'R':

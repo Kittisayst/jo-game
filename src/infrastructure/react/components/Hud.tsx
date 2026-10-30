@@ -68,6 +68,7 @@ export interface HudProps
     skillSlots?: (SkillSlotView | null)[];
     /** The Hero Level and the XP towards the next one. */
     heroLevel?: HeroLevelView;
+    onOpenCharacter?: () => void;
     onUseSkill?: (slot: number) => void;
 }
 
@@ -99,6 +100,7 @@ export function Hud ({
     onDrinkQuickSlot,
     skillSlots = [],
     heroLevel,
+    onOpenCharacter,
     onUseSkill,
 }: HudProps)
 {
@@ -114,7 +116,7 @@ export function Hud ({
                         <span className="badge-label">{levelLabel}</span>
                     </div>
 
-                    <div className="hud-badge health-badge">
+                    <div className="hud-badge health-badge" data-testid="health-hearts" data-current={health} data-max={maxHealth}>
                         <span className="badge-icon">
                             {'❤️'.repeat(Math.max(0, health)) + '🖤'.repeat(Math.max(0, maxHealth - health))}
                         </span>
@@ -194,18 +196,20 @@ export function Hud ({
                     )}
 
                     {heroLevel && (
-                        <div
+                        <button
+                            type="button"
+                            onClick={e => { e.preventDefault(); e.stopPropagation(); onOpenCharacter?.(); }}
                             className="hud-badge hero-level-badge"
                             data-testid="hero-level"
                             data-level={heroLevel.level}
-                            title={heroLevel.xpNeeded > 0 ? `XP ${heroLevel.xp} / ${heroLevel.xpNeeded} (XP ມາຈາກການຂ້າ monster ເທົ່ານັ້ນ, ບໍ່ແມ່ນ Credit)` : 'ລະດັບສູງສຸດ'}
+                            title={heroLevel.xpNeeded > 0 ? `[C] XP ${heroLevel.xp} / ${heroLevel.xpNeeded} (XP ມາຈາກການຂ້າ monster ເທົ່ານັ້ນ, ບໍ່ແມ່ນ Credit)` : 'ລະດັບສູງສຸດ'}
                         >
                             <span className="badge-icon">⭐</span>
                             <span className="badge-value">Lv {heroLevel.level}</span>
                             <span aria-hidden="true" style={{ display: 'inline-block', width: 44, height: 6, borderRadius: 3, background: 'rgba(148,163,184,0.35)', overflow: 'hidden' }}>
                                 <span data-testid="hero-xp-bar" style={{ display: 'block', height: '100%', width: `${Math.round(heroLevel.fraction * 100)}%`, background: '#a5b4fc' }} />
                             </span>
-                        </div>
+                        </button>
                     )}
 
                     {/* Permanent Knowledge Credit balance */}

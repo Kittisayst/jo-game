@@ -24,7 +24,9 @@ export function performAttackUseCase (
     equipment: EquipmentState,
     cooldown: AttackCooldown,
     backpack?: Backpack,
-    effects?: ActiveEffects
+    effects?: ActiveEffects,
+    /** The Attack Stat: a factor on the damage (1 = none). */
+    statMultiplier = 1
 ): AttackResult | null
 {
     if (!cooldown.canAttack())
@@ -40,7 +42,7 @@ export function performAttackUseCase (
 
     return {
         weaponId: id,
-        damage: Math.round((reading ? damageAfterWear(baseDamage, reading.state) : baseDamage) * (effects?.damageMultiplier ?? 1)),
+        damage: Math.round((reading ? damageAfterWear(baseDamage, reading.state) : baseDamage) * (effects?.damageMultiplier ?? 1) * statMultiplier),
         range,
         effectiveCooldown: cooldownMs,
         ...(reading ? { durabilityState: reading.state } : {}),

@@ -95,6 +95,20 @@ export class HeroLevel
         return gained;
     }
 
+    /** Spends one Stat point. Returns false when there is none. */
+    spendPoint (): boolean
+    {
+        if (this._unspentPoints <= 0) return false;
+        this._unspentPoints -= 1;
+        return true;
+    }
+
+    /** Gives back points taken from the Stats. */
+    refundPoints (count: number): void
+    {
+        if (count > 0) this._unspentPoints += Math.floor(count);
+    }
+
     toSnapshot (): HeroLevelSnapshot
     {
         return { level: this._level, xp: this._xp, unspentPoints: this._unspentPoints };

@@ -53,9 +53,11 @@ import { StageQuestionModal } from './components/StageQuestionModal';
 import { GardenSeedPicker } from './components/GardenSeedPicker';
 import { readSkillSlots } from './skillSlots';
 import { readHeroLevel } from './heroLevelView';
+import { syncHearts } from '../heroStats';
 import { syncMovement, syncSkills } from '../skills';
 import { GARDEN_LEVEL_KEY, isHomeLevel } from '../phaser/levelCatalog';
 import { StorageModal } from './components/StorageModal';
+import { CharacterModal } from './components/CharacterModal';
 import { answerStageQuestionUseCase, pickStageQuestion } from '../../application/AnswerStageQuestionUseCase';
 import { returnToVillageUseCase } from '../../application/ReturnToVillageUseCase';
 import {
@@ -146,6 +148,7 @@ function App ()
         stageQuestion, setStageQuestion,
         isGardenOpen, setIsGardenOpen,
         isStorageOpen, setIsStorageOpen,
+        isCharacterOpen, setIsCharacterOpen,
     } = modals;
 
     // Bumped when books or the backpack change, so memoised values that read them recompute
@@ -279,7 +282,7 @@ function App ()
         setIsStageSelectOpen(false);
         setIsStageMapOpen(false);
         setIsSettingsOpen(false);
-        setHealth(maxHealth);
+        setHealth(entities.health.max);
         setCurrentLevel(stageKey);
         setBossHp(null);
 
@@ -364,7 +367,7 @@ function App ()
 
         if (resetToStart)
         {
-            setHealth(maxHealth);
+            setHealth(entities.health.max);
         }
 
         setCurrentLevel(target);
@@ -468,12 +471,17 @@ function App ()
         {
             if (!isMainMenuOpen && !isSkinModalOpen) setIsBackpackOpen(prev => !prev);
         },
+        toggleCharacter: () =>
+        {
+            if (!isMainMenuOpen && !isSkinModalOpen) setIsCharacterOpen(prev => !prev);
+        },
         drinkQuickSlot,
     });
 
     // A save made before skills existed still teaches the skills of the Textbooks already passed
     useEffect(() =>
     {
+        syncHearts();
         if (syncSkills().length + syncMovement().length > 0) autoSaveGame();
     }, []);
 
@@ -731,6 +739,7 @@ function App ()
                     craftingJob={entities.crafting.job}
                     skillSlots={readSkillSlots()}
                     heroLevel={readHeroLevel()}
+                    onOpenCharacter={() => setIsCharacterOpen(true)}
                     onUseSkill={slot => EventBus.emit('virtual-skill', { slot })}
                     activeEffects={entities.effects.active}
                     quickSlot={quickSlotDef
@@ -949,7 +958,7 @@ function App ()
                 onReturnConfirmed={() =>
                 {
                     setIsWaypointOpen(false);
-                    setHealth(maxHealth);
+                    setHealth(entities.health.max);
                     handleStartGame('village');
                 }}
             />
@@ -988,6 +997,17 @@ function App ()
                 onPlanted={() =>
                 {
                     notifyTutorial('seed-planted');
+                    setBackpackRevision(r => r + 1);
+                    autoSaveGame();
+                }}
+            />
+
+            <CharacterModal
+                isOpen={isCharacterOpen}
+                onClose={() => setIsCharacterOpen(false)}
+                onChanged={() =>
+                {
+                    setHealth(entities.health.current);
                     setBackpackRevision(r => r + 1);
                     autoSaveGame();
                 }}

@@ -5,6 +5,7 @@ import { MOVEMENT_ABILITY_IDS, MovementAbilityId } from './MovementAbilities';
 import { MAX_SKILL_RANK, SKILL_SLOT_COUNT, SkillProgressionSnapshot } from './SkillProgression';
 import { MAX_TOOL_LEVEL } from './ToolUpgrades';
 import { HERO_LEVEL_CAP, type HeroLevelSnapshot } from './HeroLevel';
+import { STAT_IDS, type StatsSnapshot } from './HeroStats';
 import type { PendingReward } from './PendingRewards';
 import { TutorialSnapshot } from './TutorialProgress';
 import { SettingsData, StageProgressionData } from '../ports';
@@ -59,6 +60,8 @@ export interface SaveGameSnapshot
     toolUpgrades: Record<string, number>;
     /** The Hero Level, the XP towards the next one and the Stat points not spent. Missing in older saves. */
     heroLevel: HeroLevelSnapshot;
+    /** The Stat points spent on each Stat. Missing in older saves. */
+    heroStats: StatsSnapshot;
     /** What is in the Storage chest. Missing in older saves. */
     storage: BackpackSlotSnapshot[];
     /** When each small plant was last harvested (key = Stage id + node id, value = ms). Missing in older saves. */
@@ -133,6 +136,7 @@ export function createDefaultSaveSnapshot (slotId = 'slot_1'): SaveGameSnapshot
         skills: { unlocked: [], equipped: [null, null], ranks: {} },
         toolUpgrades: {},
         heroLevel: { level: 1, xp: 0, unspentPoints: 0 },
+        heroStats: { attack: 0, hearts: 0, guard: 0, agility: 0 },
         storage: [],
     };
 }
@@ -351,6 +355,9 @@ export function migrateSaveSnapshot (raw: unknown, fallbackSlotId = 'slot_1'): S
         xp: wholeIn(rawHero.xp, 0, Number.MAX_SAFE_INTEGER, 0),
         unspentPoints: wholeIn(rawHero.unspentPoints, 0, 10000, 0),
     };
+    const rawStats = asRecord(data.heroStats);
+    const heroStats = { attack: 0, hearts: 0, guard: 0, agility: 0 } as StatsSnapshot;
+    for (const id of STAT_IDS) heroStats[id] = wholeIn(rawStats[id], 0, 1000, 0);
     const storage: BackpackSlotSnapshot[] = [];
     for (const slot of Array.isArray(data.storage) ? data.storage : [])
     {
@@ -408,6 +415,7 @@ export function migrateSaveSnapshot (raw: unknown, fallbackSlotId = 'slot_1'): S
         skills,
         toolUpgrades,
         heroLevel,
+        heroStats,
         storage,
     };
 }

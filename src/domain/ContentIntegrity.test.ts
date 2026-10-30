@@ -511,6 +511,15 @@ describe('content data integrity', () =>
 
 describe('Hero Level balance', () =>
 {
+    it('asks for a Material that exists to take the Stat points back (never Credit)', () =>
+    {
+        for (const ingredient of progression.respec.ingredients)
+        {
+            expect(itemIds.has(ingredient.itemId), `respec ingredient ${ingredient.itemId}`).toBe(true);
+        }
+        expect(progression.respec.ingredients.length).toBeGreaterThan(0);
+    });
+
     it('gives every enemy some XP', () =>
     {
         for (const enemy of enemies as { id: string; xp?: number }[])

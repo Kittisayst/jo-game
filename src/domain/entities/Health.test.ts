@@ -65,3 +65,27 @@ describe('Health entity', () =>
         expect(health.isDead).toBe(true);
     });
 });
+
+describe('Health.syncMaxHealth', () =>
+{
+    it('gives a heart gained at full and takes the extra ones away when the maximum falls', () =>
+    {
+        const health = new Health();
+        health.syncMaxHealth(5);
+        expect(health.max).toBe(5);
+        expect(health.current).toBe(5);
+        health.syncMaxHealth(3);
+        expect(health.max).toBe(3);
+        expect(health.current).toBe(3);
+    });
+
+    it('keeps the damage taken when a heart is gained, and never leaves the hero at 0 by lowering the maximum', () =>
+    {
+        const health = new Health();
+        health.takeDamage();
+        health.syncMaxHealth(4);
+        expect(health.current).toBe(3);
+        health.syncMaxHealth(1);
+        expect(health.current).toBe(1);
+    });
+});

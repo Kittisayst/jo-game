@@ -1,7 +1,7 @@
 # Hero Level (1–150), XP ຈາກ monster, ແຕ້ມ stat, ກາງວັນ/ກາງຄືນ, monster ກາງຄືນ ແລະຕຽງນອນ
 
 - **Date:** 2026-10-30
-- **Status:** in progress (L1 done, branch `feat/hero-level-xp`)
+- **Status:** in progress (L1 and L2 done)
 - **Project:** jo-game (Knowledge Quest)
 
 ## ເປົ້າໝາຍ (Goal)

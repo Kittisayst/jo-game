@@ -533,7 +533,8 @@ export class Game extends Scene
         if (this.player)
         {
             this.player.speedMultiplier = entities.effects.speedMultiplier
-                * (1 + armorSpeedBonusOf(entities.equipment.wornArmor.map(w => w.piece), entities.itemCatalog));
+                * (1 + armorSpeedBonusOf(entities.equipment.wornArmor.map(w => w.piece), entities.itemCatalog))
+                * entities.heroStats.speedMultiplier(getGameContent().statsTuning);
             this.player.canDoubleJump = entities.movement.has('double-jump');
         }
 
