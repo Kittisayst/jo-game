@@ -58,7 +58,7 @@ export class CombatController
     onPlayerTouchesEnemy (player: Player, enemy: Enemy): void
     {
         const { scene } = this;
-        if (enemy.entity.isDefeated || player.isInvincible) return;
+        if (enemy.entity.isDefeated || !player.canBeHurt) return;
 
         player.triggerDamage(enemy.x);
         scene.cameras.main.shake(160, 0.008);
@@ -70,7 +70,7 @@ export class CombatController
     onPlayerTouchesSpike (spike: Spike): void
     {
         const { scene } = this;
-        if (scene.player.isInvincible) return;
+        if (!scene.player.canBeHurt) return;
 
         scene.player.triggerDamage(spike.x);
         scene.particleManager.emitSpikeHit(spike.x, spike.y);
@@ -83,7 +83,7 @@ export class CombatController
     onPlayerTouchesBoss (player: Player, boss: Boss): void
     {
         const { scene } = this;
-        if (boss.entity.isDefeated || player.isInvincible) return;
+        if (boss.entity.isDefeated || !player.canBeHurt) return;
 
         player.triggerDamage(boss.x);
         scene.cameras.main.shake(220, 0.012);
@@ -96,7 +96,7 @@ export class CombatController
     {
         const { scene } = this;
         spit.destroy();
-        if (scene.player.isInvincible) return;
+        if (!scene.player.canBeHurt) return;
 
         scene.player.triggerDamage(scene.player.x);
         scene.particleManager.emitSpikeHit(scene.player.x, scene.player.y);

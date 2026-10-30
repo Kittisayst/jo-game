@@ -196,6 +196,19 @@ export const VirtualTouchControls: React.FC<VirtualTouchControlsProps> = ({ visi
         }, 120);
     };
 
+    const handleDashTap = (e: React.PointerEvent<HTMLButtonElement>) =>
+    {
+        e.preventDefault();
+        triggerHaptic(15);
+        setActiveButtons(prev => ({ ...prev, dash: true }));
+        EventBus.emit('virtual-dash');
+
+        setTimeout(() =>
+        {
+            setActiveButtons(prev => ({ ...prev, dash: false }));
+        }, 120);
+    };
+
     const handleCycleWeaponTap = (e: React.PointerEvent<HTMLButtonElement>) =>
     {
         e.preventDefault();
@@ -282,6 +295,18 @@ export const VirtualTouchControls: React.FC<VirtualTouchControlsProps> = ({ visi
                 >
                     <span className="virtual-touch-icon">🔀</span>
                     <span className="virtual-touch-label">[Q]</span>
+                </button>
+
+                <button
+                    aria-label="ພຸ່ງຫຼົບ (Dash)"
+                    className={`virtual-touch-btn virtual-touch-dash ${activeButtons.dash ? 'is-active' : ''}`}
+                    data-testid="touch-dash"
+                    onPointerDown={handleDashTap}
+                    title="Dash [Shift]"
+                    type="button"
+                >
+                    <span className="virtual-touch-icon">💨</span>
+                    <span className="virtual-touch-label">ພຸ່ງ</span>
                 </button>
 
                 <button

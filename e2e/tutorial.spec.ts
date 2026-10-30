@@ -47,7 +47,11 @@ test.describe('The first Stage teaches the loop', () => {
 
     // 4. Fight the slime (x = 800)
     await bot.goTo(790, { tolerance: 30, timeoutMs: 40000 });
-    await expect(hint(page)).toContainText('ກະເປົາ', { timeout: 30000 });
+    await expect(hint(page)).toContainText('ພຸ່ງຫຼົບ', { timeout: 30000 });
+
+    // 4b. Dash
+    await page.keyboard.press('Shift');
+    await expect(hint(page)).toContainText('ກະເປົາ');
 
     // 5. Backpack
     await page.keyboard.press('KeyI');
@@ -61,7 +65,7 @@ test.describe('The first Stage teaches the loop', () => {
 
     // 7. Back in the village the next hint is about planting the Seed the herb gave
     await expect(hint(page)).toContainText('ປູກເມັດ');
-    expect(await doneSteps(page)).toEqual(['move', 'herb', 'tree', 'fight', 'backpack', 'exit']);
+    expect(await doneSteps(page)).toEqual(['move', 'herb', 'tree', 'fight', 'dash', 'backpack', 'exit']);
     const stage2Open = await page.evaluate(() => (window as any).__entities.stageProgression.isStageUnlocked('stage-002'));
     expect(stage2Open).toBe(true);
   });

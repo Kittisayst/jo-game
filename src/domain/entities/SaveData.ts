@@ -1,6 +1,7 @@
 import { ARMOR_SLOTS, ArmorSlot, WornPiece } from './Armor';
 import type { CraftingJobSnapshot } from './CraftingQueue';
 import type { GardenSnapshot } from './Garden';
+import { MOVEMENT_ABILITY_IDS, MovementAbilityId } from './MovementAbilities';
 import type { PendingReward } from './PendingRewards';
 import { TutorialSnapshot } from './TutorialProgress';
 import { SettingsData, StageProgressionData } from '../ports';
@@ -47,6 +48,8 @@ export interface SaveGameSnapshot
     garden: GardenSnapshot;
     /** The Workshop/Forge job in progress or waiting to be collected. Missing in older saves. */
     crafting: CraftingJobSnapshot | null;
+    /** The movement abilities unlocked (the Dash always). Missing in older saves. */
+    movement: MovementAbilityId[];
     /** What is in the Storage chest. Missing in older saves. */
     storage: BackpackSlotSnapshot[];
     /** When each small plant was last harvested (key = Stage id + node id, value = ms). Missing in older saves. */
@@ -117,6 +120,7 @@ export function createDefaultSaveSnapshot (slotId = 'slot_1'): SaveGameSnapshot
         plantRegrowth: {},
         garden: { plotCount: 6, plots: [null, null, null, null, null, null] },
         crafting: null,
+        movement: ['dash'],
         storage: [],
     };
 }
@@ -305,6 +309,8 @@ export function migrateSaveSnapshot (raw: unknown, fallbackSlotId = 'slot_1'): S
                 remainingMs: Math.min(rawJob.totalMs, Math.max(0, rawJob.remainingMs)),
             }
             : null;
+    const movement: MovementAbilityId[] = MOVEMENT_ABILITY_IDS.filter(id =>
+        id === 'dash' || (Array.isArray(data.movement) && data.movement.includes(id)));
     const storage: BackpackSlotSnapshot[] = [];
     for (const slot of Array.isArray(data.storage) ? data.storage : [])
     {
@@ -358,6 +364,7 @@ export function migrateSaveSnapshot (raw: unknown, fallbackSlotId = 'slot_1'): S
         plantRegrowth,
         garden,
         crafting,
+        movement,
         storage,
     };
 }

@@ -73,6 +73,9 @@ A separate scene reached from the Village Hub where Seeds are planted in Plots. 
 **Plot**:
 One planting spot of the Garden: empty, growing or ready. The Garden starts with six and can be expanded with Materials.
 
+**Dash**:
+A quick burst sideways (Shift, or the touch button) that the hero has from the start. For its first moments nothing can hurt the hero: this is the **dodge**. It has a cooldown. The air dash (a Dash in the air, once per jump) and the double jump are later **movement abilities**, unlocked by beating Bosses.
+
 **Crafting job**:
 What the Workshop or the Forge is making: one recipe with a build time, one at a time. The Materials and Credit are taken when it starts, the time counts Game time (only while the game is being played), and the result is collected by hand when it is done. A recipe with no build time is made at once.
 

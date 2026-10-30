@@ -12,7 +12,7 @@ export interface TutorialStepDefinition extends TutorialStep
 /** What can finish a step. `harvested:<node id>` is checked against `nodes.json` by ContentIntegrity.test.ts. */
 export const FIXED_TUTORIAL_EVENTS = [
     'moved', 'enemy-defeated', 'backpack-opened', 'stage-cleared', 'book-fully-read', 'portal-shard-collected', 'portal-block-placed',
-    'seed-collected', 'seed-planted',
+    'seed-collected', 'seed-planted', 'dashed',
 ] as const;
 const HARVESTED = /^harvested:[a-z0-9-]+$/;
 
