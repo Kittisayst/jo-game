@@ -8,6 +8,8 @@ export interface InteractiveBuilding
 }
 
 const FONT = '"Noto Sans Lao", sans-serif';
+const FORGE_X = 1140;
+const FORGE_OPEN_LABEL = '⚔️ [E] ເຂົ້າໂຮງຕີເຫຼັກ (Forge)';
 
 /**
  * Draws the Village Hub (buildings, Mina's stall, animated World Gate, trees, lanterns, signs)
@@ -82,11 +84,14 @@ export function buildVillageScenery (scene: Phaser.Scene, baseY: number, forgeOp
     }
 
     // Main village buildings
+    let forgeImage: Phaser.GameObjects.Image | undefined;
+    let forgeSign: Phaser.GameObjects.Text | undefined;
     for (const b of buildings)
     {
+        let image: Phaser.GameObjects.Image | undefined;
         if (scene.textures.exists(b.textureKey))
         {
-            scene.add.image(b.x, baseY + 2, b.textureKey).setOrigin(0.5, 1).setDepth(1.5);
+            image = scene.add.image(b.x, baseY + 2, b.textureKey).setOrigin(0.5, 1).setDepth(1.5);
         }
         else
         {
@@ -108,6 +113,12 @@ export function buildVillageScenery (scene: Phaser.Scene, baseY: number, forgeOp
         });
         sign.setOrigin(0.5, 0.5);
         sign.setDepth(2.5);
+
+        if (b.x === FORGE_X)
+        {
+            forgeImage = image;
+            forgeSign = sign;
+        }
     }
 
     // Mina's Skin Boutique Stall at x = 1295 (behind NPC Mina at x = 1290)
@@ -193,17 +204,30 @@ export function buildVillageScenery (scene: Phaser.Scene, baseY: number, forgeOp
         ease: 'Sine.easeInOut',
     });
 
+    const forge: InteractiveBuilding = {
+        x: FORGE_X,
+        label: forgeOpen ? FORGE_OPEN_LABEL : '🔒 [E] ໂຮງຕີເຫຼັກ (ຕ້ອງສອບເສັງບົດທີ 1 ຜ່ານກ່ອນ)',
+        action: () => EventBus.emit('open-forge'),
+    };
+
+    // Passing the Book 1 exam opens the Forge for good: take the padlock off without rebuilding the village
+    if (!forgeOpen)
+    {
+        const unlockForge = (): void =>
+        {
+            forge.label = FORGE_OPEN_LABEL;
+            if (forgeImage?.active && scene.textures.exists('building-forge-open')) forgeImage.setTexture('building-forge-open');
+            forgeSign?.setText('⚔️ ໂຮງຕີເຫຼັກ (Forge)\n(ອັບເກຣດອາວຸດ)');
+        };
+        EventBus.once('book-exam-passed', unlockForge);
+        scene.events.once('shutdown', () => EventBus.off('book-exam-passed', unlockForge));
+    }
+
     return [
         { x: 320, label: '📚 [E] ເຂົ້າຫໍສະໝຸດ (Library)', action: () => EventBus.emit('open-library') },
         { x: 600, label: '🏛️ [E] ເຂົ້າສະຖາບັນ (Academy)', action: () => EventBus.emit('open-academy') },
         { x: 880, label: '🔨 [E] ເຂົ້າໂຮງຊ່າງ (Workshop)', action: () => EventBus.emit('open-workshop') },
-        {
-            x: 1140,
-            label: forgeOpen
-                ? '⚔️ [E] ເຂົ້າໂຮງຕີເຫຼັກ (Forge)'
-                : '🔒 [E] ໂຮງຕີເຫຼັກ (ຕ້ອງສອບເສັງບົດທີ 1 ຜ່ານກ່ອນ)',
-            action: () => EventBus.emit('open-forge'),
-        },
+        forge,
         { x: 235, label: '📦 [E] ເປີດຫີບເກັບຂອງ (Storage)', action: () => EventBus.emit('open-storage') },
         { x: 1010, label: '🌱 [E] ເຂົ້າສວນຜັກ (Garden)', action: () => EventBus.emit('open-garden') },
         { x: 1420, label: '🌀 [E] ເລືອກດ່ານຜະຈົນໄພ (World Map)', action: () => EventBus.emit('open-stage-map') },

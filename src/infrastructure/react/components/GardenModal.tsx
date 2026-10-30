@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
     expandGardenUseCase, growMinutesOf, harvestPlotUseCase, nextPlotCost, plantSeedUseCase,
 } from '../../../application/GardenUseCases';
@@ -27,6 +27,7 @@ export const GardenModal: React.FC<GardenModalProps> = ({ isOpen, onClose, onCha
     const [, setTick] = useState(0);
     const [pickerPlot, setPickerPlot] = useState<number | null>(null);
     const [notice, setNotice] = useState<string | null>(null);
+    const pickerRef = useRef<HTMLDivElement>(null);
 
     // The time left on each Plot counts down on screen
     useEffect(() =>
@@ -35,6 +36,12 @@ export const GardenModal: React.FC<GardenModalProps> = ({ isOpen, onClose, onCha
         const timer = setInterval(() => setTick(t => t + 1), 1000);
         return () => clearInterval(timer);
     }, [isOpen]);
+
+    // The picker opens below the Plots: bring it into view so a small window does not hide it
+    useEffect(() =>
+    {
+        if (pickerPlot !== null) pickerRef.current?.scrollIntoView?.({ block: 'nearest', behavior: 'smooth' });
+    }, [pickerPlot]);
 
     if (!isOpen) return null;
 
@@ -176,7 +183,7 @@ export const GardenModal: React.FC<GardenModalProps> = ({ isOpen, onClose, onCha
                     </div>
 
                     {pickerPlot !== null && (
-                        <div className="rounded-xl border border-emerald-500/40 bg-slate-900/80 p-4 space-y-2" data-testid="seed-picker">
+                        <div ref={pickerRef} className="rounded-xl border border-emerald-500/40 bg-slate-900/80 p-4 space-y-2" data-testid="seed-picker">
                             <h3 className="text-sm font-bold text-emerald-300">ເລືອກເມັດທີ່ຈະປູກໃນແປງ {pickerPlot + 1}</h3>
                             {seeds.length === 0 ? (
                                 <p className="text-xs text-slate-400">ຍັງບໍ່ມີເມັດໃນກະເປົາ. ເກັບສະໝຸນໄພ, ຫຍ້າເສັ້ນໃຍ ຫຼືຕັດຕົ້ນໄມ້ໃນດ່ານເພື່ອໄດ້ເມັດ.</p>
