@@ -1769,6 +1769,20 @@
       "viewBox": "0 0 360 156",
       "source": "Original procedural vector diagram (tools/art/build_ch2_diagrams.py)",
       "license": "MIT (Project Original)"
+    },
+    {
+      "path": "assets/characters/npc_smith.png",
+      "category": "characters",
+      "format": "PNG",
+      "mode": "RGBA",
+      "width": 384,
+      "height": 48,
+      "hasAlpha": true,
+      "transparentPixels": 12684,
+      "colorCount": 16,
+      "bytes": 1741,
+      "source": "Original placeholder pixel art (tools/art/build_smith.py)",
+      "license": "MIT (Project Original)"
     }
   ],
   "plannedAssets": {
