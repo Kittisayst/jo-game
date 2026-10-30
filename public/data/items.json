@@ -799,5 +799,15 @@
     "durability": 130,
     "icon": "🥾",
     "iconImage": "assets/items/copper-boots.png"
+  },
+  {
+    "id": "moon-dust",
+    "name": "ຜົງຈັນ",
+    "nameEn": "Moon Dust",
+    "description": "ຜົງເຫຼື້ອມທີ່ເຫຼືອຈາກ monster ກາງຄືນ ໃຊ້ຕອນຣີເຊັດແຕ້ມ stat (ເສຍເຄິ່ງໜຶ່ງເມື່ອຕາຍ)",
+    "category": "material",
+    "maxStack": 99,
+    "icon": "🌙",
+    "iconImage": "assets/items/moon-dust.png"
   }
 ]

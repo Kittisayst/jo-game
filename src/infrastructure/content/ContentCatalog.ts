@@ -15,7 +15,8 @@ import type { RecipeDefinition } from '../../application/CraftRecipeUseCase';
 import type { WeaponUpgradeRecipe } from '../../application/UpgradeWeaponTierUseCase';
 import type { ToolUpgradeRecipe } from '../../application/UpgradeToolUseCase';
 import { parseStageDefinitions, StageDefinition } from '../phaser/stages/StageDefinition';
-import { parseStageQuestion, parseStageScaling } from './ScalingCatalog';
+import { checkNightCreatures, parseNightTuning, parseStageQuestion, parseStageScaling } from './ScalingCatalog';
+import type { NightTuning } from '../../domain/entities/NightCreatures';
 import { parseProgression, parseStatsTuning } from './ProgressionCatalog';
 import { parseWorldTime } from './WorldTimeCatalog';
 import type { WorldTimeTuning } from '../../domain/entities/WorldTime';
@@ -53,6 +54,8 @@ export interface GameContent
     scaling: StageScaling;
     /** The Hero Level curve (XP per level, the over-level rule). */
     progression: ProgressionTuning;
+    /** How night creatures appear (see `NightCreatures`). */
+    night: NightTuning;
     /** The four Stats (ceilings, size of a point) and the price of starting over. */
     statsTuning: StatsTuning;
     /** The length of a day and when night falls. */
@@ -366,6 +369,7 @@ export function parseEnemies (raw: unknown): EnemyDefinition[]
         if (maxHp < 1) v.fail(`${p}.maxHp`, 'at least 1');
         const kind = v.asOneOf(enemy.kind, ENEMY_KINDS, `${p}.kind`);
         if (enemy.attacks !== undefined && kind !== 'miniboss') v.fail(`${p}.attacks`, 'only on a miniboss');
+        if (enemy.night === true && kind !== 'normal') v.fail(`${p}.night`, 'only on a normal enemy (a night creature is not a Mini-boss or a Boss)');
 
         return {
             id: v.asString(enemy.id, `${p}.id`),
@@ -373,6 +377,7 @@ export function parseEnemies (raw: unknown): EnemyDefinition[]
             maxHp,
             damage: v.asNumber(enemy.damage, `${p}.damage`),
             xp: readXp(v, enemy.xp, `${p}.xp`),
+            ...(enemy.night !== undefined ? { night: v.asBoolean(enemy.night, `${p}.night`) } : {}),
             ...(enemy.attacks !== undefined ? { attacks: parseEnemyAttacks(v, enemy.attacks, `${p}.attacks`) } : {}),
             drops: v.asArray(enemy.drops, `${p}.drops`).map((rawDrop, j) =>
             {
@@ -415,18 +420,22 @@ export async function loadGameContent (): Promise<GameContent>
     ]);
 
     const parsedNodes = parseNodes(nodes);
+    const parsedEnemies = parseEnemies(enemies);
+    const night = parseNightTuning(stages);
+    checkNightCreatures(night, parsedEnemies);
 
     return {
         items: parseItems(items),
         books: parseBooks(books),
         questions: parseQuestions(questions),
         recipes: parseRecipes(recipes),
-        enemies: parseEnemies(enemies),
+        enemies: parsedEnemies,
         realms: parseRealms(realms),
         nodes: parsedNodes,
         stages: parseStageDefinitions(stages, parsedNodes),
         scaling: parseStageScaling(stages),
         progression: parseProgression(progression),
+        night,
         statsTuning: parseStatsTuning(progression),
         worldTime: parseWorldTime(worldTime),
         stageQuestionCredit: parseStageQuestion(stages).credit,

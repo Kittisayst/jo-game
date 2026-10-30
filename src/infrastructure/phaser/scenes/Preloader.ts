@@ -62,6 +62,9 @@ const SPRITESHEET_ASSETS: readonly { key: string; path: string; frameWidth: numb
     // Enemies, Mini-Boss & Chapter Boss (4 frames each)
     { key: 'enemy-slime', path: 'assets/characters/enemy_slime.png', frameWidth: 32, frameHeight: 28 },
     { key: 'enemy-rock-golem', path: 'assets/characters/enemy_rock_golem.png', frameWidth: 48, frameHeight: 40 },
+    { key: 'enemy-night-wisp', path: 'assets/characters/night_wisp.png', frameWidth: 32, frameHeight: 28 },
+    { key: 'enemy-night-shade', path: 'assets/characters/night_shade.png', frameWidth: 32, frameHeight: 28 },
+    { key: 'enemy-night-scarab', path: 'assets/characters/night_scarab.png', frameWidth: 32, frameHeight: 28 },
     { key: 'miniboss-cave-guardian', path: 'assets/characters/miniboss_cave_guardian.png', frameWidth: 64, frameHeight: 64 },
     { key: 'boss-hardware-overlord', path: 'assets/characters/boss_hardware_overlord.png', frameWidth: 96, frameHeight: 80 },
 

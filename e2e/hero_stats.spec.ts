@@ -36,18 +36,18 @@ test.describe('Character window and Stat points', () => {
     });
     expect(attack).toBe(1);
 
-    // Starting over needs the Material (3 crystal) and never Credit
+    // Starting over needs the Material (3 moon dust) and never Credit
     const creditBefore = await page.evaluate(() => (window as any).__entities.wallet.balance as number);
     await page.getByTestId('stat-reset').click();
     await expect(page.getByTestId('character-notice')).toContainText('ວັດຖຸດິບບໍ່ພໍ');
     expect(await page.evaluate(() => (window as any).__entities.heroStats.totalSpent as number)).toBe(11);
 
-    await page.evaluate(() => { (window as any).__entities.backpack.addItem('crystal', 3); });
+    await page.evaluate(() => { (window as any).__entities.backpack.addItem('moon-dust', 3); });
     await page.getByTestId('stat-reset').click();
     await expect(page.getByTestId('character-points')).toContainText('11');
     expect(await page.evaluate(() => (window as any).__entities.health.max as number)).toBe(3);
     await expect(page.getByTestId('health-hearts')).toHaveAttribute('data-max', '3');
-    expect(await page.evaluate(() => (window as any).__entities.backpack.getItemCount('crystal') as number)).toBe(0);
+    expect(await page.evaluate(() => (window as any).__entities.backpack.getItemCount('moon-dust') as number)).toBe(0);
     expect(await page.evaluate(() => (window as any).__entities.wallet.balance as number)).toBe(creditBefore);
 
     // Esc closes it

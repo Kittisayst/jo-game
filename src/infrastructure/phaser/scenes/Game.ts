@@ -1,3 +1,4 @@
+import { nightCreatureCount, nightCreatureIdsFor, scaleNightCreature, stageHasNightCreatures } from '../../../domain/entities/NightCreatures';
 import { DayNightOverlay } from '../effects/DayNightOverlay';
 import { tickWorldTimeUseCase, WORLD_PHASE_CHANGED_EVENT, type WorldPhaseChangedPayload } from '../../../application/TickWorldTimeUseCase';
 import { EventBus } from '../../EventBus';
@@ -49,7 +50,7 @@ import { ResourceNode } from '../../../domain/entities/ResourceNode';
 import { PLAYER_DIED_EVENT } from '../../../application/PlayerTakeDamageUseCase';
 import { SKIN_CHANGED_EVENT, SkinChangedPayload } from '../../../application/SelectSkinUseCase';
 import { GAME_PAUSED_EVENT, GAME_RESUMED_EVENT } from '../../../application/TogglePauseUseCase';
-import { clock, entities } from '../../composition';
+import { clock, entities, random } from '../../composition';
 import { EnemyDefinition } from '../../../domain/entities/Enemy';
 import { scaleEnemyDefinition } from '../../../domain/entities/StageScaling';
 import { GROUND_SINK } from '../physicsConstants';
@@ -110,6 +111,8 @@ export class Game extends Scene
     private gardenView?: GardenView;
     private skillController?: SkillController;
     private dayNight?: DayNightOverlay;
+    /** The night creatures walking this Stage now (they are in `enemies` too). */
+    private nightCreatures: Enemy[] = [];
     /** The smiths in front of the Workshop and the Forge (village only). */
     private craftingWorkers: CraftingWorker[] = [];
 
@@ -499,7 +502,12 @@ export class Game extends Scene
         {
             const text = { dusk: '🌅 ຕາເວັນຕົກແລ້ວ...', night: '🌙 ກາງຄືນມາແລ້ວ!', dawn: '🌄 ຟ້າເລີ່ມແຈ້ງ', day: '☀️ ເຊົ້າແລ້ວ!' }[payload.phase];
             if (this.player) showLootNotification(this, this.player.x, this.player.y - 60, text, '#fde68a');
+            if (payload.phase === 'night') this.spawnNightCreatures();
+            if (payload.phase === 'dawn') this.despawnNightCreatures();
         };
+        // Night already when the Stage is entered
+        this.nightCreatures = [];
+        if (entities.worldTime.isNight) this.spawnNightCreatures();
         DomainEvents.on(WORLD_PHASE_CHANGED_EVENT, onWorldPhaseChanged);
 
         this.events.on('shutdown', () =>
@@ -726,6 +734,61 @@ export class Game extends Scene
         const definition = getGameContent().enemies.find(e => e.id === enemyId);
         if (!definition || !this.stage) return definition;
         return scaleEnemyDefinition(definition, this.stage.number, getGameContent().scaling);
+    }
+
+    /**
+     * Night creatures walk the Stage (not the first one, not a Mini-boss or Boss Stage, not one with
+     * `"night": false`): spread over the width, never close to the hero, tougher than the day's monsters.
+     */
+    private spawnNightCreatures (): void
+    {
+        const { stage, player } = this;
+        if (!stage || !player || this.nightCreatures.length > 0 || this.health.isDead) return;
+
+        const content = getGameContent();
+        const hasMiniboss = getStageEnemySpawns(stage).some(spawn => content.enemies.find(e => e.id === spawn.enemyId)?.kind === 'miniboss');
+        if (!stageHasNightCreatures(stage, Boolean(getStageBossSpawn(stage)), hasMiniboss)) return;
+        const ids = nightCreatureIdsFor(stage.realm, content.night);
+        if (ids.length === 0) return;
+
+        const count = nightCreatureCount(this.level.worldWidth, content.night);
+        const slot = this.level.worldWidth / count;
+        const far = content.night.minDistanceFromHero;
+        for (let i = 0; i < count; i++)
+        {
+            let x = slot * (i + 0.5) + (random.next() - 0.5) * slot * 0.5;
+            if (Math.abs(x - player.x) < far)
+            {
+                // Too close to the hero: stand on the side with room, at the minimum distance
+                const toRight = player.x + far;
+                x = toRight < this.level.worldWidth - 80 ? toRight : Math.max(80, player.x - far);
+            }
+            const id = ids[Math.floor(random.next() * ids.length)];
+            const base = content.enemies.find(e => e.id === id);
+            if (!base) continue;
+
+            const creature = new Enemy(this, x, 300, 200, 70, 'slime', scaleNightCreature(base, stage.number, content.scaling, content.night));
+            creature.setAlpha(0);
+            this.tweens.add({ targets: creature, alpha: 1, duration: 700 });
+            this.particleManager.emitStompBurst(x, 300);
+            this.enemies.add(creature);
+            this.nightCreatures.push(creature);
+        }
+        if (this.nightCreatures.length > 0) showLootNotification(this, player.x, player.y - 90, '👻 ມີ monster ກາງຄືນ!', '#c4b5fd');
+    }
+
+    /** Dawn: the night creatures still standing fade away (no drop, no XP). */
+    private despawnNightCreatures (): void
+    {
+        for (const creature of this.nightCreatures)
+        {
+            if (!creature.active) continue;
+            this.enemies.remove(creature, false, false);
+            const body = creature.body as Phaser.Physics.Arcade.Body | null;
+            if (body) body.enable = false;
+            this.tweens.add({ targets: creature, alpha: 0, duration: 800, onComplete: () => creature.destroy() });
+        }
+        this.nightCreatures = [];
     }
 
     private createEnemies ()

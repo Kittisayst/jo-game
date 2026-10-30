@@ -150,6 +150,8 @@ export interface StageDefinition
     lessons: string[];
     /** A safe Stage (the first one): dying in it loses no Materials. */
     safe: boolean;
+    /** False when night creatures never walk this Stage (`"night": false` in `stages.json`). */
+    night: boolean;
     zones: StageZone[];
 }
 
@@ -193,6 +195,7 @@ function placeholder (number: number): StageDefinition
         layout: null,
         lessons: [],
         safe: false,
+        night: false,
         zones: [],
     };
 }
@@ -459,6 +462,7 @@ function parseStage (raw: unknown, index: number, nodes: ReadonlyMap<string, Nod
         layout: generate ? null : asString(entry.layout, `${path}.layout`),
         generated,
         safe: entry.safe === true,
+        night: entry.night !== false,
         lessons: asArray(entry.lessons ?? [], `${path}.lessons`).map((lesson, j) =>
         {
             const text = asString(lesson, `${path}.lessons[${j}]`);

@@ -9,5 +9,5 @@
     "guard": { "maxPoints": 30, "blockChancePerPoint": 0.01 },
     "agility": { "maxPoints": 39, "speedPerPoint": 0.0025 }
   },
-  "respec": { "ingredients": [{ "itemId": "crystal", "count": 3 }] }
+  "respec": { "ingredients": [{ "itemId": "moon-dust", "count": 3 }] }
 }

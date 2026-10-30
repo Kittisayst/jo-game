@@ -72,6 +72,9 @@ export class Enemy extends Physics.Arcade.Sprite
             'forest-slime': 'enemy-slime',
             'rock-golem': 'enemy-rock-golem',
             'cave-guardian': 'miniboss-cave-guardian',
+            'night-wisp': 'enemy-night-wisp',
+            'night-shade': 'enemy-night-shade',
+            'night-scarab': 'enemy-night-scarab',
         };
         const preferredTex = definition ? defTexMap[definition.id] : undefined;
         const texKey = (preferredTex && scene.textures.exists(preferredTex))

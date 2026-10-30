@@ -564,3 +564,51 @@ describe('Hero Level balance', () =>
         expect(hero.level).toBeLessThanOrEqual(40);
     });
 });
+
+describe('Night creatures', () =>
+{
+    const night = stages.night as { byRealm: Record<string, string[]> };
+    const creatures = (enemies as { id: string; night?: boolean; kind: string; drops: { itemId: string }[] }[]).filter(e => e.night === true);
+
+    it('are normal enemies with Moon Dust to drop', () =>
+    {
+        expect(creatures.length).toBeGreaterThanOrEqual(3);
+        for (const creature of creatures)
+        {
+            expect(creature.kind, creature.id).toBe('normal');
+            expect(creature.drops.some(d => d.itemId === 'moon-dust'), `${creature.id} drops moon-dust`).toBe(true);
+        }
+    });
+
+    it('walk every Realm that has Stages built, and the ids in the night block are night creatures', () =>
+    {
+        const ids = new Set(creatures.map(c => c.id));
+        for (const list of Object.values(night.byRealm)) for (const id of list) expect(ids.has(id), id).toBe(true);
+
+        const builtRealms = new Set(stages.stages.filter(s => s.status === 'ready').map(s => String(s.realm)));
+        for (const realm of builtRealms) expect(night.byRealm[realm]?.length, `Realm ${realm} has night creatures`).toBeGreaterThan(0);
+    });
+
+    it('never stand in a Stage as an ordinary spawn', () =>
+    {
+        const ids = new Set(creatures.map(c => c.id));
+        for (const stage of stages.stages)
+        {
+            for (const zone of (stage as unknown as { zones?: { contents: { enemy?: string; enemies?: string[] }[] }[] }).zones ?? [])
+            {
+                for (const content of zone.contents)
+                {
+                    for (const id of [content.enemy, ...(content.enemies ?? [])]) if (id) expect(ids.has(id), `stage ${stage.number} spawns ${id}`).toBe(false);
+                }
+            }
+        }
+    });
+
+    it('make the night worth it: more XP than a day monster of the same Realm, even before the multiplier', () =>
+    {
+        const xp = (id: string) => (enemies as { id: string; xp: number }[]).find(e => e.id === id)!.xp;
+        expect(xp('night-wisp')).toBeGreaterThanOrEqual(xp('forest-slime'));
+        expect(xp('night-shade')).toBeGreaterThanOrEqual(xp('crystal-slime'));
+        expect(xp('night-scarab')).toBeGreaterThanOrEqual(xp('sand-slime'));
+    });
+});

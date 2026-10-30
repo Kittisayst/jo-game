@@ -32,7 +32,7 @@ describe('progression.json Stats', () =>
         const parsed = parseStatsTuning(progression);
         expect(parsed.stats.attack).toEqual({ maxPoints: 50, perPoint: 0.01 });
         expect(parsed.stats.hearts.pointsPerHeart).toBe(10);
-        expect(parsed.respec.ingredients).toEqual([{ itemId: 'crystal', count: 3 }]);
+        expect(parsed.respec.ingredients).toEqual([{ itemId: 'moon-dust', count: 3 }]);
     });
 
     it('needs the ceilings to add up to the points of the top level, so no point is wasted', () =>
