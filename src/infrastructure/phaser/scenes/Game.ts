@@ -275,7 +275,9 @@ export class Game extends Scene
             this.boss.awaitFinisher = true;
             this.combat.bindBoss(this.boss, () =>
             {
-                EventBus.emit('open-quiz-finisher');
+                // The question comes from the Textbook of this Stage's Realm
+                const realm = getGameContent().realms.find(r => r.number === this.stage?.realm);
+                EventBus.emit('open-quiz-finisher', { bookId: realm?.bookId ?? 'book-ch1' });
             });
 
             this.physics.add.collider(this.boss, this.ground);

@@ -67,6 +67,138 @@
       { "itemId": "crystal", "chance": 1.0, "count": 3 },
       { "itemId": "portal-shard-green", "chance": 1.0, "count": 3 }
     ]
+  },
+  {
+    "id": "crystal-slime",
+    "name": "ສະໄລມ໌ຜລຶກ",
+    "nameEn": "Crystal Slime",
+    "kind": "normal",
+    "maxHp": 40,
+    "damage": 12,
+    "speed": 60,
+    "drops": [
+      {
+        "itemId": "cave-mushroom",
+        "chance": 0.6,
+        "count": 1
+      },
+      {
+        "itemId": "blue-ore",
+        "chance": 0.3,
+        "count": 1
+      }
+    ]
+  },
+  {
+    "id": "crystal-golem",
+    "name": "ໂກເລມຜລຶກ",
+    "nameEn": "Crystal Golem",
+    "kind": "normal",
+    "maxHp": 90,
+    "damage": 20,
+    "speed": 40,
+    "drops": [
+      {
+        "itemId": "blue-ore",
+        "chance": 1.0,
+        "count": 2
+      },
+      {
+        "itemId": "stone",
+        "chance": 0.5,
+        "count": 2
+      }
+    ]
+  },
+  {
+    "id": "crystal-warden",
+    "name": "ຜູ້ພິທັກຖ້ຳຜລຶກ",
+    "nameEn": "Crystal Warden",
+    "kind": "miniboss",
+    "maxHp": 220,
+    "damage": 26,
+    "speed": 55,
+    "attacks": {
+      "engageRange": 520,
+      "cooldownMs": 2300,
+      "moves": [
+        {
+          "id": "charge",
+          "telegraphMs": 800,
+          "minDistance": 0,
+          "maxDistance": 260,
+          "speed": 380,
+          "durationMs": 700,
+          "stunMs": 900
+        },
+        {
+          "id": "rock-throw",
+          "telegraphMs": 550,
+          "minDistance": 240,
+          "maxDistance": 520,
+          "speed": 280,
+          "projectiles": 4
+        }
+      ]
+    },
+    "drops": [
+      {
+        "itemId": "crystal",
+        "chance": 1.0,
+        "count": 2
+      },
+      {
+        "itemId": "portal-shard-blue",
+        "chance": 1.0,
+        "count": 1
+      }
+    ]
+  },
+  {
+    "id": "stage-ch2-boss",
+    "name": "ຈອມມານເຄືອຂ່າຍ",
+    "nameEn": "Network Overlord",
+    "kind": "boss",
+    "maxHp": 450,
+    "damage": 32,
+    "speed": 75,
+    "phases": [
+      {
+        "phase": 1,
+        "hpThreshold": 1.0,
+        "description": "ໂຈມຕີປົກກະຕິ ແລະ ພຸ່ງຕຳ"
+      },
+      {
+        "phase": 2,
+        "hpThreshold": 0.66,
+        "description": "ຍິງຄື້ນສັນຍານ"
+      },
+      {
+        "phase": 3,
+        "hpThreshold": 0.33,
+        "description": "ບ້າຄັ່ງ ຄວາມໄວໂຈມຕີເພີ່ມຂຶ້ນ"
+      }
+    ],
+    "quizFinisher": {
+      "bookId": "book-ch2",
+      "requiredPass": true
+    },
+    "drops": [
+      {
+        "itemId": "boss-core",
+        "chance": 1.0,
+        "count": 1
+      },
+      {
+        "itemId": "crystal",
+        "chance": 1.0,
+        "count": 3
+      },
+      {
+        "itemId": "portal-shard-blue",
+        "chance": 1.0,
+        "count": 3
+      }
+    ]
   }
 ]
-

@@ -303,5 +303,147 @@
         "count": 1
       }
     ]
+  },
+  {
+    "id": "recipe-axe-t2",
+    "resultItemId": "axe-t2",
+    "resultCount": 1,
+    "building": "workshop",
+    "requiredBookRecipe": "axe-t2",
+    "creditCost": 0,
+    "ingredients": [
+      {
+        "itemId": "wood",
+        "count": 6
+      },
+      {
+        "itemId": "blue-ore",
+        "count": 4
+      }
+    ]
+  },
+  {
+    "id": "recipe-pickaxe-t2",
+    "resultItemId": "pickaxe-t2",
+    "resultCount": 1,
+    "building": "workshop",
+    "requiredBookRecipe": "pickaxe-t2",
+    "creditCost": 0,
+    "ingredients": [
+      {
+        "itemId": "wood",
+        "count": 8
+      },
+      {
+        "itemId": "blue-ore",
+        "count": 6
+      },
+      {
+        "itemId": "stone",
+        "count": 4
+      }
+    ]
+  },
+  {
+    "id": "recipe-hammer-t2",
+    "resultItemId": "hammer-t2",
+    "resultCount": 1,
+    "building": "workshop",
+    "requiredBookRecipe": "hammer-t2",
+    "creditCost": 0,
+    "ingredients": [
+      {
+        "itemId": "wood",
+        "count": 6
+      },
+      {
+        "itemId": "blue-ore",
+        "count": 6
+      },
+      {
+        "itemId": "iron-ore",
+        "count": 4
+      }
+    ]
+  },
+  {
+    "id": "recipe-blue-sword",
+    "resultItemId": "blue-sword",
+    "resultCount": 1,
+    "building": "forge",
+    "requiredBookRecipe": "blue-sword",
+    "creditCost": 25,
+    "ingredients": [
+      {
+        "itemId": "blue-ore",
+        "count": 10
+      },
+      {
+        "itemId": "crystal",
+        "count": 3
+      },
+      {
+        "itemId": "iron-ore",
+        "count": 4
+      }
+    ]
+  },
+  {
+    "id": "recipe-blue-helmet",
+    "resultItemId": "blue-helmet",
+    "resultCount": 1,
+    "building": "forge",
+    "requiredBookRecipe": "blue-helmet",
+    "creditCost": 0,
+    "ingredients": [
+      {
+        "itemId": "blue-ore",
+        "count": 6
+      },
+      {
+        "itemId": "fiber",
+        "count": 2
+      }
+    ]
+  },
+  {
+    "id": "recipe-blue-chestplate",
+    "resultItemId": "blue-chestplate",
+    "resultCount": 1,
+    "building": "forge",
+    "requiredBookRecipe": "blue-chestplate",
+    "creditCost": 0,
+    "ingredients": [
+      {
+        "itemId": "blue-ore",
+        "count": 10
+      },
+      {
+        "itemId": "fiber",
+        "count": 3
+      },
+      {
+        "itemId": "crystal",
+        "count": 1
+      }
+    ]
+  },
+  {
+    "id": "recipe-blue-boots",
+    "resultItemId": "blue-boots",
+    "resultCount": 1,
+    "building": "forge",
+    "requiredBookRecipe": "blue-boots",
+    "creditCost": 0,
+    "ingredients": [
+      {
+        "itemId": "blue-ore",
+        "count": 6
+      },
+      {
+        "itemId": "fiber",
+        "count": 2
+      }
+    ]
   }
 ]

@@ -505,5 +505,152 @@
     "plant": { "minutes": 20, "harvest": [{ "itemId": "wood", "count": 6 }] },
     "icon": "🌳",
     "iconImage": "assets/items/oak-sapling.png"
+  },
+  {
+    "id": "blue-ore",
+    "name": "ແຮ່ຟ້າ",
+    "nameEn": "Blue Ore",
+    "description": "ແຮ່ສີຟ້າຈາກສາຍແຮ່ໃນຖ້ຳຜລຶກ ໃຊ້ຕີອຸປະກອນລະດັບ 2",
+    "category": "material",
+    "maxStack": 99,
+    "icon": "🔷",
+    "iconImage": "assets/items/blue-ore.png"
+  },
+  {
+    "id": "cave-mushroom",
+    "name": "ເຫັດຖ້ຳ",
+    "nameEn": "Cave Mushroom",
+    "description": "ເຫັດເຮືອງແສງທີ່ຂຶ້ນໃນຖ້ຳ ໄດ້ຈາກກອງເຫັດ ຫຼືປູກຈາກເມັດເຫັດ",
+    "category": "material",
+    "maxStack": 99,
+    "icon": "🍄",
+    "iconImage": "assets/items/cave-mushroom.png"
+  },
+  {
+    "id": "mushroom-spore",
+    "name": "ເມັດເຫັດ",
+    "nameEn": "Mushroom Spore",
+    "description": "ເມັດຈາກກອງເຫັດໃນຖ້ຳ ໃຊ້ປູກເປັນເຫັດຖ້ຳໄດ້ (ເສຍເຄິ່ງໜຶ່ງເມື່ອຕາຍ)",
+    "category": "material",
+    "maxStack": 99,
+    "plant": {
+      "minutes": 12,
+      "harvest": [
+        {
+          "itemId": "cave-mushroom",
+          "count": 4
+        }
+      ]
+    },
+    "icon": "🍄",
+    "iconImage": "assets/items/mushroom-spore.png"
+  },
+  {
+    "id": "axe-t2",
+    "name": "ຂວານແຮ່ຟ້າ T2",
+    "nameEn": "Blue Axe T2",
+    "description": "ຂວານລະດັບ 2 ທົນກວ່າຂວານໄມ້ (ກົດ E ໃສ່ຕົ້ນໄມ້)",
+    "category": "tool",
+    "toolType": "axe",
+    "tier": 2,
+    "maxStack": 1,
+    "durability": 120,
+    "icon": "🪓",
+    "iconImage": "assets/items/axe-t2.png",
+    "held": {
+      "gripX": 16,
+      "gripY": 26
+    }
+  },
+  {
+    "id": "pickaxe-t2",
+    "name": "ຈົກແຮ່ຟ້າ T2",
+    "nameEn": "Blue Pickaxe T2",
+    "description": "ຈົກລະດັບ 2 ທົນກວ່າຈົກ T1 (ກົດ E ໃສ່ສາຍແຮ່)",
+    "category": "tool",
+    "toolType": "pickaxe",
+    "tier": 2,
+    "maxStack": 1,
+    "durability": 120,
+    "icon": "⛏️",
+    "iconImage": "assets/items/pickaxe-t2.png",
+    "held": {
+      "gripX": 16,
+      "gripY": 26
+    }
+  },
+  {
+    "id": "hammer-t2",
+    "name": "ຄ້ອນສ້ອມແປງ T2",
+    "nameEn": "Repair Hammer T2",
+    "description": "ຄ້ອນນາຍຊ່າງລະດັບ 2 ໃຊ້ສ້ອມແປງປະຕູໄດ້ຄືຄ້ອນ T1",
+    "category": "tool",
+    "toolType": "hammer",
+    "tier": 2,
+    "maxStack": 1,
+    "icon": "🔨",
+    "iconImage": "assets/items/hammer-t2.png",
+    "held": {
+      "gripX": 16,
+      "gripY": 26
+    }
+  },
+  {
+    "id": "blue-sword",
+    "name": "ດາບແຮ່ຟ້າ",
+    "nameEn": "Blue Ore Sword",
+    "description": "ດາບແຮ່ຟ້າ ພະລັງໂຈມຕີພື້ນຖານ 52",
+    "category": "weapon",
+    "tier": 4,
+    "baseDamage": 52,
+    "maxUpgradeLevel": 0,
+    "maxStack": 1,
+    "durability": 160,
+    "icon": "🗡️",
+    "iconImage": "assets/items/blue-sword.png",
+    "held": {
+      "gripX": 16,
+      "gripY": 26
+    }
+  },
+  {
+    "id": "blue-helmet",
+    "name": "ໝວກແຮ່ຟ້າ",
+    "nameEn": "Blue Helmet",
+    "description": "ໝວກແຮ່ຟ້າ ໃຫ້ຫົວໃຈເກາະ 2 ຫົວໃຈ",
+    "category": "armor",
+    "slot": "head",
+    "armorHearts": 2,
+    "maxStack": 1,
+    "durability": 100,
+    "icon": "⛑️",
+    "iconImage": "assets/items/blue-helmet.png"
+  },
+  {
+    "id": "blue-chestplate",
+    "name": "ເສື້ອເກາະແຮ່ຟ້າ",
+    "nameEn": "Blue Chestplate",
+    "description": "ເສື້ອເກາະແຮ່ຟ້າ ໃຫ້ຫົວໃຈເກາະ 3 ຫົວໃຈ",
+    "category": "armor",
+    "slot": "body",
+    "armorHearts": 3,
+    "maxStack": 1,
+    "durability": 130,
+    "icon": "🛡️",
+    "iconImage": "assets/items/blue-chestplate.png"
+  },
+  {
+    "id": "blue-boots",
+    "name": "ເກີບແຮ່ຟ້າ",
+    "nameEn": "Blue Boots",
+    "description": "ເກີບແຮ່ຟ້າ ໃຫ້ຫົວໃຈເກາະ 2 ຫົວໃຈ ແລະ ຍ່າງໄວຂຶ້ນ 15%",
+    "category": "armor",
+    "slot": "feet",
+    "armorHearts": 2,
+    "speedBonus": 0.15,
+    "maxStack": 1,
+    "durability": 100,
+    "icon": "🥾",
+    "iconImage": "assets/items/blue-boots.png"
   }
 ]

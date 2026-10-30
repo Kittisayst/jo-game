@@ -101,7 +101,7 @@
     "price": 60,
     "prerequisiteBookId": "book-ch1",
     "requiredCompletedStageId": "stage-010",
-    "unlockedRecipes": ["crystal-sword", "portal-block-blue"],
+    "unlockedRecipes": ["crystal-sword", "portal-block-blue", "axe-t2", "pickaxe-t2", "hammer-t2", "blue-sword", "blue-helmet", "blue-chestplate", "blue-boots"],
     "pages": [
       {
         "pageNumber": 1,
@@ -126,6 +126,90 @@
         "content": "ການປ້ອງກັນຕົວເອງໃນໂລກດິຈິທອນ:\n- ລະຫັດຜ່ານ (Password): ຄວນຕັ້ງໃຫ້ຍາວ ແລະ ປະສົມຕົວເລກ/ອັກສອນພິເສດ.\n- Phishing: ການຫຼອກລວງເອົາຂໍ້ມູນຜ່ານອີເມວ ຫຼື ເວັບໄຊປອມ.\n- Firewall: ລະບົບປ້ອງກັນການບຸກລຸກລະຫວ່າງເຄືອຂ່າຍ.",
         "keyPoints": ["ຢ່າບອກລະຫັດຜ່ານກັບໃຜ", "ລະວັງ Phishing ເວັບໄຊປອມ", "Firewall ຊ່ວຍກັ່ນຕອງຂໍ້ມູນທີ່ບໍ່ປອດໄພ"],
         "lesson": "13-1"
+      },
+      {
+        "pageNumber": 4,
+        "title": "ອຸປະກອນເຄືອຂ່າຍ: Modem, Router ແລະ Switch",
+        "illustration": "assets/books/ch2-p4-network-devices.svg",
+        "content": "ອຸປະກອນຫຼັກທີ່ເຮັດໃຫ້ເຄືອຂ່າຍເຮັດວຽກ:\n- Modem: ແປງສັນຍານຈາກຜູ້ໃຫ້ບໍລິການອິນເຕີເນັດ (ISP) ໃຫ້ຄອມພິວເຕີໃຊ້ໄດ້.\n- Router: ສົ່ງຂໍ້ມູນລະຫວ່າງເຄືອຂ່າຍຕ່າງໆ ແລະ ແຈກ IP ໃຫ້ອຸປະກອນໃນເຄືອຂ່າຍ.\n- Switch: ເຊື່ອມຕໍ່ຄອມພິວເຕີຫຼາຍເຄື່ອງໃນ LAN ດຽວກັນ.",
+        "keyPoints": [
+          "Modem ເຊື່ອມກັບ ISP",
+          "Router ສົ່ງຂໍ້ມູນລະຫວ່າງເຄືອຂ່າຍ",
+          "Switch ເຊື່ອມຄອມພິວເຕີຫຼາຍເຄື່ອງໃນ LAN"
+        ],
+        "lesson": "14-1"
+      },
+      {
+        "pageNumber": 5,
+        "title": "ຮູບແບບເຄືອຂ່າຍ (Topology)",
+        "illustration": "assets/books/ch2-p5-topology.svg",
+        "content": "ຮູບແບບການເຊື່ອມຕໍ່ເຄືອຂ່າຍເອີ້ນວ່າ Topology:\n- Star (ດາວ): ທຸກເຄື່ອງເຊື່ອມຕໍ່ກັບອຸປະກອນກາງ ເຊັ່ນ Switch.\n- Bus (ສາຍຫຼັກ): ທຸກເຄື່ອງຕໍ່ກັບສາຍຫຼັກເສັ້ນດຽວ.\n- Ring (ວົງແຫວນ): ແຕ່ລະເຄື່ອງຕໍ່ກັບເຄື່ອງຂ້າງໆ ເປັນວົງປິດ.",
+        "keyPoints": [
+          "Topology = ຮູບແບບການເຊື່ອມຕໍ່",
+          "Star ມີອຸປະກອນກາງ",
+          "Star: ເຄື່ອງໜຶ່ງເສຍ ບໍ່ກະທົບເຄື່ອງອື່ນ"
+        ],
+        "lesson": "15-1"
+      },
+      {
+        "pageNumber": 6,
+        "title": "Wi-Fi ແລະ ເຄືອຂ່າຍໄຮ້ສາຍ",
+        "illustration": "assets/books/ch2-p6-wifi.svg",
+        "content": "ເຄືອຂ່າຍໄຮ້ສາຍບໍ່ໃຊ້ສາຍ:\n- Wi-Fi: ໃຊ້ຄື້ນວິທະຍຸເຊື່ອມຕໍ່ເຄືອຂ່າຍ ແລະ ອິນເຕີເນັດ.\n- Bluetooth: ເຊື່ອມຕໍ່ໄລຍະໃກ້ ເຊັ່ນ ຫູຟັງ ຫຼື ລຳໂພງ.\n- ຄວນຕັ້ງລະຫັດຜ່ານ Wi-Fi ເພື່ອກັນຄົນແປກໜ້າເຂົ້າໃຊ້.",
+        "keyPoints": [
+          "Wi-Fi ໃຊ້ຄື້ນວິທະຍຸ",
+          "Bluetooth ເໝາະກັບໄລຍະໃກ້",
+          "ຕັ້ງລະຫັດຜ່ານ Wi-Fi ສະເໝີ"
+        ],
+        "lesson": "16-1"
+      },
+      {
+        "pageNumber": 7,
+        "title": "ເວັບໄຊ ແລະ ບຣາວເຊີ",
+        "illustration": "assets/books/ch2-p7-web.svg",
+        "content": "ການເຂົ້າເບິ່ງເວັບ:\n- Browser (ບຣາວເຊີ): ໂປຣແກຣມເປີດເບິ່ງເວັບ ເຊັ່ນ Chrome, Firefox.\n- URL: ທີ່ຢູ່ຂອງເວັບໄຊ ເຊັ່ນ https://www.example.com.\n- https: ເຂົ້າລະຫັດຂໍ້ມູນລະຫວ່າງເຮົາກັບເວັບໄຊ ປອດໄພກວ່າ http.",
+        "keyPoints": [
+          "Browser = ໂປຣແກຣມເປີດເວັບ",
+          "URL = ທີ່ຢູ່ເວັບໄຊ",
+          "https ປອດໄພກວ່າ http"
+        ],
+        "lesson": "17-1"
+      },
+      {
+        "pageNumber": 8,
+        "title": "ໂດເມນ ແລະ DNS",
+        "illustration": "assets/books/ch2-p8-dns.svg",
+        "content": "ເວັບໄຊມີທັງຊື່ ແລະ ເລກ IP:\n- ຊື່ໂດເມນ (Domain): ຊື່ທີ່ຄົນຈື່ງ່າຍ ເຊັ່ນ www.example.com.\n- DNS: ລະບົບທີ່ແປງຊື່ໂດເມນໃຫ້ເປັນ IP Address.\n- ຄອມພິວເຕີຕິດຕໍ່ກັນດ້ວຍ IP Address ສ່ວນຊື່ໂດເມນເປັນໄວ້ໃຫ້ຄົນໃຊ້.",
+        "keyPoints": [
+          "Domain = ຊື່ເວັບໄຊທີ່ຄົນຈື່ງ່າຍ",
+          "DNS ແປງຊື່ໂດເມນເປັນ IP",
+          "ຄອມພິວເຕີຕິດຕໍ່ກັນດ້ວຍ IP"
+        ],
+        "lesson": "18-1"
+      },
+      {
+        "pageNumber": 9,
+        "title": "ອີເມວ ແລະ ການສື່ສານອອນລາຍ",
+        "illustration": "assets/books/ch2-p9-email.svg",
+        "content": "ການສື່ສານຜ່ານເຄືອຂ່າຍ:\n- ອີເມວ (Email): ຈົດໝາຍອີເລັກໂທຣນິກ ທີ່ຢູ່ອີເມວມີເຄື່ອງໝາຍ @ ເຊັ່ນ name@example.com.\n- ການສົນທະນາອອນລາຍ (Chat) ແລະ ການໂທວິດີໂອ ຊ່ວຍໃຫ້ຕິດຕໍ່ກັນໄດ້ທັນທີ.\n- ຢ່າຕອບອີເມວທີ່ຂໍລະຫັດຜ່ານ ແລະ ຢ່າເປີດໄຟລ໌ແນບຈາກຄົນທີ່ບໍ່ຮູ້ຈັກ.",
+        "keyPoints": [
+          "ທີ່ຢູ່ອີເມວມີ @",
+          "ຢ່າຕອບອີເມວທີ່ຂໍລະຫັດຜ່ານ",
+          "ລະວັງໄຟລ໌ແນບຈາກຄົນແປກໜ້າ"
+        ],
+        "lesson": "19-1"
+      },
+      {
+        "pageNumber": 10,
+        "title": "Upload, Download, Cloud ແລະ ການສຳຮອງຂໍ້ມູນ",
+        "illustration": "assets/books/ch2-p10-cloud.svg",
+        "content": "ການສົ່ງຂໍ້ມູນຜ່ານເຄືອຂ່າຍ:\n- Download: ດຶງໄຟລ໌ຈາກອິນເຕີເນັດລົງເຄື່ອງເຮົາ.\n- Upload: ສົ່ງໄຟລ໌ຈາກເຄື່ອງເຮົາຂຶ້ນອິນເຕີເນັດ.\n- Cloud: ບ່ອນເກັບຂໍ້ມູນໃນອິນເຕີເນັດ ເຂົ້າເຖິງໄດ້ຈາກຫຼາຍເຄື່ອງ.\n- Backup: ສຳຮອງຂໍ້ມູນໄວ້ອີກບ່ອນ ເພື່ອບໍ່ໃຫ້ເສຍເມື່ອເຄື່ອງເສຍ.",
+        "keyPoints": [
+          "Download = ດຶງລົງ, Upload = ສົ່ງຂຶ້ນ",
+          "Cloud ເກັບຂໍ້ມູນໃນອິນເຕີເນັດ",
+          "ສຳຮອງຂໍ້ມູນສຳຄັນໄວ້ສະເໝີ"
+        ],
+        "lesson": "20-1"
       }
     ]
   }
