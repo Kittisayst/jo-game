@@ -1,30 +1,5 @@
-import { test, expect, Page } from '@playwright/test';
-import { Bot } from './helpers/bot';
-
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
-/** Opens Stage `n` straight from the address (`?stage=N`, development only) and waits until it is running. */
-async function openStage (page: Page, n: number): Promise<Bot>
-{
-  page.on('pageerror', err => console.log('PAGE ERROR:', err.message));
-  await page.goto(`/?stage=${n}`);
-  await expect(page.locator('.game-hud')).toBeVisible({ timeout: 20000 });
-  await expect(page.locator('.level-badge')).toContainText(new RegExp(`ດ່ານ ${n}`), { timeout: 12000 });
-
-  const bot = new Bot(page, false);
-  await expect.poll(async () => (await bot.state()).scene, { timeout: 20000 }).toBe(`stage-${String(n).padStart(3, '0')}`);
-  return bot;
-}
-
-async function exitXOf (page: Page): Promise<number>
-{
-  return page.evaluate(() => (window as any).__botGame.scene.getScene('Game').stageExitX as number);
-}
-
-async function makeHeroInvincible (page: Page): Promise<void>
-{
-  await page.evaluate(() => { (window as any).__botGame.scene.getScene('Game').player.isInvincible = true; });
-}
+import { test, expect } from '@playwright/test';
+import { answerStageQuestion, exitXOf, makeHeroInvincible, openStage, walkOutOfStage } from './helpers/stage';
 
 test.describe('Generated stages', () => {
   for (const n of [3, 7]) {
@@ -33,14 +8,11 @@ test.describe('Generated stages', () => {
       const bot = await openStage(page, n);
       await makeHeroInvincible(page);
 
-      const exitX = await exitXOf(page);
-      expect(exitX).toBeGreaterThan(1400);
+      expect(await exitXOf(page)).toBeGreaterThan(1400);
+      await walkOutOfStage(page, bot);
 
-      // The Stage is cleared once the hero is past the exit marker, so walk a little beyond it
-      const result = await bot.goTo(exitX + 55, { tolerance: 15, timeoutMs: 90000 });
-      expect(['arrived', 'left-scene']).toContain(result);
-
-      // Walking out clears the Stage and sends the hero home
+      // Walking out asks the Stage's question, then clears it and sends the hero home
+      await answerStageQuestion(page, true);
       await expect(page.locator('.level-badge')).toContainText(/ໝູ່ບ້ານ/, { timeout: 15000 });
     });
   }

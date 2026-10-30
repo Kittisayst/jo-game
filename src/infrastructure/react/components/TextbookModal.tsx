@@ -7,6 +7,7 @@ import {
 import { readBookPageUseCase } from '../../../application/ReadBookPageUseCase';
 import { getGameContent } from '../../content/ContentCatalog';
 import { entities } from '../../composition';
+import { stageIdOf, stageOfLesson } from '../../../domain/entities/StageNumber';
 import { soundManager } from '../../audio/SoundManager';
 import { EventBus } from '../../EventBus';
 
@@ -28,6 +29,14 @@ export interface TextbookModalProps
     onBookPurchased?: (bookId: string, newBalance: number) => void;
     onPageRead?: (bookId: string, pageNumber: number, isFullyRead: boolean) => void;
     onGoToExam?: (bookId: string) => void;
+}
+
+/** Says when the lesson belongs to a Stage the player has not cleared yet (it can still be read). */
+function lessonNotReachedNote (lesson: string): string
+{
+    const stageNumber = stageOfLesson(lesson);
+    if (stageNumber === null) return '';
+    return entities.stageProgression.isStageCompleted(stageIdOf(stageNumber)) ? '' : ` · ດ່ານ ${stageNumber} ຍັງບໍ່ຜ່ານ`;
 }
 
 export const TextbookModal: React.FC<TextbookModalProps> = ({
@@ -565,6 +574,11 @@ export const TextbookModal: React.FC<TextbookModalProps> = ({
                                 <span className="text-xs uppercase tracking-wider text-amber-400 font-bold bg-amber-500/10 px-2.5 py-1 rounded">
                                     ໜ້າທີ {activePage.pageNumber} / {pages.length}
                                 </span>
+                                {activePage.lesson && (
+                                    <span className="text-xs font-bold text-sky-300 bg-sky-500/10 px-2.5 py-1 rounded" data-testid="lesson-badge">
+                                        ບົດ {activePage.lesson}{lessonNotReachedNote(activePage.lesson)}
+                                    </span>
+                                )}
                                 {isPageAlreadyRead ? (
                                     <span className="text-xs text-emerald-400 font-bold flex items-center gap-1">
                                         ✓ ອ່ານໜ້ານີ້ແລ້ວ
@@ -630,9 +644,9 @@ export const TextbookModal: React.FC<TextbookModalProps> = ({
                                                         ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
                                                         : 'bg-slate-800 text-slate-400 border-slate-700'
                                             }`}
-                                            title={`ໜ້າທີ ${p.pageNumber}`}
+                                            title={p.lesson ? `ບົດ ${p.lesson}${lessonNotReachedNote(p.lesson)}` : `ໜ້າທີ ${p.pageNumber}`}
                                         >
-                                            {p.pageNumber} {read ? '✓' : ''}
+                                            {p.lesson ?? p.pageNumber} {read ? '✓' : ''}
                                         </button>
                                     );
                                 })}

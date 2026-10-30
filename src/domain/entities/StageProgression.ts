@@ -9,12 +9,16 @@ export class StageProgression
 {
     private _unlockedStages: Set<string>;
     private _completedStages: Set<string>;
+    /** Stages whose end-of-Stage question has already paid its Credit (once per Stage). */
+    private _questionRewardedStages: Set<string>;
 
     constructor (
         initialUnlockedStages: string[] = [...ALWAYS_UNLOCKED_STAGES],
-        initialCompletedStages: string[] = []
+        initialCompletedStages: string[] = [],
+        initialQuestionRewardedStages: string[] = []
     )
     {
+        this._questionRewardedStages = new Set(initialQuestionRewardedStages);
         const baseUnlocked = new Set([...ALWAYS_UNLOCKED_STAGES, ...initialUnlockedStages]);
         this._unlockedStages = baseUnlocked;
         this._completedStages = new Set(initialCompletedStages);
@@ -28,6 +32,24 @@ export class StageProgression
     get completedStages (): string[]
     {
         return Array.from(this._completedStages);
+    }
+
+    get questionRewardedStages (): string[]
+    {
+        return Array.from(this._questionRewardedStages);
+    }
+
+    isStageQuestionRewarded (stageId: string): boolean
+    {
+        return this._questionRewardedStages.has(stageId);
+    }
+
+    /** Remembers that the Stage's question paid its Credit. Returns false when it had already. */
+    markStageQuestionRewarded (stageId: string): boolean
+    {
+        if (this._questionRewardedStages.has(stageId)) return false;
+        this._questionRewardedStages.add(stageId);
+        return true;
     }
 
     isStageUnlocked (stageId: string): boolean
@@ -83,11 +105,13 @@ export class StageProgression
     {
         this._unlockedStages = new Set(ALWAYS_UNLOCKED_STAGES);
         this._completedStages = new Set();
+        this._questionRewardedStages = new Set();
     }
 
-    loadFrom (unlockedStages: string[], completedStages: string[]): void
+    loadFrom (unlockedStages: string[], completedStages: string[], questionRewardedStages: string[] = []): void
     {
         this._unlockedStages = new Set([...ALWAYS_UNLOCKED_STAGES, ...unlockedStages]);
         this._completedStages = new Set(completedStages);
+        this._questionRewardedStages = new Set(questionRewardedStages);
     }
 }

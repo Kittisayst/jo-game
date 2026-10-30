@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { test, expect, Page } from '@playwright/test';
 import items from '../public/data/items.json';
 import questions from '../public/data/questions.json';
@@ -25,7 +26,7 @@ const itemName = (id: string) => items.find(i => i.id === id)!.name;
 async function inventory (page: Page)
 {
   return page.evaluate(async () => {
-    const { entities } = await import('/src/infrastructure/composition.ts');
+    const entities = (window as any).__entities; // the app's own state (a second import() can be a second copy)
     const count = (id: string) => entities.backpack.getItemCount(id);
     return {
       credit: entities.wallet.balance,

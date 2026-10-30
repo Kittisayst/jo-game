@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 156" width="360" height="156">
+  <defs>
+    <pattern id="grid" width="18" height="18" patternUnits="userSpaceOnUse">
+      <path d="M 18 0 L 0 0 0 18" fill="none" stroke="#1e293b" stroke-width="1"/>
+    </pattern>
+  </defs>
+  <rect width="360" height="156" rx="10" fill="#0f172a"/>
+  <rect width="360" height="156" rx="10" fill="url(#grid)"/>
+  <rect x="1.5" y="1.5" width="357" height="153" rx="9" fill="none" stroke="#334155" stroke-width="1.5"/>
+  <g font-family="Noto Sans Lao, sans-serif" text-anchor="middle">
+    <text x="180" y="20" fill="#e2e8f0" font-size="12" font-weight="bold">ລະບົບປະຕິບັດການ (OS)</text>
+    <rect x="40" y="34" width="280" height="30" rx="6" fill="#2e1065" stroke="#a855f7" stroke-width="2"/>
+    <text x="180.0" y="48.0" fill="#e9d5ff" font-size="11" font-weight="bold">Application (ໂປຣແກຣມ)</text>
+    <text x="180.0" y="62.0" fill="#a855f7" font-size="9">Word • Chrome • ເກມ</text>
+    <rect x="40" y="72" width="280" height="30" rx="6" fill="#083344" stroke="#38bdf8" stroke-width="2"/>
+    <text x="180.0" y="86.0" fill="#bae6fd" font-size="11" font-weight="bold">OS (ລະບົບປະຕິບັດການ)</text>
+    <text x="180.0" y="100.0" fill="#38bdf8" font-size="9">Windows • macOS • Linux • Android</text>
+    <rect x="40" y="110" width="280" height="30" rx="6" fill="#422006" stroke="#f59e0b" stroke-width="2"/>
+    <text x="180.0" y="124.0" fill="#fde68a" font-size="11" font-weight="bold">Hardware (ເຄື່ອງ)</text>
+    <text x="180.0" y="138.0" fill="#f59e0b" font-size="9">CPU • RAM • ຈໍພາບ</text>
+  </g>
+</svg>

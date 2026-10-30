@@ -1,10 +1,12 @@
 {
+  "stageQuestion": {"credit": 5},
   "scaling": {"enemyHpPerStage": 0.08, "enemyDamagePerRealm": 1, "dropBonusPerRealm": 0.1},
   "stages": [
     {
       "number": 1, "realm": 1, "status": "ready",
       "name": "ດ່ານ 1: ປາກທາງປ່າ", "nameEn": "Stage 1: Forest Edge",
       "layout": "assets/levels/stage-001.json",
+      "lessons": ["1-1"],
       "zones": [
         {
           "id": "a", "name": "ປາກທາງປ່າ (Forest Edge)",
@@ -23,6 +25,7 @@
       "number": 2, "realm": 1, "status": "ready",
       "name": "ດ່ານ 2: ເສັ້ນທາງປ່າ", "nameEn": "Stage 2: Forest Path",
       "layout": {"generate": {"biome": "forest", "seed": 2, "screens": 2}},
+      "lessons": ["2-1"],
       "zones": [
         {
           "id": "a", "name": "ເສັ້ນທາງປ່າ (Forest Path)",
@@ -39,6 +42,7 @@
       "number": 3, "realm": 1, "status": "ready",
       "name": "ດ່ານ 3: ລຳທານໍ້າໃນປ່າ", "nameEn": "Stage 3: Creek Woods",
       "layout": {"generate": {"biome": "forest", "seed": 3, "screens": 2}},
+      "lessons": ["3-1"],
       "zones": [
         {
           "id": "a", "name": "ລຳທານໍ້າໃນປ່າ (Creek Woods)",
@@ -55,6 +59,7 @@
       "number": 4, "realm": 1, "status": "ready",
       "name": "ດ່ານ 4: ປາກຖ້ຳ", "nameEn": "Stage 4: Cave Mouth",
       "layout": {"generate": {"biome": "forest", "seed": 4, "screens": 2}},
+      "lessons": ["4-1"],
       "zones": [
         {
           "id": "a", "name": "ປາກຖ້ຳ (Cave Mouth)",
@@ -71,6 +76,7 @@
       "number": 5, "realm": 1, "status": "ready",
       "name": "ດ່ານ 5: ຜູ້ພິທັກຖ້ຳ", "nameEn": "Stage 5: Cave Guardian",
       "layout": "assets/levels/stage-005.json",
+      "lessons": ["5-1"],
       "zones": [
         {
           "id": "a", "name": "ຖ້ຳຜູ້ພິທັກ (Guardian Cave)",
@@ -91,6 +97,7 @@
       "number": 6, "realm": 1, "status": "ready",
       "name": "ດ່ານ 6: ຖ້ຳແຄບ", "nameEn": "Stage 6: Narrow Cave",
       "layout": {"generate": {"biome": "cave", "seed": 6, "screens": 2}},
+      "lessons": ["6-1"],
       "zones": [
         {
           "id": "a", "name": "ຖ້ຳແຄບ",
@@ -107,6 +114,7 @@
       "number": 7, "realm": 1, "status": "ready",
       "name": "ດ່ານ 7: ຖ້ຳເລິກ", "nameEn": "Stage 7: Deep Cave",
       "layout": {"generate": {"biome": "cave", "seed": 7, "screens": 3}},
+      "lessons": ["7-1"],
       "zones": [
         {
           "id": "a", "name": "ຖ້ຳເລິກ",
@@ -123,6 +131,7 @@
       "number": 8, "realm": 1, "status": "ready",
       "name": "ດ່ານ 8: ສາຍແຮ່", "nameEn": "Stage 8: Ore Seam",
       "layout": {"generate": {"biome": "cave", "seed": 8, "screens": 3}},
+      "lessons": ["8-1"],
       "zones": [
         {
           "id": "a", "name": "ສາຍແຮ່",
@@ -139,6 +148,7 @@
       "number": 9, "realm": 1, "status": "ready",
       "name": "ດ່ານ 9: ໜ້າປະຕູໃຫຍ່", "nameEn": "Stage 9: Before the Gate",
       "layout": {"generate": {"biome": "cave", "seed": 9, "screens": 3}},
+      "lessons": ["9-1"],
       "zones": [
         {
           "id": "a", "name": "ໜ້າປະຕູໃຫຍ່",
@@ -155,6 +165,7 @@
       "number": 10, "realm": 1, "status": "ready",
       "name": "ດ່ານ 10: ປະຕູໃຫຍ່ ແລະ ລານບອສ", "nameEn": "Stage 10: Broken Gate & Boss Arena",
       "layout": "assets/levels/stage-010.json",
+      "lessons": ["10-1"],
       "zones": [
         {
           "id": "gate", "name": "ປະຕູໃຫຍ່ທີ່ຫັກພັງ (Broken Gate)",

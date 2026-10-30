@@ -16,6 +16,7 @@ import {
     MINIBOSS_STAGE_IN_REALM,
     positionInRealm,
     realmOf,
+    stageOfLesson,
     stageIdOf,
     STAGE_COUNT,
 } from '../../../domain/entities/StageNumber';
@@ -137,6 +138,8 @@ export interface StageDefinition
     layout: string | null;
     /** The level built from `layout.generate`, for a generated Stage. */
     generated?: GeneratedLevel;
+    /** Lesson numbers (`3-1`) the question at the end of this Stage is drawn from. */
+    lessons: string[];
     zones: StageZone[];
 }
 
@@ -178,6 +181,7 @@ function placeholder (number: number): StageDefinition
         name: `ດ່ານ ${number}`,
         nameEn: `Stage ${number}`,
         layout: null,
+        lessons: [],
         zones: [],
     };
 }
@@ -426,6 +430,12 @@ function parseStage (raw: unknown, index: number, nodes: ReadonlyMap<string, Nod
         nameEn: asString(entry.nameEn, `${path}.nameEn`),
         layout: generate ? null : asString(entry.layout, `${path}.layout`),
         generated,
+        lessons: asArray(entry.lessons ?? [], `${path}.lessons`).map((lesson, j) =>
+        {
+            const text = asString(lesson, `${path}.lessons[${j}]`);
+            if (stageOfLesson(text) !== number) fail(`${path}.lessons[${j}]`, `a lesson number of stage ${number}, written ${number}-<order>`);
+            return text;
+        }),
         zones: asArray(entry.zones, `${path}.zones`).map((z, j) => parseZone(
             z,
             `${path}.zones[${j}]`,

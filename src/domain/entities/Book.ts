@@ -1,6 +1,8 @@
 export interface BookPage
 {
     pageNumber: number;
+    /** Lesson number `<stage>-<order>` such as `3-1`; the question at the end of that Stage is drawn from it. */
+    lesson?: string;
     title: string;
     content: string;
     keyPoints: string[];

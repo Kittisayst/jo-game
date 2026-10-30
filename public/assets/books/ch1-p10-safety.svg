@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 156" width="360" height="156">
+  <defs>
+    <pattern id="grid" width="18" height="18" patternUnits="userSpaceOnUse">
+      <path d="M 18 0 L 0 0 0 18" fill="none" stroke="#1e293b" stroke-width="1"/>
+    </pattern>
+  </defs>
+  <rect width="360" height="156" rx="10" fill="#0f172a"/>
+  <rect width="360" height="156" rx="10" fill="url(#grid)"/>
+  <rect x="1.5" y="1.5" width="357" height="153" rx="9" fill="none" stroke="#334155" stroke-width="1.5"/>
+  <g font-family="Noto Sans Lao, sans-serif" text-anchor="middle">
+    <text x="180" y="20" fill="#e2e8f0" font-size="12" font-weight="bold">ໃຊ້ຄອມພິວເຕີຢ່າງປອດໄພ</text>
+    <rect x="10.0" y="34" width="165.0" height="44" rx="6" fill="#083344" stroke="#38bdf8" stroke-width="2"/>
+    <text x="92.5" y="55.0" fill="#bae6fd" font-size="11" font-weight="bold">🔑 ລະຫັດຜ່ານ</text>
+    <text x="92.5" y="69.0" fill="#38bdf8" font-size="9">ຍາວ ແລະ ບໍ່ຊ້ຳ</text>
+    <rect x="185.0" y="34" width="165.0" height="44" rx="6" fill="#2e1065" stroke="#a855f7" stroke-width="2"/>
+    <text x="267.5" y="55.0" fill="#e9d5ff" font-size="11" font-weight="bold">💾 Backup</text>
+    <text x="267.5" y="69.0" fill="#a855f7" font-size="9">ສຳຮອງຂໍ້ມູນ</text>
+    <rect x="10.0" y="88" width="165.0" height="44" rx="6" fill="#083344" stroke="#38bdf8" stroke-width="2"/>
+    <text x="92.5" y="109.0" fill="#bae6fd" font-size="11" font-weight="bold">⬆ ອັບເດດ</text>
+    <text x="92.5" y="123.0" fill="#38bdf8" font-size="9">ເປັນປະຈຳ</text>
+    <rect x="185.0" y="88" width="165.0" height="44" rx="6" fill="#2e1065" stroke="#a855f7" stroke-width="2"/>
+    <text x="267.5" y="109.0" fill="#e9d5ff" font-size="11" font-weight="bold">🚫 ລິ້ງແປກ</text>
+    <text x="267.5" y="123.0" fill="#a855f7" font-size="9">ບໍ່ກົດ</text>
+  </g>
+</svg>

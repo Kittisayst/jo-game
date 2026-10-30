@@ -18,6 +18,7 @@ describe('SaveData Domain Entity & Migration', () =>
         expect(defaultSave.settings.soundMuted).toBe(false);
         expect(defaultSave.stageProgression.unlockedStages).toEqual(['village', 'stage-001']);
         expect(defaultSave.stageProgression.completedStages).toEqual([]);
+        expect(defaultSave.stageProgression.questionRewardedStages).toEqual([]);
 
         // Exactly enough Credit for the first textbook; books start unpurchased
         expect(defaultSave.wallet.balance).toBe(20);
@@ -137,5 +138,23 @@ describe('SaveData Domain Entity & Migration', () =>
         const notBought = migrateSaveSnapshot({ version: 7, activeSkinId: 'golden-runner' });
         expect(notBought.ownedSkins).toEqual(['cyber-blue']);
         expect(notBought.activeSkinId).toBe('cyber-blue');
+    });
+});
+
+describe('Stage question rewards in a save', () =>
+{
+    it('keeps the rewarded Stages, drops anything that is not a Stage, and accepts a save without the field', () =>
+    {
+        const withRewards = migrateSaveSnapshot({
+            version: CURRENT_SAVE_VERSION,
+            stageProgression: { unlockedStages: ['stage-001'], completedStages: [], questionRewardedStages: ['stage-002', 'nonsense', 7] },
+        });
+        expect(withRewards.stageProgression.questionRewardedStages).toEqual(['stage-002']);
+
+        const without = migrateSaveSnapshot({
+            version: CURRENT_SAVE_VERSION,
+            stageProgression: { unlockedStages: ['stage-001'], completedStages: [] },
+        });
+        expect(without.stageProgression.questionRewardedStages).toEqual([]);
     });
 });

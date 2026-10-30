@@ -166,7 +166,7 @@ export class Bot
   {
     await this.walk(0);
     const slot = await this.page.evaluate(async () => {
-      const { entities } = await import('/src/infrastructure/composition.ts');
+      const entities = (window as any).__entities; // the app's own state (a second import() can be a second copy)
       const slots = entities.backpack.getAllSlots();
       const first = slots.findIndex(x => x !== null);
       const potion = slots.findIndex(x => x && x.itemId === 'herb-potion');
@@ -186,7 +186,7 @@ export class Bot
     await this.page.waitForTimeout(150);
 
     const after = await this.page.evaluate(async () => {
-      const { entities } = await import('/src/infrastructure/composition.ts');
+      const entities = (window as any).__entities; // the app's own state (a second import() can be a second copy)
       return entities.health.current;
     });
     this.note(`drank a potion: hearts ${slot.hearts} -> ${after}`);

@@ -79,4 +79,29 @@ describe('StageProgression entity', () =>
         expect(progression.isStageCompleted('stage-001')).toBe(true);
         expect(progression.isStageCompleted('stage-002')).toBe(false);
     });
+
+    it('remembers which Stage questions have paid their Credit, once each', () =>
+    {
+        const progression = new StageProgression();
+
+        expect(progression.isStageQuestionRewarded('stage-002')).toBe(false);
+        expect(progression.markStageQuestionRewarded('stage-002')).toBe(true);
+        expect(progression.markStageQuestionRewarded('stage-002')).toBe(false);
+        expect(progression.questionRewardedStages).toEqual(['stage-002']);
+    });
+
+    it('loads, keeps and resets the rewarded Stages', () =>
+    {
+        const progression = new StageProgression();
+        progression.loadFrom(['village', 'stage-001'], [], ['stage-001']);
+        expect(progression.isStageQuestionRewarded('stage-001')).toBe(true);
+
+        // A save from before this existed has none
+        progression.loadFrom(['village', 'stage-001'], []);
+        expect(progression.questionRewardedStages).toEqual([]);
+
+        progression.markStageQuestionRewarded('stage-003');
+        progression.reset();
+        expect(progression.questionRewardedStages).toEqual([]);
+    });
 });

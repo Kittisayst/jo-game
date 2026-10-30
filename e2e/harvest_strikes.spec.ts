@@ -7,7 +7,7 @@ import { enterStage } from './helpers/stage';
 async function woodCount (page: Page): Promise<number>
 {
   return page.evaluate(async () => {
-    const { entities } = await import('/src/infrastructure/composition.ts');
+    const entities = (window as any).__entities; // the app's own state (a second import() can be a second copy)
     return entities.backpack.getItemCount('wood');
   });
 }

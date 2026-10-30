@@ -34,6 +34,7 @@ export function restoreSaveSnapshotUseCase (state: GameState, snapshot: SaveGame
     ports.stageProgression.save({
         unlockedStages: state.stageProgression.unlockedStages,
         completedStages: state.stageProgression.completedStages,
+        questionRewardedStages: state.stageProgression.questionRewardedStages,
     });
     applySettingsUseCase(state.settings);
 }

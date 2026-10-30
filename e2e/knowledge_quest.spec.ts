@@ -3,9 +3,13 @@ import { walkRightTo } from './helpers/gameProbe';
 
 test.describe('Knowledge Quest — Buy-to-Read Textbook & Chapter 1 Loop E2E', () => {
   test('Enforces Buy-at-Library -> Read-All-Pages (5s timer) -> Unlock-Academy-Exam loop', async ({ page }) => {
-    test.setTimeout(120000);
+    test.setTimeout(150000);
     page.on('console', msg => console.log(`BROWSER [${msg.type()}]:`, msg.text()));
     page.on('pageerror', err => console.log('PAGE ERROR:', err.message));
+
+    // The textbook grows with the lessons; read how many pages it has from the data
+    const books = await (await page.request.get('/data/books.json')).json();
+    const total: number = books.find((b: { id: string }) => b.id === 'book-ch1').pages.length;
 
     // 1. Navigate to game with clean storage and start
     await page.goto('/');
@@ -67,7 +71,7 @@ test.describe('Knowledge Quest — Buy-to-Read Textbook & Chapter 1 Loop E2E', (
 
     // The bought book moves from "For sale" to "My books" (unread: 0/5)
     await expect(mineTab).toHaveAttribute('aria-selected', 'true');
-    await expect(page.locator('button:has-text("ເປີດອ່ານຕຳລາ (0/5)")')).toBeVisible();
+    await expect(page.locator(`button:has-text("ເປີດອ່ານຕຳລາ (0/${total})")`)).toBeVisible();
     await expect(page.locator('button:has-text("ຊື້ປຶ້ມຕຳລາ")')).toHaveCount(0);
     await shopTab.click();
     await expect(page.locator('h3:has-text("ພື້ນຖານລະບົບຄອມພິວເຕີ")')).toHaveCount(0);
@@ -85,18 +89,21 @@ test.describe('Knowledge Quest — Buy-to-Read Textbook & Chapter 1 Loop E2E', (
     const academyHeader = page.locator('h2:has-text("Academy")');
     await expect(academyHeader).toBeVisible({ timeout: 5000 });
 
-    // Start Exam must NOT be visible yet because 0/5 pages read!
+    // Start Exam must NOT be visible yet because 0 pages read!
     await expect(page.locator('button:has-text("ເລີ່ມສອບເສັງ")')).toHaveCount(0);
-    const continueReadingBtn = page.locator('button:has-text("ເປີດອ່ານປຶ້ມຕຳລາຕໍ່ (0/5)")');
+    const continueReadingBtn = page.locator(`button:has-text("ເປີດອ່ານປຶ້ມຕຳລາຕໍ່ (0/${total})")`);
     await expect(continueReadingBtn).toBeVisible();
 
-    // 5. Click shortcut to open Personal Reader and read all 5 pages (5s first-read timer per page)
+    // 5. Click shortcut to open Personal Reader and read every page (5s first-read timer per page)
     await continueReadingBtn.click();
     await expect(page.locator('h2:has-text("ປຶ້ມຕຳລາສ່ວນຕົວ")')).toBeVisible();
 
-    for (let pageNum = 1; pageNum <= 5; pageNum++) {
-      await expect(page.locator(`text=ໜ້າທີ ${pageNum} / 5`)).toBeVisible();
-      if (pageNum < 5) {
+    // Each page shows its lesson number (<stage>-<order>) and says when its Stage has not been cleared yet
+    await expect(page.getByTestId('lesson-badge')).toContainText('ບົດ 1-1 · ດ່ານ 1 ຍັງບໍ່ຜ່ານ');
+
+    for (let pageNum = 1; pageNum <= total; pageNum++) {
+      await expect(page.locator(`text=ໜ້າທີ ${pageNum} / ${total}`)).toBeVisible();
+      if (pageNum < total) {
         const confirmNextBtn = page.locator('button:has-text("ອ່ານເຂົ້າໃຈແລ້ວ & ໜ້າຕໍ່ໄປ")');
         await expect(confirmNextBtn).toBeVisible({ timeout: 8000 });
         await confirmNextBtn.click();
@@ -107,7 +114,7 @@ test.describe('Knowledge Quest — Buy-to-Read Textbook & Chapter 1 Loop E2E', (
       }
     }
 
-    // 6. All 5/5 pages read -> Jump to Academy Exam!
+    // 6. All pages read -> Jump to Academy Exam!
     const goToExamBtn = page.locator('button:has-text("ໄປສອບເສັງທີ່ສະຖາບັນ")');
     await expect(goToExamBtn).toBeVisible();
     await goToExamBtn.click();
