@@ -27,6 +27,8 @@ export interface Level
     worldWidth: number;
     spawn: { x: number; y: number };
     platforms: { x: number; y: number }[];
+    /** Platforms (also listed in `platforms`) that only the air dash reaches: a secret ledge with a reward on it. */
+    secretPlatforms?: { x: number; y: number }[];
     spikes?: SpikeSpawnData[];
     movingPlatforms?: MovingPlatformSpawnData[];
     /** Which backdrop and ground the level has: the village, a forest, or a cave. */

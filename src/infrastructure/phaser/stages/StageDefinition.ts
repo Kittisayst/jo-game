@@ -48,6 +48,10 @@ export interface StageResourceNode
     requiredTool: string | null;
     toolTier: number;
     x: number;
+    /** The y of the surface it stands on when that is not the ground (a node on the secret ledge). */
+    surfaceY?: number;
+    /** True for the reward on the secret ledge. */
+    secret?: boolean;
     /** How many Strikes it takes to deplete the node (see "Strike" in CONTEXT.md). */
     strikes: number;
     drops: StageDrop[];
@@ -196,7 +200,8 @@ function placeholder (number: number): StageDefinition
 function parseNode (
     entry: Record<string, unknown>,
     path: string,
-    nodes: ReadonlyMap<string, NodeDefinition>
+    nodes: ReadonlyMap<string, NodeDefinition>,
+    placement?: { surfaceY: number; secret: boolean }
 ): StageResourceNode
 {
     const nodeId = asString(entry.node, `${path}.node`);
@@ -233,6 +238,7 @@ function parseNode (
         requiredTool: kind!.requiredTool,
         toolTier: kind!.toolTier,
         x,
+        ...(placement ? { surfaceY: placement.surfaceY, secret: placement.secret } : {}),
         strikes,
         drops,
         ...(seed ? { seed } : {}),
@@ -342,7 +348,17 @@ function parseZone (
         switch (kind)
         {
             case 'node':
-                parsed.resourceNodes.push(parseNode(entry, entryPath, nodes));
+                if (entry.secret === true)
+                {
+                    // The reward of the secret ledge: its place comes from the generated level
+                    const secret = context?.generated.secret;
+                    if (!secret) fail(`${entryPath}.secret`, 'used only in a Stage whose layout asks for a secret ledge ("generate": { ..., "secret": true }) and where one fits');
+                    parsed.resourceNodes.push(parseNode({ ...entry, x: secret!.x }, entryPath, nodes, { surfaceY: secret!.surfaceY, secret: true }));
+                }
+                else
+                {
+                    parsed.resourceNodes.push(parseNode(entry, entryPath, nodes));
+                }
                 break;
             case 'enemy':
                 parsed.enemySpawns.push(parseEnemy(entry, entryPath, false));
@@ -404,7 +420,7 @@ function parseZone (
     return parsed;
 }
 
-function parseGenerate (raw: unknown, path: string): { biome: Biome; seed: number; screens: number }
+function parseGenerate (raw: unknown, path: string): { biome: Biome; seed: number; screens: number; secret: boolean }
 {
     const generate = asObject(asObject(raw, path).generate, `${path}.generate`);
     const biome = asString(generate.biome, `${path}.generate.biome`) as Biome;
@@ -412,7 +428,8 @@ function parseGenerate (raw: unknown, path: string): { biome: Biome; seed: numbe
     const seed = asNumber(generate.seed, `${path}.generate.seed`);
     if (!Number.isInteger(seed)) fail(`${path}.generate.seed`, 'a whole number');
     const screens = asNumber(generate.screens, `${path}.generate.screens`);
-    return { biome, seed, screens };
+    if (generate.secret !== undefined && typeof generate.secret !== 'boolean') fail(`${path}.generate.secret`, 'true or false');
+    return { biome, seed, screens, secret: generate.secret === true };
 }
 
 function parseStage (raw: unknown, index: number, nodes: ReadonlyMap<string, NodeDefinition>): StageDefinition
@@ -456,6 +473,13 @@ function parseStage (raw: unknown, index: number, nodes: ReadonlyMap<string, Nod
         )),
     };
     if (stage.zones.length === 0) fail(`${path}.zones`, 'at least one zone');
+
+    if (generate?.secret && !generated?.secret) fail(`${path}.layout.generate.secret`, 'a secret ledge that fits this Stage (try another seed or more screens)');
+    if (generated?.secret)
+    {
+        const rewards = stage.zones.flatMap(z => z.resourceNodes).filter(n => n.secret).length;
+        if (rewards !== 1) fail(`${path}.zones`, 'exactly one node with "secret": true (the reward on the secret ledge)');
+    }
 
     const spawns = getStageEnemySpawns(stage);
     const minibosses = spawns.filter(s => s.miniboss).length;

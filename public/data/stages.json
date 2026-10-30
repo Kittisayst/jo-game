@@ -196,7 +196,8 @@
         "generate": {
           "biome": "cave",
           "seed": 11,
-          "screens": 2
+          "screens": 2,
+          "secret": true
         }
       },
       "lessons": [
@@ -236,6 +237,18 @@
               "speed": 50
             },
             {
+              "kind": "node",
+              "node": "crystal-vein",
+              "secret": true,
+              "overrides": {
+                "strikes": 3,
+                "drops": [
+                    { "itemId": "crystal", "count": 2 },
+                    { "itemId": "blue-ore", "count": 3 }
+                ]
+              }
+            },
+            {
               "kind": "exit"
             }
           ]
@@ -252,7 +265,8 @@
         "generate": {
           "biome": "cave",
           "seed": 12,
-          "screens": 3
+          "screens": 3,
+          "secret": true
         }
       },
       "lessons": [
@@ -292,6 +306,18 @@
               "speed": 50
             },
             {
+              "kind": "node",
+              "node": "crystal-vein",
+              "secret": true,
+              "overrides": {
+                "strikes": 3,
+                "drops": [
+                    { "itemId": "crystal", "count": 2 },
+                    { "itemId": "blue-ore", "count": 4 }
+                ]
+              }
+            },
+            {
               "kind": "exit"
             }
           ]
@@ -308,7 +334,8 @@
         "generate": {
           "biome": "cave",
           "seed": 13,
-          "screens": 3
+          "screens": 4,
+          "secret": true
         }
       },
       "lessons": [
@@ -347,6 +374,18 @@
               "speed": 50
             },
             {
+              "kind": "node",
+              "node": "crystal-vein",
+              "secret": true,
+              "overrides": {
+                "strikes": 3,
+                "drops": [
+                    { "itemId": "crystal", "count": 2 },
+                    { "itemId": "cave-mushroom", "count": 4 }
+                ]
+              }
+            },
+            {
               "kind": "exit"
             }
           ]
@@ -363,7 +402,8 @@
         "generate": {
           "biome": "cave",
           "seed": 14,
-          "screens": 3
+          "screens": 3,
+          "secret": true
         }
       },
       "lessons": [
@@ -401,6 +441,18 @@
               "enemyCount": 3,
               "patrolDistance": 100,
               "speed": 50
+            },
+            {
+              "kind": "node",
+              "node": "crystal-vein",
+              "secret": true,
+              "overrides": {
+                "strikes": 3,
+                "drops": [
+                    { "itemId": "crystal", "count": 3 },
+                    { "itemId": "blue-ore", "count": 3 }
+                ]
+              }
             },
             {
               "kind": "exit"
@@ -489,7 +541,8 @@
         "generate": {
           "biome": "cave",
           "seed": 16,
-          "screens": 3
+          "screens": 3,
+          "secret": true
         }
       },
       "lessons": [
@@ -530,6 +583,18 @@
               "speed": 45
             },
             {
+              "kind": "node",
+              "node": "crystal-vein",
+              "secret": true,
+              "overrides": {
+                "strikes": 3,
+                "drops": [
+                    { "itemId": "crystal", "count": 3 },
+                    { "itemId": "blue-ore", "count": 5 }
+                ]
+              }
+            },
+            {
               "kind": "exit"
             }
           ]
@@ -546,7 +611,8 @@
         "generate": {
           "biome": "cave",
           "seed": 17,
-          "screens": 4
+          "screens": 4,
+          "secret": true
         }
       },
       "lessons": [
@@ -586,6 +652,18 @@
               "speed": 50
             },
             {
+              "kind": "node",
+              "node": "crystal-vein",
+              "secret": true,
+              "overrides": {
+                "strikes": 3,
+                "drops": [
+                    { "itemId": "crystal", "count": 3 },
+                    { "itemId": "cave-mushroom", "count": 6 }
+                ]
+              }
+            },
+            {
               "kind": "exit"
             }
           ]
@@ -602,7 +680,8 @@
         "generate": {
           "biome": "cave",
           "seed": 18,
-          "screens": 4
+          "screens": 4,
+          "secret": true
         }
       },
       "lessons": [
@@ -643,6 +722,18 @@
               "speed": 45
             },
             {
+              "kind": "node",
+              "node": "crystal-vein",
+              "secret": true,
+              "overrides": {
+                "strikes": 3,
+                "drops": [
+                    { "itemId": "crystal", "count": 4 },
+                    { "itemId": "blue-ore", "count": 5 }
+                ]
+              }
+            },
+            {
               "kind": "exit"
             }
           ]
@@ -659,7 +750,8 @@
         "generate": {
           "biome": "cave",
           "seed": 19,
-          "screens": 4
+          "screens": 4,
+          "secret": true
         }
       },
       "lessons": [
@@ -698,6 +790,18 @@
               "enemyType": "slime-armored",
               "patrolDistance": 120,
               "speed": 45
+            },
+            {
+              "kind": "node",
+              "node": "crystal-vein",
+              "secret": true,
+              "overrides": {
+                "strikes": 3,
+                "drops": [
+                    { "itemId": "crystal", "count": 4 },
+                    { "itemId": "blue-ore", "count": 6 }
+                ]
+              }
             },
             {
               "kind": "exit"

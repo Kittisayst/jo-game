@@ -32,7 +32,7 @@ The look and the moves of a Boss are still in code (`Boss.ts`); a new Boss is a 
 
 ## 6. Stages
 
-`stages.json`: turn `{ number, realm, status: "placeholder" }` into a built Stage.
+`stages.json`: turn `{ number, realm, status: "placeholder" }` into a built Stage. An ordinary Stage can hide a secret ledge for the air dash (`"secret": true` in `generate`, plus one `{ "kind": "node", "secret": true, ... }` with a rich `overrides.drops` in the Zone); see "Secret ledges" in CLAUDE.md.
 
 - Ordinary Stage: `layout: { generate: { biome: "forest" | "cave", seed, screens } }`, `lessons: ["<n>-1"]`, a waypoint, a sign, one `spawn-pool` and an `exit` (see Stages 11–14, 16–19).
 - Stage 5 and Stage 10 of the Realm: a level JSON in `public/assets/levels/stage-NNN.json` (copy Stage 15 or 20 and move the platforms), with the `miniboss` / `boss` entry. Stage 10 of Realm 1 has the Broken Gate; its id (`gate-ch1`) is tied to code, so a Realm without a gate simply leaves it out.
