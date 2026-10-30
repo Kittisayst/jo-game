@@ -1,3 +1,5 @@
+import { DayNightOverlay } from '../effects/DayNightOverlay';
+import { tickWorldTimeUseCase, WORLD_PHASE_CHANGED_EVENT, type WorldPhaseChangedPayload } from '../../../application/TickWorldTimeUseCase';
 import { EventBus } from '../../EventBus';
 import { Input, Scene } from 'phaser';
 import { Player } from '../objects/Player';
@@ -107,6 +109,7 @@ export class Game extends Scene
     private bossBgmStarted = false;
     private gardenView?: GardenView;
     private skillController?: SkillController;
+    private dayNight?: DayNightOverlay;
     /** The smiths in front of the Workshop and the Forge (village only). */
     private craftingWorkers: CraftingWorker[] = [];
 
@@ -490,8 +493,19 @@ export class Game extends Scene
         };
         DomainEvents.on(PLAYER_DIED_EVENT, onGameOver);
 
+        // The dark layer of the night, and a word when the day turns
+        this.dayNight = new DayNightOverlay(this);
+        const onWorldPhaseChanged = (payload: WorldPhaseChangedPayload) =>
+        {
+            const text = { dusk: '🌅 ຕາເວັນຕົກແລ້ວ...', night: '🌙 ກາງຄືນມາແລ້ວ!', dawn: '🌄 ຟ້າເລີ່ມແຈ້ງ', day: '☀️ ເຊົ້າແລ້ວ!' }[payload.phase];
+            if (this.player) showLootNotification(this, this.player.x, this.player.y - 60, text, '#fde68a');
+        };
+        DomainEvents.on(WORLD_PHASE_CHANGED_EVENT, onWorldPhaseChanged);
+
         this.events.on('shutdown', () =>
         {
+            DomainEvents.off(WORLD_PHASE_CHANGED_EVENT, onWorldPhaseChanged);
+            this.dayNight = undefined;
             DomainEvents.off<SkinChangedPayload>(SKIN_CHANGED_EVENT, onSkinChanged);
             DomainEvents.off<ItemWornPayload>(ITEM_WORN_EVENT, onItemWorn);
             DomainEvents.off<ItemBrokenPayload>(ITEM_BROKEN_EVENT, onItemBroken);
@@ -527,6 +541,8 @@ export class Game extends Scene
         entities.attackCooldown.tick(delta);
         entities.effects.tick(delta);
         entities.crafting.tick(delta);
+        tickWorldTimeUseCase(entities.worldTime, delta);
+        if (this.player) this.dayNight?.update(entities.worldTime.darkness, this.player.x, this.player.y);
         entities.movement.tick(delta);
         entities.skillCooldowns.tick(delta);
         for (const worker of this.craftingWorkers) worker.update(entities.crafting.job);

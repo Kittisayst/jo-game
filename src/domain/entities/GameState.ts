@@ -21,6 +21,7 @@ import { SkillProgression } from './SkillProgression';
 import { ToolUpgrades } from './ToolUpgrades';
 import { HeroLevel } from './HeroLevel';
 import { HeroStats } from './HeroStats';
+import { WorldTime } from './WorldTime';
 import { PendingRewards } from './PendingRewards';
 import { PlantRegrowth } from './PlantRegrowth';
 import { RealmProgression } from './RealmProgression';
@@ -67,6 +68,8 @@ export class GameState
     readonly heroLevel = new HeroLevel();
     /** What the Stat points were spent on (Attack, Hearts, Guard, Agility). */
     readonly heroStats = new HeroStats();
+    /** The time of day (Game time, saved). Needs `configure` once the content has loaded. */
+    readonly worldTime = new WorldTime();
     /** The Storage chest: 40 slots, never touched by dying. */
     readonly storage: Backpack;
     /** Timed Potion effects running on the hero (not saved). */
@@ -136,6 +139,7 @@ export class GameState
             toolUpgrades: this.toolUpgrades.toSnapshot(),
             heroLevel: this.heroLevel.toSnapshot(),
             heroStats: this.heroStats.toSnapshot(),
+            worldTime: this.worldTime.toSnapshot(),
             storage: this.storage.toSnapshot(),
         };
     }
@@ -187,6 +191,7 @@ export class GameState
         this.toolUpgrades.loadFrom(snapshot.toolUpgrades);
         this.heroLevel.loadFrom(snapshot.heroLevel);
         this.heroStats.loadFrom(snapshot.heroStats);
+        this.worldTime.loadFrom(snapshot.worldTime ?? undefined);
         this.storage.loadFromSnapshot(snapshot.storage ?? []);
         this.effects.clear();
         this.syncArmor();

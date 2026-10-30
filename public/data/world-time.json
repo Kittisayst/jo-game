@@ -1,0 +1,8 @@
+{
+  "dayLengthMinutes": 20,
+  "nightStartsAt": 0.7,
+  "duskMinutes": 1,
+  "dawnMinutes": 1,
+  "startAt": 0.1,
+  "maxDarkness": 0.55
+}

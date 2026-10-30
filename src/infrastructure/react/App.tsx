@@ -53,6 +53,7 @@ import { StageQuestionModal } from './components/StageQuestionModal';
 import { GardenSeedPicker } from './components/GardenSeedPicker';
 import { readSkillSlots } from './skillSlots';
 import { readHeroLevel } from './heroLevelView';
+import { readWorldTime } from './worldTimeView';
 import { syncHearts } from '../heroStats';
 import { syncMovement, syncSkills } from '../skills';
 import { GARDEN_LEVEL_KEY, isHomeLevel } from '../phaser/levelCatalog';
@@ -485,6 +486,13 @@ function App ()
         if (syncSkills().length + syncMovement().length > 0) autoSaveGame();
     }, []);
 
+    // The clock of the day counts down on the HUD: one redraw a second
+    useEffect(() =>
+    {
+        const timer = setInterval(() => setBackpackRevision(r => r + 1), 1000);
+        return () => clearInterval(timer);
+    }, []);
+
     // Potion effects count down on screen: redraw twice a second while one is running
     useEffect(() =>
     {
@@ -739,6 +747,7 @@ function App ()
                     craftingJob={entities.crafting.job}
                     skillSlots={readSkillSlots()}
                     heroLevel={readHeroLevel()}
+                    worldTime={readWorldTime()}
                     onOpenCharacter={() => setIsCharacterOpen(true)}
                     onUseSkill={slot => EventBus.emit('virtual-skill', { slot })}
                     activeEffects={entities.effects.active}
