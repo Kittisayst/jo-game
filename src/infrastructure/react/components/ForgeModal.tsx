@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { repairItemUseCase, RepairRecipe } from '../../../application/RepairItemUseCase';
+import { DurabilityBar } from './DurabilityBar';
 import { RecipeDefinition, craftRecipeUseCase } from '../../../application/CraftRecipeUseCase';
 import { WeaponUpgradeRecipe, upgradeWeaponTierUseCase } from '../../../application/UpgradeWeaponTierUseCase';
 import { getGameContent } from '../../content/ContentCatalog';
@@ -14,7 +16,8 @@ interface ForgeModalProps
 
 export const ForgeModal: React.FC<ForgeModalProps> = ({ isOpen, onClose }) =>
 {
-    const [activeTab, setActiveTab] = useState<'craft' | 'upgrade'>('craft');
+    const [activeTab, setActiveTab] = useState<'craft' | 'upgrade' | 'repair'>('craft');
+    const [repairRecipes] = useState<RepairRecipe[]>(() => getGameContent().repairs.filter(r => r.building === 'forge'));
     const [craftRecipes] = useState<RecipeDefinition[]>(() => getGameContent().recipes.filter(
         (r): r is RecipeDefinition => r.building === 'forge' && 'resultItemId' in r
     ));
@@ -58,6 +61,20 @@ export const ForgeModal: React.FC<ForgeModalProps> = ({ isOpen, onClose }) =>
     const handleUpgrade = (weaponId: string) =>
     {
         const result = upgradeWeaponTierUseCase(weaponId, upgradeRecipes, entities.equipment, entities.backpack, entities.wallet);
+        if (result.success)
+        {
+            soundManager.playPowerUp();
+            setRevision(r => r + 1);
+        }
+        else
+        {
+            soundManager.playHurt();
+        }
+    };
+
+    const handleRepair = (itemId: string) =>
+    {
+        const result = repairItemUseCase(itemId, repairRecipes, entities.backpack);
         if (result.success)
         {
             soundManager.playPowerUp();
@@ -131,6 +148,19 @@ export const ForgeModal: React.FC<ForgeModalProps> = ({ isOpen, onClose }) =>
                             >
                                 <span>✨</span>
                                 <span>ອັບເກຣດຂັ້ນອາວຸດ (Upgrade Tier +1..+3)</span>
+                            </button>
+
+                            <button
+                                data-testid="forge-repair-tab"
+                                onClick={() => setActiveTab('repair')}
+                                className={`pb-2.5 font-bold text-sm transition flex items-center gap-2 border-b-2 ${
+                                    activeTab === 'repair'
+                                        ? 'border-orange-400 text-orange-300'
+                                        : 'border-transparent text-slate-400 hover:text-slate-200'
+                                }`}
+                            >
+                                <span>🛠️</span>
+                                <span>ສ້ອມແປງ (Repair)</span>
                             </button>
                         </div>
 
@@ -213,7 +243,7 @@ export const ForgeModal: React.FC<ForgeModalProps> = ({ isOpen, onClose }) =>
                                         );
                                     })}
                                 </div>
-                            ) : (
+                            ) : activeTab === 'upgrade' ? (
                                 /* Upgrade Tab */
                                 <div className="space-y-4">
                                     {['iron-sword', 'crystal-sword'].map(weaponId =>
@@ -299,6 +329,73 @@ export const ForgeModal: React.FC<ForgeModalProps> = ({ isOpen, onClose }) =>
                                                         ອັບເກຣດເຕັມແລ້ວ (+3 MAX)
                                                     </span>
                                                 )}
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            ) : (
+                                /* Repair Tab: Materials only, never Credit */
+                                <div className="space-y-4" data-testid="forge-repair-list">
+                                    {repairRecipes.filter(r => entities.backpack.getDurability(r.itemId) !== null).length === 0 && (
+                                        <p className="text-sm text-slate-400">ຍັງບໍ່ມີອາວຸດ ຫຼື ເຄື່ອງມືທີ່ສ້ອມໄດ້ໃນກະເປົາ.</p>
+                                    )}
+                                    {repairRecipes.map(recipe =>
+                                    {
+                                        const reading = entities.backpack.getDurability(recipe.itemId);
+                                        if (!reading) return null;
+                                        const item = getItem(recipe.itemId);
+                                        const isWorn = reading.current < reading.max;
+                                        const hasIngredients = recipe.ingredients.every(ing => entities.backpack.getItemCount(ing.itemId) >= ing.count);
+                                        const canRepair = isWorn && hasIngredients;
+
+                                        return (
+                                            <div
+                                                key={recipe.itemId}
+                                                data-testid="forge-repair-row"
+                                                className="p-5 rounded-xl border bg-slate-800/80 border-slate-700/80 flex flex-col md:flex-row items-center justify-between gap-4"
+                                            >
+                                                <div className="flex items-center gap-3 md:w-1/3">
+                                                    <ItemIcon iconImage={item?.iconImage} icon={item?.icon || '🛠️'} size={36} />
+                                                    <div className="w-full">
+                                                        <h4 className="font-bold text-white text-base">{item?.name}</h4>
+                                                        <DurabilityBar reading={reading} />
+                                                    </div>
+                                                </div>
+
+                                                <div className="flex flex-col md:flex-row items-center gap-3">
+                                                    <div className="flex flex-wrap gap-2 text-xs">
+                                                        {recipe.ingredients.map(ing =>
+                                                        {
+                                                            const count = entities.backpack.getItemCount(ing.itemId);
+                                                            const ok = count >= ing.count;
+                                                            const itm = getItem(ing.itemId);
+                                                            return (
+                                                                <span
+                                                                    key={ing.itemId}
+                                                                    className={`px-2 py-1 rounded border flex items-center gap-1 ${
+                                                                        ok ? 'bg-emerald-950/40 border-emerald-500/40 text-emerald-300' : 'bg-rose-950/40 border-rose-500/40 text-rose-300'
+                                                                    }`}
+                                                                >
+                                                                    <ItemIcon iconImage={itm?.iconImage} icon={itm?.icon} size={14} />
+                                                                    <span>{itm?.name}: {count}/{ing.count}</span>
+                                                                </span>
+                                                            );
+                                                        })}
+                                                    </div>
+
+                                                    <button
+                                                        data-testid="forge-repair-button"
+                                                        onClick={() => handleRepair(recipe.itemId)}
+                                                        disabled={!canRepair}
+                                                        className={`px-4 py-2 rounded-lg font-bold text-xs transition shadow ${
+                                                            canRepair
+                                                                ? 'bg-orange-600 hover:bg-orange-500 text-white'
+                                                                : 'bg-slate-800 text-slate-500 cursor-not-allowed'
+                                                        }`}
+                                                    >
+                                                        {isWorn ? 'ສ້ອມແປງ' : 'ບໍ່ຕ້ອງສ້ອມ'}
+                                                    </button>
+                                                </div>
                                             </div>
                                         );
                                     })}

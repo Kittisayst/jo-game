@@ -1,5 +1,6 @@
-import { Backpack } from '../domain/entities/Backpack';
+import { Backpack, DurabilityChange } from '../domain/entities/Backpack';
 import { DomainEvents } from '../domain/DomainEvents';
+import { deathWearUseCase } from './WearItemUseCase';
 
 export const RETURNED_TO_VILLAGE_EVENT = 'returned-to-village';
 
@@ -16,6 +17,8 @@ export interface ReturnResult
     reason: ReturnReason;
     keptAllMaterials: boolean;
     lostMaterials: { itemId: string; count: number }[];
+    /** Weapons and tools that lost Durability because the hero died (empty on any other way home). */
+    wornItems: DurabilityChange[];
 }
 
 export function returnToVillageUseCase (
@@ -25,6 +28,7 @@ export function returnToVillageUseCase (
 ): ReturnResult
 {
     let lostMaterials: { itemId: string; count: number }[] = [];
+    let wornItems: DurabilityChange[] = [];
 
     if (reason === 'safe_waypoint')
     {
@@ -36,6 +40,7 @@ export function returnToVillageUseCase (
         // Death or Emergency Retreat: 50% carried materials lost
         const penalty = backpack.applyRetreatPenalty();
         lostMaterials = penalty.lost;
+        if (reason === 'death') wornItems = deathWearUseCase(backpack);
     }
 
     if (healToFullCallback)
@@ -52,6 +57,7 @@ export function returnToVillageUseCase (
         reason,
         keptAllMaterials: reason === 'safe_waypoint',
         lostMaterials,
+        wornItems,
     };
 }
 

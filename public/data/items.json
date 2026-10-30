@@ -101,6 +101,7 @@
     "toolType": "axe",
     "tier": 1,
     "maxStack": 1,
+    "durability": 40,
     "icon": "🪓",
     "iconImage": "assets/items/axe-t1.png",
     "held": { "image": "assets/held/axe-t1.png", "gripX": 16, "gripY": 26 }
@@ -114,6 +115,7 @@
     "toolType": "pickaxe",
     "tier": 1,
     "maxStack": 1,
+    "durability": 40,
     "icon": "⛏️",
     "iconImage": "assets/items/pickaxe-t1.png",
     "held": { "image": "assets/held/pickaxe-t1.png", "gripX": 16, "gripY": 26 }
@@ -155,6 +157,7 @@
     "baseDamage": 22,
     "maxUpgradeLevel": 3,
     "maxStack": 1,
+    "durability": 80,
     "icon": "⚔️",
     "iconImage": "assets/items/iron-sword.png",
     "held": { "image": "assets/held/iron-sword.png", "gripX": 16, "gripY": 26 }
@@ -169,6 +172,7 @@
     "baseDamage": 38,
     "maxUpgradeLevel": 3,
     "maxStack": 1,
+    "durability": 120,
     "icon": "✨",
     "iconImage": "assets/items/crystal-sword.png",
     "held": { "image": "assets/held/crystal-sword.png", "gripX": 16, "gripY": 26 }

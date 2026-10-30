@@ -1,3 +1,4 @@
+import { DurabilityState, deathWearAmount, durabilityStateOf } from './Durability';
 import { ItemCatalog } from './ItemCatalog';
 
 export interface BackpackSlot
@@ -5,6 +6,8 @@ export interface BackpackSlot
     slotIndex: number;
     itemId: string;
     count: number;
+    /** Durability left. Missing means full (or that the item does not wear). Only items that wear are one to a slot. */
+    durability?: number;
 }
 
 export interface BackpackSlotSnapshot
@@ -12,6 +15,23 @@ export interface BackpackSlotSnapshot
     slotIndex: number;
     itemId: string;
     count: number;
+    durability?: number;
+}
+
+/** What wearing an item changed. */
+export interface DurabilityChange
+{
+    itemId: string;
+    previous: number;
+    current: number;
+    max: number;
+}
+
+export interface DurabilityReading
+{
+    current: number;
+    max: number;
+    state: DurabilityState;
 }
 
 export interface CraftingIngredient
@@ -70,6 +90,65 @@ export class Backpack
             }
         }
         return total;
+    }
+
+    /** How worn the first slot holding `itemId` is, or null when the item is missing or never wears. */
+    getDurability (itemId: string): DurabilityReading | null
+    {
+        const index = this._slots.findIndex(s => s !== null && s.itemId === itemId);
+        return index < 0 ? null : this.getSlotDurability(index);
+    }
+
+    /** How worn the item in one slot is, or null for an empty slot or an item that never wears. */
+    getSlotDurability (index: number): DurabilityReading | null
+    {
+        const slot = index >= 0 && index < BACKPACK_MAX_SLOTS ? this._slots[index] : null;
+        const max = slot ? this._catalog.maxDurabilityOf(slot.itemId) : undefined;
+        if (!slot || max === undefined) return null;
+
+        const current = Math.max(0, Math.min(max, slot.durability ?? max));
+        return { current, max, state: durabilityStateOf(current, max) };
+    }
+
+    /** Wears the first slot holding `itemId` by `amount`. Returns null when the item is missing or never wears. */
+    wearItem (itemId: string, amount = 1): DurabilityChange | null
+    {
+        const index = this._slots.findIndex(s => s !== null && s.itemId === itemId);
+        return index < 0 ? null : this.wearSlot(index, amount);
+    }
+
+    /** Takes a tenth of the maximum off every item that wears (the hero died). Returns what changed. */
+    wearAllDurable (): DurabilityChange[]
+    {
+        const changes: DurabilityChange[] = [];
+        for (let i = 0; i < this._slots.length; i++)
+        {
+            const max = this._slots[i] ? this._catalog.maxDurabilityOf(this._slots[i]!.itemId) : undefined;
+            if (max === undefined) continue;
+            const change = this.wearSlot(i, deathWearAmount(max));
+            if (change && change.current !== change.previous) changes.push(change);
+        }
+        return changes;
+    }
+
+    /** Gives the first slot holding `itemId` its full Durability back. Returns false when it was missing or never wears. */
+    restoreItem (itemId: string): boolean
+    {
+        const index = this._slots.findIndex(s => s !== null && s.itemId === itemId);
+        if (index < 0 || this._catalog.maxDurabilityOf(itemId) === undefined) return false;
+        delete this._slots[index]!.durability;
+        return true;
+    }
+
+    private wearSlot (index: number, amount: number): DurabilityChange | null
+    {
+        const reading = this.getSlotDurability(index);
+        const slot = this._slots[index];
+        if (!reading || !slot) return null;
+
+        const current = Math.max(0, reading.current - Math.max(0, amount));
+        slot.durability = current;
+        return { itemId: slot.itemId, previous: reading.current, current, max: reading.max };
     }
 
     getMaxStack (itemId: string): number
@@ -294,6 +373,7 @@ export class Backpack
                 slotIndex: i,
                 itemId: occupied[i].itemId,
                 count: occupied[i].count,
+                ...(occupied[i].durability !== undefined ? { durability: occupied[i].durability } : {}),
             };
         }
     }
@@ -309,6 +389,7 @@ export class Backpack
                     slotIndex: slot.slotIndex,
                     itemId: slot.itemId,
                     count: slot.count,
+                    ...(slot.durability !== undefined ? { durability: slot.durability } : {}),
                 });
             }
         }
@@ -326,6 +407,7 @@ export class Backpack
                     slotIndex: s.slotIndex,
                     itemId: s.itemId,
                     count: s.count,
+                    ...(typeof s.durability === 'number' ? { durability: Math.max(0, Math.floor(s.durability)) } : {}),
                 };
             }
         }

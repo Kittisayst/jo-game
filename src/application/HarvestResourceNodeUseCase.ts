@@ -2,6 +2,8 @@ import { Backpack } from '../domain/entities/Backpack';
 import { DomainEvents } from '../domain/DomainEvents';
 import { ResourceNode } from '../domain/entities/ResourceNode';
 import { findTool } from '../domain/entities/HeldItem';
+import { DurabilityState, strikeWeightFor } from '../domain/entities/Durability';
+import { wearItemUseCase } from './WearItemUseCase';
 
 export const RESOURCE_HARVESTED_EVENT = 'resource-harvested';
 
@@ -36,6 +38,8 @@ export interface HarvestResult
     completed?: boolean;
     strikesTaken?: number;
     strikesNeeded?: number;
+    /** How worn the tool was for this Strike; a Broken tool counts half a Strike. Missing for a tool that never wears. */
+    toolState?: DurabilityState;
     drops: ResourceDrop[];
 }
 
@@ -56,11 +60,12 @@ export function harvestResourceNodeUseCase (
     }
 
     // 1. Check tool requirement
+    let toolId: string | null = null;
     if (node.requiredTool)
     {
-        const hasMatchingTool = findTool(backpack, node.requiredTool) !== null;
+        toolId = findTool(backpack, node.requiredTool);
 
-        if (!hasMatchingTool)
+        if (toolId === null)
         {
             return {
                 success: false,
@@ -84,9 +89,15 @@ export function harvestResourceNodeUseCase (
         }
     }
 
-    // 3. Count the Strike; only the last one gives the Materials
-    progress.registerStrike();
-    const strikeInfo = { strikesTaken: progress.strikesTaken, strikesNeeded: progress.strikesNeeded };
+    // 3. Count the Strike (half of one with a Broken tool) and wear the tool; only the last Strike gives the Materials
+    const toolReading = toolId ? backpack.getDurability(toolId) : null;
+    progress.registerStrike(toolReading ? strikeWeightFor(toolReading.state) : 1);
+    if (toolId && toolReading) wearItemUseCase(backpack, toolId);
+    const strikeInfo = {
+        strikesTaken: progress.strikesTaken,
+        strikesNeeded: progress.strikesNeeded,
+        ...(toolReading ? { toolState: toolReading.state } : {}),
+    };
 
     if (!progress.isDepleted)
     {

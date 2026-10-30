@@ -8,6 +8,7 @@ import nodes from '../../public/data/nodes.json';
 import realms from '../../public/data/realms.json';
 import stages from '../../public/data/stages.json';
 import tutorial from '../../public/data/tutorial.json';
+import repairs from '../../public/data/repairs.json';
 
 /**
  * The game data files point at each other by id. A typo in one file silently breaks a loop
@@ -107,6 +108,19 @@ describe('content data integrity', () =>
             expect(nodeIds.has(node), `${step.id} -> ${node}`).toBe(true);
             expect(stage1, `Stage 1 has a ${node} for step ${step.id}`).toContain(node);
         }
+    });
+
+    it('lets only items that wear be repaired, with known Materials, and repairs every item that wears', () =>
+    {
+        const durable = (items as { id: string; durability?: number; maxStack: number }[]).filter(i => i.durability !== undefined);
+
+        for (const item of durable) expect(item.maxStack, `${item.id} stacks`).toBe(1);
+        for (const repair of repairs.repairs)
+        {
+            expect(durable.some(i => i.id === repair.itemId), `${repair.itemId} wears`).toBe(true);
+            for (const ing of repair.ingredients) expect(itemIds.has(ing.itemId), `${repair.itemId} needs ${ing.itemId}`).toBe(true);
+        }
+        for (const item of durable) expect(repairs.repairs.some(r => r.itemId === item.id), `${item.id} can be repaired`).toBe(true);
     });
 
     describe('lessons', () =>

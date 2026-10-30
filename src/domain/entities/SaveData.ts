@@ -194,7 +194,12 @@ export function migrateSaveSnapshot (raw: unknown, fallbackSlotId = 'slot_1'): S
             const s = slot as Record<string, unknown>;
             if (typeof s.slotIndex === 'number' && typeof s.itemId === 'string' && typeof s.count === 'number' && s.count > 0)
             {
-                backpack.push({ slotIndex: s.slotIndex, itemId: s.itemId, count: Math.floor(s.count) });
+                backpack.push({
+                    slotIndex: s.slotIndex,
+                    itemId: s.itemId,
+                    count: Math.floor(s.count),
+                    ...(typeof s.durability === 'number' && !isNaN(s.durability) ? { durability: Math.max(0, Math.floor(s.durability)) } : {}),
+                });
             }
         }
     }

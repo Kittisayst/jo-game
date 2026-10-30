@@ -14,6 +14,7 @@ import {
 import type { GateRequirements } from '../../../application/RepairBrokenGateUseCase';
 import { GAME_PAUSED_EVENT, GAME_RESUMED_EVENT } from '../../../application/TogglePauseUseCase';
 import { TUTORIAL_CHANGED_EVENT } from '../../../application/NotifyTutorialUseCase';
+import { ITEM_REPAIRED_EVENT, ITEM_WORN_EVENT } from '../../../application/WearItemUseCase';
 import { EventBus } from '../../EventBus';
 
 /** What the React side does when the game or the domain announces something. Every handler is optional. */
@@ -45,6 +46,7 @@ export interface GameEventHandlers
     onBossDefeated?: () => void;
     onGamePaused?: () => void;
     onGameResumed?: () => void;
+    onItemWornOrRepaired?: () => void;
     onTutorialChanged?: (payload: { finished: string[]; currentStepId: string | null }) => void;
 }
 
@@ -77,6 +79,8 @@ const DOMAIN_EVENTS: [string, keyof GameEventHandlers][] = [
     [GAME_PAUSED_EVENT, 'onGamePaused'],
     [GAME_RESUMED_EVENT, 'onGameResumed'],
     [TUTORIAL_CHANGED_EVENT, 'onTutorialChanged'],
+    [ITEM_WORN_EVENT, 'onItemWornOrRepaired'],
+    [ITEM_REPAIRED_EVENT, 'onItemWornOrRepaired'],
 ];
 
 /**

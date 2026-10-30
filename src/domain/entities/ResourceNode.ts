@@ -24,9 +24,12 @@ export class ResourceNode
         return this._strikesTaken >= this.strikesNeeded;
     }
 
-    /** Counts one Strike; a depleted node ignores further Strikes. */
-    registerStrike (): void
+    /**
+     * Counts one Strike; a depleted node ignores further Strikes. A Strike with a Broken tool counts for
+     * less (`weight` 0.5), so it takes twice as many.
+     */
+    registerStrike (weight = 1): void
     {
-        if (!this.isDepleted) this._strikesTaken++;
+        if (!this.isDepleted) this._strikesTaken += weight;
     }
 }
