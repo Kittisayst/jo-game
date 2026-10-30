@@ -46,15 +46,20 @@ export class Backpack
 {
     private _slots: (BackpackSlot | null)[];
 
-    constructor (initialSlots: BackpackSlotSnapshot[] = [], private readonly _catalog: ItemCatalog = new ItemCatalog())
+    /** `maxSlots` is 30 for the hero's Backpack; the Storage chest uses the same rules with 40. */
+    constructor (
+        initialSlots: BackpackSlotSnapshot[] = [],
+        private readonly _catalog: ItemCatalog = new ItemCatalog(),
+        private readonly _maxSlots: number = BACKPACK_MAX_SLOTS
+    )
     {
-        this._slots = new Array(BACKPACK_MAX_SLOTS).fill(null);
+        this._slots = new Array(this._maxSlots).fill(null);
         this.loadFromSnapshot(initialSlots);
     }
 
     get maxSlots (): number
     {
-        return BACKPACK_MAX_SLOTS;
+        return this._maxSlots;
     }
 
     get usedSlotsCount (): number
@@ -64,7 +69,7 @@ export class Backpack
 
     get isFull (): boolean
     {
-        return this.usedSlotsCount >= BACKPACK_MAX_SLOTS;
+        return this.usedSlotsCount >= this._maxSlots;
     }
 
     getAllSlots (): (BackpackSlot | null)[]
@@ -74,7 +79,7 @@ export class Backpack
 
     getSlot (index: number): BackpackSlot | null
     {
-        if (index < 0 || index >= BACKPACK_MAX_SLOTS) return null;
+        if (index < 0 || index >= this._maxSlots) return null;
         const s = this._slots[index];
         return s ? { ...s } : null;
     }
@@ -102,7 +107,7 @@ export class Backpack
     /** How worn the item in one slot is, or null for an empty slot or an item that never wears. */
     getSlotDurability (index: number): DurabilityReading | null
     {
-        const slot = index >= 0 && index < BACKPACK_MAX_SLOTS ? this._slots[index] : null;
+        const slot = index >= 0 && index < this._maxSlots ? this._slots[index] : null;
         const max = slot ? this._catalog.maxDurabilityOf(slot.itemId) : undefined;
         if (!slot || max === undefined) return null;
 
@@ -308,7 +313,7 @@ export class Backpack
         }
 
         // Clone backpack slots
-        const sim = new Backpack(this.toSnapshot(), this._catalog);
+        const sim = new Backpack(this.toSnapshot(), this._catalog, this._maxSlots);
 
         // Remove ingredients
         for (const ing of ingredients)
@@ -354,12 +359,12 @@ export class Backpack
 
     clear (): void
     {
-        this._slots = new Array(BACKPACK_MAX_SLOTS).fill(null);
+        this._slots = new Array(this._maxSlots).fill(null);
     }
 
     removeSlot (index: number): boolean
     {
-        if (index < 0 || index >= BACKPACK_MAX_SLOTS || this._slots[index] === null)
+        if (index < 0 || index >= this._maxSlots || this._slots[index] === null)
         {
             return false;
         }
@@ -370,7 +375,7 @@ export class Backpack
     /** Removes `count` items from one slot; the slot empties when it reaches zero. */
     removeFromSlot (index: number, count: number): boolean
     {
-        const slot = index >= 0 && index < BACKPACK_MAX_SLOTS ? this._slots[index] : null;
+        const slot = index >= 0 && index < this._maxSlots ? this._slots[index] : null;
         if (!slot || count <= 0 || count > slot.count)
         {
             return false;
@@ -431,7 +436,7 @@ export class Backpack
         this.clear();
         for (const s of snapshots)
         {
-            if (s.slotIndex >= 0 && s.slotIndex < BACKPACK_MAX_SLOTS && s.count > 0)
+            if (s.slotIndex >= 0 && s.slotIndex < this._maxSlots && s.count > 0)
             {
                 this._slots[s.slotIndex] = {
                     slotIndex: s.slotIndex,

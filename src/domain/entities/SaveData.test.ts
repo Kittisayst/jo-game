@@ -313,3 +313,53 @@ describe('Plant regrowth in a save', () =>
         expect(migrateSaveSnapshot({ version: CURRENT_SAVE_VERSION }).plantRegrowth).toEqual({});
     });
 });
+
+describe('The Garden and the Storage chest in a save', () =>
+{
+    it('starts with six empty Plots and an empty chest', () =>
+    {
+        const save = createDefaultSaveSnapshot();
+
+        expect(save.garden.plotCount).toBe(6);
+        expect(save.garden.plots).toEqual([null, null, null, null, null, null]);
+        expect(save.storage).toEqual([]);
+    });
+
+    it('keeps the planted Seeds and what is in the chest, with Durability', () =>
+    {
+        const saved = migrateSaveSnapshot({
+            version: CURRENT_SAVE_VERSION,
+            garden: { plotCount: 7, plots: [{ seedItemId: 'herb-seed', plantedAtMs: 1700000000000 }, null, null, null, null, null, { seedItemId: 'fiber-seed', plantedAtMs: 5 }] },
+            storage: [{ slotIndex: 39, itemId: 'wood', count: 12 }, { slotIndex: 0, itemId: 'iron-sword', count: 1, durability: 40.5 }],
+        });
+
+        expect(saved.garden.plotCount).toBe(7);
+        expect(saved.garden.plots[0]).toEqual({ seedItemId: 'herb-seed', plantedAtMs: 1700000000000 });
+        expect(saved.garden.plots[6]).toEqual({ seedItemId: 'fiber-seed', plantedAtMs: 5 });
+        expect(saved.storage).toEqual([
+            { slotIndex: 39, itemId: 'wood', count: 12 },
+            { slotIndex: 0, itemId: 'iron-sword', count: 1, durability: 40 },
+        ]);
+    });
+
+    it('repairs nonsense: Plot count out of range, broken Plots, chest slots that do not exist', () =>
+    {
+        const saved = migrateSaveSnapshot({
+            version: CURRENT_SAVE_VERSION,
+            garden: { plotCount: 99, plots: [{ seedItemId: 7, plantedAtMs: 1 }, 'x'] },
+            storage: [{ slotIndex: 40, itemId: 'wood', count: 1 }, { slotIndex: 1, itemId: 'wood', count: 0 }, { slotIndex: 2, itemId: 'wood', count: 3 }],
+        });
+
+        expect(saved.garden.plotCount).toBe(12);
+        expect(saved.garden.plots.every(plot => plot === null)).toBe(true);
+        expect(saved.storage).toEqual([{ slotIndex: 2, itemId: 'wood', count: 3 }]);
+    });
+
+    it('loads a save from before the Garden existed', () =>
+    {
+        const saved = migrateSaveSnapshot({ version: CURRENT_SAVE_VERSION });
+
+        expect(saved.garden.plotCount).toBe(6);
+        expect(saved.storage).toEqual([]);
+    });
+});

@@ -6,6 +6,7 @@
     {"id": "fight", "event": "enemy-defeated", "text": "⚔️ ກົດ J ຫຼື Z ເພື່ອຕີສະໄລມ໌ໃຫ້ມັນແພ້"},
     {"id": "backpack", "event": "backpack-opened", "text": "🎒 ກົດ I ເພື່ອເບິ່ງກະເປົາ ແລະ ຂອງທີ່ເກັບໄດ້"},
     {"id": "exit", "event": "stage-cleared", "text": "🚪 ຍ່າງໄປທາງຂວາສຸດ (ທາງອອກ) ແລ້ວຕອບຄຳຖາມ ເພື່ອຜ່ານດ່ານ"},
+    {"id": "garden", "event": "seed-planted", "showAfter": "seed-collected", "text": "🌱 ໄດ້ເມັດແລ້ວ! ໄປປະຕູສວນໃນໝູ່ບ້ານ (ຂວາຂອງໂຮງຊ່າງ) ແລ້ວປູກເມັດ ລໍເວລາ ແລ້ວເກັບຜົນ"},
     {"id": "learn", "event": "book-fully-read", "text": "📚 ຢູ່ໝູ່ບ້ານ: ຊື້ປຶ້ມຕຳລາທີ່ຫໍສະໝຸດ ແລ້ວອ່ານໃຫ້ຄົບທຸກໜ້າ"},
     {"id": "portal", "event": "portal-block-placed", "showAfter": "portal-shard-collected", "text": "💠 ໄດ້ເສດປະຕູແລ້ວ! ເກັບໃຫ້ຄົບ 5 ເສດ ແລ້ວສ້າງກ້ອນປະຕູທີ່ Forge ແລະໃສ່ທີ່ປະຕູໃຫຍ່ (ແຜນທີ່ 100 ດ່ານ) ເພື່ອເປີດມິຕິຕໍ່ໄປ"}
   ]

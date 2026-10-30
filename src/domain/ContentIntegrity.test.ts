@@ -9,6 +9,7 @@ import realms from '../../public/data/realms.json';
 import stages from '../../public/data/stages.json';
 import tutorial from '../../public/data/tutorial.json';
 import repairs from '../../public/data/repairs.json';
+import garden from '../../public/data/garden.json';
 
 /**
  * The game data files point at each other by id. A typo in one file silently breaks a loop
@@ -194,6 +195,23 @@ describe('content data integrity', () =>
                 expect(seed!.story, `${node.seed.itemId} is not a story Material`).not.toBe(true);
             }
         }
+    });
+
+    it('gives every Seed a plant that yields known Materials, and prices Garden expansions in known Materials', () =>
+    {
+        type Planted = { id: string; category: string; plant?: { minutes: number; harvest: { itemId: string }[] } };
+        const seeds = (items as Planted[]).filter(i => i.plant);
+
+        // Every Seed a plant can drop is a Seed that can be planted
+        for (const node of nodes.nodes as { id: string; seed?: { itemId: string } }[])
+        {
+            if (node.seed) expect(seeds.some(s => s.id === node.seed!.itemId), `${node.seed.itemId} can be planted`).toBe(true);
+        }
+        for (const seed of seeds)
+        {
+            for (const drop of seed.plant!.harvest) expect(itemIds.has(drop.itemId), `${seed.id} gives ${drop.itemId}`).toBe(true);
+        }
+        for (const cost of garden.expansions) for (const ing of cost) expect(itemIds.has(ing.itemId), `a Plot costs ${ing.itemId}`).toBe(true);
     });
 
     describe('lessons', () =>

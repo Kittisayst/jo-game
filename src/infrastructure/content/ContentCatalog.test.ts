@@ -13,6 +13,8 @@ import { parseStageQuestion, parseStageScaling } from './ScalingCatalog';
 import { parseTutorial } from './TutorialCatalog';
 import { parseRepairs } from './RepairCatalog';
 import { parseNodes } from './NodeCatalog';
+import { parseGardenExpansions } from './GardenCatalog';
+import garden from '../../../public/data/garden.json';
 import repairs from '../../../public/data/repairs.json';
 import tutorial from '../../../public/data/tutorial.json';
 import { scaleEnemyDefinition } from '../../domain/entities/StageScaling';
@@ -379,6 +381,53 @@ describe('validator errors', () =>
             });
         });
 
+        describe('seeds that grow in the Garden', () =>
+        {
+            const copyItems = () => JSON.parse(JSON.stringify(items)) as Record<string, unknown>[];
+            const find = (list: Record<string, unknown>[], id: string) => list.find(i => i.id === id)!;
+
+            it('reads how long each Seed grows and what it gives', () =>
+            {
+                const parsed = parseItems(items);
+                const plant = (id: string) => parsed.find(i => i.id === id)!.plant;
+
+                expect(plant('herb-seed')).toEqual({ minutes: 10, harvest: [{ itemId: 'herb', count: 4 }] });
+                expect(plant('oak-sapling')).toEqual({ minutes: 20, harvest: [{ itemId: 'wood', count: 6 }] });
+                expect(parsed.find(i => i.id === 'herb')!.plant).toBeUndefined();
+            });
+
+            it('rejects a plant that takes no time, gives nothing, or sits on something that is not a Material', () =>
+            {
+                const noTime = copyItems();
+                (find(noTime, 'herb-seed').plant as { minutes: number }).minutes = 0;
+                expect(() => parseItems(noTime)).toThrow(/plant\.minutes must be more than 0/);
+
+                const gives = copyItems();
+                (find(gives, 'herb-seed').plant as { harvest: unknown[] }).harvest = [];
+                expect(() => parseItems(gives)).toThrow(/plant\.harvest must be at least one Material/);
+
+                const notMaterial = copyItems();
+                find(notMaterial, 'iron-sword').plant = { minutes: 5, harvest: [{ itemId: 'wood', count: 1 }] };
+                expect(() => parseItems(notMaterial)).toThrow(/category must be material/);
+            });
+
+            it('reads the price of each extra Plot, one for each Plot after the sixth', () =>
+            {
+                const costs = parseGardenExpansions(garden);
+
+                expect(costs).toHaveLength(6);
+                expect(costs[0]).toEqual([{ itemId: 'wood', count: 10 }, { itemId: 'stone', count: 5 }]);
+
+                const short = JSON.parse(JSON.stringify(garden));
+                short.expansions.pop();
+                expect(() => parseGardenExpansions(short)).toThrow(/expansions must be exactly 6 entries/);
+
+                const free = JSON.parse(JSON.stringify(garden));
+                free.expansions[0] = [];
+                expect(() => parseGardenExpansions(free)).toThrow(/expansions\[0\] must be at least one Material/);
+            });
+        });
+
         describe('seeds and regrowing plants', () =>
         {
             const copyNodes = () => JSON.parse(JSON.stringify(nodes)) as { nodes: Record<string, unknown>[] };
@@ -541,8 +590,9 @@ describe('validator errors', () =>
             {
                 const steps = parseTutorial(tutorial);
 
-                expect(steps.map(s => s.id)).toEqual(['move', 'herb', 'tree', 'fight', 'backpack', 'exit', 'learn', 'portal']);
-                expect(steps[7]).toMatchObject({ event: 'portal-block-placed', showAfter: 'portal-shard-collected' });
+                expect(steps.map(s => s.id)).toEqual(['move', 'herb', 'tree', 'fight', 'backpack', 'exit', 'garden', 'learn', 'portal']);
+                expect(steps[6]).toMatchObject({ event: 'seed-planted', showAfter: 'seed-collected' });
+                expect(steps[8]).toMatchObject({ event: 'portal-block-placed', showAfter: 'portal-shard-collected' });
                 expect(steps[1]).toMatchObject({ event: 'harvested:wild-herb' });
                 expect(steps.every(s => s.text.length > 0)).toBe(true);
             });

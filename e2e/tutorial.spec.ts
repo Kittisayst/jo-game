@@ -59,8 +59,8 @@ test.describe('The first Stage teaches the loop', () => {
     await answerStageQuestion(page, true);
     await expect(page.locator('.level-badge')).toContainText(/ໝູ່ບ້ານ/, { timeout: 15000 });
 
-    // 7. Back in the village the last hint is about the Textbook
-    await expect(hint(page)).toContainText('ປຶ້ມຕຳລາ');
+    // 7. Back in the village the next hint is about planting the Seed the herb gave
+    await expect(hint(page)).toContainText('ປູກເມັດ');
     expect(await doneSteps(page)).toEqual(['move', 'herb', 'tree', 'fight', 'backpack', 'exit']);
     const stage2Open = await page.evaluate(() => (window as any).__entities.stageProgression.isStageUnlocked('stage-002'));
     expect(stage2Open).toBe(true);

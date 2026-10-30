@@ -64,7 +64,7 @@ export function buildVillageScenery (scene: Phaser.Scene, baseY: number, forgeOp
     ];
 
     // Background village trees
-    for (const tx of [185, 445, 740, 1015])
+    for (const tx of [185, 445, 740])
     {
         if (scene.textures.exists('village-tree'))
         {
@@ -134,6 +134,10 @@ export function buildVillageScenery (scene: Phaser.Scene, baseY: number, forgeOp
         }
     }
 
+    // The Garden door (x = 1010) and the Storage chest (x = 235): drawn with shapes until real art replaces them
+    addGardenDoor(scene, 1010, baseY);
+    addStorageChest(scene, 235, baseY);
+
     // Welcome signpost & text at village entrance (x = 120)
     if (scene.textures.exists('signpost'))
     {
@@ -200,6 +204,54 @@ export function buildVillageScenery (scene: Phaser.Scene, baseY: number, forgeOp
                 : '🔒 [E] ໂຮງຕີເຫຼັກ (ຕ້ອງສອບເສັງບົດທີ 1 ຜ່ານກ່ອນ)',
             action: () => EventBus.emit('open-forge'),
         },
+        { x: 235, label: '📦 [E] ເປີດຫີບເກັບຂອງ (Storage)', action: () => EventBus.emit('open-storage') },
+        { x: 1010, label: '🌱 [E] ເຂົ້າສວນຜັກ (Garden)', action: () => EventBus.emit('open-garden') },
         { x: 1420, label: '🌀 [E] ເລືອກດ່ານຜະຈົນໄພ (World Map)', action: () => EventBus.emit('open-stage-map') },
     ];
+}
+
+function addLabel (scene: Phaser.Scene, x: number, y: number, text: string, color: string, stroke: string): void
+{
+    scene.add.text(x, y, text, {
+        fontFamily: FONT,
+        fontSize: '12px',
+        color,
+        stroke,
+        strokeThickness: 3,
+        align: 'center',
+    }).setOrigin(0.5, 0.5).setDepth(2.5);
+}
+
+/** An arch of wood with leaves, the way into the Garden. */
+function addGardenDoor (scene: Phaser.Scene, x: number, baseY: number): void
+{
+    const g = scene.add.graphics();
+    g.setDepth(1.6);
+    g.fillStyle(0x78350f, 1);
+    g.fillRect(x - 38, baseY - 100, 10, 100);
+    g.fillRect(x + 28, baseY - 100, 10, 100);
+    g.fillRect(x - 42, baseY - 108, 84, 12);
+    g.fillStyle(0x16a34a, 1);
+    g.fillCircle(x - 33, baseY - 108, 11);
+    g.fillCircle(x + 33, baseY - 108, 11);
+    g.fillCircle(x, baseY - 114, 13);
+    g.fillStyle(0x22c55e, 0.9);
+    g.fillRect(x - 28, baseY - 96, 56, 96);
+    addLabel(scene, x, baseY - 134, '🌱 ສວນຜັກ (Garden)\n[E] ເຂົ້າສວນ', '#86efac', '#064e3b');
+}
+
+/** A wooden chest with an iron band. */
+function addStorageChest (scene: Phaser.Scene, x: number, baseY: number): void
+{
+    const g = scene.add.graphics();
+    g.setDepth(1.6);
+    g.fillStyle(0x92400e, 1);
+    g.fillRoundedRect(x - 26, baseY - 34, 52, 34, 4);
+    g.fillStyle(0xb45309, 1);
+    g.fillRoundedRect(x - 28, baseY - 46, 56, 16, 6);
+    g.fillStyle(0x64748b, 1);
+    g.fillRect(x - 4, baseY - 46, 8, 46);
+    g.fillStyle(0xfacc15, 1);
+    g.fillRect(x - 3, baseY - 26, 6, 8);
+    addLabel(scene, x, baseY - 66, '📦 ຫີບເກັບຂອງ (Storage)\n[E] ເປີດຫີບ', '#fde68a', '#451a03');
 }

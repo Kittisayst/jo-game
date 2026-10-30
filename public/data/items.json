@@ -480,6 +480,7 @@
     "description": "ເມັດຈາກຕົ້ນສະໝຸນໄພໃນດ່ານ ໃຊ້ປູກເປັນສະໝຸນໄພໄດ້ (ເສຍເຄິ່ງໜຶ່ງເມື່ອຕາຍ)",
     "category": "material",
     "maxStack": 99,
+    "plant": { "minutes": 10, "harvest": [{ "itemId": "herb", "count": 4 }] },
     "icon": "🌱",
     "iconImage": "assets/items/herb-seed.png"
   },
@@ -490,6 +491,7 @@
     "description": "ເມັດຈາກຫຍ້າເສັ້ນໃຍໃນດ່ານ ໃຊ້ປູກເປັນເສັ້ນໃຍໄດ້ (ເສຍເຄິ່ງໜຶ່ງເມື່ອຕາຍ)",
     "category": "material",
     "maxStack": 99,
+    "plant": { "minutes": 10, "harvest": [{ "itemId": "fiber", "count": 4 }] },
     "icon": "🌱",
     "iconImage": "assets/items/fiber-seed.png"
   },
@@ -500,6 +502,7 @@
     "description": "ກ້າໄມ້ທີ່ໄດ້ຈາກການຕັດຕົ້ນໄມ້ ໃຊ້ປູກເປັນຕົ້ນໄມ້ໄດ້ (ເສຍເຄິ່ງໜຶ່ງເມື່ອຕາຍ)",
     "category": "material",
     "maxStack": 99,
+    "plant": { "minutes": 20, "harvest": [{ "itemId": "wood", "count": 6 }] },
     "icon": "🌳",
     "iconImage": "assets/items/oak-sapling.png"
   }

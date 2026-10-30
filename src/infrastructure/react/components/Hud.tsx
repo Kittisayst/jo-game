@@ -52,6 +52,8 @@ export interface HudProps
     armor?: number;
     /** Timed Potion effects running, with the seconds left. */
     activeEffects?: { effect: 'strength' | 'speed'; remainingSeconds: number }[];
+    /** How many Garden Plots are ready to harvest. */
+    gardenReadyCount?: number;
     /** Story Materials waiting for a free Backpack slot. */
     pendingRewardsCount?: number;
     /** The Potion chosen to be drunk with R, with how many are left. */
@@ -80,6 +82,7 @@ export function Hud ({
     onDismissTutorial,
     armor = 0,
     pendingRewardsCount = 0,
+    gardenReadyCount = 0,
     activeEffects = [],
     quickSlot = null,
     onDrinkQuickSlot,
@@ -106,6 +109,13 @@ export function Hud ({
                     {armor > 0 && (
                         <div className="hud-badge armor-badge" data-testid="armor-hearts" data-armor={armor} title="ຫົວໃຈເກາະ: ເສຍກ່ອນຫົວໃຈປົກກະຕິ ແລະ ຟື້ນເມື່ອກັບໝູ່ບ້ານ">
                             <span className="badge-icon">{'🛡️'.repeat(Math.min(armor, 10))}</span>
+                        </div>
+                    )}
+
+                    {gardenReadyCount > 0 && (
+                        <div className="hud-badge garden-badge" data-testid="garden-ready" title="ມີຜົນໃນສວນພ້ອມເກັບ: ໄປທີ່ປະຕູສວນໃນໝູ່ບ້ານ">
+                            <span className="badge-icon">🌿</span>
+                            <span className="badge-label">ສວນພ້ອມເກັບ {gardenReadyCount}</span>
                         </div>
                     )}
 

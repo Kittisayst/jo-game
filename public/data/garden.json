@@ -1,0 +1,10 @@
+{
+  "expansions": [
+    [{"itemId": "wood", "count": 10}, {"itemId": "stone", "count": 5}],
+    [{"itemId": "wood", "count": 14}, {"itemId": "stone", "count": 7}],
+    [{"itemId": "wood", "count": 18}, {"itemId": "stone", "count": 9}],
+    [{"itemId": "wood", "count": 22}, {"itemId": "stone", "count": 11}, {"itemId": "iron-ore", "count": 4}],
+    [{"itemId": "wood", "count": 26}, {"itemId": "stone", "count": 13}, {"itemId": "iron-ore", "count": 8}],
+    [{"itemId": "wood", "count": 30}, {"itemId": "stone", "count": 15}, {"itemId": "iron-ore", "count": 12}]
+  ]
+}
