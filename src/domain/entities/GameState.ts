@@ -16,6 +16,8 @@ import { armorHeartsOf } from './Armor';
 import { CraftingQueue } from './CraftingQueue';
 import { Garden } from './Garden';
 import { MovementAbilities } from './MovementAbilities';
+import { SkillCooldowns } from './SkillCooldowns';
+import { SkillProgression } from './SkillProgression';
 import { PendingRewards } from './PendingRewards';
 import { PlantRegrowth } from './PlantRegrowth';
 import { RealmProgression } from './RealmProgression';
@@ -52,6 +54,10 @@ export class GameState
     readonly crafting = new CraftingQueue();
     /** The Dash (and later the air dash and double jump). */
     readonly movement = new MovementAbilities();
+    /** The active skills learned and what is on the K and L slots. */
+    readonly skills = new SkillProgression();
+    /** Time until each skill can be used again (not saved). */
+    readonly skillCooldowns = new SkillCooldowns();
     /** The Storage chest: 40 slots, never touched by dying. */
     readonly storage: Backpack;
     /** Timed Potion effects running on the hero (not saved). */
@@ -117,6 +123,7 @@ export class GameState
             garden: this.garden.toSnapshot(),
             crafting: this.crafting.toSnapshot(),
             movement: this.movement.toSnapshot(),
+            skills: this.skills.toSnapshot(),
             storage: this.storage.toSnapshot(),
         };
     }
@@ -163,6 +170,8 @@ export class GameState
         this.garden.loadFrom(snapshot.garden ?? { plotCount: 6, plots: [] });
         this.crafting.loadFrom(snapshot.crafting ?? null);
         this.movement.loadFrom(snapshot.movement);
+        this.skills.loadFrom(snapshot.skills);
+        this.skillCooldowns.clear();
         this.storage.loadFromSnapshot(snapshot.storage ?? []);
         this.effects.clear();
         this.syncArmor();

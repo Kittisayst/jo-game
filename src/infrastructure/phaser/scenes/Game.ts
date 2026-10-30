@@ -10,6 +10,7 @@ import { CraftingWorker } from '../objects/CraftingWorker';
 import { ParticleManager } from '../effects/ParticleManager';
 import { describeDrops, showLootNotification } from '../effects/FloatingText';
 import { CombatController } from '../controllers/CombatController';
+import { SkillController } from '../controllers/SkillController';
 import { InteractionController } from '../controllers/InteractionController';
 import { soundManager } from '../../audio/SoundManager';
 import { Level } from '../Level';
@@ -105,6 +106,7 @@ export class Game extends Scene
     private brokenGate?: BrokenGate;
     private bossBgmStarted = false;
     private gardenView?: GardenView;
+    private skillController?: SkillController;
     /** The smiths in front of the Workshop and the Forge (village only). */
     private craftingWorkers: CraftingWorker[] = [];
 
@@ -162,6 +164,7 @@ export class Game extends Scene
         this.health.reset();
 
         this.combat = new CombatController(this);
+        this.skillController = new SkillController(this, this.combat);
 
         this.physics.world.setBounds(0, 0, this.level.worldWidth, WORLD_HEIGHT);
 
@@ -343,12 +346,16 @@ export class Game extends Scene
         const qKey = this.input.keyboard?.addKey('Q');
         const f2Key = this.input.keyboard?.addKey(Input.Keyboard.KeyCodes.F2);
         const shiftKey = this.input.keyboard?.addKey(Input.Keyboard.KeyCodes.SHIFT);
+        const kKey = this.input.keyboard?.addKey('K');
+        const lKey = this.input.keyboard?.addKey('L');
 
         jKey?.on('down', () => this.combat.attack());
         zKey?.on('down', () => this.combat.attack());
         qKey?.on('down', () => this.combat.cycleWeapon());
         f2Key?.on('down', () => this.togglePhysicsDebug());
         shiftKey?.on('down', () => this.tryDash());
+        kKey?.on('down', () => this.skillController?.use(0));
+        lKey?.on('down', () => this.skillController?.use(1));
 
         const onVirtualInput = (inputs: { left?: boolean; right?: boolean; up?: boolean }) =>
         {
@@ -361,6 +368,7 @@ export class Game extends Scene
         const onVirtualAttack = () => this.combat.attack();
         const onVirtualCycleWeapon = () => this.combat.cycleWeapon();
         const onVirtualDash = () => this.tryDash();
+        const onVirtualSkill = (payload?: { slot?: number }) => this.skillController?.use(payload?.slot === 1 ? 1 : 0);
         const onTogglePhysicsDebug = () => this.togglePhysicsDebug();
 
         const onQuizFinisherPassed = () =>
@@ -420,6 +428,7 @@ export class Game extends Scene
         EventBus.on('virtual-interact', onVirtualInteract);
         EventBus.on('virtual-attack', onVirtualAttack);
         EventBus.on('virtual-dash', onVirtualDash);
+        EventBus.on('virtual-skill', onVirtualSkill);
         EventBus.on('virtual-cycle-weapon', onVirtualCycleWeapon);
         EventBus.on('toggle-physics-debug', onTogglePhysicsDebug);
         EventBus.on('quiz-finisher-passed', onQuizFinisherPassed);
@@ -493,6 +502,7 @@ export class Game extends Scene
             EventBus.removeListener('virtual-interact', onVirtualInteract);
             EventBus.removeListener('virtual-attack', onVirtualAttack);
             EventBus.removeListener('virtual-dash', onVirtualDash);
+            EventBus.removeListener('virtual-skill', onVirtualSkill);
             EventBus.removeListener('virtual-cycle-weapon', onVirtualCycleWeapon);
             EventBus.removeListener('toggle-physics-debug', onTogglePhysicsDebug);
             EventBus.removeListener('quiz-finisher-passed', onQuizFinisherPassed);
@@ -517,6 +527,7 @@ export class Game extends Scene
         entities.effects.tick(delta);
         entities.crafting.tick(delta);
         entities.movement.tick(delta);
+        entities.skillCooldowns.tick(delta);
         for (const worker of this.craftingWorkers) worker.update(entities.crafting.job);
         if (this.player)
         {

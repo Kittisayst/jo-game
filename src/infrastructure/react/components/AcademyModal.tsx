@@ -9,6 +9,8 @@ import {
     submitDailyPracticeUseCase,
     SubmitDailyPracticeResult,
 } from '../../../application/SubmitDailyPracticeUseCase';
+import { SkillsPanel } from './SkillsPanel';
+import { syncSkills } from '../../skills';
 import { soundManager } from '../../audio/SoundManager';
 import { EventBus } from '../../EventBus';
 
@@ -33,7 +35,8 @@ export const AcademyModal: React.FC<AcademyModalProps> = ({
     onOpenReader,
 }) =>
 {
-    const [activeTab, setActiveTab] = useState<'exam' | 'practice'>('exam');
+    const [activeTab, setActiveTab] = useState<'exam' | 'practice' | 'skills'>('exam');
+    const [learnedSkillNames, setLearnedSkillNames] = useState<string[]>([]);
     const [books] = useState<BookDefinition[]>(() => getGameContent().books);
     const [allQuestions] = useState<QuestionData[]>(() => getGameContent().questions);
     const [selectedBookId, setSelectedBookId] = useState<string>(initialBookId);
@@ -128,6 +131,8 @@ export const AcademyModal: React.FC<AcademyModalProps> = ({
         {
             soundManager.playPowerUp();
             onCreditChanged?.(entities.wallet.balance);
+            const learned = syncSkills();
+            setLearnedSkillNames(learned.map(id => getGameContent().skills.active.find(s => s.id === id)?.name ?? id));
             if (onExamPassed) onExamPassed(bookProgress.bookId);
             EventBus.emit('book-exam-passed', bookProgress.bookId);
         }
@@ -236,6 +241,19 @@ export const AcademyModal: React.FC<AcademyModalProps> = ({
                     >
                         <span>🧠</span>
                         <span>ຝຶກຝົນປະຈຳວັນ Spaced Repetition (Daily Practice)</span>
+                    </button>
+
+                    <button
+                        data-testid="academy-tab-skills"
+                        onClick={() => { setActiveTab('skills'); soundManager.playSelect(); }}
+                        className={`pb-2.5 font-bold text-sm transition flex items-center gap-2 border-b-2 ${
+                            activeTab === 'skills'
+                                ? 'border-indigo-400 text-indigo-300'
+                                : 'border-transparent text-slate-400 hover:text-slate-200'
+                        }`}
+                    >
+                        <span>✨</span>
+                        <span>ທັກສະ (Skills)</span>
                     </button>
                 </div>
 
@@ -388,6 +406,11 @@ export const AcademyModal: React.FC<AcademyModalProps> = ({
                                                 {examResults.forgeUnlocked && ' 🔨 ໂຮງຕີເຫຼັກ (Forge) ໄດ້ຮັບການປົດລັອກແລ້ວ!'}
                                             </p>
                                         )}
+                                        {examResults.passed && learnedSkillNames.length > 0 && (
+                                            <p className="text-sky-300 font-bold text-base" data-testid="skill-learned">
+                                                ✨ ໄດ້ສະກິວໃໝ່: {learnedSkillNames.join(', ')} (ກົດ K ຫຼື L ໃນເກມ)
+                                            </p>
+                                        )}
                                     </div>
 
                                     {examSession && examSession.getMissedResults().length > 0 && (
@@ -502,6 +525,9 @@ export const AcademyModal: React.FC<AcademyModalProps> = ({
                                 </div>
                             )}
                         </div>
+                    ) : activeTab === 'skills' ? (
+                        /* ================= SKILLS TAB ================= */
+                        <SkillsPanel />
                     ) : (
                         /* ================= DAILY PRACTICE TAB ================= */
                         <div className="space-y-6">

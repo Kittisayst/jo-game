@@ -2,6 +2,7 @@ import { ARMOR_SLOTS, ArmorSlot, WornPiece } from './Armor';
 import type { CraftingJobSnapshot } from './CraftingQueue';
 import type { GardenSnapshot } from './Garden';
 import { MOVEMENT_ABILITY_IDS, MovementAbilityId } from './MovementAbilities';
+import { SKILL_SLOT_COUNT, SkillProgressionSnapshot } from './SkillProgression';
 import type { PendingReward } from './PendingRewards';
 import { TutorialSnapshot } from './TutorialProgress';
 import { SettingsData, StageProgressionData } from '../ports';
@@ -50,6 +51,8 @@ export interface SaveGameSnapshot
     crafting: CraftingJobSnapshot | null;
     /** The movement abilities unlocked (the Dash always). Missing in older saves. */
     movement: MovementAbilityId[];
+    /** The active skills learned and the two skill slots. Missing in older saves. */
+    skills: SkillProgressionSnapshot;
     /** What is in the Storage chest. Missing in older saves. */
     storage: BackpackSlotSnapshot[];
     /** When each small plant was last harvested (key = Stage id + node id, value = ms). Missing in older saves. */
@@ -121,6 +124,7 @@ export function createDefaultSaveSnapshot (slotId = 'slot_1'): SaveGameSnapshot
         garden: { plotCount: 6, plots: [null, null, null, null, null, null] },
         crafting: null,
         movement: ['dash'],
+        skills: { unlocked: [], equipped: [null, null] },
         storage: [],
     };
 }
@@ -311,6 +315,16 @@ export function migrateSaveSnapshot (raw: unknown, fallbackSlotId = 'slot_1'): S
             : null;
     const movement: MovementAbilityId[] = MOVEMENT_ABILITY_IDS.filter(id =>
         id === 'dash' || (Array.isArray(data.movement) && data.movement.includes(id)));
+    const rawSkills = asRecord(data.skills);
+    const unlockedSkills = Array.isArray(rawSkills.unlocked)
+        ? Array.from(new Set(rawSkills.unlocked.filter((id): id is string => typeof id === 'string' && id.length > 0)))
+        : [];
+    const equippedSkills: (string | null)[] = Array.from({ length: SKILL_SLOT_COUNT }, (_, i) =>
+    {
+        const id = Array.isArray(rawSkills.equipped) ? rawSkills.equipped[i] : null;
+        return typeof id === 'string' && unlockedSkills.includes(id) ? id : null;
+    });
+    const skills: SkillProgressionSnapshot = { unlocked: unlockedSkills, equipped: equippedSkills };
     const storage: BackpackSlotSnapshot[] = [];
     for (const slot of Array.isArray(data.storage) ? data.storage : [])
     {
@@ -365,6 +379,7 @@ export function migrateSaveSnapshot (raw: unknown, fallbackSlotId = 'slot_1'): S
         garden,
         crafting,
         movement,
+        skills,
         storage,
     };
 }

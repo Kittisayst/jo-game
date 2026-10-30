@@ -1,5 +1,17 @@
 {
   "movement": {
     "dash": { "speed": 640, "durationMs": 170, "dodgeMs": 220, "cooldownMs": 800 }
-  }
+  },
+  "active": [
+    {
+      "id": "power-wave",
+      "realm": 1,
+      "name": "ຄື້ນພະລັງ (Power Wave)",
+      "icon": "🌊",
+      "description": "ຍິງຄື້ນພະລັງໄປໄກ ທະລຸສັດຕູ 1 ໂຕ ແລະແຮງ 1.5 ເທົ່າຂອງດາບ",
+      "concept": "Input → Process → Output: ໃສ່ພະລັງເຂົ້າ ປະມວນຜົນ ແລ້ວສົ່ງຜົນອອກໄປໄກ",
+      "cooldownMs": 4000,
+      "effect": { "type": "wave", "damageMultiplier": 1.5, "speed": 520, "rangePx": 560, "pierce": 1, "bossShare": 0.5 }
+    }
+  ]
 }

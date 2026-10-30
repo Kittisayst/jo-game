@@ -199,6 +199,26 @@ export class CombatController
         });
     }
 
+    /** `damage` lands on an enemy (the sword or a skill): number, burst, and drops when it falls. */
+    strikeEnemy (enemy: Enemy, damage: number, dir: number): void
+    {
+        const { scene } = this;
+        const res = enemy.takeDamage(damage, dir);
+        showDamageNumber(scene, enemy.x, enemy.y, damage);
+        scene.particleManager.emitStompBurst(enemy.x, enemy.y);
+        if (res.defeated) this.onEnemyDefeated(enemy);
+    }
+
+    /** `damage` lands on the Boss (nothing while it is invulnerable). */
+    strikeBoss (boss: Boss, damage: number): void
+    {
+        const { scene } = this;
+        if (!boss.active || boss.entity.isDefeated || boss.isInvulnerable) return;
+        boss.takeDamage(damage);
+        showDamageNumber(scene, boss.x, boss.y, damage);
+        scene.particleManager.emitStompBurst(boss.x, boss.y);
+    }
+
     private resolveMeleeAttack (damage: number, range: number): void
     {
         const { scene } = this;
@@ -237,14 +257,7 @@ export class CombatController
             if (Geom.Intersects.RectangleToRectangle(bounds, enemy.getBounds()))
             {
                 hitAny = true;
-                const res = enemy.takeDamage(damage, dir);
-                showDamageNumber(scene, enemy.x, enemy.y, damage);
-                scene.particleManager.emitStompBurst(enemy.x, enemy.y);
-
-                if (res.defeated)
-                {
-                    this.onEnemyDefeated(enemy);
-                }
+                this.strikeEnemy(enemy, damage, dir);
             }
         }
 
@@ -254,9 +267,7 @@ export class CombatController
             if (Geom.Intersects.RectangleToRectangle(bounds, boss.getBounds()))
             {
                 hitAny = true;
-                boss.takeDamage(damage);
-                showDamageNumber(scene, boss.x, boss.y, damage);
-                scene.particleManager.emitStompBurst(boss.x, boss.y);
+                this.strikeBoss(boss, damage);
             }
         }
 

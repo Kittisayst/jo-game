@@ -73,6 +73,9 @@ A separate scene reached from the Village Hub where Seeds are planted in Plots. 
 **Plot**:
 One planting spot of the Garden: empty, growing or ready. The Garden starts with six and can be expanded with Materials.
 
+**Skill**:
+An active power the hero learns by passing the exam of a Realm's Textbook (one for each Realm, such as Power Wave for Realm 1). Two Skills can be on the **skill slots**, K and L; using one starts its **cooldown**, counted in Game time. A Skill never pays Credit and never makes Materials.
+
 **Dash**:
 A quick burst sideways (Shift, or the touch button) that the hero has from the start. For its first moments nothing can hurt the hero: this is the **dodge**. It has a cooldown. The air dash (a Dash in the air, once per jump) and the double jump are later **movement abilities**, unlocked by beating Bosses.
 

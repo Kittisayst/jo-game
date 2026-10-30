@@ -673,10 +673,22 @@ describe('skills.json', () =>
         expect(parsed.dash.dodgeMs).toBeGreaterThanOrEqual(parsed.dash.durationMs);
     });
 
+    it('reads the active skills and refuses a duplicate or an out-of-range Boss share', async () =>
+    {
+        const { parseSkills } = await import('./SkillCatalog');
+        const skills = (await import('../../../public/data/skills.json')).default;
+        const parsed = parseSkills(skills);
+        expect(parsed.active.map(s => s.id)).toContain('power-wave');
+        const wave = skills.active[0];
+        expect(() => parseSkills({ ...skills, active: [wave, wave] })).toThrow('active[1].id must be unique');
+        expect(() => parseSkills({ ...skills, active: [{ ...wave, effect: { ...wave.effect, bossShare: 2 } }] }))
+            .toThrow('active[0].effect.bossShare must be a number above 0 and at most 1');
+    });
+
     it('names the file and the path of a bad value', async () =>
     {
         const { parseSkills } = await import('./SkillCatalog');
-        expect(() => parseSkills({ movement: { dash: { speed: 0, durationMs: 1, dodgeMs: 1, cooldownMs: 1 } } }))
+        expect(() => parseSkills({ active: [], movement: { dash: { speed: 0, durationMs: 1, dodgeMs: 1, cooldownMs: 1 } } }))
             .toThrow('skills.json: movement.dash.speed must be a number above 0');
     });
 });
