@@ -43,6 +43,8 @@ const SPRITESHEET_ASSETS: readonly { key: string; path: string; frameWidth: numb
     { key: 'node-crystal-vein', path: 'assets/environment/node_crystal_vein.png', frameWidth: 64, frameHeight: 64 },
     { key: 'node-blue-ore', path: 'assets/environment/node_blue_ore.png', frameWidth: 64, frameHeight: 64 },
     { key: 'node-cave-mushroom', path: 'assets/environment/node_cave_mushroom.png', frameWidth: 48, frameHeight: 48 },
+    { key: 'node-copper-vein', path: 'assets/environment/node_copper_vein.png', frameWidth: 64, frameHeight: 64 },
+    { key: 'node-cactus-patch', path: 'assets/environment/node_cactus_patch.png', frameWidth: 48, frameHeight: 48 },
     { key: 'waypoint-shrine', path: 'assets/environment/waypoint_shrine.png', frameWidth: 48, frameHeight: 80 },
     { key: 'gate-ch1', path: 'assets/environment/gate_ch1.png', frameWidth: 96, frameHeight: 160 },
 

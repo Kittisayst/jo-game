@@ -451,7 +451,40 @@ describe('content data integrity', () =>
                 expect(lessons.has(`${number}-1`), `book has lesson ${number}-1`).toBe(true);
                 expect(questions.filter(q => (q as { lesson?: string }).lesson === `${number}-1`).length, `questions for ${number}-1`).toBeGreaterThanOrEqual(3);
             }
-            expect(stages.stages.find(s => s.number === 21)!.status).toBe('placeholder');
+            expect(stages.stages.find(s => s.number === 31)!.status).toBe('placeholder');
+        });
+
+        it('plays Realm 3 in full: Stages 21 to 30 are built, each with a lesson and questions from the Realm 3 Textbook', () =>
+        {
+            const realm3 = realms.realms.find(r => r.number === 3)!;
+            expect(realm3.bookId).toBe('book-ch3');
+            const book = books.find(b => b.id === realm3.bookId)!;
+            const lessons = new Set(book.pages.map(p => (p as { lesson?: string }).lesson));
+
+            for (let number = 21; number <= 30; number++)
+            {
+                const stage = stages.stages.find(s => s.number === number) as { status: string; lessons?: string[] };
+                expect(stage.status, `stage ${number}`).toBe('ready');
+                expect(stage.lessons, `stage ${number} lessons`).toEqual([`${number}-1`]);
+                expect(lessons.has(`${number}-1`), `book has lesson ${number}-1`).toBe(true);
+                expect(questions.filter(q => (q as { lesson?: string }).lesson === `${number}-1`).length, `questions for ${number}-1`).toBeGreaterThanOrEqual(3);
+            }
+        });
+
+        it('gives Realm 3 its Mini-boss (1 yellow shard), its Boss (3 yellow shards, finisher from its own Textbook) and Realm 3 gear', () =>
+        {
+            const realm3 = realms.realms.find(r => r.number === 3)!;
+            const dropOf = (id: string, itemId: string) => enemies.find(e => e.id === id)!.drops.find(d => d.itemId === itemId)?.count;
+
+            expect(dropOf('dune-sentinel', realm3.shardItem)).toBe(1);
+            expect(dropOf('stage-ch3-boss', realm3.shardItem)).toBe(3);
+            expect((enemies.find(e => e.id === 'stage-ch3-boss') as { quizFinisher?: { bookId: string } }).quizFinisher?.bookId).toBe(realm3.bookId);
+
+            const taught = new Set(books.find(b => b.id === realm3.bookId)!.unlockedRecipes);
+            for (const id of ['axe-t3', 'pickaxe-t3', 'hammer-t3', 'copper-sword', 'copper-helmet', 'copper-chestplate', 'copper-boots', 'portal-block-yellow'])
+            {
+                expect(taught.has(id), `${realm3.bookId} teaches ${id}`).toBe(true);
+            }
         });
 
         it('gives Realm 2 its Mini-boss (1 blue shard), its Boss (3 blue shards, finisher from its own Textbook) and Realm 2 gear', () =>

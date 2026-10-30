@@ -1,6 +1,6 @@
 # Content guide: adding a Realm
 
-A Realm (10 Stages, one subject) is content work. Realm 2 (Stages 11–20) was added with only one small code change (the Boss finisher reads the Realm's own Textbook, see Phase 10 in [the plan](plans/2026-10-29-hundred-stages-realms.md)). Follow the same steps for Realms 3–10. Run `npm run test` after each step: [ContentIntegrity.test.ts](../src/domain/ContentIntegrity.test.ts) and the validators in `ContentCatalog.test.ts` name the file and path of any broken reference.
+A Realm (10 Stages, one subject) is content work. Realm 3 (Stages 21–30, Operating Systems, the desert) followed this same guide, with `tools/art/build_realm3_art.py` and `build_ch3_diagrams.py` for the art and one extra code piece (the End Task skill, an `area` effect). Realm 2 (Stages 11–20) was added with only one small code change (the Boss finisher reads the Realm's own Textbook, see Phase 10 in [the plan](plans/2026-10-29-hundred-stages-realms.md)). Follow the same steps for Realms 3–10. Run `npm run test` after each step: [ContentIntegrity.test.ts](../src/domain/ContentIntegrity.test.ts) and the validators in `ContentCatalog.test.ts` name the file and path of any broken reference.
 
 Content text is Lao. **Lesson text and questions written by an AI or a developer must be checked by a teacher** before the Realm is shown to students.
 

@@ -12,6 +12,78 @@
     {"itemId": "blue-sword", "building": "forge", "ingredients": [{"itemId": "blue-ore", "count": 3}, {"itemId": "crystal", "count": 1}]},
     {"itemId": "blue-helmet", "building": "forge", "ingredients": [{"itemId": "blue-ore", "count": 3}, {"itemId": "fiber", "count": 1}]},
     {"itemId": "blue-chestplate", "building": "forge", "ingredients": [{"itemId": "blue-ore", "count": 5}, {"itemId": "fiber", "count": 2}]},
-    {"itemId": "blue-boots", "building": "forge", "ingredients": [{"itemId": "blue-ore", "count": 3}, {"itemId": "fiber", "count": 1}]}
+    {"itemId": "blue-boots", "building": "forge", "ingredients": [{"itemId": "blue-ore", "count": 3}, {"itemId": "fiber", "count": 1}]},
+    {
+      "itemId": "axe-t3",
+      "building": "workshop",
+      "ingredients": [
+        {
+          "itemId": "wood",
+          "count": 4
+        },
+        {
+          "itemId": "copper-ore",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "itemId": "pickaxe-t3",
+      "building": "workshop",
+      "ingredients": [
+        {
+          "itemId": "wood",
+          "count": 4
+        },
+        {
+          "itemId": "copper-ore",
+          "count": 2
+        }
+      ]
+    },
+    {
+      "itemId": "copper-sword",
+      "building": "forge",
+      "ingredients": [
+        {
+          "itemId": "copper-ore",
+          "count": 3
+        },
+        {
+          "itemId": "crystal",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "itemId": "copper-helmet",
+      "building": "forge",
+      "ingredients": [
+        {
+          "itemId": "copper-ore",
+          "count": 2
+        }
+      ]
+    },
+    {
+      "itemId": "copper-chestplate",
+      "building": "forge",
+      "ingredients": [
+        {
+          "itemId": "copper-ore",
+          "count": 3
+        }
+      ]
+    },
+    {
+      "itemId": "copper-boots",
+      "building": "forge",
+      "ingredients": [
+        {
+          "itemId": "copper-ore",
+          "count": 2
+        }
+      ]
+    }
   ]
 }

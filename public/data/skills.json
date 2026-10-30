@@ -33,6 +33,61 @@
         { "credit": 40, "ingredients": [{ "itemId": "blue-ore", "count": 6 }], "cooldownMs": 5000, "effect": { "stunMs": 3500 } },
         { "credit": 80, "ingredients": [{ "itemId": "blue-ore", "count": 12 }, { "itemId": "cave-mushroom", "count": 6 }], "cooldownMs": 4500, "effect": { "jumps": 4, "stunMs": 4500 } }
       ]
+    },
+    {
+      "id": "end-task",
+      "realm": 3,
+      "name": "ປິດໂປຣແກຣມ End Task",
+      "icon": "🛑",
+      "description": "ຄື້ນຊັອກອອກຮອບຕົວ ຕີສັດຕູທຸກໂຕໃນວົງ ແລະເຮັດໃຫ້ມຶນ (ມຶນແລ້ວຂະຍັບບໍ່ໄດ້ ແລະແຕະກໍ່ບໍ່ເຈັບ)",
+      "concept": "Task Manager: End Task ປິດ Process ທີ່ຄ້າງ ແລະ ຢຸດມັນທັນທີ",
+      "cooldownMs": 9000,
+      "effect": {
+        "type": "area",
+        "damageMultiplier": 0.6,
+        "radiusPx": 260,
+        "stunMs": 2000,
+        "bossShare": 0.5
+      },
+      "upgrades": [
+        {
+          "credit": 50,
+          "ingredients": [
+            {
+              "itemId": "copper-ore",
+              "count": 6
+            },
+            {
+              "itemId": "cactus-pulp",
+              "count": 4
+            }
+          ],
+          "cooldownMs": 8000,
+          "effect": {
+            "radiusPx": 320,
+            "stunMs": 2500
+          }
+        },
+        {
+          "credit": 100,
+          "ingredients": [
+            {
+              "itemId": "copper-ore",
+              "count": 14
+            },
+            {
+              "itemId": "crystal",
+              "count": 3
+            }
+          ],
+          "cooldownMs": 7000,
+          "effect": {
+            "radiusPx": 380,
+            "stunMs": 3200,
+            "damageMultiplier": 0.9
+          }
+        }
+      ]
     }
   ]
 }

@@ -42,6 +42,39 @@ describe('HarvestResourceNodeUseCase', () =>
         expect(backpack.getItemCount('wood')).toBe(0);
     });
 
+    it('asks for a tool of the right tier: a tier 1 pickaxe cannot mine a tier 2 vein, a tier 2 or 3 one can', () =>
+    {
+        const copperVein: ResourceNodeDefinition = {
+            id: 'copper-1',
+            type: 'copper-vein',
+            requiredTool: 'pickaxe',
+            toolTier: 2,
+            drops: [{ itemId: 'copper-ore', count: 3 }],
+        };
+        const withPickaxe = (id: string) =>
+        {
+            const backpack = new Backpack();
+            backpack.addItem(id, 1);
+            return backpack;
+        };
+
+        const weak = new ResourceNode(2);
+        const refused = harvestResourceNodeUseCase(copperVein, weak, withPickaxe('pickaxe-t1'));
+        expect(refused).toMatchObject({ success: false, reason: 'missing_tool', requiredTool: 'pickaxe', requiredTier: 2 });
+        expect(weak.strikesTaken).toBe(0);
+
+        for (const id of ['pickaxe-t2', 'pickaxe-t3'])
+        {
+            const ok = harvestResourceNodeUseCase(copperVein, new ResourceNode(2), withPickaxe(id));
+            expect(ok.success, id).toBe(true);
+        }
+
+        // The best tool counts: a tier 1 and a tier 2 pickaxe together are enough
+        const both = withPickaxe('pickaxe-t1');
+        both.addItem('pickaxe-t2', 1);
+        expect(harvestResourceNodeUseCase(copperVein, new ResourceNode(2), both).success).toBe(true);
+    });
+
     it('gives no Materials until the third Strike fells a tree', () =>
     {
         const backpack = backpackWithAxe();

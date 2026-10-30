@@ -2,7 +2,7 @@
   "realms": [
     { "number": 1, "name": "ມິຕິປ່າຂຽວ", "nameEn": "Green Forest Realm", "subject": "ພື້ນຖານລະບົບຄອມພິວເຕີ", "color": "#22c55e", "icon": "🌲", "biome": "forest", "bookId": "book-ch1", "shardItem": "portal-shard-green", "blockItem": "portal-block-green" },
     { "number": 2, "name": "ມິຕິຖ້ຳຄຣິສຕັນ", "nameEn": "Crystal Cave Realm", "subject": "ເຄືອຂ່າຍຄອມພິວເຕີ ແລະ ອິນເຕີເນັດ", "color": "#3b82f6", "icon": "💎", "biome": "crystal-cave", "bookId": "book-ch2", "shardItem": "portal-shard-blue", "blockItem": "portal-block-blue" },
-    { "number": 3, "name": "ມິຕິທະເລຊາຍ", "nameEn": "Desert Realm", "subject": "ລະບົບປະຕິບັດການ", "color": "#eab308", "icon": "🏜️", "biome": "desert", "bookId": null, "shardItem": "portal-shard-yellow", "blockItem": "portal-block-yellow" },
+    { "number": 3, "name": "ມິຕິທະເລຊາຍ", "nameEn": "Desert Realm", "subject": "ລະບົບປະຕິບັດການ", "color": "#eab308", "icon": "🏜️", "biome": "desert", "bookId": "book-ch3", "shardItem": "portal-shard-yellow", "blockItem": "portal-block-yellow" },
     { "number": 4, "name": "ມິຕິທົ່ງຫຍ້າ", "nameEn": "Meadow Realm", "subject": "ອອບຟິດ ແລະ ເອກະສານ", "color": "#f97316", "icon": "🌾", "biome": "meadow", "bookId": null, "shardItem": "portal-shard-orange", "blockItem": "portal-block-orange" },
     { "number": 5, "name": "ມິຕິພູເຂົາໄຟ", "nameEn": "Volcano Realm", "subject": "ຄວາມປອດໄພໄຊເບີ", "color": "#ef4444", "icon": "🌋", "biome": "volcano", "bookId": null, "shardItem": "portal-shard-red", "blockItem": "portal-block-red" },
     { "number": 6, "name": "ມິຕິໜອງນ້ຳ", "nameEn": "Marsh Realm", "subject": "ຖານຂໍ້ມູນ", "color": "#a855f7", "icon": "🪷", "biome": "marsh", "bookId": null, "shardItem": "portal-shard-purple", "blockItem": "portal-block-purple" },

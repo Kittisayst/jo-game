@@ -4,7 +4,7 @@ import { soundManager } from '../../audio/SoundManager';
 import { entities } from '../../composition';
 import { getGameContent } from '../../content/ContentCatalog';
 import { effectAtRank } from '../../content/SkillCatalog';
-import type { ChainEffect, SkillDefinition, WaveEffect } from '../../content/SkillCatalog';
+import type { AreaEffect, ChainEffect, SkillDefinition, WaveEffect } from '../../content/SkillCatalog';
 import { showLootNotification } from '../effects/FloatingText';
 import type { Boss } from '../objects/Boss';
 import type { Enemy } from '../objects/Enemy';
@@ -35,7 +35,10 @@ export class SkillController
         // A skill that needs a target does not start its cooldown when there is nothing to hit
         const wanted = skills.find(s => s.id === entities.skills.skillInSlot(slot));
         const wantedEffect = wanted ? effectAtRank(wanted, entities.skills.rankOf(wanted.id)) : undefined;
-        if (wanted && wantedEffect?.type === 'chain' && entities.skillCooldowns.remainingMs(wanted.id) <= 0 && this.chainTargets(wantedEffect).length === 0)
+        const noTarget = wantedEffect?.type === 'chain' ? this.chainTargets(wantedEffect).length === 0
+            : wantedEffect?.type === 'area' ? this.areaTargets(wantedEffect).length === 0
+                : false;
+        if (wanted && noTarget && entities.skillCooldowns.remainingMs(wanted.id) <= 0)
         {
             showLootNotification(scene, player.x, player.y - 30, 'ບໍ່ມີເປົ້າໝາຍ', '#fbbf24');
             return;
@@ -48,6 +51,7 @@ export class SkillController
         const effect = effectAtRank(skill, result.rank);
         if (effect.type === 'wave') this.castWave(effect);
         else if (effect.type === 'chain') this.castChain(effect);
+        else if (effect.type === 'area') this.castArea(effect);
     }
 
     /** The enemies (and the Boss) a chain reaches, in order: the nearest in front of the hero, then the nearest to each one. */
@@ -79,6 +83,57 @@ export class SkillController
             reach = effect.jumpRangePx;
         }
         return chain;
+    }
+
+    /** The enemies (and the Boss) inside the circle of an area skill. */
+    private areaTargets (effect: AreaEffect): { enemy?: Enemy; boss?: Boss }[]
+    {
+        const { scene } = this;
+        const { x, y } = scene.player;
+        const inside = (px: number, py: number): boolean => Math.hypot(px - x, py - y) <= effect.radiusPx;
+        const targets: { enemy?: Enemy; boss?: Boss }[] = [];
+        for (const child of scene.enemies.getChildren())
+        {
+            const enemy = child as Enemy;
+            if (enemy.active && !enemy.entity.isDefeated && inside(enemy.x, enemy.y)) targets.push({ enemy });
+        }
+        const boss = scene.boss;
+        if (boss && boss.active && !boss.entity.isDefeated && inside(boss.x, boss.y)) targets.push({ boss });
+        return targets;
+    }
+
+    /** A ring of light spreads from the hero; every enemy in the circle is hurt and stunned, a Boss only hurt. */
+    private castArea (effect: AreaEffect): void
+    {
+        const { scene } = this;
+        const dir = scene.player.facingDir < 0 ? -1 : 1;
+        const damage = Math.max(1, Math.round(entities.equipment.equippedStats.damage * effect.damageMultiplier * entities.effects.damageMultiplier));
+
+        for (const target of this.areaTargets(effect))
+        {
+            if (target.enemy)
+            {
+                const enemy = target.enemy;
+                this.combat.strikeEnemy(enemy, damage, Math.sign(enemy.x - scene.player.x) || dir);
+                if (enemy.active && !enemy.entity.isDefeated) enemy.stun(effect.stunMs);
+            }
+            else if (target.boss)
+            {
+                this.combat.strikeBoss(target.boss, Math.max(1, Math.round(damage * effect.bossShare)));
+            }
+        }
+
+        const ring = scene.add.circle(scene.player.x, scene.player.y, 20, 0xfacc15, 0.18).setStrokeStyle(4, 0xfde047, 0.95).setDepth(14);
+        scene.tweens.add({
+            targets: ring,
+            scale: effect.radiusPx / 20,
+            alpha: 0,
+            duration: 420,
+            ease: 'Cubic.easeOut',
+            onComplete: () => ring.destroy(),
+        });
+        soundManager.playStomp();
+        scene.cameras.main.shake(140, 0.005);
     }
 
     /** Lightning leaps along `chainTargets`: each enemy is hurt and stunned, a Boss only hurt (for part of the damage). */

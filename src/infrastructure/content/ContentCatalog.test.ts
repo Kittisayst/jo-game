@@ -572,11 +572,13 @@ describe('validator errors', () =>
                 expect(parsed.map(r => r.itemId)).toEqual([
                     'axe-t1', 'pickaxe-t1', 'iron-sword', 'crystal-sword', 'iron-helmet', 'iron-chestplate', 'iron-boots',
                     'axe-t2', 'pickaxe-t2', 'blue-sword', 'blue-helmet', 'blue-chestplate', 'blue-boots',
+                    'axe-t3', 'pickaxe-t3', 'copper-sword', 'copper-helmet', 'copper-chestplate', 'copper-boots',
                 ]);
-                expect(parsed.filter(r => r.building === 'workshop').map(r => r.itemId)).toEqual(['axe-t1', 'pickaxe-t1', 'axe-t2', 'pickaxe-t2']);
+                expect(parsed.filter(r => r.building === 'workshop').map(r => r.itemId)).toEqual(['axe-t1', 'pickaxe-t1', 'axe-t2', 'pickaxe-t2', 'axe-t3', 'pickaxe-t3']);
                 expect(parsed.filter(r => r.building === 'forge').map(r => r.itemId)).toEqual([
                     'iron-sword', 'crystal-sword', 'iron-helmet', 'iron-chestplate', 'iron-boots',
                     'blue-sword', 'blue-helmet', 'blue-chestplate', 'blue-boots',
+                    'copper-sword', 'copper-helmet', 'copper-chestplate', 'copper-boots',
                 ]);
                 expect(parsed.every(r => r.ingredients.length > 0)).toBe(true);
 
@@ -713,6 +715,21 @@ describe('skills.json', () =>
         expect(() => parseSkills({ ...skills, movement: { ...skills.movement, unlocks: [{ ability: 'air-dash', afterBossStage: 7 }] } }))
             .toThrow('movement.unlocks[0].afterBossStage must be the number of a Boss Stage');
         expect(() => parseSkills({ ...skills, active: [{ ...wave, upgrades: [upgrade] }] })).toThrow('active[0].upgrades must be exactly 2 entries');
+    });
+
+    it('reads End Task as an area skill and refuses an area skill without a radius', async () =>
+    {
+        const { parseSkills, effectAtRank } = await import('./SkillCatalog');
+        const skills = (await import('../../../public/data/skills.json')).default;
+        const parsed = parseSkills(skills);
+        const endTask = parsed.active.find(s => s.id === 'end-task')!;
+        expect(endTask.realm).toBe(3);
+        expect(effectAtRank(endTask, 1)).toMatchObject({ type: 'area', radiusPx: 260, stunMs: 2000 });
+        expect(effectAtRank(endTask, 3)).toMatchObject({ type: 'area', radiusPx: 380, stunMs: 3200, damageMultiplier: 0.9 });
+        const raw = skills.active.find(x => x.id === 'end-task') as { effect: Record<string, unknown> };
+        const { radiusPx: _unused, ...withoutRadius } = raw.effect;
+        void _unused;
+        expect(() => parseSkills({ ...skills, active: [{ ...raw, effect: withoutRadius }] })).toThrow('active[0].effect.radiusPx must be a number');
     });
 
     it('refuses a chain skill without a stun time', async () =>

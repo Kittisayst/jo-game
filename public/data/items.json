@@ -652,5 +652,152 @@
     "durability": 100,
     "icon": "🥾",
     "iconImage": "assets/items/blue-boots.png"
+  },
+  {
+    "id": "copper-ore",
+    "name": "ແຮ່ທອງແດງ",
+    "nameEn": "Copper Ore",
+    "description": "ແຮ່ສີສົ້ມຈາກສາຍແຮ່ໃນທະເລຊາຍ ໃຊ້ຕີອຸປະກອນລະດັບ 3 (ຕ້ອງໃຊ້ຈົກ T2 ຂຸດ)",
+    "category": "material",
+    "maxStack": 99,
+    "icon": "🟠",
+    "iconImage": "assets/items/copper-ore.png"
+  },
+  {
+    "id": "cactus-pulp",
+    "name": "ເນື້ອກະບອງເພັດ",
+    "nameEn": "Cactus Pulp",
+    "description": "ເນື້ອໃບກະບອງເພັດທີ່ເກັບນ້ຳໄດ້ ໄດ້ຈາກກອງກະບອງເພັດ ຫຼືປູກຈາກເມັດກະບອງເພັດ",
+    "category": "material",
+    "maxStack": 99,
+    "icon": "🌵",
+    "iconImage": "assets/items/cactus-pulp.png"
+  },
+  {
+    "id": "cactus-seed",
+    "name": "ເມັດກະບອງເພັດ",
+    "nameEn": "Cactus Seed",
+    "description": "ເມັດຈາກກອງກະບອງເພັດໃນທະເລຊາຍ ໃຊ້ປູກເປັນເນື້ອກະບອງເພັດໄດ້ (ເສຍເຄິ່ງໜຶ່ງເມື່ອຕາຍ)",
+    "category": "material",
+    "maxStack": 99,
+    "plant": {
+      "minutes": 14,
+      "harvest": [
+        {
+          "itemId": "cactus-pulp",
+          "count": 4
+        }
+      ]
+    },
+    "icon": "🌱",
+    "iconImage": "assets/items/cactus-seed.png"
+  },
+  {
+    "id": "axe-t3",
+    "name": "ຂວານທອງແດງ T3",
+    "nameEn": "Copper Axe T3",
+    "description": "ຂວານລະດັບ 3 ທົນກວ່າຂວານແຮ່ຟ້າ (ກົດ E ໃສ່ຕົ້ນໄມ້)",
+    "category": "tool",
+    "toolType": "axe",
+    "tier": 3,
+    "maxStack": 1,
+    "durability": 180,
+    "icon": "🪓",
+    "iconImage": "assets/items/axe-t3.png",
+    "held": {
+      "gripX": 16,
+      "gripY": 26
+    }
+  },
+  {
+    "id": "pickaxe-t3",
+    "name": "ຈົກທອງແດງ T3",
+    "nameEn": "Copper Pickaxe T3",
+    "description": "ຈົກລະດັບ 3 ທົນກວ່າຈົກ T2 (ກົດ E ໃສ່ສາຍແຮ່)",
+    "category": "tool",
+    "toolType": "pickaxe",
+    "tier": 3,
+    "maxStack": 1,
+    "durability": 180,
+    "icon": "⛏️",
+    "iconImage": "assets/items/pickaxe-t3.png",
+    "held": {
+      "gripX": 16,
+      "gripY": 26
+    }
+  },
+  {
+    "id": "hammer-t3",
+    "name": "ຄ້ອນສ້ອມແປງ T3",
+    "nameEn": "Repair Hammer T3",
+    "description": "ຄ້ອນນາຍຊ່າງລະດັບ 3 ໃຊ້ສ້ອມແປງປະຕູໄດ້ຄືຄ້ອນ T1",
+    "category": "tool",
+    "toolType": "hammer",
+    "tier": 3,
+    "maxStack": 1,
+    "icon": "🔨",
+    "iconImage": "assets/items/hammer-t3.png",
+    "held": {
+      "gripX": 16,
+      "gripY": 26
+    }
+  },
+  {
+    "id": "copper-sword",
+    "name": "ດາບທອງແດງ",
+    "nameEn": "Copper Sword",
+    "description": "ດາບທອງແດງ ພະລັງໂຈມຕີພື້ນຖານ 70",
+    "category": "weapon",
+    "tier": 5,
+    "baseDamage": 70,
+    "maxUpgradeLevel": 0,
+    "maxStack": 1,
+    "durability": 220,
+    "icon": "🗡️",
+    "iconImage": "assets/items/copper-sword.png",
+    "held": {
+      "gripX": 16,
+      "gripY": 26
+    }
+  },
+  {
+    "id": "copper-helmet",
+    "name": "ໝວກທອງແດງ",
+    "nameEn": "Copper Helmet",
+    "description": "ໝວກທອງແດງ ໃຫ້ຫົວໃຈເກາະ 3 ຫົວໃຈ",
+    "category": "armor",
+    "slot": "head",
+    "armorHearts": 3,
+    "maxStack": 1,
+    "durability": 130,
+    "icon": "⛑️",
+    "iconImage": "assets/items/copper-helmet.png"
+  },
+  {
+    "id": "copper-chestplate",
+    "name": "ເສື້ອເກາະທອງແດງ",
+    "nameEn": "Copper Chestplate",
+    "description": "ເສື້ອເກາະທອງແດງ ໃຫ້ຫົວໃຈເກາະ 4 ຫົວໃຈ",
+    "category": "armor",
+    "slot": "body",
+    "armorHearts": 4,
+    "maxStack": 1,
+    "durability": 170,
+    "icon": "🛡️",
+    "iconImage": "assets/items/copper-chestplate.png"
+  },
+  {
+    "id": "copper-boots",
+    "name": "ເກີບທອງແດງ",
+    "nameEn": "Copper Boots",
+    "description": "ເກີບທອງແດງ ໃຫ້ຫົວໃຈເກາະ 3 ຫົວໃຈ ແລະ ຍ່າງໄວຂຶ້ນ 20%",
+    "category": "armor",
+    "slot": "feet",
+    "armorHearts": 3,
+    "speedBonus": 0.2,
+    "maxStack": 1,
+    "durability": 130,
+    "icon": "🥾",
+    "iconImage": "assets/items/copper-boots.png"
   }
 ]

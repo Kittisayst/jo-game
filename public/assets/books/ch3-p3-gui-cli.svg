@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 156" width="360" height="156">
+  <defs>
+    <pattern id="grid" width="18" height="18" patternUnits="userSpaceOnUse">
+      <path d="M 18 0 L 0 0 0 18" fill="none" stroke="#1e293b" stroke-width="1"/>
+    </pattern>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#38bdf8"/>
+    </marker>
+  </defs>
+  <rect width="360" height="156" rx="10" fill="#0f172a"/>
+  <rect width="360" height="156" rx="10" fill="url(#grid)"/>
+  <rect x="1.5" y="1.5" width="357" height="153" rx="9" fill="none" stroke="#334155" stroke-width="1.5"/>
+  <text x="180" y="20" text-anchor="middle" fill="#e2e8f0" font-family="Noto Sans Lao, sans-serif" font-size="12" font-weight="bold">GUI ແລະ CLI</text>
+  <rect x="14" y="36" width="156" height="84" rx="6" fill="#1e293b" stroke="#38bdf8" stroke-width="2"/>
+  <text x="92" y="54" text-anchor="middle" fill="#38bdf8" font-family="Noto Sans Lao, sans-serif" font-size="11">GUI</text>
+  <rect x="30" y="66" width="30" height="24" rx="4" fill="#0f172a" stroke="#f59e0b" stroke-width="1.5"/>
+  <rect x="70" y="66" width="30" height="24" rx="4" fill="#0f172a" stroke="#f59e0b" stroke-width="1.5"/>
+  <rect x="110" y="66" width="30" height="24" rx="4" fill="#0f172a" stroke="#f59e0b" stroke-width="1.5"/>
+  <text x="92" y="108" text-anchor="middle" fill="#cbd5e1" font-family="Noto Sans Lao, sans-serif" font-size="9">ໄອຄອນ · ເມນູ · ເມົ້າ</text>
+  <rect x="190" y="36" width="156" height="84" rx="6" fill="#020617" stroke="#22c55e" stroke-width="2"/>
+  <text x="268" y="54" text-anchor="middle" fill="#22c55e" font-family="Noto Sans Lao, sans-serif" font-size="11">CLI</text>
+  <text x="202" y="76" fill="#22c55e" font-family="monospace" font-size="11">$ cd Documents</text>
+  <text x="202" y="92" fill="#22c55e" font-family="monospace" font-size="11">$ ls</text>
+  <text x="268" y="108" text-anchor="middle" fill="#cbd5e1" font-family="Noto Sans Lao, sans-serif" font-size="9">ພິມຄຳສັ່ງເປັນຕົວໜັງສື</text>
+</svg>

@@ -20,6 +20,13 @@ export function findTool (backpack: Backpack, kind: string): string | null
     return best?.id ?? null;
 }
 
+/** The tier of a tool from its id (`pickaxe-t2` is 2); 0 for anything that is not a tool id. */
+export function toolTierOf (toolId: string): number
+{
+    const match = /-t(\d+)$/.exec(toolId);
+    return match ? Number(match[1]) : 0;
+}
+
 export interface HeldItemContext
 {
     inVillage: boolean;

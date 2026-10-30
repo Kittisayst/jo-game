@@ -55,7 +55,7 @@ test.describe('Knowledge Quest — Buy-to-Read Textbook & Chapter 1 Loop E2E', (
     await expect(readTab).toBeDisabled();
 
     // Verify Chapter 2 book is locked behind Chapter 1 Exam + Boss
-    await expect(page.locator('button:has-text("ຍັງບໍ່ປົດລັອກບົດຮຽນນີ້")')).toBeVisible();
+    await expect(page.locator('button:has-text("ຍັງບໍ່ປົດລັອກບົດຮຽນນີ້")').first()).toBeVisible();
 
     // Purchase Chapter 1 book (20 Credit)
     const buyCh1Btn = page.locator('button:has-text("ຊື້ປຶ້ມຕຳລາ (20 🎓 Credit)")');
@@ -73,7 +73,7 @@ test.describe('Knowledge Quest — Buy-to-Read Textbook & Chapter 1 Loop E2E', (
     await expect(page.locator('button:has-text("ຊື້ປຶ້ມຕຳລາ")')).toHaveCount(0);
     await shopTab.click();
     await expect(page.locator('h3:has-text("ພື້ນຖານລະບົບຄອມພິວເຕີ")')).toHaveCount(0);
-    await expect(page.locator('button:has-text("ຍັງບໍ່ປົດລັອກບົດຮຽນນີ້")')).toBeVisible();
+    await expect(page.locator('button:has-text("ຍັງບໍ່ປົດລັອກບົດຮຽນນີ້")').first()).toBeVisible();
 
     // Close Library Store and walk to Academy (x=600) to verify Exam is still locked before reading all pages
     await page.keyboard.press('Escape');

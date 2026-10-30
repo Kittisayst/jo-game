@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 156" width="360" height="156">
+  <defs>
+    <pattern id="grid" width="18" height="18" patternUnits="userSpaceOnUse">
+      <path d="M 18 0 L 0 0 0 18" fill="none" stroke="#1e293b" stroke-width="1"/>
+    </pattern>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#38bdf8"/>
+    </marker>
+  </defs>
+  <rect width="360" height="156" rx="10" fill="#0f172a"/>
+  <rect width="360" height="156" rx="10" fill="url(#grid)"/>
+  <rect x="1.5" y="1.5" width="357" height="153" rx="9" fill="none" stroke="#334155" stroke-width="1.5"/>
+  <text x="180" y="20" text-anchor="middle" fill="#e2e8f0" font-family="Noto Sans Lao, sans-serif" font-size="12" font-weight="bold">ລຳດັບເປີດເຄື່ອງ (Boot)</text>
+  <rect x="8" y="52" width="78" height="50" rx="6" fill="#1e293b" stroke="#f59e0b" stroke-width="2"/>
+  <text x="47" y="81" text-anchor="middle" fill="#f59e0b" font-family="Noto Sans Lao, sans-serif" font-size="11" font-weight="bold">ເປີດໄຟ</text>
+  <line x1="88" y1="77" x2="100" y2="77" stroke="#38bdf8" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="102" y="52" width="82" height="50" rx="6" fill="#1e293b" stroke="#38bdf8" stroke-width="2"/>
+  <text x="143" y="77" text-anchor="middle" fill="#38bdf8" font-family="Noto Sans Lao, sans-serif" font-size="11" font-weight="bold">BIOS/UEFI</text>
+  <text x="143" y="91" text-anchor="middle" fill="#cbd5e1" font-family="Noto Sans Lao, sans-serif" font-size="8.5">ກວດຮາດແວ</text>
+  <line x1="186" y1="77" x2="198" y2="77" stroke="#38bdf8" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="200" y="52" width="76" height="50" rx="6" fill="#1e293b" stroke="#a78bfa" stroke-width="2"/>
+  <text x="238" y="77" text-anchor="middle" fill="#a78bfa" font-family="Noto Sans Lao, sans-serif" font-size="11" font-weight="bold">Bootloader</text>
+  <text x="238" y="91" text-anchor="middle" fill="#cbd5e1" font-family="Noto Sans Lao, sans-serif" font-size="8.5">ຫາ OS</text>
+  <line x1="278" y1="77" x2="290" y2="77" stroke="#38bdf8" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="292" y="52" width="62" height="50" rx="6" fill="#1e293b" stroke="#22c55e" stroke-width="2"/>
+  <text x="323" y="77" text-anchor="middle" fill="#22c55e" font-family="Noto Sans Lao, sans-serif" font-size="11" font-weight="bold">Kernel</text>
+  <text x="323" y="91" text-anchor="middle" fill="#cbd5e1" font-family="Noto Sans Lao, sans-serif" font-size="8.5">ລັອກອິນ</text>
+  <text x="180" y="130" text-anchor="middle" fill="#cbd5e1" font-family="Noto Sans Lao, sans-serif" font-size="9">Administrator = ສິດເຕັມ · ຜູ້ໃຊ້ທົ່ວໄປ = ສິດຈຳກັດ</text>
+</svg>

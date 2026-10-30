@@ -138,7 +138,7 @@
 1. `upgradeSkillUseCase` (Credit + ວັດຖຸດິບ), ປຸ່ມອັບເກຣດໃນແຖບທັກສະ.
 2. Air dash ປົດລັອກຫຼັງ Boss ດ່ານ 10. ເພີ່ມຊ່ອງວ່າງທີ່ຕ້ອງພຸ່ງກາງອາກາດໃນດ່ານ 11–20 ບາງດ່ານ (ທາງລັບ).
 
-**Phase S6+: ພ້ອມເນື້ອຫາມິຕິ 3–10**
+**Phase S6+: ພ້ອມເນື້ອຫາມິຕິ 3–10** (ມິຕິ 3 ເຮັດແລ້ວ: ສະກິວ 🛑 End Task ເປັນ `area` effect ໃນ `skills.json`, branch `feat/realm3-content`)
 - ແຕ່ລະມິຕິທີ່ສ້າງຕາມ `content-guide.md` ເພີ່ມ: ສະກິວຂອງມັນ (ໃນ `skills.json` + effect ໃນ `SkillController`), ແລະສັດຕູທີ່ຊວນໃຫ້ໃຊ້ມັນ (ຍິງໄກສຳລັບ Firewall, ບິນສຳລັບ Drone…). ໂດດຄູ່ຫຼັງ Boss ດ່ານ 30.
 - ເພີ່ມຂັ້ນ "ສະກິວ" ໃສ່ `content-guide.md`.
 

@@ -1,7 +1,7 @@
 import { Backpack } from '../domain/entities/Backpack';
 import { DomainEvents } from '../domain/DomainEvents';
 import { ResourceNode } from '../domain/entities/ResourceNode';
-import { findTool } from '../domain/entities/HeldItem';
+import { findTool, toolTierOf } from '../domain/entities/HeldItem';
 import { PlantRegrowth } from '../domain/entities/PlantRegrowth';
 import type { Clock, Random } from '../domain/ports';
 import { DurabilityState, strikeWeightFor } from '../domain/entities/Durability';
@@ -52,6 +52,8 @@ export interface HarvestResult
     success: boolean;
     reason?: 'missing_tool' | 'backpack_full' | 'depleted';
     requiredTool?: string | null;
+    /** The tier the node asks for, when the carried tool is of a lower tier (a node of tier 1 asks for nothing special). */
+    requiredTier?: number;
     /** True when this Strike was the last one and the Materials were handed over. */
     completed?: boolean;
     strikesTaken?: number;
@@ -88,12 +90,13 @@ export function harvestResourceNodeUseCase (
     {
         toolId = findTool(backpack, node.requiredTool);
 
-        if (toolId === null)
+        if (toolId === null || toolTierOf(toolId) < node.toolTier)
         {
             return {
                 success: false,
                 reason: 'missing_tool',
                 requiredTool: node.requiredTool,
+                ...(node.toolTier > 1 ? { requiredTier: node.toolTier } : {}),
                 drops: [],
             };
         }

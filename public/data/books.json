@@ -212,5 +212,147 @@
         "lesson": "20-1"
       }
     ]
+  },
+  {
+    "id": "book-ch3",
+    "chapter": 3,
+    "title": "ລະບົບປະຕິບັດການ",
+    "titleEn": "Operating Systems",
+    "description": "ຮຽນຮູ້ກ່ຽວກັບລະບົບປະຕິບັດການ (OS), Kernel, Process, ຄວາມຈຳ, ລະບົບໄຟລ໌ ແລະ ການເປີດເຄື່ອງ",
+    "price": 90,
+    "prerequisiteBookId": "book-ch2",
+    "requiredCompletedStageId": "stage-020",
+    "unlockedRecipes": [
+      "axe-t3",
+      "pickaxe-t3",
+      "hammer-t3",
+      "copper-sword",
+      "copper-helmet",
+      "copper-chestplate",
+      "copper-boots",
+      "portal-block-yellow"
+    ],
+    "pages": [
+      {
+        "pageNumber": 1,
+        "title": "ລະບົບປະຕິບັດການ (OS) ຄືຫຍັງ?",
+        "illustration": "assets/books/ch3-p1-os-role.svg",
+        "content": "ລະບົບປະຕິບັດການ (Operating System: OS) ເປັນຊອບແວຫຼັກທີ່ຄວບຄຸມຄອມພິວເຕີທັງເຄື່ອງ:\n- ຈັດການ CPU ໃຫ້ແຕ່ລະໂປຣແກຣມໄດ້ໃຊ້ເປັນລຳດັບ.\n- ຈັດການຄວາມຈຳ (RAM) ແລະ ໄຟລ໌ໃນບ່ອນເກັບຂໍ້ມູນ.\n- ເຊື່ອມຕໍ່ ແລະ ຄວບຄຸມອຸປະກອນຕ່າງໆ ເຊັ່ນ ເມົ້າ, ຈໍພາບ, ເຄື່ອງພິມ.\n- ເປັນຕົວກາງລະຫວ່າງຜູ້ໃຊ້/ໂປຣແກຣມ ກັບຮາດແວ.",
+        "keyPoints": [
+          "OS ຄວບຄຸມຄອມພິວເຕີທັງເຄື່ອງ",
+          "OS ຈັດການ CPU, RAM, ໄຟລ໌ ແລະອຸປະກອນ",
+          "OS ເປັນຕົວກາງລະຫວ່າງໂປຣແກຣມກັບຮາດແວ"
+        ],
+        "lesson": "21-1"
+      },
+      {
+        "pageNumber": 2,
+        "title": "ປະເພດຂອງ OS",
+        "illustration": "assets/books/ch3-p2-os-types.svg",
+        "content": "OS ມີຫຼາຍຊະນິດຕາມອຸປະກອນທີ່ໃຊ້:\n- ຄອມພິວເຕີຕັ້ງໂຕະ/ແລັບທັອບ: Windows, macOS, Linux.\n- ໂທລະສັບ/ແທັບເລັດ: Android, iOS.\n- ເຊີບເວີ: ມັກໃຊ້ Linux ຫຼື Windows Server.\nLinux ເປັນ OS ແບບເປີດໂຄ້ດ (Open Source) ໃຜກໍ່ເບິ່ງ ແລະ ແກ້ໄຂໄດ້.",
+        "keyPoints": [
+          "Windows, macOS, Linux ໃຊ້ໃນຄອມພິວເຕີ",
+          "Android ແລະ iOS ໃຊ້ໃນໂທລະສັບ",
+          "Linux ເປັນ OS ແບບເປີດໂຄ້ດ"
+        ],
+        "lesson": "22-1"
+      },
+      {
+        "pageNumber": 3,
+        "title": "GUI ແລະ CLI",
+        "illustration": "assets/books/ch3-p3-gui-cli.svg",
+        "content": "ມີສອງວິທີສັ່ງງານ OS:\n- GUI (Graphical User Interface): ໃຊ້ໜ້າຈໍພາບ ໄອຄອນ ເມນູ ແລະເມົ້າ.\n- CLI (Command Line Interface): ພິມຄຳສັ່ງເປັນຕົວໜັງສື ເຊັ່ນ cd, ls, dir.\nGUI ງ່າຍສຳລັບຜູ້ເລີ່ມຕົ້ນ, CLI ໄວ ແລະ ສັ່ງງານຊ້ຳໆໄດ້ ນິຍົມໃນເຊີບເວີ.",
+        "keyPoints": [
+          "GUI ໃຊ້ໄອຄອນ ແລະເມົ້າ",
+          "CLI ພິມຄຳສັ່ງເປັນຕົວໜັງສື",
+          "CLI ນິຍົມໃຊ້ໃນເຊີບເວີ"
+        ],
+        "lesson": "23-1"
+      },
+      {
+        "pageNumber": 4,
+        "title": "Kernel: ຫົວໃຈຂອງ OS",
+        "illustration": "assets/books/ch3-p4-kernel.svg",
+        "content": "Kernel ເປັນສ່ວນແກນກາງຂອງ OS ທີ່ເຮັດວຽກໃກ້ຮາດແວທີ່ສຸດ:\n- ຄວບຄຸມ CPU, ຄວາມຈຳ ແລະອຸປະກອນ.\n- ໂປຣແກຣມທົ່ວໄປ (User space) ຂໍໃຊ້ບໍລິການຜ່ານ System Call.\n- ຖ້າ Kernel ມີບັນຫາ ທັງເຄື່ອງຈະຄ້າງ ຫຼືຈໍຟ້າ (Kernel Panic / BSOD).",
+        "keyPoints": [
+          "Kernel ເປັນແກນກາງຂອງ OS",
+          "ໂປຣແກຣມຂໍໃຊ້ຮາດແວຜ່ານ System Call",
+          "Kernel ເສຍ ທັງເຄື່ອງຈະຄ້າງ"
+        ],
+        "lesson": "24-1"
+      },
+      {
+        "pageNumber": 5,
+        "title": "Process ແລະ Thread",
+        "illustration": "assets/books/ch3-p5-process.svg",
+        "content": "- Process: ໂປຣແກຣມທີ່ກຳລັງແລ່ນຢູ່ ມີຄວາມຈຳຂອງຕົນເອງ.\n- Thread: ສາຍງານຍ່ອຍພາຍໃນ Process ທີ່ເຮັດວຽກພ້ອມກັນໄດ້.\n- Task Manager ໃຊ້ເບິ່ງ Process ແລະປິດ (End Task) ໂປຣແກຣມທີ່ຄ້າງ.",
+        "keyPoints": [
+          "Process ຄືໂປຣແກຣມທີ່ກຳລັງແລ່ນ",
+          "Thread ເປັນສາຍງານຍ່ອຍໃນ Process",
+          "Task Manager ໃຊ້ປິດໂປຣແກຣມທີ່ຄ້າງ"
+        ],
+        "lesson": "25-1"
+      },
+      {
+        "pageNumber": 6,
+        "title": "Multitasking ແລະ ການແບ່ງເວລາ CPU",
+        "illustration": "assets/books/ch3-p6-multitasking.svg",
+        "content": "Multitasking ຄືການເຮັດຫຼາຍງານໃນເວລາໃກ້ກັນ:\n- CPU ໜຶ່ງຫຼັກສະຫຼັບໄປມາລະຫວ່າງໂປຣແກຣມຢ່າງໄວ (ແບ່ງເວລາ / Time-sharing) ຈົນເບິ່ງຄືແລ່ນພ້ອມກັນ.\n- CPU ຫຼາຍຫຼັກແລ່ນຫຼາຍງານພ້ອມກັນຈິງໄດ້.\n- Scheduler ຂອງ OS ເປັນຜູ້ຕັດສິນວ່າໂປຣແກຣມໃດໄດ້ໃຊ້ CPU ກ່ອນ.",
+        "keyPoints": [
+          "Multitasking ເຮັດຫຼາຍງານພ້ອມກັນ",
+          "CPU ສະຫຼັບໂປຣແກຣມໄວ (ແບ່ງເວລາ)",
+          "Scheduler ຕັດສິນລຳດັບໃຊ້ CPU"
+        ],
+        "lesson": "26-1"
+      },
+      {
+        "pageNumber": 7,
+        "title": "ໜ່ວຍຄວາມຈຳ ແລະ Virtual Memory",
+        "illustration": "assets/books/ch3-p7-memory.svg",
+        "content": "OS ແບ່ງ RAM ໃຫ້ແຕ່ລະ Process:\n- RAM ໄວ ແຕ່ເກັບຂໍ້ມູນຊົ່ວຄາວ (ປິດເຄື່ອງແລ້ວຫາຍ).\n- ຖ້າ RAM ບໍ່ພໍ OS ໃຊ້ພື້ນທີ່ໃນດິດເປັນ Virtual Memory (Swap) ແຕ່ຊ້າກວ່າ.\n- ເປີດໂປຣແກຣມຫຼາຍເກີນໄປ ເຄື່ອງຈະຊ້າລົງ.",
+        "keyPoints": [
+          "RAM ເກັບຂໍ້ມູນຊົ່ວຄາວ",
+          "Virtual Memory ໃຊ້ດິດຊ່ວຍເມື່ອ RAM ບໍ່ພໍ",
+          "Virtual Memory ຊ້າກວ່າ RAM"
+        ],
+        "lesson": "27-1"
+      },
+      {
+        "pageNumber": 8,
+        "title": "ລະບົບໄຟລ໌ (File System)",
+        "illustration": "assets/books/ch3-p8-filesystem.svg",
+        "content": "ລະບົບໄຟລ໌ຄືວິທີທີ່ OS ຈັດເກັບໄຟລ໌ໃນດິດ:\n- ໄຟລ໌ຢູ່ໃນໂຟນເດີ ແລະ ໂຟນເດີຢູ່ໃນໂຟນເດີອື່ນໄດ້ (ໂຄງສ້າງຕົ້ນໄມ້).\n- ຊະນິດທີ່ພົບ: FAT32, NTFS (Windows), ext4 (Linux), APFS (macOS).\n- ແຕ່ລະໄຟລ໌ມີຊື່, ນາມສະກຸນ (.docx, .jpg) ແລະ ສິດການເຂົ້າເຖິງ.",
+        "keyPoints": [
+          "ໄຟລ໌ຈັດເປັນໂຟນເດີແບບຕົ້ນໄມ້",
+          "NTFS ໃຊ້ໃນ Windows, ext4 ໃນ Linux",
+          "ໄຟລ໌ມີຊື່ ນາມສະກຸນ ແລະສິດການເຂົ້າເຖິງ"
+        ],
+        "lesson": "28-1"
+      },
+      {
+        "pageNumber": 9,
+        "title": "Driver ແລະ ການອັບເດດ",
+        "illustration": "assets/books/ch3-p9-driver.svg",
+        "content": "- Driver ເປັນໂປຣແກຣມນ້ອຍທີ່ສອນ OS ໃຫ້ຮູ້ຈັກ ແລະ ໃຊ້ອຸປະກອນໃດໜຶ່ງ (ເຄື່ອງພິມ, ກາດຈໍ).\n- ຖ້າບໍ່ມີ Driver ທີ່ຖືກຕ້ອງ ອຸປະກອນອາດໃຊ້ບໍ່ໄດ້.\n- ການອັບເດດ OS ແລະ Driver ປິດຊ່ອງໂຫວ່ດ້ານຄວາມປອດໄພ ແລະແກ້ບັກ ຄວນອັບເດດເປັນປະຈຳ.",
+        "keyPoints": [
+          "Driver ເຮັດໃຫ້ OS ໃຊ້ອຸປະກອນໄດ້",
+          "ບໍ່ມີ Driver ອຸປະກອນອາດໃຊ້ບໍ່ໄດ້",
+          "ອັບເດດເປັນປະຈຳເພື່ອຄວາມປອດໄພ"
+        ],
+        "lesson": "29-1"
+      },
+      {
+        "pageNumber": 10,
+        "title": "ການເປີດເຄື່ອງ (Boot) ແລະ ບັນຊີຜູ້ໃຊ້",
+        "illustration": "assets/books/ch3-p10-boot.svg",
+        "content": "ລຳດັບຕອນເປີດເຄື່ອງ (Boot):\n1. ເປີດໄຟ → BIOS/UEFI ກວດຮາດແວ.\n2. Bootloader ຫາ OS ໃນດິດ.\n3. Kernel ເລີ່ມແລ່ນ ແລ້ວສະແດງໜ້າລັອກອິນ.\nບັນຊີຜູ້ໃຊ້ (User Account) ແບ່ງສິດ: ຜູ້ດູແລ (Administrator) ປ່ຽນລະບົບໄດ້, ຜູ້ໃຊ້ທົ່ວໄປມີສິດຈຳກັດ.",
+        "keyPoints": [
+          "ເປີດເຄື່ອງ: BIOS/UEFI → Bootloader → Kernel",
+          "Administrator ປ່ຽນລະບົບໄດ້",
+          "ຜູ້ໃຊ້ທົ່ວໄປມີສິດຈຳກັດເພື່ອຄວາມປອດໄພ"
+        ],
+        "lesson": "30-1"
+      }
+    ]
   }
 ]
