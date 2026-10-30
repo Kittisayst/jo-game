@@ -74,4 +74,43 @@ test.describe('Harvesting takes several Strikes', () => {
     await page.waitForTimeout(300);
     expect(await woodCount(page)).toBe(3);
   });
+
+  test('A tree cannot be struck from high above it, only from next to it', async ({ page }) => {
+    test.setTimeout(60000);
+    page.on('pageerror', err => console.log('PAGE ERROR:', err.message));
+
+    await page.goto('/');
+    await enterStage(page, 1);
+    await expect(page.locator('.game-hud')).toBeVisible({ timeout: 12000 });
+    await page.waitForTimeout(1000);
+
+    const bot = new Bot(page, false);
+    await bot.state(); // lets the helpers find the running game
+
+    // Hang the hero 150 px above the tree (x = 560), straight over it, where the old reach still counted
+    await page.evaluate(() => {
+      const scene = (window as any).__botGame.scene.getScene('Game');
+      scene.player.setPosition(560, 470);
+      scene.player.setVelocity(0, 0);
+      scene.player.body.setAllowGravity(false);
+    });
+    await page.waitForTimeout(300);
+    for (let i = 0; i < 4; i++) {
+      await page.keyboard.press('KeyE');
+      await page.waitForTimeout(500);
+    }
+    expect(await woodCount(page)).toBe(0);
+
+    // Let the hero drop onto the ground beside the tree: now the same presses strike it
+    await page.evaluate(() => {
+      const scene = (window as any).__botGame.scene.getScene('Game');
+      scene.player.body.setAllowGravity(true);
+    });
+    await expect.poll(async () => (await bot.state()).onGround, { timeout: 5000 }).toBe(true);
+    for (let i = 0; i < 3; i++) {
+      await page.keyboard.press('KeyE');
+      await page.waitForTimeout(500);
+    }
+    expect(await woodCount(page)).toBe(3);
+  });
 });
