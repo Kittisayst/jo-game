@@ -1,6 +1,6 @@
 {
   "stageQuestion": {"credit": 5},
-  "scaling": {"enemyHpPerStage": 0.08, "enemyDamagePerRealm": 1, "dropBonusPerRealm": 0.1},
+  "scaling": {"enemyHpPerStage": 0.08, "enemyDamagePerRealm": 1, "dropBonusPerRealm": 0.1, "enemyXpPerStage": 1.2},
   "stages": [
     {
       "number": 1, "realm": 1, "status": "ready", "safe": true,

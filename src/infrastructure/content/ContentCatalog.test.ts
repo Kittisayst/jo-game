@@ -634,7 +634,7 @@ describe('validator errors', () =>
         {
             it('reads the numbers from stages.json and rejects a negative one', () =>
             {
-                expect(parseStageScaling(stages)).toEqual({ enemyHpPerStage: 0.08, enemyDamagePerRealm: 1, dropBonusPerRealm: 0.1 });
+                expect(parseStageScaling(stages)).toEqual({ enemyHpPerStage: 0.08, enemyDamagePerRealm: 1, dropBonusPerRealm: 0.1, enemyXpPerStage: 1.2 });
 
                 const broken = copy(stages) as unknown as { scaling: Record<string, number> };
                 broken.scaling.enemyHpPerStage = -1;

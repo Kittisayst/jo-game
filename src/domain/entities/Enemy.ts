@@ -20,6 +20,8 @@ export interface EnemyDefinition
     kind: EnemyKind;
     maxHp: number;
     damage: number;
+    /** XP the hero gets when it falls (more in later Stages, see `StageScaling`). Not Credit. */
+    xp: number;
     drops: EnemyDrop[];
     /** Special attacks, only for a Mini-boss (see `EnemyAttackPlanner`). */
     attacks?: EnemyAttackPlan;
@@ -74,6 +76,7 @@ export class Enemy
     private _definitionId: string | null = null;
     private _kind: EnemyKind = 'normal';
     private _drops: EnemyDrop[] = [];
+    private _xp = 0;
     private _stunMs = 0;
 
     /**
@@ -86,6 +89,7 @@ export class Enemy
         enemy._definitionId = definition.id;
         enemy._kind = definition.kind;
         enemy._drops = definition.drops.map(d => ({ ...d }));
+        enemy._xp = definition.xp;
         return enemy;
     }
 
@@ -115,6 +119,12 @@ export class Enemy
     get drops (): EnemyDrop[]
     {
         return this._drops;
+    }
+
+    /** XP the hero gets for defeating this enemy. */
+    get xp (): number
+    {
+        return this._xp;
     }
 
     get state (): EnemyState

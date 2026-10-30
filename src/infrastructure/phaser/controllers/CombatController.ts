@@ -2,6 +2,9 @@ import { Geom } from 'phaser';
 import { collectEnemyDropsUseCase } from '../../../application/CollectEnemyDropsUseCase';
 import { cycleEquippedWeaponUseCase } from '../../../application/CycleEquippedWeaponUseCase';
 import { performAttackUseCase } from '../../../application/PerformAttackUseCase';
+import { grantXpUseCase } from '../../../application/GrantXpUseCase';
+import { autoSaveGame } from '../../saveSnapshot';
+import { getGameContent } from '../../content/ContentCatalog';
 import { playerTakeDamageUseCase } from '../../../application/PlayerTakeDamageUseCase';
 import { armorContext, entities } from '../../composition';
 import { soundManager } from '../../audio/SoundManager';
@@ -206,7 +209,11 @@ export class CombatController
         const res = enemy.takeDamage(damage, dir);
         showDamageNumber(scene, enemy.x, enemy.y, damage);
         scene.particleManager.emitStompBurst(enemy.x, enemy.y);
-        if (res.defeated) this.onEnemyDefeated(enemy);
+        if (res.defeated)
+        {
+            this.awardXp(enemy.entity.xp, enemy.x, enemy.y);
+            this.onEnemyDefeated(enemy);
+        }
     }
 
     /** `damage` lands on the Boss (nothing while it is invulnerable). */
@@ -214,9 +221,30 @@ export class CombatController
     {
         const { scene } = this;
         if (!boss.active || boss.entity.isDefeated || boss.isInvulnerable) return;
-        boss.takeDamage(damage);
+        const fell = boss.takeDamage(damage);
         showDamageNumber(scene, boss.x, boss.y, damage);
         scene.particleManager.emitStompBurst(boss.x, boss.y);
+        if (fell) this.awardXp(boss.xp, boss.x, boss.y);
+    }
+
+    /** XP for a monster that fell, whichever way it fell (sword or skill): a number, and a banner on a new level. */
+    private awardXp (enemyXp: number, x: number, y: number): void
+    {
+        const result = grantXpUseCase(
+            entities.heroLevel,
+            getGameContent().progression,
+            enemyXp,
+            this.scene.stage?.number ?? 1
+        );
+        if (result.xp <= 0) return;
+
+        showLootNotification(this.scene, x, y - 10, `+${result.xp} XP`, '#a5b4fc');
+        if (result.levelsGained > 0)
+        {
+            showLootNotification(this.scene, this.scene.player.x, this.scene.player.y - 40, `⬆️ Level ${entities.heroLevel.level}!`, '#fde047');
+            soundManager.playPowerUp();
+        }
+        autoSaveGame();
     }
 
     private resolveMeleeAttack (damage: number, range: number): void

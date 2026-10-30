@@ -431,3 +431,19 @@ describe('Skill ranks in a save', () =>
         expect(migrateSaveSnapshot({ version: CURRENT_SAVE_VERSION, skills: { unlocked: ['a'], ranks: { a: 7 } } }).skills.ranks).toEqual({});
     });
 });
+
+describe('Hero Level in a save', () =>
+{
+    it('keeps a valid level, XP and points and starts an older save at level 1', () =>
+    {
+        const saved = migrateSaveSnapshot({ version: CURRENT_SAVE_VERSION, heroLevel: { level: 37, xp: 120, unspentPoints: 4 } });
+        expect(saved.heroLevel).toEqual({ level: 37, xp: 120, unspentPoints: 4 });
+        expect(migrateSaveSnapshot({ version: CURRENT_SAVE_VERSION }).heroLevel).toEqual({ level: 1, xp: 0, unspentPoints: 0 });
+    });
+
+    it('drops values out of range or not whole numbers', () =>
+    {
+        const saved = migrateSaveSnapshot({ version: CURRENT_SAVE_VERSION, heroLevel: { level: 151, xp: -1, unspentPoints: 2.5 } });
+        expect(saved.heroLevel).toEqual({ level: 1, xp: 0, unspentPoints: 0 });
+    });
+});

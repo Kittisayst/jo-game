@@ -8,6 +8,7 @@ const guardian: EnemyDefinition = {
     kind: 'miniboss',
     maxHp: 180,
     damage: 20,
+    xp: 100,
     drops: [
         { itemId: 'crystal', chance: 1, count: 2 },
         { itemId: 'iron-ore', chance: 0.5, count: 3 },

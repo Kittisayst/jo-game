@@ -17,6 +17,7 @@ import { TUTORIAL_CHANGED_EVENT } from '../../../application/NotifyTutorialUseCa
 import { ITEM_REPAIRED_EVENT, ITEM_WORN_EVENT } from '../../../application/WearItemUseCase';
 import { ARMOR_CHANGED_EVENT } from '../../../application/ArmorUseCases';
 import { POTION_DRUNK_EVENT } from '../../../application/DrinkPotionUseCase';
+import { HERO_LEVEL_UP_EVENT, XP_GAINED_EVENT } from '../../../application/GrantXpUseCase';
 import { EventBus } from '../../EventBus';
 
 /** What the React side does when the game or the domain announces something. Every handler is optional. */
@@ -91,6 +92,8 @@ const DOMAIN_EVENTS: [string, keyof GameEventHandlers][] = [
     [ITEM_REPAIRED_EVENT, 'onItemWornOrRepaired'],
     [ARMOR_CHANGED_EVENT, 'onItemWornOrRepaired'],
     [POTION_DRUNK_EVENT, 'onItemWornOrRepaired'],
+    [XP_GAINED_EVENT, 'onItemWornOrRepaired'],
+    [HERO_LEVEL_UP_EVENT, 'onItemWornOrRepaired'],
 ];
 
 /**

@@ -4,6 +4,7 @@ import { ItemIcon } from './ItemIcon';
 import { DurabilityBar } from './DurabilityBar';
 import { formatCraftTime } from '../formatCraftTime';
 import type { SkillSlotView } from '../skillSlots';
+import type { HeroLevelView } from '../heroLevelView';
 import type { DurabilityReading } from '../../../domain/entities/Backpack';
 
 const OBJECTIVE_TEXT: Record<ObjectiveId, string> = {
@@ -65,6 +66,8 @@ export interface HudProps
     onDrinkQuickSlot?: () => void;
     /** The skills on K and L (null = empty slot), with their cooldown. */
     skillSlots?: (SkillSlotView | null)[];
+    /** The Hero Level and the XP towards the next one. */
+    heroLevel?: HeroLevelView;
     onUseSkill?: (slot: number) => void;
 }
 
@@ -95,6 +98,7 @@ export function Hud ({
     quickSlot = null,
     onDrinkQuickSlot,
     skillSlots = [],
+    heroLevel,
     onUseSkill,
 }: HudProps)
 {
@@ -186,6 +190,21 @@ export function Hud ({
                                     ✕
                                 </button>
                             )}
+                        </div>
+                    )}
+
+                    {heroLevel && (
+                        <div
+                            className="hud-badge hero-level-badge"
+                            data-testid="hero-level"
+                            data-level={heroLevel.level}
+                            title={heroLevel.xpNeeded > 0 ? `XP ${heroLevel.xp} / ${heroLevel.xpNeeded} (XP ມາຈາກການຂ້າ monster ເທົ່ານັ້ນ, ບໍ່ແມ່ນ Credit)` : 'ລະດັບສູງສຸດ'}
+                        >
+                            <span className="badge-icon">⭐</span>
+                            <span className="badge-value">Lv {heroLevel.level}</span>
+                            <span aria-hidden="true" style={{ display: 'inline-block', width: 44, height: 6, borderRadius: 3, background: 'rgba(148,163,184,0.35)', overflow: 'hidden' }}>
+                                <span data-testid="hero-xp-bar" style={{ display: 'block', height: '100%', width: `${Math.round(heroLevel.fraction * 100)}%`, background: '#a5b4fc' }} />
+                            </span>
                         </div>
                     )}
 

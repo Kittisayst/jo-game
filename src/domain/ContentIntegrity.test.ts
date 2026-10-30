@@ -11,6 +11,10 @@ import tutorial from '../../public/data/tutorial.json';
 import repairs from '../../public/data/repairs.json';
 import garden from '../../public/data/garden.json';
 import skills from '../../public/data/skills.json';
+import progression from '../../public/data/progression.json';
+import { HeroLevel, xpShareForStage, type ProgressionTuning } from './entities/HeroLevel';
+import { scaleEnemyDefinition, type StageScaling } from './entities/StageScaling';
+import type { EnemyDefinition } from './entities/Enemy';
 
 /**
  * The game data files point at each other by id. A typo in one file silently breaks a loop
@@ -502,5 +506,52 @@ describe('content data integrity', () =>
                 expect(taught.has(id), `${realm2.bookId} teaches ${id}`).toBe(true);
             }
         });
+    });
+});
+
+describe('Hero Level balance', () =>
+{
+    it('gives every enemy some XP', () =>
+    {
+        for (const enemy of enemies as { id: string; xp?: number }[])
+        {
+            expect(Number.isInteger(enemy.xp), `${enemy.id} has xp`).toBe(true);
+            expect(enemy.xp as number, `${enemy.id} xp`).toBeGreaterThan(0);
+        }
+    });
+
+    it('takes one pass through Stages 1 to 30 to about level 25 to 40 (no farming, no night creatures yet)', () =>
+    {
+        type Content = { kind: string; enemy?: string; enemies?: string[]; enemyCount?: number };
+        const tuning: ProgressionTuning = {
+            maxLevel: progression.maxLevel,
+            xpCurve: progression.xpCurve,
+            pointsPerLevel: progression.pointsPerLevel,
+            overlevel: progression.overlevel,
+        };
+        const hero = new HeroLevel();
+        for (const stage of stages.stages)
+        {
+            if (stage.status !== 'ready') continue;
+            let xp = 0;
+            for (const zone of (stage as unknown as { zones: { contents: Content[] }[] }).zones)
+            {
+                for (const content of zone.contents)
+                {
+                    if (!['enemy', 'miniboss', 'boss', 'spawn-pool'].includes(content.kind)) continue;
+                    const ids = content.kind === 'spawn-pool' ? content.enemies ?? [] : content.enemy ? [content.enemy] : [];
+                    const count = content.kind === 'spawn-pool' ? (content.enemyCount ?? 0) : 1;
+                    for (let i = 0; i < count; i++)
+                    {
+                        const definition = enemies.find(e => e.id === ids[i % ids.length]) as unknown as EnemyDefinition;
+                        const scaled = scaleEnemyDefinition(definition, stage.number, stages.scaling as StageScaling);
+                        xp += Math.max(1, Math.round(scaled.xp * xpShareForStage(hero.level, stage.number, tuning)));
+                    }
+                }
+            }
+            hero.gainXp(xp, tuning);
+        }
+        expect(hero.level).toBeGreaterThanOrEqual(25);
+        expect(hero.level).toBeLessThanOrEqual(40);
     });
 });

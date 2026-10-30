@@ -5,6 +5,7 @@
     "nameEn": "Forest Slime",
     "kind": "normal",
     "maxHp": 24,
+    "xp": 6,
     "damage": 8,
     "speed": 60,
     "drops": [
@@ -18,6 +19,7 @@
     "nameEn": "Rock Golem",
     "kind": "normal",
     "maxHp": 60,
+    "xp": 15,
     "damage": 15,
     "speed": 40,
     "drops": [
@@ -30,6 +32,7 @@
     "nameEn": "Cave Guardian",
     "kind": "miniboss",
     "maxHp": 140,
+    "xp": 100,
     "damage": 20,
     "speed": 55,
     "attacks": {
@@ -51,6 +54,7 @@
     "nameEn": "Ancient Hardware Overlord",
     "kind": "boss",
     "maxHp": 300,
+    "xp": 250,
     "damage": 25,
     "speed": 70,
     "phases": [
@@ -74,6 +78,7 @@
     "nameEn": "Crystal Slime",
     "kind": "normal",
     "maxHp": 40,
+    "xp": 10,
     "damage": 12,
     "speed": 60,
     "drops": [
@@ -95,6 +100,7 @@
     "nameEn": "Crystal Golem",
     "kind": "normal",
     "maxHp": 90,
+    "xp": 22,
     "damage": 20,
     "speed": 40,
     "drops": [
@@ -116,6 +122,7 @@
     "nameEn": "Crystal Warden",
     "kind": "miniboss",
     "maxHp": 220,
+    "xp": 150,
     "damage": 26,
     "speed": 55,
     "attacks": {
@@ -160,6 +167,7 @@
     "nameEn": "Network Overlord",
     "kind": "boss",
     "maxHp": 450,
+    "xp": 350,
     "damage": 32,
     "speed": 75,
     "phases": [
@@ -207,6 +215,7 @@
     "nameEn": "Sand Slime",
     "kind": "normal",
     "maxHp": 48,
+    "xp": 12,
     "damage": 16,
     "speed": 62,
     "drops": [
@@ -228,6 +237,7 @@
     "nameEn": "Sand Golem",
     "kind": "normal",
     "maxHp": 105,
+    "xp": 26,
     "damage": 24,
     "speed": 42,
     "drops": [
@@ -249,6 +259,7 @@
     "nameEn": "Dune Sentinel",
     "kind": "miniboss",
     "maxHp": 300,
+    "xp": 200,
     "damage": 30,
     "speed": 58,
     "attacks": {
@@ -293,6 +304,7 @@
     "nameEn": "Kernel Overlord",
     "kind": "boss",
     "maxHp": 600,
+    "xp": 450,
     "damage": 38,
     "speed": 80,
     "phases": [

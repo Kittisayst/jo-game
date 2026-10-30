@@ -19,6 +19,7 @@ export function parseStageScaling (raw: unknown): StageScaling
         enemyHpPerStage: read('enemyHpPerStage'),
         enemyDamagePerRealm: read('enemyDamagePerRealm'),
         dropBonusPerRealm: read('dropBonusPerRealm'),
+        enemyXpPerStage: read('enemyXpPerStage'),
     };
 }
 

@@ -2,13 +2,14 @@ import { describe, expect, it } from 'vitest';
 import type { EnemyDefinition } from './Enemy';
 import { NO_SCALING, scaleEnemyDefinition, StageScaling } from './StageScaling';
 
-const scaling: StageScaling = { enemyHpPerStage: 0.1, enemyDamagePerRealm: 2, dropBonusPerRealm: 0.1 };
+const scaling: StageScaling = { enemyHpPerStage: 0.1, enemyDamagePerRealm: 2, dropBonusPerRealm: 0.1, enemyXpPerStage: 1 };
 
 const slime: EnemyDefinition = {
     id: 'forest-slime',
     kind: 'normal',
     maxHp: 20,
     damage: 8,
+    xp: 5,
     drops: [{ itemId: 'fiber', chance: 0.8, count: 1 }, { itemId: 'herb', chance: 0.4, count: 1 }],
 };
 
@@ -23,6 +24,12 @@ describe('scaleEnemyDefinition', () =>
     {
         expect(scaleEnemyDefinition(slime, 2, scaling).maxHp).toBe(22);
         expect(scaleEnemyDefinition(slime, 9, scaling).maxHp).toBe(36);
+    });
+
+    it('pays more XP in a later Stage', () =>
+    {
+        expect(scaleEnemyDefinition(slime, 2, scaling).xp).toBe(10);
+        expect(scaleEnemyDefinition(slime, 9, scaling).xp).toBe(45);
     });
 
     it('makes a later Stage tougher than an earlier one', () =>
