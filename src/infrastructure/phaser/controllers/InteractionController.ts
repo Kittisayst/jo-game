@@ -12,6 +12,12 @@ import type { Game } from '../scenes/Game';
 /** Shortest time between two Strikes, so a held or mashed E key cannot fell a tree in an instant. */
 const STRIKE_COOLDOWN_MS = 400;
 
+/**
+ * How far above or below a node, waypoint or gate the hero's centre may be and still reach it (px).
+ * Standing on the ground is within about 40; standing on the lowest platform (80 px up) is out of reach.
+ */
+const REACH_HEIGHT = 64;
+
 /** Everything in the current level the player can press E on. */
 export interface Interactables
 {
@@ -102,7 +108,7 @@ export class InteractionController
         // 2. Waypoints
         for (const wp of this.interactables.waypoints)
         {
-            if (Math.abs(px - wp.x) < 70)
+            if (Math.abs(px - wp.x) < 70 && Math.abs(py - wp.y) <= REACH_HEIGHT)
             {
                 show(wp.x, `🌀 [E] ${wp.name}`, () => EventBus.emit('open-waypoint', wp.name));
                 return;
@@ -111,7 +117,7 @@ export class InteractionController
 
         // 3. Broken gate
         const gate = this.interactables.brokenGate;
-        if (gate && !entities.repairedGates.has(gate.gateId) && Math.abs(px - gate.x) < 80)
+        if (gate && !entities.repairedGates.has(gate.gateId) && Math.abs(px - gate.x) < 80 && Math.abs(py - gate.y) <= REACH_HEIGHT)
         {
             show(
                 gate.x,
@@ -124,7 +130,7 @@ export class InteractionController
         // 4. Resource nodes
         for (const node of this.interactables.resourceNodes)
         {
-            if (!node.harvested && Math.abs(px - node.x) < node.reach)
+            if (!node.harvested && Math.abs(px - node.x) < node.reach && Math.abs(py - node.y) <= REACH_HEIGHT)
             {
                 show(node.x, node.label, () => this.harvest(node));
                 return;
