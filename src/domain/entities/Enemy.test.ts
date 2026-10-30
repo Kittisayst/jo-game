@@ -109,3 +109,41 @@ describe('Enemy entity', () =>
         });
     });
 });
+
+describe('Enemy stun', () =>
+{
+    it('is stunned for the time given and wakes up in Game time', () =>
+    {
+        const enemy = new Enemy('slime');
+        expect(enemy.isStunned).toBe(false);
+        expect(enemy.stun(2000)).toBe(true);
+        expect(enemy.isStunned).toBe(true);
+        enemy.tickStun(1500);
+        expect(enemy.stunMsLeft).toBe(500);
+        enemy.tickStun(600);
+        expect(enemy.isStunned).toBe(false);
+        expect(enemy.stunMsLeft).toBe(0);
+    });
+
+    it('keeps the longer stun and ignores a bad time', () =>
+    {
+        const enemy = new Enemy('slime');
+        enemy.stun(3000);
+        enemy.stun(1000);
+        expect(enemy.stunMsLeft).toBe(3000);
+        expect(enemy.stun(0)).toBe(false);
+        expect(enemy.stun(Number.NaN)).toBe(false);
+        enemy.tickStun(-10);
+        enemy.tickStun(Number.NaN);
+        expect(enemy.stunMsLeft).toBe(3000);
+    });
+
+    it('cannot stun a defeated enemy and a defeat ends a stun', () =>
+    {
+        const enemy = new Enemy('slime');
+        enemy.stun(3000);
+        enemy.defeat();
+        expect(enemy.isStunned).toBe(false);
+        expect(enemy.stun(1000)).toBe(false);
+    });
+});

@@ -679,10 +679,22 @@ describe('skills.json', () =>
         const skills = (await import('../../../public/data/skills.json')).default;
         const parsed = parseSkills(skills);
         expect(parsed.active.map(s => s.id)).toContain('power-wave');
+        expect(parsed.active.map(s => s.id)).toContain('ping');
+        expect(parsed.active.find(s => s.id === 'ping')?.effect).toMatchObject({ type: 'chain', jumps: 3 });
         const wave = skills.active[0];
         expect(() => parseSkills({ ...skills, active: [wave, wave] })).toThrow('active[1].id must be unique');
         expect(() => parseSkills({ ...skills, active: [{ ...wave, effect: { ...wave.effect, bossShare: 2 } }] }))
             .toThrow('active[0].effect.bossShare must be a number above 0 and at most 1');
+    });
+
+    it('refuses a chain skill without a stun time', async () =>
+    {
+        const { parseSkills } = await import('./SkillCatalog');
+        const skills = (await import('../../../public/data/skills.json')).default;
+        const ping = skills.active.find(x => x.id === 'ping') as { effect: Record<string, unknown> };
+        const { stunMs: _unused, ...withoutStun } = ping.effect;
+        void _unused;
+        expect(() => parseSkills({ ...skills, active: [{ ...ping, effect: withoutStun }] })).toThrow('active[0].effect.stunMs must be a number');
     });
 
     it('names the file and the path of a bad value', async () =>

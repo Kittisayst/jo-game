@@ -1,3 +1,4 @@
+import { Math as PhaserMath } from 'phaser';
 import type { CraftingJob } from '../../../domain/entities/CraftingQueue';
 import { getGameContent } from '../../content/ContentCatalog';
 
@@ -128,10 +129,10 @@ export class CraftingWorker
             const spark = this.scene.add.rectangle(ox, oy, 3, 3, i % 2 ? 0xfde047 : 0xffffff).setDepth(9);
             this.scene.tweens.add({
                 targets: spark,
-                x: ox + Phaser.Math.Between(-18, 24),
-                y: oy - Phaser.Math.Between(8, 30),
+                x: ox + PhaserMath.Between(-18, 24),
+                y: oy - PhaserMath.Between(8, 30),
                 alpha: 0,
-                duration: Phaser.Math.Between(250, 450),
+                duration: PhaserMath.Between(250, 450),
                 ease: 'Cubic.easeOut',
                 onComplete: () => spark.destroy(),
             });

@@ -74,6 +74,7 @@ export class Enemy
     private _definitionId: string | null = null;
     private _kind: EnemyKind = 'normal';
     private _drops: EnemyDrop[] = [];
+    private _stunMs = 0;
 
     /**
      * Builds an enemy whose HP and drops come from data. Behaviour (patrol, hop, spit) still
@@ -166,5 +167,32 @@ export class Enemy
     {
         this._currentHp = 0;
         this._isDefeated = true;
+        this._stunMs = 0;
+    }
+
+    /** True while the enemy is stunned: it cannot move, attack or hurt the hero by touching. */
+    get isStunned (): boolean
+    {
+        return this._stunMs > 0 && !this._isDefeated;
+    }
+
+    /** Milliseconds of stun left. */
+    get stunMsLeft (): number
+    {
+        return this.isStunned ? this._stunMs : 0;
+    }
+
+    /** Stuns the enemy for `ms` (a longer stun already running is kept). Returns false for a defeated enemy or no time. */
+    stun (ms: number): boolean
+    {
+        if (this._isDefeated || !(ms > 0)) return false;
+        this._stunMs = Math.max(this._stunMs, ms);
+        return true;
+    }
+
+    /** Moves the stun on by `deltaMs` of Game time. */
+    tickStun (deltaMs: number): void
+    {
+        if (this._stunMs > 0 && deltaMs > 0) this._stunMs = Math.max(0, this._stunMs - deltaMs);
     }
 }

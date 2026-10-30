@@ -20,7 +20,24 @@ export interface WaveEffect
     bossShare: number;
 }
 
-export type SkillEffect = WaveEffect;
+/** Lightning that jumps from enemy to enemy, hurting and stunning each one (Ping). */
+export interface ChainEffect
+{
+    type: 'chain';
+    damageMultiplier: number;
+    /** How many enemies it can reach in a row. */
+    jumps: number;
+    /** How far from the hero the first enemy can be. */
+    rangePx: number;
+    /** How far the next enemy can be from the one before. */
+    jumpRangePx: number;
+    /** How long each enemy hit is stunned (not a Boss). */
+    stunMs: number;
+    /** Share of the damage a Boss takes (1 = all). A Boss is never stunned. */
+    bossShare: number;
+}
+
+export type SkillEffect = WaveEffect | ChainEffect;
 
 export interface SkillDefinition extends SkillRule
 {
@@ -61,9 +78,28 @@ export function parseSkills (raw: unknown): SkillContent
         seen.add(id);
 
         const effect = v.asObject(skill.effect, `${p}.effect`);
-        const type = v.asOneOf(effect.type, ['wave'] as const, `${p}.effect.type`);
+        const type = v.asOneOf(effect.type, ['wave', 'chain'] as const, `${p}.effect.type`);
         const bossShare = v.asNumber(effect.bossShare, `${p}.effect.bossShare`);
         if (!(bossShare > 0 && bossShare <= 1)) v.fail(`${p}.effect.bossShare`, 'a number above 0 and at most 1');
+        const e = `${p}.effect`;
+        const parsedEffect: SkillEffect = type === 'wave'
+            ? {
+                type,
+                damageMultiplier: positive(effect, 'damageMultiplier', e),
+                speed: positive(effect, 'speed', e),
+                rangePx: positive(effect, 'rangePx', e),
+                pierce: positive(effect, 'pierce', e),
+                bossShare,
+            }
+            : {
+                type,
+                damageMultiplier: positive(effect, 'damageMultiplier', e),
+                jumps: positive(effect, 'jumps', e),
+                rangePx: positive(effect, 'rangePx', e),
+                jumpRangePx: positive(effect, 'jumpRangePx', e),
+                stunMs: positive(effect, 'stunMs', e),
+                bossShare,
+            };
 
         return {
             id,
@@ -73,14 +109,7 @@ export function parseSkills (raw: unknown): SkillContent
             description: v.asString(skill.description, `${p}.description`),
             concept: v.asString(skill.concept, `${p}.concept`),
             cooldownMs: positive(skill, 'cooldownMs', p),
-            effect: {
-                type,
-                damageMultiplier: positive(effect, 'damageMultiplier', `${p}.effect`),
-                speed: positive(effect, 'speed', `${p}.effect`),
-                rangePx: positive(effect, 'rangePx', `${p}.effect`),
-                pierce: positive(effect, 'pierce', `${p}.effect`),
-                bossShare,
-            },
+            effect: parsedEffect,
         };
     });
 

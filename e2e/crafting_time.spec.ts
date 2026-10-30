@@ -26,6 +26,9 @@ async function startInVillage (page: Page): Promise<Bot>
 test.describe('Build time at the Workshop', () => {
   test('one job at a time: Materials are taken at the start, the tool is collected when the Game time is up, and the job is saved', async ({ page }) => {
     test.setTimeout(120000);
+    // An exception inside the smith's animation (sparks on every strike) used to go unnoticed
+    const pageErrors: string[] = [];
+    page.on('pageerror', err => pageErrors.push(err.message));
     const bot = await startInVillage(page);
     await page.evaluate(() => {
       const e = (window as any).__entities;
@@ -58,6 +61,8 @@ test.describe('Build time at the Workshop', () => {
     await expect(page.getByTestId('crafting-badge')).toContainText('ກຳລັງສ້າງ');
     // The smith is at the Workshop hammering, with the time left over his head
     await expect.poll(() => smithText(page), { timeout: 5000 }).toMatch(/^🔨 0:\d\d$/);
+    // Long enough for the hammer to strike a few times (sparks fly on every strike)
+    await page.waitForTimeout(2500);
 
     // Done: the badge says so, and the tool is collected at the Workshop
     await page.evaluate(() => (window as any).__entities.crafting.tick(15000));
@@ -69,5 +74,6 @@ test.describe('Build time at the Workshop', () => {
     await expect(page.getByTestId('crafting-status')).toHaveCount(0);
     // Nothing left to make: the smith goes
     await expect.poll(() => smithText(page), { timeout: 5000 }).toBe('');
+    expect(pageErrors).toEqual([]);
   });
 });
