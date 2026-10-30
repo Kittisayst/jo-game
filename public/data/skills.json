@@ -12,6 +12,16 @@
       "concept": "Input → Process → Output: ໃສ່ພະລັງເຂົ້າ ປະມວນຜົນ ແລ້ວສົ່ງຜົນອອກໄປໄກ",
       "cooldownMs": 4000,
       "effect": { "type": "wave", "damageMultiplier": 1.5, "speed": 520, "rangePx": 560, "pierce": 1, "bossShare": 0.5 }
+    },
+    {
+      "id": "ping",
+      "realm": 2,
+      "name": "ສາຍຟ້າ Ping",
+      "icon": "⚡",
+      "description": "ສາຍຟ້າກະໂດດຈາກສັດຕູໂຕໜຶ່ງໄປອີກໂຕ ສູງສຸດ 3 ໂຕ ຕີ ແລະເຮັດໃຫ້ມຶນ 2.5 ວິ (ມຶນແລ້ວຂະຍັບບໍ່ໄດ້ ແລະແຕະກໍ່ບໍ່ເຈັບ)",
+      "concept": "Ping: ສົ່ງ packet ຈາກເຄື່ອງໜຶ່ງໄປອີກເຄື່ອງ ຕໍ່ໆກັນໃນເຄືອຂ່າຍ",
+      "cooldownMs": 6000,
+      "effect": { "type": "chain", "damageMultiplier": 1.0, "jumps": 3, "rangePx": 420, "jumpRangePx": 240, "stunMs": 2500, "bossShare": 0.5 }
     }
   ]
 }

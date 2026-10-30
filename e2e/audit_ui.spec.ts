@@ -7,10 +7,8 @@ test.describe('Playwright UI Audit — Backpack & Village Hub', () => {
 
     // 1. Navigate to game
     await page.goto('/');
-    const playBtn = page.locator('#btn-play-game');
-    if (await playBtn.isVisible()) {
-      await playBtn.click();
-    }
+    // Wait for the start menu (it appears once the game data is loaded) instead of checking once
+    await page.locator('#btn-play-game').click();
 
     const hud = page.locator('.game-hud');
     await expect(hud).toBeVisible({ timeout: 30000 });

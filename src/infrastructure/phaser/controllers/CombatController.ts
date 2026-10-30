@@ -58,7 +58,7 @@ export class CombatController
     onPlayerTouchesEnemy (player: Player, enemy: Enemy): void
     {
         const { scene } = this;
-        if (enemy.entity.isDefeated || !player.canBeHurt) return;
+        if (enemy.entity.isDefeated || enemy.isStunned || !player.canBeHurt) return;
 
         player.triggerDamage(enemy.x);
         scene.cameras.main.shake(160, 0.008);

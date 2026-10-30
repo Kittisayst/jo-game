@@ -76,6 +76,9 @@ One planting spot of the Garden: empty, growing or ready. The Garden starts with
 **Skill**:
 An active power the hero learns by passing the exam of a Realm's Textbook (one for each Realm, such as Power Wave for Realm 1). Two Skills can be on the **skill slots**, K and L; using one starts its **cooldown**, counted in Game time. A Skill never pays Credit and never makes Materials.
 
+**Stun**:
+An enemy held still for a few seconds by a Skill (such as Ping): it cannot patrol, attack or hurt the hero by touching, and an attack it was starting is cut short. It counts Game time. A Boss is never stunned.
+
 **Dash**:
 A quick burst sideways (Shift, or the touch button) that the hero has from the start. For its first moments nothing can hurt the hero: this is the **dodge**. It has a cooldown. The air dash (a Dash in the air, once per jump) and the double jump are later **movement abilities**, unlocked by beating Bosses.
 

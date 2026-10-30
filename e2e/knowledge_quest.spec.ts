@@ -15,10 +15,8 @@ test.describe('Knowledge Quest — Buy-to-Read Textbook & Chapter 1 Loop E2E', (
     await page.goto('/');
     await expect(page).toHaveTitle(/Knowledge Quest/i);
 
-    const playBtn = page.locator('#btn-play-game');
-    if (await playBtn.isVisible()) {
-      await playBtn.click();
-    }
+    // Wait for the start menu (it appears once the game data is loaded) instead of checking once
+    await page.locator('#btn-play-game').click();
 
     const hud = page.locator('.game-hud');
     await expect(hud).toBeVisible({ timeout: 12000 });

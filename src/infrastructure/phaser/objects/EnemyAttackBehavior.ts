@@ -109,6 +109,12 @@ export class EnemyAttackBehavior
     }
 
     /** Drops any warning marker and tint, e.g. when the enemy is defeated. */
+    /** A stun cuts an attack short: the warning, rush or throw ends and the enemy starts over. */
+    interrupt (): void
+    {
+        if (this.phase !== 'ready') this.enter('ready');
+    }
+
     cancel (): void
     {
         this.marker?.destroy();

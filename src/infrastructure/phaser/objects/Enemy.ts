@@ -52,6 +52,7 @@ export class Enemy extends Physics.Arcade.Sprite
 
     // Mini-boss special attacks (charge, rock throw), only when its definition has `attacks`
     private attackBehavior?: EnemyAttackBehavior;
+    private stunMarker?: Phaser.GameObjects.Text;
     onThrowRock?: (x: number, y: number, dirX: number, speed: number) => void;
 
     constructor (
@@ -318,6 +319,9 @@ export class Enemy extends Physics.Arcade.Sprite
         {
             this.hopCooldown -= delta;
         }
+
+        // A stunned enemy stands still: no patrol, no attack, and (see `isStunned`) it cannot hurt by touch
+        if (this.updateStun(delta, body)) return;
 
         if (this.alertText && this.alertText.active)
         {
@@ -631,6 +635,49 @@ export class Enemy extends Physics.Arcade.Sprite
         }
     }
 
+    /** True while a skill (Ping, End Task...) holds the enemy still. */
+    get isStunned (): boolean
+    {
+        return this.entity.isStunned;
+    }
+
+    /** Stuns the enemy for `ms` of Game time; a running attack is cut short. */
+    stun (ms: number): void
+    {
+        if (!this.entity.stun(ms)) return;
+        this.attackBehavior?.interrupt();
+        this.setVelocityX(0);
+    }
+
+    /** Counts the stun down and shows it. Returns true while the enemy is stunned (the rest of `update` is skipped). */
+    private updateStun (delta: number, body: Phaser.Physics.Arcade.Body): boolean
+    {
+        this.entity.tickStun(delta);
+
+        if (!this.entity.isStunned)
+        {
+            if (this.stunMarker)
+            {
+                this.stunMarker.destroy();
+                this.stunMarker = undefined;
+                this.clearTint();
+            }
+            return false;
+        }
+
+        body.setVelocityX(0);
+        this.setTint(0x93c5fd);
+        if (!this.stunMarker)
+        {
+            this.stunMarker = this.scene.add.text(this.x, this.y - this.spriteHeight / 2 - 18, '💫', {
+                fontFamily: 'monospace, sans-serif',
+                fontSize: '20px',
+            }).setOrigin(0.5).setDepth(15);
+        }
+        this.stunMarker.setPosition(this.x, this.y - this.spriteHeight / 2 - 18);
+        return true;
+    }
+
     takeDamage (amount = 1, knockbackDir = 0, isHeavyWeapon = false): { defeated: boolean; remainingHp: number }
     {
         if (this.isDefeated) return { defeated: true, remainingHp: 0 };
@@ -684,6 +731,8 @@ export class Enemy extends Physics.Arcade.Sprite
         this.entity.defeat();
 
         this.removeAlertIndicator();
+        this.stunMarker?.destroy();
+        this.stunMarker = undefined;
         this.attackBehavior?.cancel();
         this.disableBody(true, false);
 
@@ -703,6 +752,7 @@ export class Enemy extends Physics.Arcade.Sprite
 
     destroy (fromScene?: boolean): void
     {
+        this.stunMarker?.destroy();
         this.removeAlertIndicator();
         this.attackBehavior?.cancel();
         super.destroy(fromScene);
