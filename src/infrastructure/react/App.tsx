@@ -10,7 +10,7 @@ import {
     togglePauseUseCase,
 } from '../../application/TogglePauseUseCase';
 import { EventBus } from '../EventBus';
-import { armorContext, entities, repositories } from '../composition';
+import { armorContext, clock, entities, repositories } from '../composition';
 import { Hud } from './components/Hud';
 import { SkinModal } from './components/SkinModal';
 import { useDialogue } from './hooks/useDialogue';
@@ -20,6 +20,7 @@ import { dismissTutorialUseCase } from '../../application/NotifyTutorialUseCase'
 import { drinkPotionUseCase } from '../../application/DrinkPotionUseCase';
 import { placePortalBlockUseCase } from '../../application/PlacePortalBlockUseCase';
 import { claimPendingRewardsUseCase } from '../../application/PendingRewardsUseCases';
+import { growMinutesOf } from '../../application/GardenUseCases';
 import { notifyTutorial } from '../tutorial';
 import { useGlobalShortcuts } from './hooks/useGlobalShortcuts';
 import { useModalState } from './hooks/useModalState';
@@ -49,6 +50,8 @@ import { GateRepairModal } from './components/GateRepairModal';
 import { WaypointModal } from './components/WaypointModal';
 import { QuizFinisherModal } from './components/QuizFinisherModal';
 import { StageQuestionModal } from './components/StageQuestionModal';
+import { GardenModal } from './components/GardenModal';
+import { StorageModal } from './components/StorageModal';
 import { answerStageQuestionUseCase, pickStageQuestion } from '../../application/AnswerStageQuestionUseCase';
 import { returnToVillageUseCase } from '../../application/ReturnToVillageUseCase';
 import {
@@ -134,6 +137,8 @@ function App ()
         isStageSelectOpen, setIsStageSelectOpen,
         isStageMapOpen, setIsStageMapOpen,
         stageQuestion, setStageQuestion,
+        isGardenOpen, setIsGardenOpen,
+        isStorageOpen, setIsStorageOpen,
     } = modals;
 
     // Bumped when books or the backpack change, so memoised values that read them recompute
@@ -463,7 +468,8 @@ function App ()
     {
         const timer = setInterval(() =>
         {
-            if (entities.effects.hasAny) setBackpackRevision(r => r + 1);
+            // Potion timers tick every half second; a growing Garden is looked at once a second (for its "ready" notice)
+            if (entities.effects.hasAny || entities.garden.hasPlants) setBackpackRevision(r => r + 1);
         }, 500);
         return () => clearInterval(timer);
     }, []);
@@ -589,6 +595,8 @@ function App ()
         onGamePaused: () => setIsGamePaused(true),
         onGameResumed: () => setIsGamePaused(false),
         onOpenStageMap: () => setIsStageMapOpen(true),
+        onOpenGarden: () => setIsGardenOpen(true),
+        onOpenStorage: () => setIsStorageOpen(true),
         onWeaponChanged: weaponId =>
         {
             setEquippedWeaponId(weaponId);
@@ -680,6 +688,7 @@ function App ()
                     walletBalance={walletBalance}
                     armor={entities.health.armor}
                     pendingRewardsCount={entities.pendingRewards.total}
+                    gardenReadyCount={entities.garden.readyCount(clock.now(), growMinutesOf(entities.itemCatalog))}
                     activeEffects={entities.effects.active}
                     quickSlot={quickSlotDef
                         ? {
@@ -928,6 +937,27 @@ function App ()
                     }}
                 />
             )}
+
+            <GardenModal
+                isOpen={isGardenOpen}
+                onClose={() => setIsGardenOpen(false)}
+                onChanged={change =>
+                {
+                    if (change === 'planted') notifyTutorial('seed-planted');
+                    setBackpackRevision(r => r + 1);
+                    autoSaveGame();
+                }}
+            />
+
+            <StorageModal
+                isOpen={isStorageOpen}
+                onClose={() => setIsStorageOpen(false)}
+                onChanged={() =>
+                {
+                    setBackpackRevision(r => r + 1);
+                    autoSaveGame();
+                }}
+            />
 
             <QuizFinisherModal
                 isOpen={isQuizFinisherOpen}

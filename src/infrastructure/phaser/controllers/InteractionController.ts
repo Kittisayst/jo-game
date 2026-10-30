@@ -208,6 +208,7 @@ export class InteractionController
             scene.particleManager.emitCelebration(node.x, node.y - 20);
 
             notifyTutorial(`harvested:${node.type}`);
+            if (result.seed) notifyTutorial('seed-collected');
             EventBus.emit('backpack-changed');
             showLootNotification(scene, node.x, node.y - 30, `🎒 ${describeDrops(result.seed ? [...result.drops, result.seed] : result.drops)}`, '#22c55e');
             return;

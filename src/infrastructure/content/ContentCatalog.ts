@@ -5,6 +5,7 @@
  */
 
 import { ARMOR_SLOTS, POTION_EFFECTS } from '../../domain/entities/Armor';
+import { parseDrops } from './NodeCatalog';
 import type { BookDefinition } from '../../domain/entities/Book';
 import type { EnemyDefinition, EnemyKind } from '../../domain/entities/Enemy';
 import type { EnemyAttackId, EnemyAttackMove, EnemyAttackPlan } from '../../domain/entities/EnemyAttackPlanner';
@@ -16,6 +17,8 @@ import { parseStageDefinitions, StageDefinition } from '../phaser/stages/StageDe
 import { parseStageQuestion, parseStageScaling } from './ScalingCatalog';
 import { parseTutorial, TutorialStepDefinition } from './TutorialCatalog';
 import { parseRepairs } from './RepairCatalog';
+import { parseGardenExpansions } from './GardenCatalog';
+import type { ExpansionCosts } from '../../application/GardenUseCases';
 import type { RepairRecipe } from '../../application/RepairItemUseCase';
 import { isLessonNumber } from '../../domain/entities/StageNumber';
 import type { StageScaling } from '../../domain/entities/StageScaling';
@@ -47,6 +50,8 @@ export interface GameContent
     tutorial: TutorialStepDefinition[];
     /** What it costs to repair each weapon and tool at the Forge (Materials, never Credit). */
     repairs: RepairRecipe[];
+    /** What each Garden Plot after the sixth costs (Materials, never Credit). */
+    gardenExpansions: ExpansionCosts;
     /** How weapons and tools look in the hero's hand, by item id. */
     heldArt: Record<string, HeldArt>;
     /** The rows of the player skin sheets (animations) and where the hand is in each frame. */
@@ -108,6 +113,17 @@ function parseArmorAndPotion (v: ReturnType<typeof makeValidators>, item: Record
         }
         if (amount !== undefined) fields.amount = amount;
         if (duration !== undefined) fields.durationSec = duration;
+    }
+
+    if (item.plant !== undefined)
+    {
+        if (item.category !== 'material') v.fail(`${p}.category`, 'material (only a Material can be a Seed with a plant)');
+        const plant = v.asObject(item.plant, `${p}.plant`);
+        const minutes = v.asNumber(plant.minutes, `${p}.plant.minutes`);
+        if (minutes <= 0) v.fail(`${p}.plant.minutes`, 'more than 0');
+        const harvest = parseDrops(v, plant.harvest, `${p}.plant.harvest`);
+        if (harvest.length === 0) v.fail(`${p}.plant.harvest`, 'at least one Material (a plant gives something)');
+        fields.plant = { minutes, harvest };
     }
 
     return fields;
@@ -339,7 +355,7 @@ async function fetchJson (file: string): Promise<unknown>
 /** Fetches and validates all game data. Call once before the app starts. */
 export async function loadGameContent (): Promise<GameContent>
 {
-    const [items, books, questions, recipes, enemies, realms, nodes, stages, tutorial, repairs, playerAnimations] = await Promise.all([
+    const [items, books, questions, recipes, enemies, realms, nodes, stages, tutorial, repairs, garden, playerAnimations] = await Promise.all([
         fetchJson('items.json'),
         fetchJson('books.json'),
         fetchJson('questions.json'),
@@ -350,6 +366,7 @@ export async function loadGameContent (): Promise<GameContent>
         fetchJson('stages.json'),
         fetchJson('tutorial.json'),
         fetchJson('repairs.json'),
+        fetchJson('garden.json'),
         fetchJson('player-animations.json'),
     ]);
 
@@ -368,6 +385,7 @@ export async function loadGameContent (): Promise<GameContent>
         stageQuestionCredit: parseStageQuestion(stages).credit,
         tutorial: parseTutorial(tutorial),
         repairs: parseRepairs(repairs),
+        gardenExpansions: parseGardenExpansions(garden),
         heldArt: parseHeldArt(items),
         playerAnimations: parsePlayerAnimations(playerAnimations),
     };

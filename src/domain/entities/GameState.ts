@@ -13,6 +13,7 @@ import { SkinManager } from './Skin';
 import { StageProgression } from './StageProgression';
 import { ActiveEffects } from './ActiveEffects';
 import { armorHeartsOf } from './Armor';
+import { Garden } from './Garden';
 import { PendingRewards } from './PendingRewards';
 import { PlantRegrowth } from './PlantRegrowth';
 import { RealmProgression } from './RealmProgression';
@@ -27,6 +28,9 @@ const FIRST_BOOK_ID = 'book-ch1';
  * replaced: loading a save changes the members in place, so a reference held by a scene or a
  * screen never goes stale.
  */
+/** Slots in the Storage chest of the Village Hub. */
+export const STORAGE_MAX_SLOTS = 40;
+
 export class GameState
 {
     readonly itemCatalog: ItemCatalog;
@@ -40,6 +44,10 @@ export class GameState
     readonly pendingRewards = new PendingRewards();
     /** When each small plant of a Stage was last harvested. */
     readonly plantRegrowth = new PlantRegrowth();
+    /** The Garden of the Village Hub. */
+    readonly garden = new Garden();
+    /** The Storage chest: 40 slots, never touched by dying. */
+    readonly storage: Backpack;
     /** Timed Potion effects running on the hero (not saved). */
     readonly effects = new ActiveEffects();
     /** The Potion chosen to be drunk with R, or null. */
@@ -60,6 +68,7 @@ export class GameState
     {
         this.itemCatalog = itemCatalog;
         this.backpack = new Backpack([], itemCatalog);
+        this.storage = new Backpack([], itemCatalog, STORAGE_MAX_SLOTS);
         this.books[FIRST_BOOK_ID] = new BookProgress(FIRST_BOOK_ID, false);
     }
 
@@ -99,6 +108,8 @@ export class GameState
             openedRealms: this.realms.openedRealms,
             pendingRewards: this.pendingRewards.toSnapshot(),
             plantRegrowth: this.plantRegrowth.toSnapshot(),
+            garden: this.garden.toSnapshot(),
+            storage: this.storage.toSnapshot(),
         };
     }
 
@@ -141,6 +152,8 @@ export class GameState
         this.realms.loadFrom(snapshot.openedRealms ?? [1]);
         this.pendingRewards.loadFrom(snapshot.pendingRewards ?? []);
         this.plantRegrowth.loadFrom(snapshot.plantRegrowth ?? {});
+        this.garden.loadFrom(snapshot.garden ?? { plotCount: 6, plots: [] });
+        this.storage.loadFromSnapshot(snapshot.storage ?? []);
         this.effects.clear();
         this.syncArmor();
         this.health.reset();

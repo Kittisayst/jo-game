@@ -1,4 +1,5 @@
 import { ARMOR_SLOTS, ArmorSlot, WornPiece } from './Armor';
+import type { GardenSnapshot } from './Garden';
 import type { PendingReward } from './PendingRewards';
 import { TutorialSnapshot } from './TutorialProgress';
 import { SettingsData, StageProgressionData } from '../ports';
@@ -41,6 +42,10 @@ export interface SaveGameSnapshot
     practiceStats: DailyPracticeProgressSnapshot;
     repairedGates: string[];
     forgeUnlocked: boolean;
+    /** The Garden's Plots. Missing in older saves. */
+    garden: GardenSnapshot;
+    /** What is in the Storage chest. Missing in older saves. */
+    storage: BackpackSlotSnapshot[];
     /** When each small plant was last harvested (key = Stage id + node id, value = ms). Missing in older saves. */
     plantRegrowth: Record<string, number>;
     /** Story Materials waiting for room in the Backpack. Missing in older saves. */
@@ -107,6 +112,8 @@ export function createDefaultSaveSnapshot (slotId = 'slot_1'): SaveGameSnapshot
         openedRealms: [1],
         pendingRewards: [],
         plantRegrowth: {},
+        garden: { plotCount: 6, plots: [null, null, null, null, null, null] },
+        storage: [],
     };
 }
 
@@ -268,6 +275,33 @@ export function migrateSaveSnapshot (raw: unknown, fallbackSlotId = 'slot_1'): S
         dismissed: typeof rawTutorial.dismissed === 'boolean' ? rawTutorial.dismissed : data.tutorial === undefined && hasProgress,
         triggered: Array.isArray(rawTutorial.triggered) ? rawTutorial.triggered.filter((id): id is string => typeof id === 'string') : [],
     };
+    // The Garden: any number of Plots from 6 to 12, each empty or a Seed with the time it was planted
+    const rawGarden = asRecord(data.garden);
+    const plotCount = Math.min(12, Math.max(6, wholeNumber(rawGarden.plotCount, 6)));
+    const garden: GardenSnapshot = {
+        plotCount,
+        plots: Array.from({ length: plotCount }, (_, i) =>
+        {
+            const plot = asRecord((Array.isArray(rawGarden.plots) ? rawGarden.plots : [])[i]);
+            return typeof plot.seedItemId === 'string' && plot.seedItemId.length > 0 && typeof plot.plantedAtMs === 'number' && Number.isFinite(plot.plantedAtMs)
+                ? { seedItemId: plot.seedItemId, plantedAtMs: plot.plantedAtMs }
+                : null;
+        }),
+    };
+    const storage: BackpackSlotSnapshot[] = [];
+    for (const slot of Array.isArray(data.storage) ? data.storage : [])
+    {
+        const s = asRecord(slot);
+        if (typeof s.slotIndex === 'number' && s.slotIndex >= 0 && s.slotIndex < 40 && typeof s.itemId === 'string' && typeof s.count === 'number' && s.count > 0)
+        {
+            storage.push({
+                slotIndex: Math.floor(s.slotIndex),
+                itemId: s.itemId,
+                count: Math.floor(s.count),
+                ...(typeof s.durability === 'number' && !isNaN(s.durability) ? { durability: Math.max(0, Math.floor(s.durability)) } : {}),
+            });
+        }
+    }
     const plantRegrowth: Record<string, number> = {};
     for (const [key, at] of Object.entries(asRecord(data.plantRegrowth)))
     {
@@ -305,5 +339,7 @@ export function migrateSaveSnapshot (raw: unknown, fallbackSlotId = 'slot_1'): S
         openedRealms,
         pendingRewards,
         plantRegrowth,
+        garden,
+        storage,
     };
 }

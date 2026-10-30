@@ -24,6 +24,8 @@ export interface GameEventHandlers
 {
     // From the Phaser scene (EventBus)
     onOpenStageMap?: () => void;
+    onOpenGarden?: () => void;
+    onOpenStorage?: () => void;
     onWeaponChanged?: (weaponId: string) => void;
     onOpenLibrary?: (bookId?: string) => void;
     onOpenAcademy?: (bookId?: string) => void;
@@ -54,6 +56,8 @@ export interface GameEventHandlers
 
 const EVENT_BUS_EVENTS: [string, keyof GameEventHandlers][] = [
     ['open-stage-map', 'onOpenStageMap'],
+    ['open-garden', 'onOpenGarden'],
+    ['open-storage', 'onOpenStorage'],
     ['weapon-changed', 'onWeaponChanged'],
     ['open-library', 'onOpenLibrary'],
     ['open-academy', 'onOpenAcademy'],

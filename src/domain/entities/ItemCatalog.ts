@@ -31,6 +31,8 @@ export interface ItemDefinition
     amount?: number;
     /** How long a strength or speed potion lasts, in seconds. */
     durationSec?: number;
+    /** A Seed: planted in a Garden Plot it grows for `minutes` of real time and then gives `harvest`. */
+    plant?: { minutes: number; harvest: { itemId: string; count: number }[] };
     /** Armor only: which of the three places on the hero it is worn. */
     slot?: ArmorSlot;
     /** Armor only: Armor hearts it gives while it is not Broken. */
