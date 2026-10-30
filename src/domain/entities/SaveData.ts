@@ -1,4 +1,5 @@
 import { ARMOR_SLOTS, ArmorSlot, WornPiece } from './Armor';
+import type { CraftingJobSnapshot } from './CraftingQueue';
 import type { GardenSnapshot } from './Garden';
 import type { PendingReward } from './PendingRewards';
 import { TutorialSnapshot } from './TutorialProgress';
@@ -44,6 +45,8 @@ export interface SaveGameSnapshot
     forgeUnlocked: boolean;
     /** The Garden's Plots. Missing in older saves. */
     garden: GardenSnapshot;
+    /** The Workshop/Forge job in progress or waiting to be collected. Missing in older saves. */
+    crafting: CraftingJobSnapshot | null;
     /** What is in the Storage chest. Missing in older saves. */
     storage: BackpackSlotSnapshot[];
     /** When each small plant was last harvested (key = Stage id + node id, value = ms). Missing in older saves. */
@@ -113,6 +116,7 @@ export function createDefaultSaveSnapshot (slotId = 'slot_1'): SaveGameSnapshot
         pendingRewards: [],
         plantRegrowth: {},
         garden: { plotCount: 6, plots: [null, null, null, null, null, null] },
+        crafting: null,
         storage: [],
     };
 }
@@ -288,6 +292,19 @@ export function migrateSaveSnapshot (raw: unknown, fallbackSlotId = 'slot_1'): S
                 : null;
         }),
     };
+    const rawJob = asRecord(data.crafting);
+    const crafting: CraftingJobSnapshot | null =
+        typeof rawJob.recipeId === 'string' && typeof rawJob.resultItemId === 'string'
+        && typeof rawJob.resultCount === 'number' && rawJob.resultCount >= 1
+        && typeof rawJob.totalMs === 'number' && rawJob.totalMs > 0 && typeof rawJob.remainingMs === 'number'
+            ? {
+                recipeId: rawJob.recipeId,
+                resultItemId: rawJob.resultItemId,
+                resultCount: Math.floor(rawJob.resultCount),
+                totalMs: rawJob.totalMs,
+                remainingMs: Math.min(rawJob.totalMs, Math.max(0, rawJob.remainingMs)),
+            }
+            : null;
     const storage: BackpackSlotSnapshot[] = [];
     for (const slot of Array.isArray(data.storage) ? data.storage : [])
     {
@@ -340,6 +357,7 @@ export function migrateSaveSnapshot (raw: unknown, fallbackSlotId = 'slot_1'): S
         pendingRewards,
         plantRegrowth,
         garden,
+        crafting,
         storage,
     };
 }

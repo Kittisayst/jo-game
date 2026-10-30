@@ -27,9 +27,15 @@ test.describe('Portal shards open the next Realm', () => {
     // The Forge (x = 1140): the recipe is there, taught by the book
     expect(await bot.goTo(1135, { tolerance: 25, fight: false, timeoutMs: 40000 })).toBe('arrived');
     await page.keyboard.press('KeyE');
-    const card = page.locator('div', { hasText: 'ກ້ອນປະຕູມິຕິສີຂຽວ' }).filter({ has: page.getByRole('button', { name: /Craft/ }) }).last();
+    const card = page.locator('div', { hasText: 'ກ້ອນປະຕູມິຕິສີຂຽວ' }).filter({ has: page.getByRole('button', { name: /ເລີ່ມຫຼອມ/ }) }).last();
     await expect(card).toBeVisible();
-    await card.getByRole('button', { name: /Craft/ }).click();
+    await card.getByRole('button', { name: /ເລີ່ມຫຼອມ/ }).click();
+
+    // The block takes two minutes of Game time: shards and Materials are taken now, the block comes when it is collected
+    expect(await count('portal-shard-green')).toBe(0);
+    expect(await count('portal-block-green')).toBe(0);
+    await page.evaluate(() => (window as any).__entities.crafting.tick(120000));
+    await page.getByTestId('crafting-collect').click();
 
     expect(await count('portal-block-green')).toBe(1);
     expect(await count('portal-shard-green')).toBe(0);

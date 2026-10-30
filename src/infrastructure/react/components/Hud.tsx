@@ -2,6 +2,7 @@ import { hudLabelOf } from '../../phaser/levelCatalog';
 import { ObjectiveId } from '../../../domain/utils/nextObjective';
 import { ItemIcon } from './ItemIcon';
 import { DurabilityBar } from './DurabilityBar';
+import { formatCraftTime } from '../formatCraftTime';
 import type { DurabilityReading } from '../../../domain/entities/Backpack';
 
 const OBJECTIVE_TEXT: Record<ObjectiveId, string> = {
@@ -54,6 +55,8 @@ export interface HudProps
     activeEffects?: { effect: 'strength' | 'speed'; remainingSeconds: number }[];
     /** How many Garden Plots are ready to harvest. */
     gardenReadyCount?: number;
+    /** What the Workshop/Forge is making, or null. */
+    craftingJob?: { resultItemId: string; remainingMs: number } | null;
     /** Story Materials waiting for a free Backpack slot. */
     pendingRewardsCount?: number;
     /** The Potion chosen to be drunk with R, with how many are left. */
@@ -83,6 +86,7 @@ export function Hud ({
     armor = 0,
     pendingRewardsCount = 0,
     gardenReadyCount = 0,
+    craftingJob = null,
     activeEffects = [],
     quickSlot = null,
     onDrinkQuickSlot,
@@ -109,6 +113,20 @@ export function Hud ({
                     {armor > 0 && (
                         <div className="hud-badge armor-badge" data-testid="armor-hearts" data-armor={armor} title="ຫົວໃຈເກາະ: ເສຍກ່ອນຫົວໃຈປົກກະຕິ ແລະ ຟື້ນເມື່ອກັບໝູ່ບ້ານ">
                             <span className="badge-icon">{'🛡️'.repeat(Math.min(armor, 10))}</span>
+                        </div>
+                    )}
+
+                    {craftingJob && (
+                        <div
+                            className="hud-badge crafting-badge"
+                            data-testid="crafting-badge"
+                            data-state={craftingJob.remainingMs <= 0 ? 'ready' : 'building'}
+                            title="ໂຮງຊ່າງ/ໂຮງຕີເຫຼັກກຳລັງສ້າງ: ເວລານັບຕອນຫຼິ້ນເກມເທົ່ານັ້ນ"
+                        >
+                            <span className="badge-icon">{craftingJob.remainingMs <= 0 ? '✅' : '🔨'}</span>
+                            <span className="badge-label">
+                                {craftingJob.remainingMs <= 0 ? 'ສ້າງສຳເລັດ ໄປຮັບຂອງ' : `ກຳລັງສ້າງ ${formatCraftTime(craftingJob.remainingMs)}`}
+                            </span>
                         </div>
                     )}
 

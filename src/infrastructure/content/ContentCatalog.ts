@@ -269,6 +269,7 @@ export function parseRecipes (raw: unknown): RecipeEntry[]
             requiredBookRecipe: required == null ? null : v.asString(required, `${p}.requiredBookRecipe`),
             creditCost,
             ingredients,
+            ...(recipe.craftSeconds === undefined ? {} : { craftSeconds: v.asNumber(recipe.craftSeconds, `${p}.craftSeconds`) }),
         } satisfies RecipeDefinition;
     });
 }

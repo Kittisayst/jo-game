@@ -6,6 +6,7 @@
     "building": "workshop",
     "requiredBookRecipe": null,
     "creditCost": 0,
+    "craftSeconds": 15,
     "ingredients": [
       { "itemId": "wood", "count": 5 },
       { "itemId": "stone", "count": 2 }
@@ -18,6 +19,7 @@
     "building": "workshop",
     "requiredBookRecipe": "pickaxe-t1",
     "creditCost": 0,
+    "craftSeconds": 15,
     "ingredients": [
       { "itemId": "wood", "count": 8 },
       { "itemId": "stone", "count": 5 }
@@ -30,6 +32,7 @@
     "building": "workshop",
     "requiredBookRecipe": "hammer-t1",
     "creditCost": 0,
+    "craftSeconds": 15,
     "ingredients": [
       { "itemId": "wood", "count": 6 },
       { "itemId": "iron-ore", "count": 4 }
@@ -67,6 +70,7 @@
     "building": "forge",
     "requiredBookRecipe": "iron-sword",
     "creditCost": 10,
+    "craftSeconds": 30,
     "ingredients": [
       { "itemId": "iron-ore", "count": 10 },
       { "itemId": "wood", "count": 5 }
@@ -79,6 +83,7 @@
     "building": "forge",
     "requiredBookRecipe": "crystal-sword",
     "creditCost": 30,
+    "craftSeconds": 60,
     "ingredients": [
       { "itemId": "crystal", "count": 3 },
       { "itemId": "iron-ore", "count": 15 }
@@ -159,6 +164,7 @@
     "building": "forge",
     "requiredBookRecipe": "iron-helmet",
     "creditCost": 0,
+    "craftSeconds": 20,
     "ingredients": [
       {
         "itemId": "iron-ore",
@@ -177,6 +183,7 @@
     "building": "forge",
     "requiredBookRecipe": "iron-chestplate",
     "creditCost": 0,
+    "craftSeconds": 30,
     "ingredients": [
       {
         "itemId": "iron-ore",
@@ -195,6 +202,7 @@
     "building": "forge",
     "requiredBookRecipe": "iron-boots",
     "creditCost": 0,
+    "craftSeconds": 20,
     "ingredients": [
       {
         "itemId": "iron-ore",
@@ -267,6 +275,7 @@
     "building": "forge",
     "requiredBookRecipe": "portal-block-green",
     "creditCost": 0,
+    "craftSeconds": 120,
     "ingredients": [
       {
         "itemId": "portal-shard-green",
@@ -289,6 +298,7 @@
     "building": "forge",
     "requiredBookRecipe": "portal-block-blue",
     "creditCost": 0,
+    "craftSeconds": 120,
     "ingredients": [
       {
         "itemId": "portal-shard-blue",
@@ -311,6 +321,7 @@
     "building": "workshop",
     "requiredBookRecipe": "axe-t2",
     "creditCost": 0,
+    "craftSeconds": 45,
     "ingredients": [
       {
         "itemId": "wood",
@@ -329,6 +340,7 @@
     "building": "workshop",
     "requiredBookRecipe": "pickaxe-t2",
     "creditCost": 0,
+    "craftSeconds": 45,
     "ingredients": [
       {
         "itemId": "wood",
@@ -351,6 +363,7 @@
     "building": "workshop",
     "requiredBookRecipe": "hammer-t2",
     "creditCost": 0,
+    "craftSeconds": 45,
     "ingredients": [
       {
         "itemId": "wood",
@@ -373,6 +386,7 @@
     "building": "forge",
     "requiredBookRecipe": "blue-sword",
     "creditCost": 25,
+    "craftSeconds": 90,
     "ingredients": [
       {
         "itemId": "blue-ore",
@@ -395,6 +409,7 @@
     "building": "forge",
     "requiredBookRecipe": "blue-helmet",
     "creditCost": 0,
+    "craftSeconds": 40,
     "ingredients": [
       {
         "itemId": "blue-ore",
@@ -413,6 +428,7 @@
     "building": "forge",
     "requiredBookRecipe": "blue-chestplate",
     "creditCost": 0,
+    "craftSeconds": 60,
     "ingredients": [
       {
         "itemId": "blue-ore",
@@ -435,6 +451,7 @@
     "building": "forge",
     "requiredBookRecipe": "blue-boots",
     "creditCost": 0,
+    "craftSeconds": 40,
     "ingredients": [
       {
         "itemId": "blue-ore",

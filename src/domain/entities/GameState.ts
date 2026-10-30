@@ -13,6 +13,7 @@ import { SkinManager } from './Skin';
 import { StageProgression } from './StageProgression';
 import { ActiveEffects } from './ActiveEffects';
 import { armorHeartsOf } from './Armor';
+import { CraftingQueue } from './CraftingQueue';
 import { Garden } from './Garden';
 import { PendingRewards } from './PendingRewards';
 import { PlantRegrowth } from './PlantRegrowth';
@@ -46,6 +47,8 @@ export class GameState
     readonly plantRegrowth = new PlantRegrowth();
     /** The Garden of the Village Hub. */
     readonly garden = new Garden();
+    /** What the Workshop or the Forge is making (one job at a time, counted in Game time). */
+    readonly crafting = new CraftingQueue();
     /** The Storage chest: 40 slots, never touched by dying. */
     readonly storage: Backpack;
     /** Timed Potion effects running on the hero (not saved). */
@@ -109,6 +112,7 @@ export class GameState
             pendingRewards: this.pendingRewards.toSnapshot(),
             plantRegrowth: this.plantRegrowth.toSnapshot(),
             garden: this.garden.toSnapshot(),
+            crafting: this.crafting.toSnapshot(),
             storage: this.storage.toSnapshot(),
         };
     }
@@ -153,6 +157,7 @@ export class GameState
         this.pendingRewards.loadFrom(snapshot.pendingRewards ?? []);
         this.plantRegrowth.loadFrom(snapshot.plantRegrowth ?? {});
         this.garden.loadFrom(snapshot.garden ?? { plotCount: 6, plots: [] });
+        this.crafting.loadFrom(snapshot.crafting ?? null);
         this.storage.loadFromSnapshot(snapshot.storage ?? []);
         this.effects.clear();
         this.syncArmor();
