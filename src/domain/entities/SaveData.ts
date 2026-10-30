@@ -2,7 +2,7 @@ import { ARMOR_SLOTS, ArmorSlot, WornPiece } from './Armor';
 import type { CraftingJobSnapshot } from './CraftingQueue';
 import type { GardenSnapshot } from './Garden';
 import { MOVEMENT_ABILITY_IDS, MovementAbilityId } from './MovementAbilities';
-import { SKILL_SLOT_COUNT, SkillProgressionSnapshot } from './SkillProgression';
+import { MAX_SKILL_RANK, SKILL_SLOT_COUNT, SkillProgressionSnapshot } from './SkillProgression';
 import { MAX_TOOL_LEVEL } from './ToolUpgrades';
 import type { PendingReward } from './PendingRewards';
 import { TutorialSnapshot } from './TutorialProgress';
@@ -127,7 +127,7 @@ export function createDefaultSaveSnapshot (slotId = 'slot_1'): SaveGameSnapshot
         garden: { plotCount: 6, plots: [null, null, null, null, null, null] },
         crafting: null,
         movement: ['dash'],
-        skills: { unlocked: [], equipped: [null, null] },
+        skills: { unlocked: [], equipped: [null, null], ranks: {} },
         toolUpgrades: {},
         storage: [],
     };
@@ -328,7 +328,12 @@ export function migrateSaveSnapshot (raw: unknown, fallbackSlotId = 'slot_1'): S
         const id = Array.isArray(rawSkills.equipped) ? rawSkills.equipped[i] : null;
         return typeof id === 'string' && unlockedSkills.includes(id) ? id : null;
     });
-    const skills: SkillProgressionSnapshot = { unlocked: unlockedSkills, equipped: equippedSkills };
+    const skillRanks: Record<string, number> = {};
+    for (const [id, rank] of Object.entries(asRecord(rawSkills.ranks)))
+    {
+        if (unlockedSkills.includes(id) && typeof rank === 'number' && Number.isInteger(rank) && rank >= 2 && rank <= MAX_SKILL_RANK) skillRanks[id] = rank;
+    }
+    const skills: SkillProgressionSnapshot = { unlocked: unlockedSkills, equipped: equippedSkills, ranks: skillRanks };
     const toolUpgrades: Record<string, number> = {};
     for (const [id, level] of Object.entries(asRecord(data.toolUpgrades)))
     {

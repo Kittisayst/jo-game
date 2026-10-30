@@ -74,7 +74,7 @@ A separate scene reached from the Village Hub where Seeds are planted in Plots. 
 One planting spot of the Garden: empty, growing or ready. The Garden starts with six and can be expanded with Materials.
 
 **Skill**:
-An active power the hero learns by passing the exam of a Realm's Textbook (one for each Realm, such as Power Wave for Realm 1). Two Skills can be on the **skill slots**, K and L; using one starts its **cooldown**, counted in Game time. A Skill never pays Credit and never makes Materials.
+An active power the hero learns by passing the exam of a Realm's Textbook (one for each Realm, such as Power Wave for Realm 1). A Skill has a **rank** from 1 to 3, raised at the Academy for Credit and Materials: a higher rank has a shorter cooldown and a stronger effect. Two Skills can be on the **skill slots**, K and L; using one starts its **cooldown**, counted in Game time. A Skill never pays Credit and never makes Materials.
 
 **Tool upgrade**:
 An axe or pickaxe raised from +0 to +3 at the Workshop for Materials (never Credit). An upgraded tool counts for more of a Strike, so a tree or a rock takes fewer Strikes. The level belongs to the kind of tool (every Axe T1 is the same level). This is how chopping gets faster: it is not a Skill.
@@ -83,7 +83,7 @@ An axe or pickaxe raised from +0 to +3 at the Workshop for Materials (never Cred
 An enemy held still for a few seconds by a Skill (such as Ping): it cannot patrol, attack or hurt the hero by touching, and an attack it was starting is cut short. It counts Game time. A Boss is never stunned.
 
 **Dash**:
-A quick burst sideways (Shift, or the touch button) that the hero has from the start. For its first moments nothing can hurt the hero: this is the **dodge**. It has a cooldown. The air dash (a Dash in the air, once per jump) and the double jump are later **movement abilities**, unlocked by beating Bosses.
+A quick burst sideways (Shift, or the touch button) that the hero has from the start. For its first moments nothing can hurt the hero: this is the **dodge**. It has a cooldown. The **air dash** (a Dash in the air, once per jump) is a **movement ability** the hero gets by beating the Boss of Stage 10; the double jump is a later one (Stage 30).
 
 **Crafting job**:
 What the Workshop or the Forge is making: one recipe with a build time, one at a time. The Materials and Credit are taken when it starts, the time counts Game time (only while the game is being played), and the result is collected by hand when it is done. A recipe with no build time is made at once.

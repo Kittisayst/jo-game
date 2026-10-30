@@ -527,7 +527,7 @@ export const AcademyModal: React.FC<AcademyModalProps> = ({
                         </div>
                     ) : activeTab === 'skills' ? (
                         /* ================= SKILLS TAB ================= */
-                        <SkillsPanel />
+                        <SkillsPanel onChanged={() => onCreditChanged?.(entities.wallet.balance)} />
                     ) : (
                         /* ================= DAILY PRACTICE TAB ================= */
                         <div className="space-y-6">

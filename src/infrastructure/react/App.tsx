@@ -52,7 +52,7 @@ import { QuizFinisherModal } from './components/QuizFinisherModal';
 import { StageQuestionModal } from './components/StageQuestionModal';
 import { GardenSeedPicker } from './components/GardenSeedPicker';
 import { readSkillSlots } from './skillSlots';
-import { syncSkills } from '../skills';
+import { syncMovement, syncSkills } from '../skills';
 import { GARDEN_LEVEL_KEY, isHomeLevel } from '../phaser/levelCatalog';
 import { StorageModal } from './components/StorageModal';
 import { answerStageQuestionUseCase, pickStageQuestion } from '../../application/AnswerStageQuestionUseCase';
@@ -473,7 +473,7 @@ function App ()
     // A save made before skills existed still teaches the skills of the Textbooks already passed
     useEffect(() =>
     {
-        if (syncSkills().length > 0) autoSaveGame();
+        if (syncSkills().length + syncMovement().length > 0) autoSaveGame();
     }, []);
 
     // Potion effects count down on screen: redraw twice a second while one is running
@@ -543,13 +543,15 @@ function App ()
         const clear = completeStageUseCase(stageProgression, repositories.stageProgression, stageId, next);
         notifyTutorial('stage-cleared');
         const bonus = isBossStage ? awardChapterClearUseCase(entities.wallet, clear.isFirstTimeClear) : 0;
+        const newMovement = syncMovement();
         setWalletBalance(entities.wallet.balance);
         autoSaveGame();
         EventBus.emit('change-level', 'village');
         const bonusText = bonus > 0 ? ` +${bonus} 🎓 Credit!` : '';
+        const abilityText = newMovement.includes('air-dash') ? ' 💨 ໄດ້ພຸ່ງກາງອາກາດ! (ກົດ Shift ໃນອາກາດ)' : '';
         const opened = next && clear.newlyUnlocked ? ` ດ່ານ ${stageNumberOf(next)} ເປີດແລ້ວ!` : '';
         const message = isBossStage
-            ? `🏆 ຊະນະ Boss ດ່ານ ${stageNumber}!${bonusText} ກັບມາໝູ່ບ້ານເພື່ອຮຽນ ແລະ ສ້າງອາວຸດຕໍ່ໄປ`
+            ? `🏆 ຊະນະ Boss ດ່ານ ${stageNumber}!${bonusText}${abilityText} ກັບມາໝູ່ບ້ານເພື່ອຮຽນ ແລະ ສ້າງອາວຸດຕໍ່ໄປ`
             : `✅ ຜ່ານດ່ານ ${stageNumber}!${opened} ກັບມາໝູ່ບ້ານເພື່ອຮຽນ ແລະ ສ້າງອາວຸດ`;
         setTimeout(() => setVillageWelcomeToast(message), 300);
     };

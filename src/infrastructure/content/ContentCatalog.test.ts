@@ -687,6 +687,34 @@ describe('skills.json', () =>
             .toThrow('active[0].effect.bossShare must be a number above 0 and at most 1');
     });
 
+    it('reads the ranks of each skill: rank cooldowns, the effect at each rank and the cost of each upgrade', async () =>
+    {
+        const { parseSkills, effectAtRank } = await import('./SkillCatalog');
+        const skills = (await import('../../../public/data/skills.json')).default;
+        const parsed = parseSkills(skills);
+        const wave = parsed.active.find(s => s.id === 'power-wave')!;
+        expect(wave.rankCooldowns).toEqual([4000, 3500, 3000]);
+        expect(wave.upgrades).toHaveLength(2);
+        expect(wave.upgrades[0].credit).toBeGreaterThan(0);
+        expect(effectAtRank(wave, 1)).toMatchObject({ damageMultiplier: 1.5, pierce: 1 });
+        expect(effectAtRank(wave, 3)).toMatchObject({ damageMultiplier: 2.5, pierce: 2, speed: 520 });
+        expect(parsed.unlocks).toEqual([{ ability: 'air-dash', afterBossStage: 10 }]);
+    });
+
+    it('refuses an upgrade that is free, changes an unknown number, or an unlock for a Stage that has no Boss', async () =>
+    {
+        const { parseSkills } = await import('./SkillCatalog');
+        const skills = (await import('../../../public/data/skills.json')).default;
+        const wave = skills.active[0];
+        const upgrade = wave.upgrades[0];
+        const make = (patch: object) => ({ ...skills, active: [{ ...wave, upgrades: [{ ...upgrade, ...patch }, wave.upgrades[1]] }] });
+        expect(() => parseSkills(make({ credit: 0, ingredients: [] }))).toThrow('active[0].upgrades[0] must be a cost');
+        expect(() => parseSkills(make({ effect: { stunMs: 1000 } }))).toThrow('active[0].upgrades[0].effect.stunMs must be a number the wave effect has');
+        expect(() => parseSkills({ ...skills, movement: { ...skills.movement, unlocks: [{ ability: 'air-dash', afterBossStage: 7 }] } }))
+            .toThrow('movement.unlocks[0].afterBossStage must be the number of a Boss Stage');
+        expect(() => parseSkills({ ...skills, active: [{ ...wave, upgrades: [upgrade] }] })).toThrow('active[0].upgrades must be exactly 2 entries');
+    });
+
     it('refuses a chain skill without a stun time', async () =>
     {
         const { parseSkills } = await import('./SkillCatalog');
