@@ -1,6 +1,7 @@
 import { Backpack, DurabilityChange } from '../domain/entities/Backpack';
 import { DomainEvents } from '../domain/DomainEvents';
 import { deathWearUseCase } from './WearItemUseCase';
+import { deathWearWornArmorUseCase, WornArmorContext } from './ArmorUseCases';
 
 export const RETURNED_TO_VILLAGE_EVENT = 'returned-to-village';
 
@@ -24,7 +25,8 @@ export interface ReturnResult
 export function returnToVillageUseCase (
     reason: ReturnReason,
     backpack: Backpack,
-    healToFullCallback?: () => void
+    healToFullCallback?: () => void,
+    armor?: WornArmorContext
 ): ReturnResult
 {
     let lostMaterials: { itemId: string; count: number }[] = [];
@@ -40,7 +42,11 @@ export function returnToVillageUseCase (
         // Death or Emergency Retreat: 50% carried materials lost
         const penalty = backpack.applyRetreatPenalty();
         lostMaterials = penalty.lost;
-        if (reason === 'death') wornItems = deathWearUseCase(backpack);
+        if (reason === 'death')
+        {
+            wornItems = deathWearUseCase(backpack);
+            if (armor) deathWearWornArmorUseCase(armor);
+        }
     }
 
     if (healToFullCallback)

@@ -5,6 +5,7 @@ import { entities } from '../../composition';
 import { soundManager } from '../../audio/SoundManager';
 import { ItemIcon } from './ItemIcon';
 import { RepairList } from './RepairList';
+import { missingIngredients, unlockedRecipeIds } from '../recipeUnlocks';
 
 interface WorkshopModalProps
 {
@@ -22,25 +23,8 @@ export const WorkshopModal: React.FC<WorkshopModalProps> = ({ isOpen, onClose })
 
     if (!isOpen) return null;
 
-    // Gather set of unlocked recipes from passed book exams
-    const unlockedRecipes = new Set<string>();
-    for (const bp of Object.values(entities.books))
-    {
-        if (bp.examPassed)
-        {
-            if (bp.bookId === 'book-ch1')
-            {
-                unlockedRecipes.add('pickaxe-t1');
-                unlockedRecipes.add('hammer-t1');
-                unlockedRecipes.add('repair-kit');
-                unlockedRecipes.add('iron-sword');
-            }
-            else if (bp.bookId === 'book-ch2')
-            {
-                unlockedRecipes.add('crystal-sword');
-            }
-        }
-    }
+    // Recipes taught by the Textbooks whose exam was passed
+    const unlockedRecipes = unlockedRecipeIds();
 
     const getItem = (id: string) => items.find(i => i.id === id);
 
@@ -132,6 +116,14 @@ export const WorkshopModal: React.FC<WorkshopModalProps> = ({ isOpen, onClose })
                                             {resultItem?.description}
                                         </p>
 
+                                        {!isLocked && !canCraft && missingIngredients(recipe.ingredients).length > 0 && (
+                                            <p className="text-xs text-rose-300" data-testid="missing-ingredients">
+                                                ຂາດ: {missingIngredients(recipe.ingredients)
+                                                    .map(m => `${getItem(m.itemId)?.name ?? m.itemId} ອີກ ${m.missing}`)
+                                                    .join(', ')}
+                                            </p>
+                                        )}
+
                                         {/* Ingredients required */}
                                         <div className="space-y-1 bg-slate-900/60 p-2.5 rounded-lg border border-slate-800">
                                             <span className="text-xs text-slate-400 font-semibold block mb-1">
@@ -193,7 +185,7 @@ export const WorkshopModal: React.FC<WorkshopModalProps> = ({ isOpen, onClose })
 
                 {/* Footer Backpack Status */}
                 <div className="px-6 py-3 border-t border-slate-700/60 bg-slate-900/80 flex items-center justify-between text-xs text-slate-400">
-                    <span>🎒 ພື້ນທີ່ກະເປົາ: {entities.backpack.usedSlotsCount} / 20 ຊ່ອງ</span>
+                    <span>🎒 ພື້ນທີ່ກະເປົາ: {entities.backpack.usedSlotsCount} / {entities.backpack.maxSlots} ຊ່ອງ</span>
                     <span>🎓 ເຄຣດິດ: {entities.wallet.balance}</span>
                 </div>
             </div>

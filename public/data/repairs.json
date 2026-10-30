@@ -3,6 +3,9 @@
     {"itemId": "axe-t1", "building": "workshop", "ingredients": [{"itemId": "wood", "count": 3}, {"itemId": "stone", "count": 1}]},
     {"itemId": "pickaxe-t1", "building": "workshop", "ingredients": [{"itemId": "wood", "count": 3}, {"itemId": "stone", "count": 2}]},
     {"itemId": "iron-sword", "building": "forge", "ingredients": [{"itemId": "iron-ore", "count": 3}, {"itemId": "wood", "count": 1}]},
-    {"itemId": "crystal-sword", "building": "forge", "ingredients": [{"itemId": "crystal", "count": 1}, {"itemId": "iron-ore", "count": 3}]}
+    {"itemId": "crystal-sword", "building": "forge", "ingredients": [{"itemId": "crystal", "count": 1}, {"itemId": "iron-ore", "count": 3}]},
+    {"itemId": "iron-helmet", "building": "forge", "ingredients": [{"itemId": "iron-ore", "count": 3}, {"itemId": "fiber", "count": 1}]},
+    {"itemId": "iron-chestplate", "building": "forge", "ingredients": [{"itemId": "iron-ore", "count": 5}, {"itemId": "fiber", "count": 2}]},
+    {"itemId": "iron-boots", "building": "forge", "ingredients": [{"itemId": "iron-ore", "count": 3}, {"itemId": "fiber", "count": 1}]}
   ]
 }

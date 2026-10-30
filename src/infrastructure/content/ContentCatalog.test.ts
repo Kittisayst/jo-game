@@ -379,6 +379,63 @@ describe('validator errors', () =>
             });
         });
 
+        describe('armor and potions', () =>
+        {
+            const copyItems = () => JSON.parse(JSON.stringify(items)) as Record<string, unknown>[];
+            const find = (list: Record<string, unknown>[], id: string) => list.find(i => i.id === id)!;
+
+            it('reads the three armor pieces and the three effect potions', () =>
+            {
+                const parsed = parseItems(items);
+                const byId = (id: string) => parsed.find(i => i.id === id)!;
+
+                expect(byId('iron-helmet')).toMatchObject({ category: 'armor', slot: 'head', armorHearts: 1, durability: 60 });
+                expect(byId('iron-chestplate')).toMatchObject({ slot: 'body', armorHearts: 2 });
+                expect(byId('iron-boots')).toMatchObject({ slot: 'feet', armorHearts: 1, speedBonus: 0.1 });
+                expect(byId('strength-potion')).toMatchObject({ category: 'consumable', effect: 'strength', durationSec: 60 });
+                expect(byId('armor-potion')).toMatchObject({ effect: 'armor', amount: 1 });
+                expect(byId('speed-potion')).toMatchObject({ effect: 'speed', durationSec: 60 });
+            });
+
+            it('rejects armor without a place, hearts or durability, and a place on something that is not armor', () =>
+            {
+                const noSlot = copyItems();
+                delete find(noSlot, 'iron-helmet').slot;
+                expect(() => parseItems(noSlot)).toThrow(/slot must be one of head, body, feet/);
+
+                const noHearts = copyItems();
+                find(noHearts, 'iron-helmet').armorHearts = 0;
+                expect(() => parseItems(noHearts)).toThrow(/armorHearts must be a whole number of Armor hearts, at least 1/);
+
+                const noWear = copyItems();
+                delete find(noWear, 'iron-helmet').durability;
+                expect(() => parseItems(noWear)).toThrow(/durability must be set: Armor wears out/);
+
+                const wrongKind = copyItems();
+                find(wrongKind, 'wood').slot = 'head';
+                expect(() => parseItems(wrongKind)).toThrow(/category must be armor/);
+            });
+
+            it('rejects a potion effect that is unknown, on a non-consumable, or without its size', () =>
+            {
+                const unknown = copyItems();
+                find(unknown, 'speed-potion').effect = 'flight';
+                expect(() => parseItems(unknown)).toThrow(/effect must be one of heal, strength, armor, speed/);
+
+                const notConsumable = copyItems();
+                find(notConsumable, 'iron-sword').effect = 'speed';
+                expect(() => parseItems(notConsumable)).toThrow(/category must be consumable/);
+
+                const noTime = copyItems();
+                delete find(noTime, 'strength-potion').durationSec;
+                expect(() => parseItems(noTime)).toThrow(/durationSec must be a number of seconds above 0/);
+
+                const noHearts = copyItems();
+                delete find(noHearts, 'armor-potion').amount;
+                expect(() => parseItems(noHearts)).toThrow(/amount must be a whole number of Armor hearts/);
+            });
+        });
+
         describe('durability and repairs', () =>
         {
             it('reads the durability of the swords and tools that wear, and none for the wooden sword', () =>
@@ -406,9 +463,9 @@ describe('validator errors', () =>
             it('reads the repair recipes and rejects a free repair and a repeated item', () =>
             {
                 const parsed = parseRepairs(repairs);
-                expect(parsed.map(r => r.itemId)).toEqual(['axe-t1', 'pickaxe-t1', 'iron-sword', 'crystal-sword']);
+                expect(parsed.map(r => r.itemId)).toEqual(['axe-t1', 'pickaxe-t1', 'iron-sword', 'crystal-sword', 'iron-helmet', 'iron-chestplate', 'iron-boots']);
                 expect(parsed.filter(r => r.building === 'workshop').map(r => r.itemId)).toEqual(['axe-t1', 'pickaxe-t1']);
-                expect(parsed.filter(r => r.building === 'forge').map(r => r.itemId)).toEqual(['iron-sword', 'crystal-sword']);
+                expect(parsed.filter(r => r.building === 'forge').map(r => r.itemId)).toEqual(['iron-sword', 'crystal-sword', 'iron-helmet', 'iron-chestplate', 'iron-boots']);
                 expect(parsed.every(r => r.ingredients.length > 0)).toBe(true);
 
                 const free = JSON.parse(JSON.stringify(repairs));

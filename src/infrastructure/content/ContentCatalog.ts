@@ -4,6 +4,7 @@
  * here with the file and path of the mistake rather than as an undefined deep in a modal.
  */
 
+import { ARMOR_SLOTS, POTION_EFFECTS } from '../../domain/entities/Armor';
 import type { BookDefinition } from '../../domain/entities/Book';
 import type { EnemyDefinition, EnemyKind } from '../../domain/entities/Enemy';
 import type { EnemyAttackId, EnemyAttackMove, EnemyAttackPlan } from '../../domain/entities/EnemyAttackPlanner';
@@ -52,7 +53,7 @@ export interface GameContent
     playerAnimations: PlayerAnimations;
 }
 
-const ITEM_CATEGORIES: readonly ItemCategory[] = ['material', 'consumable', 'tool', 'weapon'];
+const ITEM_CATEGORIES: readonly ItemCategory[] = ['material', 'consumable', 'tool', 'weapon', 'armor'];
 const ENEMY_KINDS: readonly EnemyKind[] = ['normal', 'elite', 'miniboss', 'boss'];
 const ENEMY_ATTACK_IDS: readonly EnemyAttackId[] = ['charge', 'rock-throw'];
 const BUILDINGS = ['workshop', 'forge'] as const;
@@ -64,6 +65,52 @@ function parseIngredients (v: ReturnType<typeof makeValidators>, value: unknown,
         const ing = v.asObject(raw, `${path}[${i}]`);
         return { itemId: v.asString(ing.itemId, `${path}[${i}].itemId`), count: v.asNumber(ing.count, `${path}[${i}].count`) };
     });
+}
+
+/** The fields only Armor (`slot`, `armorHearts`, `speedBonus`) and Potions (`effect`, `amount`, `durationSec`) have. */
+function parseArmorAndPotion (v: ReturnType<typeof makeValidators>, item: Record<string, unknown>, p: string): Partial<ItemDefinition>
+{
+    const fields: Partial<ItemDefinition> = {};
+
+    if (item.category === 'armor')
+    {
+        fields.slot = v.asOneOf(item.slot, ARMOR_SLOTS, `${p}.slot`);
+        const hearts = v.asNumber(item.armorHearts, `${p}.armorHearts`);
+        if (!Number.isInteger(hearts) || hearts < 1) v.fail(`${p}.armorHearts`, 'a whole number of Armor hearts, at least 1');
+        fields.armorHearts = hearts;
+        const speed = v.optionalNumber(item.speedBonus, `${p}.speedBonus`);
+        if (speed !== undefined)
+        {
+            if (speed < 0 || speed > 1) v.fail(`${p}.speedBonus`, 'between 0 and 1 (0.1 = +10 %)');
+            fields.speedBonus = speed;
+        }
+        if (item.durability === undefined) v.fail(`${p}.durability`, 'set: Armor wears out');
+    }
+    else if (item.slot !== undefined || item.armorHearts !== undefined || item.speedBonus !== undefined)
+    {
+        v.fail(`${p}.category`, 'armor (only Armor has slot, armorHearts and speedBonus)');
+    }
+
+    if (item.effect !== undefined)
+    {
+        if (item.category !== 'consumable') v.fail(`${p}.category`, 'consumable (only a consumable has an effect)');
+        const effect = v.asOneOf(item.effect, POTION_EFFECTS, `${p}.effect`);
+        fields.effect = effect;
+        const amount = v.optionalNumber(item.amount, `${p}.amount`);
+        const duration = v.optionalNumber(item.durationSec, `${p}.durationSec`);
+        if (effect === 'armor' && (amount === undefined || !Number.isInteger(amount) || amount < 1))
+        {
+            v.fail(`${p}.amount`, 'a whole number of Armor hearts, at least 1, for an armor potion');
+        }
+        if ((effect === 'strength' || effect === 'speed') && (duration === undefined || duration <= 0))
+        {
+            v.fail(`${p}.durationSec`, 'a number of seconds above 0 for a strength or speed potion');
+        }
+        if (amount !== undefined) fields.amount = amount;
+        if (duration !== undefined) fields.durationSec = duration;
+    }
+
+    return fields;
 }
 
 export function parseItems (raw: unknown): ItemDefinition[]
@@ -98,6 +145,7 @@ export function parseItems (raw: unknown): ItemDefinition[]
             maxUpgradeLevel: v.optionalNumber(item.maxUpgradeLevel, `${p}.maxUpgradeLevel`),
             healAmount: v.optionalNumber(item.healAmount, `${p}.healAmount`),
             durability,
+            ...parseArmorAndPotion(v, item, p),
         };
     });
 }

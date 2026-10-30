@@ -123,6 +123,27 @@ describe('content data integrity', () =>
         for (const item of durable) expect(repairs.repairs.some(r => r.itemId === item.id), `${item.id} can be repaired`).toBe(true);
     });
 
+    it('has armor for every place, every armor piece and effect potion craftable, and armor taught by a book', () =>
+    {
+        type Armorish = { id: string; category: string; slot?: string; effect?: string };
+        const all = items as Armorish[];
+        const armorPieces = all.filter(i => i.category === 'armor');
+
+        expect(new Set(armorPieces.map(i => i.slot))).toEqual(new Set(['head', 'body', 'feet']));
+
+        const craftable = new Map((recipes as LooseRecipe[]).map(r => [r.resultItemId, r] as const));
+        const unlockable = new Set(books.flatMap(b => b.unlockedRecipes));
+        for (const piece of armorPieces)
+        {
+            expect(craftable.get(piece.id)?.requiredBookRecipe, `${piece.id} is taught by a book`).toBe(piece.id);
+            expect(unlockable.has(piece.id), `${piece.id} is unlocked by a book`).toBe(true);
+        }
+        for (const potion of all.filter(i => i.effect !== undefined))
+        {
+            expect(craftable.has(potion.id), `${potion.id} has a recipe`).toBe(true);
+        }
+    });
+
     describe('lessons', () =>
     {
         type LessonPage = { pageNumber: number; lesson?: string };

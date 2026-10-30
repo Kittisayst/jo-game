@@ -48,7 +48,7 @@ export const WaypointModal: React.FC<WaypointModalProps> = ({
                 </p>
 
                 <div className="bg-slate-900/60 p-3 rounded-xl border border-slate-800 text-xs text-slate-400">
-                    🎒 ວັດສະດຸໃນກະເປົາປັດຈຸບັນ: {entities.backpack.usedSlotsCount} / 20 ຊ່ອງ
+                    🎒 ວັດສະດຸໃນກະເປົາປັດຈຸບັນ: {entities.backpack.usedSlotsCount} / {entities.backpack.maxSlots} ຊ່ອງ
                 </div>
 
                 <div className="flex gap-3 pt-2">

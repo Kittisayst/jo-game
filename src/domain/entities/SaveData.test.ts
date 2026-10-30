@@ -211,3 +211,53 @@ describe('Durability in a save', () =>
         ]);
     });
 });
+
+describe('Armor and the Quick slot in a save', () =>
+{
+    it('starts a new game with nothing worn and an empty Quick slot', () =>
+    {
+        const save = createDefaultSaveSnapshot();
+
+        expect(save.quickSlotItemId).toBeNull();
+        expect(save.equipment.armor ?? {}).toEqual({});
+    });
+
+    it('keeps the worn pieces with their Durability and the Quick slot', () =>
+    {
+        const saved = migrateSaveSnapshot({
+            version: CURRENT_SAVE_VERSION,
+            equipment: {
+                equippedWeaponId: 'wooden-sword',
+                upgradeLevels: {},
+                armor: { head: { itemId: 'iron-helmet', durability: 41.7 }, body: { itemId: 'iron-chestplate' } },
+            },
+            quickSlotItemId: 'speed-potion',
+        });
+
+        expect(saved.equipment.armor).toEqual({
+            head: { itemId: 'iron-helmet', durability: 41 },
+            body: { itemId: 'iron-chestplate' },
+        });
+        expect(saved.quickSlotItemId).toBe('speed-potion');
+    });
+
+    it('ignores a place that does not exist, a piece without an id and a Quick slot that is not text', () =>
+    {
+        const saved = migrateSaveSnapshot({
+            version: CURRENT_SAVE_VERSION,
+            equipment: { armor: { hands: { itemId: 'gloves' }, head: { durability: 3 }, feet: 'boots' } },
+            quickSlotItemId: 42,
+        });
+
+        expect(saved.equipment.armor).toEqual({});
+        expect(saved.quickSlotItemId).toBeNull();
+    });
+
+    it('loads a save from before Armor existed', () =>
+    {
+        const saved = migrateSaveSnapshot({ version: CURRENT_SAVE_VERSION, equipment: { equippedWeaponId: 'wooden-sword', upgradeLevels: {} } });
+
+        expect(saved.equipment.armor).toEqual({});
+        expect(saved.quickSlotItemId).toBeNull();
+    });
+});

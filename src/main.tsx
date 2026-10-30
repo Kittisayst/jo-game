@@ -13,6 +13,7 @@ loadGameContent()
         installGameContent(content);
         entities.itemCatalog.load(content.items);
         entities.tutorial.setSteps(content.tutorial);
+        entities.syncArmor();
 
         root.render(
             <React.StrictMode>

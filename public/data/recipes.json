@@ -151,6 +151,113 @@
       { "itemId": "crystal", "count": 6 },
       { "itemId": "boss-core", "count": 1 }
     ]
+  },
+  {
+    "id": "recipe-iron-helmet",
+    "resultItemId": "iron-helmet",
+    "resultCount": 1,
+    "building": "forge",
+    "requiredBookRecipe": "iron-helmet",
+    "creditCost": 0,
+    "ingredients": [
+      {
+        "itemId": "iron-ore",
+        "count": 6
+      },
+      {
+        "itemId": "fiber",
+        "count": 2
+      }
+    ]
+  },
+  {
+    "id": "recipe-iron-chestplate",
+    "resultItemId": "iron-chestplate",
+    "resultCount": 1,
+    "building": "forge",
+    "requiredBookRecipe": "iron-chestplate",
+    "creditCost": 0,
+    "ingredients": [
+      {
+        "itemId": "iron-ore",
+        "count": 10
+      },
+      {
+        "itemId": "fiber",
+        "count": 3
+      }
+    ]
+  },
+  {
+    "id": "recipe-iron-boots",
+    "resultItemId": "iron-boots",
+    "resultCount": 1,
+    "building": "forge",
+    "requiredBookRecipe": "iron-boots",
+    "creditCost": 0,
+    "ingredients": [
+      {
+        "itemId": "iron-ore",
+        "count": 5
+      },
+      {
+        "itemId": "fiber",
+        "count": 2
+      }
+    ]
+  },
+  {
+    "id": "recipe-strength-potion",
+    "resultItemId": "strength-potion",
+    "resultCount": 1,
+    "building": "workshop",
+    "requiredBookRecipe": null,
+    "creditCost": 0,
+    "ingredients": [
+      {
+        "itemId": "herb",
+        "count": 3
+      },
+      {
+        "itemId": "iron-ore",
+        "count": 1
+      }
+    ]
+  },
+  {
+    "id": "recipe-armor-potion",
+    "resultItemId": "armor-potion",
+    "resultCount": 1,
+    "building": "workshop",
+    "requiredBookRecipe": null,
+    "creditCost": 0,
+    "ingredients": [
+      {
+        "itemId": "herb",
+        "count": 2
+      },
+      {
+        "itemId": "stone",
+        "count": 2
+      }
+    ]
+  },
+  {
+    "id": "recipe-speed-potion",
+    "resultItemId": "speed-potion",
+    "resultCount": 1,
+    "building": "workshop",
+    "requiredBookRecipe": null,
+    "creditCost": 0,
+    "ingredients": [
+      {
+        "itemId": "herb",
+        "count": 2
+      },
+      {
+        "itemId": "fiber",
+        "count": 2
+      }
+    ]
   }
 ]
-

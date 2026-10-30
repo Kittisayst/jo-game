@@ -20,7 +20,8 @@ export interface ItemBrokenPayload
     itemId: string;
 }
 
-function announce (change: DurabilityChange): void
+/** Says what a change of Durability did: the new state, and a break when it reached zero. */
+export function announceDurabilityChange (change: DurabilityChange): void
 {
     const previousState = durabilityStateOf(change.previous, change.max);
     const state = durabilityStateOf(change.current, change.max);
@@ -47,7 +48,7 @@ export function wearItemUseCase (backpack: Backpack, itemId: string, amount = 1)
 {
     const change = backpack.wearItem(itemId, amount);
     // An item that is already Broken has nothing left to lose: say nothing
-    if (change && change.current !== change.previous) announce(change);
+    if (change && change.current !== change.previous) announceDurabilityChange(change);
     return change;
 }
 
@@ -55,6 +56,6 @@ export function wearItemUseCase (backpack: Backpack, itemId: string, amount = 1)
 export function deathWearUseCase (backpack: Backpack): DurabilityChange[]
 {
     const changes = backpack.wearAllDurable();
-    for (const change of changes) announce(change);
+    for (const change of changes) announceDurabilityChange(change);
     return changes;
 }

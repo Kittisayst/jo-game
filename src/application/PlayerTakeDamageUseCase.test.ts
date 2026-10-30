@@ -25,7 +25,7 @@ describe('playerTakeDamageUseCase', () =>
         DomainEvents.off(PLAYER_DIED_EVENT, gameOverListener);
 
         expect(health.current).toBe(2);
-        expect(damageListener).toHaveBeenCalledWith({ currentHealth: 2, maxHealth: 3 });
+        expect(damageListener).toHaveBeenCalledWith({ currentHealth: 2, maxHealth: 3, armor: 0, maxArmor: 0 });
         expect(gameOverListener).not.toHaveBeenCalled();
     });
 
@@ -45,7 +45,7 @@ describe('playerTakeDamageUseCase', () =>
 
         expect(health.current).toBe(0);
         expect(health.isDead).toBe(true);
-        expect(damageListener).toHaveBeenCalledWith({ currentHealth: 0, maxHealth: 3 });
+        expect(damageListener).toHaveBeenCalledWith({ currentHealth: 0, maxHealth: 3, armor: 0, maxArmor: 0 });
         expect(gameOverListener).toHaveBeenCalledOnce();
     });
 

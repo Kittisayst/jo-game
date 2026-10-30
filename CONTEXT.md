@@ -118,10 +118,10 @@ Three pieces worn at once (head, body, feet). Each gives Armor hearts; boots may
 Protection that is lost before Health and comes back when the player returns to the Village Hub.
 
 **Potion**:
-A drink made at the Workshop: heal, strength (+50% damage for 60 s), armor (+1 Armor heart) or speed (+30% for 60 s). Drunk from the Quick slot with Q.
+A drink made at the Workshop: heal, strength (+50% damage for 60 s), armor (+1 Armor heart) or speed (+30% for 60 s). Drunk from the Quick slot with R (Q swaps the sword).
 
 **Quick slot**:
-The one Backpack slot chosen to be drunk with Q.
+The one Potion kind chosen in the Backpack to be drunk with R.
 
 **Tutorial step**:
 One hint of the first Stage, shown until the thing it teaches has been done (walk, harvest, strike a tree, fight, open the Backpack, finish the Stage, then read, craft and plant in the Village). Defined in `tutorial.json`; done steps are saved.

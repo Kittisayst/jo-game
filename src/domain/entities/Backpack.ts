@@ -40,7 +40,7 @@ export interface CraftingIngredient
     count: number;
 }
 
-export const BACKPACK_MAX_SLOTS = 20;
+export const BACKPACK_MAX_SLOTS = 30;
 
 export class Backpack
 {
@@ -129,6 +129,36 @@ export class Backpack
             if (change && change.current !== change.previous) changes.push(change);
         }
         return changes;
+    }
+
+    /**
+     * Takes one `itemId` out of the first slot that holds it, keeping its Durability (for putting it on as Armor).
+     * Returns null when there is none.
+     */
+    takeOne (itemId: string): { itemId: string; durability?: number } | null
+    {
+        const index = this._slots.findIndex(s => s !== null && s.itemId === itemId);
+        if (index < 0) return null;
+
+        const slot = this._slots[index]!;
+        const taken = { itemId, ...(slot.durability !== undefined ? { durability: slot.durability } : {}) };
+        this.removeFromSlot(index, 1);
+        return taken;
+    }
+
+    /** Puts one worn item into an empty slot with the Durability it had. Returns false when the Backpack is full. */
+    addWithDurability (itemId: string, durability?: number): boolean
+    {
+        const index = this._slots.findIndex(s => s === null);
+        if (index < 0) return false;
+
+        this._slots[index] = {
+            slotIndex: index,
+            itemId,
+            count: 1,
+            ...(durability !== undefined ? { durability } : {}),
+        };
+        return true;
     }
 
     /** Gives the first slot holding `itemId` its full Durability back. Returns false when it was missing or never wears. */

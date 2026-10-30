@@ -8,7 +8,7 @@
     "price": 20,
     "prerequisiteBookId": null,
     "requiredCompletedStageId": null,
-    "unlockedRecipes": ["pickaxe-t1", "hammer-t1", "repair-kit", "iron-sword"],
+    "unlockedRecipes": ["pickaxe-t1", "hammer-t1", "repair-kit", "iron-sword", "iron-helmet", "iron-chestplate", "iron-boots"],
     "pages": [
       {
         "pageNumber": 1,
