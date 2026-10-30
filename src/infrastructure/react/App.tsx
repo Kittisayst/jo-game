@@ -50,7 +50,8 @@ import { GateRepairModal } from './components/GateRepairModal';
 import { WaypointModal } from './components/WaypointModal';
 import { QuizFinisherModal } from './components/QuizFinisherModal';
 import { StageQuestionModal } from './components/StageQuestionModal';
-import { GardenModal } from './components/GardenModal';
+import { GardenSeedPicker } from './components/GardenSeedPicker';
+import { GARDEN_LEVEL_KEY, isHomeLevel } from '../phaser/levelCatalog';
 import { StorageModal } from './components/StorageModal';
 import { answerStageQuestionUseCase, pickStageQuestion } from '../../application/AnswerStageQuestionUseCase';
 import { returnToVillageUseCase } from '../../application/ReturnToVillageUseCase';
@@ -69,6 +70,7 @@ function App ()
 
     const [currentLevel, setCurrentLevel] = useState(() => (shouldResumeInGame ? initialSession : 'village'));
     const [quizFinisherBookId, setQuizFinisherBookId] = useState('book-ch1');
+    const [gardenPlot, setGardenPlot] = useState<number | null>(null);
     const [health, setHealth] = useState(() => entities.health.current);
     const [walletBalance, setWalletBalance] = useState(() => entities.wallet.balance);
     const [equippedWeaponId, setEquippedWeaponId] = useState(() => entities.equipment.equippedWeaponId);
@@ -261,9 +263,10 @@ function App ()
     {
         // A Stage that is not built yet (grey on the map) has no level to load
         const stage = getStageDefinition(getGameContent().stages, stageKey);
-        if (stageKey !== 'village' && (!stage || !isStageReady(stage))) return;
+        if (!isHomeLevel(stageKey) && (!stage || !isStageReady(stage))) return;
 
-        const success = selectStageUseCase(stageProgression, stageKey);
+        // The village and the Garden are always open; only a Stage has to be unlocked
+        const success = stageKey === GARDEN_LEVEL_KEY || selectStageUseCase(stageProgression, stageKey);
         if (!success) return;
 
         resumeGameUseCase(pauseState);
@@ -596,7 +599,17 @@ function App ()
         onGamePaused: () => setIsGamePaused(true),
         onGameResumed: () => setIsGamePaused(false),
         onOpenStageMap: () => setIsStageMapOpen(true),
-        onOpenGarden: () => setIsGardenOpen(true),
+        onOpenGarden: plotIndex =>
+        {
+            setGardenPlot(plotIndex ?? null);
+            setIsGardenOpen(true);
+        },
+        onGardenChanged: change =>
+        {
+            if (change === 'planted') notifyTutorial('seed-planted');
+            setBackpackRevision(r => r + 1);
+            autoSaveGame();
+        },
         onOpenStorage: () => setIsStorageOpen(true),
         onWeaponChanged: weaponId =>
         {
@@ -943,12 +956,13 @@ function App ()
                 />
             )}
 
-            <GardenModal
+            <GardenSeedPicker
                 isOpen={isGardenOpen}
+                plotIndex={gardenPlot}
                 onClose={() => setIsGardenOpen(false)}
-                onChanged={change =>
+                onPlanted={() =>
                 {
-                    if (change === 'planted') notifyTutorial('seed-planted');
+                    notifyTutorial('seed-planted');
                     setBackpackRevision(r => r + 1);
                     autoSaveGame();
                 }}

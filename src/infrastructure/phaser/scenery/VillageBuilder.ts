@@ -229,7 +229,7 @@ export function buildVillageScenery (scene: Phaser.Scene, baseY: number, forgeOp
         { x: 880, label: '🔨 [E] ເຂົ້າໂຮງຊ່າງ (Workshop)', action: () => EventBus.emit('open-workshop') },
         forge,
         { x: 235, label: '📦 [E] ເປີດຫີບເກັບຂອງ (Storage)', action: () => EventBus.emit('open-storage') },
-        { x: 1010, label: '🌱 [E] ເຂົ້າສວນຜັກ (Garden)', action: () => EventBus.emit('open-garden') },
+        { x: 1010, label: '🌱 [E] ເຂົ້າສວນຜັກ (Garden)', action: () => EventBus.emit('change-level', 'garden') },
         { x: 1420, label: '🌀 [E] ເລືອກດ່ານຜະຈົນໄພ (World Map)', action: () => EventBus.emit('open-stage-map') },
     ];
 }

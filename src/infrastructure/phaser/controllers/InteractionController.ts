@@ -10,6 +10,7 @@ import type { BrokenGate, ResourceNodeView, WaypointView } from '../scenery/Stag
 import type { InteractiveBuilding } from '../scenery/VillageBuilder';
 import type { Game } from '../scenes/Game';
 import { notifyTutorial } from '../../tutorial';
+import { isHomeLevel } from '../levelCatalog';
 
 /** Shortest time between two Strikes, so a held or mashed E key cannot fell a tree in an instant. */
 const STRIKE_COOLDOWN_MS = 400;
@@ -94,8 +95,8 @@ export class InteractionController
             this.activeInteraction = action;
         };
 
-        // 1. Village buildings
-        if (scene.currentLevelKey === 'village')
+        // 1. Village buildings, and the Plots and signs of the Garden
+        if (isHomeLevel(scene.currentLevelKey))
         {
             for (const b of this.interactables.buildings)
             {
