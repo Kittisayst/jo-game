@@ -2,5 +2,12 @@
   "maxLevel": 150,
   "xpCurve": { "base": 10, "exponent": 1.5 },
   "pointsPerLevel": 1,
-  "overlevel": { "levelsPerStage": 1.5, "offset": 10, "xpShare": 0.2 }
+  "overlevel": { "levelsPerStage": 1.5, "offset": 10, "xpShare": 0.2 },
+  "stats": {
+    "attack": { "maxPoints": 50, "perPoint": 0.01 },
+    "hearts": { "maxPoints": 30, "pointsPerHeart": 10 },
+    "guard": { "maxPoints": 30, "blockChancePerPoint": 0.01 },
+    "agility": { "maxPoints": 39, "speedPerPoint": 0.0025 }
+  },
+  "respec": { "ingredients": [{ "itemId": "crystal", "count": 3 }] }
 }

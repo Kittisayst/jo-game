@@ -4,6 +4,7 @@ import { Health } from '../domain/entities/Health';
 import {
     playerTakeDamageUseCase,
     PLAYER_DAMAGED_EVENT,
+    PLAYER_BLOCKED_EVENT,
     PLAYER_DIED_EVENT,
     PlayerDamagedPayload,
 } from './PlayerTakeDamageUseCase';
@@ -65,5 +66,32 @@ describe('playerTakeDamageUseCase', () =>
 
         expect(damageListener).not.toHaveBeenCalled();
         expect(gameOverListener).not.toHaveBeenCalled();
+    });
+});
+
+describe('playerTakeDamageUseCase with Guard', () =>
+{
+    it('stops the hit when the dice roll under the block chance, losing nothing', () =>
+    {
+        const health = new Health();
+        const blocked = vi.fn();
+        DomainEvents.on(PLAYER_BLOCKED_EVENT, blocked);
+
+        expect(playerTakeDamageUseCase(health, undefined, { blockChance: 0.3, random: { next: () => 0.29 } })).toBe('blocked');
+        DomainEvents.off(PLAYER_BLOCKED_EVENT, blocked);
+
+        expect(health.current).toBe(3);
+        expect(blocked).toHaveBeenCalledTimes(1);
+    });
+
+    it('lets the hit through when the dice roll above it, and with no Guard at all', () =>
+    {
+        const health = new Health();
+        expect(playerTakeDamageUseCase(health, undefined, { blockChance: 0.3, random: { next: () => 0.3 } })).toBe('hit');
+        expect(health.current).toBe(2);
+        expect(playerTakeDamageUseCase(health, undefined, { blockChance: 0, random: { next: () => 0 } })).toBe('hit');
+        expect(health.current).toBe(1);
+        expect(playerTakeDamageUseCase(health)).toBe('hit');
+        expect(health.isDead).toBe(true);
     });
 });

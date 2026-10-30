@@ -107,7 +107,8 @@ export class SkillController
     {
         const { scene } = this;
         const dir = scene.player.facingDir < 0 ? -1 : 1;
-        const damage = Math.max(1, Math.round(entities.equipment.equippedStats.damage * effect.damageMultiplier * entities.effects.damageMultiplier));
+        const attackStat = entities.heroStats.attackMultiplier(getGameContent().statsTuning);
+        const damage = Math.max(1, Math.round(entities.equipment.equippedStats.damage * effect.damageMultiplier * entities.effects.damageMultiplier * attackStat));
 
         for (const target of this.areaTargets(effect))
         {
@@ -141,7 +142,8 @@ export class SkillController
     {
         const { scene } = this;
         const dir = scene.player.facingDir < 0 ? -1 : 1;
-        const damage = Math.max(1, Math.round(entities.equipment.equippedStats.damage * effect.damageMultiplier * entities.effects.damageMultiplier));
+        const attackStat = entities.heroStats.attackMultiplier(getGameContent().statsTuning);
+        const damage = Math.max(1, Math.round(entities.equipment.equippedStats.damage * effect.damageMultiplier * entities.effects.damageMultiplier * attackStat));
         const targets = this.chainTargets(effect);
 
         const bolt = scene.add.graphics().setDepth(14);
@@ -203,7 +205,8 @@ export class SkillController
         body.setSize(26, 44);
         wave.setVelocityX(dir * effect.speed);
 
-        const damage = Math.max(1, Math.round(entities.equipment.equippedStats.damage * effect.damageMultiplier * entities.effects.damageMultiplier));
+        const attackStat = entities.heroStats.attackMultiplier(getGameContent().statsTuning);
+        const damage = Math.max(1, Math.round(entities.equipment.equippedStats.damage * effect.damageMultiplier * entities.effects.damageMultiplier * attackStat));
         let pierceLeft = effect.pierce;
         const hit = new Set<object>();
         const stop = (): void =>

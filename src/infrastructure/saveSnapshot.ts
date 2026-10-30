@@ -4,6 +4,7 @@
  * their own state from `entities` afterwards.
  */
 
+import { syncHearts } from './heroStats';
 import { syncMovement, syncSkills } from './skills';
 import {
     createSaveSnapshotUseCase,
@@ -58,6 +59,7 @@ export function restoreEntitiesFromSnapshot (snapshot: SaveGameSnapshot): void
     // A save made before skills existed still teaches the skills of the Textbooks already passed
     syncSkills();
     syncMovement();
+    syncHearts();
 }
 
 /** Wipes the active slot and puts the game state back to a brand-new player. */

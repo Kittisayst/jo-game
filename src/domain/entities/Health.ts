@@ -9,7 +9,7 @@ const EXTRA_ARMOR_LIMIT = 3;
 export class Health
 {
     private _current: number;
-    private readonly _max: number;
+    private _max: number;
     /** Armor hearts left: they are lost before Health and come back when the hero is home. */
     private _armor = 0;
     private _maxArmor = 0;
@@ -78,6 +78,22 @@ export class Health
     {
         if (this.isDead || amount <= 0) return;
         this._armor = Math.min(this._maxArmor + EXTRA_ARMOR_LIMIT, this._armor + amount);
+    }
+
+    /**
+     * The hero now has `max` hearts (the three it starts with plus the Hearts Stat). Hearts gained are full;
+     * when the maximum falls (the points were taken back) the hearts above it go.
+     */
+    syncMaxHealth (max: number): void
+    {
+        const next = Math.max(1, Math.floor(max));
+        if (this.isDead)
+        {
+            this._max = next;
+            return;
+        }
+        this._current = Math.max(1, Math.min(next, this._current + (next - this._max)));
+        this._max = next;
     }
 
     heal (amount = 1): void

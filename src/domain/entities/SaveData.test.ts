@@ -447,3 +447,13 @@ describe('Hero Level in a save', () =>
         expect(saved.heroLevel).toEqual({ level: 1, xp: 0, unspentPoints: 0 });
     });
 });
+
+describe('Hero Stats in a save', () =>
+{
+    it('keeps the points of each Stat and starts an older save at 0', () =>
+    {
+        const saved = migrateSaveSnapshot({ version: CURRENT_SAVE_VERSION, heroStats: { attack: 7, hearts: 10, guard: 'x', agility: -1, fly: 3 } });
+        expect(saved.heroStats).toEqual({ attack: 7, hearts: 10, guard: 0, agility: 0 });
+        expect(migrateSaveSnapshot({ version: CURRENT_SAVE_VERSION }).heroStats).toEqual({ attack: 0, hearts: 0, guard: 0, agility: 0 });
+    });
+});

@@ -35,3 +35,14 @@ describe('PerformAttackUseCase', () =>
         expect(performAttackUseCase(new EquipmentState(), cooldown)).toBeNull();
     });
 });
+
+describe('PerformAttackUseCase with the Attack Stat', () =>
+{
+    it('multiplies the damage by the Attack Stat', () =>
+    {
+        const plain = performAttackUseCase(new EquipmentState(), new AttackCooldown());
+        const boosted = performAttackUseCase(new EquipmentState(), new AttackCooldown(), undefined, undefined, 1.5);
+        expect(plain?.damage).toBe(12);
+        expect(boosted?.damage).toBe(18);
+    });
+});

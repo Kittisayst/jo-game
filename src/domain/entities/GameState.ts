@@ -20,6 +20,7 @@ import { SkillCooldowns } from './SkillCooldowns';
 import { SkillProgression } from './SkillProgression';
 import { ToolUpgrades } from './ToolUpgrades';
 import { HeroLevel } from './HeroLevel';
+import { HeroStats } from './HeroStats';
 import { PendingRewards } from './PendingRewards';
 import { PlantRegrowth } from './PlantRegrowth';
 import { RealmProgression } from './RealmProgression';
@@ -64,6 +65,8 @@ export class GameState
     readonly toolUpgrades = new ToolUpgrades();
     /** The hero's Hero Level and XP (XP comes only from defeating monsters). */
     readonly heroLevel = new HeroLevel();
+    /** What the Stat points were spent on (Attack, Hearts, Guard, Agility). */
+    readonly heroStats = new HeroStats();
     /** The Storage chest: 40 slots, never touched by dying. */
     readonly storage: Backpack;
     /** Timed Potion effects running on the hero (not saved). */
@@ -132,6 +135,7 @@ export class GameState
             skills: this.skills.toSnapshot(),
             toolUpgrades: this.toolUpgrades.toSnapshot(),
             heroLevel: this.heroLevel.toSnapshot(),
+            heroStats: this.heroStats.toSnapshot(),
             storage: this.storage.toSnapshot(),
         };
     }
@@ -182,6 +186,7 @@ export class GameState
         this.skillCooldowns.clear();
         this.toolUpgrades.loadFrom(snapshot.toolUpgrades);
         this.heroLevel.loadFrom(snapshot.heroLevel);
+        this.heroStats.loadFrom(snapshot.heroStats);
         this.storage.loadFromSnapshot(snapshot.storage ?? []);
         this.effects.clear();
         this.syncArmor();

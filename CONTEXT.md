@@ -91,7 +91,11 @@ What a defeated monster pays towards the next Hero Level. It is not Credit: it c
 _Avoid_: experience points, exp
 
 **Stat point**:
-Given for every Hero Level; the hero spends it on a Stat (a later phase of the Hero Level plan).
+Given for every Hero Level (149 by level 150); the hero spends each on a Stat in the Character window (C). Taking them all back costs Materials, never Credit.
+
+**Stat**:
+One of four things Stat points go into: Attack (damage of the sword and Skills), Hearts (an extra heart for every 10 points), Guard (the chance that a hit does nothing) and Agility (walking speed). Each has a ceiling and the ceilings add up to the points of the top level, so the hero at level 150 has filled every Stat. A Stat is a small boost on top of the gear, never a replacement for it.
+_Avoid_: attribute, skill (that is a Skill)
 
 **Stun**:
 An enemy held still for a few seconds by a Skill (such as Ping): it cannot patrol, attack or hurt the hero by touching, and an attack it was starting is cut short. It counts Game time. A Boss is never stunned.
