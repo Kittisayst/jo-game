@@ -345,5 +345,74 @@
         "count": 3
       }
     ]
+  },
+  {
+    "id": "night-wisp",
+    "name": "ຜີໄຟຄືນ",
+    "nameEn": "Night Wisp",
+    "kind": "normal",
+    "night": true,
+    "maxHp": 34,
+    "xp": 12,
+    "damage": 12,
+    "speed": 70,
+    "drops": [
+      {
+        "itemId": "moon-dust",
+        "chance": 0.7,
+        "count": 1
+      },
+      {
+        "itemId": "fiber",
+        "chance": 0.4,
+        "count": 1
+      }
+    ]
+  },
+  {
+    "id": "night-shade",
+    "name": "ເງົາຜລຶກຄືນ",
+    "nameEn": "Night Shade",
+    "kind": "normal",
+    "night": true,
+    "maxHp": 62,
+    "xp": 22,
+    "damage": 20,
+    "speed": 60,
+    "drops": [
+      {
+        "itemId": "moon-dust",
+        "chance": 0.8,
+        "count": 1
+      },
+      {
+        "itemId": "crystal",
+        "chance": 0.3,
+        "count": 1
+      }
+    ]
+  },
+  {
+    "id": "night-scarab",
+    "name": "ແມງງອດຄືນ",
+    "nameEn": "Night Scarab",
+    "kind": "normal",
+    "night": true,
+    "maxHp": 80,
+    "xp": 30,
+    "damage": 26,
+    "speed": 75,
+    "drops": [
+      {
+        "itemId": "moon-dust",
+        "chance": 0.9,
+        "count": 1
+      },
+      {
+        "itemId": "cactus-pulp",
+        "chance": 0.3,
+        "count": 1
+      }
+    ]
   }
 ]

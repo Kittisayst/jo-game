@@ -2031,6 +2031,62 @@
       "bytes": 208,
       "source": "Original placeholder pixel art (tools/art/build_realm3_art.py)",
       "license": "MIT (Project Original)"
+    },
+    {
+      "path": "assets/characters/night_wisp.png",
+      "category": "characters",
+      "format": "PNG",
+      "mode": "RGBA",
+      "width": 128,
+      "height": 28,
+      "hasAlpha": true,
+      "transparentPixels": 1925,
+      "colorCount": 4,
+      "bytes": 601,
+      "source": "Original placeholder pixel art (tools/art/build_night_creatures.py)",
+      "license": "MIT (Project Original)"
+    },
+    {
+      "path": "assets/characters/night_shade.png",
+      "category": "characters",
+      "format": "PNG",
+      "mode": "RGBA",
+      "width": 128,
+      "height": 28,
+      "hasAlpha": true,
+      "transparentPixels": 1736,
+      "colorCount": 4,
+      "bytes": 578,
+      "source": "Original placeholder pixel art (tools/art/build_night_creatures.py)",
+      "license": "MIT (Project Original)"
+    },
+    {
+      "path": "assets/characters/night_scarab.png",
+      "category": "characters",
+      "format": "PNG",
+      "mode": "RGBA",
+      "width": 128,
+      "height": 28,
+      "hasAlpha": true,
+      "transparentPixels": 2196,
+      "colorCount": 4,
+      "bytes": 574,
+      "source": "Original placeholder pixel art (tools/art/build_night_creatures.py)",
+      "license": "MIT (Project Original)"
+    },
+    {
+      "path": "assets/items/moon-dust.png",
+      "category": "items",
+      "format": "PNG",
+      "mode": "RGBA",
+      "width": 32,
+      "height": 32,
+      "hasAlpha": true,
+      "transparentPixels": 686,
+      "colorCount": 5,
+      "bytes": 296,
+      "source": "Original placeholder pixel art (tools/art/build_night_creatures.py)",
+      "license": "MIT (Project Original)"
     }
   ],
   "plannedAssets": {

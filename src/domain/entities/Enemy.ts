@@ -22,6 +22,8 @@ export interface EnemyDefinition
     damage: number;
     /** XP the hero gets when it falls (more in later Stages, see `StageScaling`). Not Credit. */
     xp: number;
+    /** Only walks a Stage at night (see `NightCreatures`); never in a Stage's ordinary spawns. */
+    night?: boolean;
     drops: EnemyDrop[];
     /** Special attacks, only for a Mini-boss (see `EnemyAttackPlanner`). */
     attacks?: EnemyAttackPlan;

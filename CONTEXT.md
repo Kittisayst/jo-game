@@ -101,6 +101,13 @@ _Avoid_: attribute, skill (that is a Skill)
 The time of day in the world, counted in Game time (it moves only while the game runs, like the build queue, and is saved). One day is 20 minutes: dawn, day, dusk, **night** (the last 6 minutes), dawn. At night the world is darker (never so dark that the platforms and spikes cannot be read) and, in a later phase of the Hero Level plan, Night creatures walk the Stages and the hero can sleep at the Bed. Real time (the Garden's plants) does not follow it.
 _Avoid_: clock (that is the real-time `Clock` port), time of day (say World time)
 
+**Night creature**:
+A special monster that walks a Stage only while it is night (one per Realm so far, listed in the `night` block of `stages.json`). It is tougher than the day's monsters of its Realm and pays more XP, it never appears near the hero, it drops Moon Dust, and it fades away at dawn (no drop, no XP). The first Stage and a Mini-boss or Boss Stage have none.
+_Avoid_: ghost, nightmare, boss (it is not one)
+
+**Moon Dust**:
+The Material night creatures drop. Taking back every Stat point costs Moon Dust, so starting over is a night's hunting (never Credit). A plain Material: halved on death.
+
 **Stun**:
 An enemy held still for a few seconds by a Skill (such as Ping): it cannot patrol, attack or hurt the hero by touching, and an attack it was starting is cut short. It counts Game time. A Boss is never stunned.
 
