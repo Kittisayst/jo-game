@@ -41,6 +41,9 @@ export interface HudProps
     ownedBooksCount?: number;
     backpackCount?: number;
     maxBackpackSlots?: number;
+    /** The hint of the first Stage the player has not done yet; nothing once they have or skipped it. */
+    tutorialText?: string;
+    onDismissTutorial?: () => void;
 }
 
 export function Hud ({
@@ -60,6 +63,8 @@ export function Hud ({
     ownedBooksCount = 0,
     backpackCount = 0,
     maxBackpackSlots = 20,
+    tutorialText,
+    onDismissTutorial,
 }: HudProps)
 {
     const levelLabel = hudLabelOf(currentLevel);
@@ -83,6 +88,23 @@ export function Hud ({
                     {objective && (
                         <div className="hud-badge objective-badge" title="ເປົ້າໝາຍຕໍ່ໄປ">
                             <span className="badge-label">{OBJECTIVE_TEXT[objective]}</span>
+                        </div>
+                    )}
+
+                    {tutorialText && (
+                        <div className="hud-badge tutorial-badge" data-testid="tutorial-hint" title="ຄຳແນະນຳສຳລັບຜູ້ຫຼິ້ນໃໝ່">
+                            <span className="badge-label">{tutorialText}</span>
+                            {onDismissTutorial && (
+                                <button
+                                    type="button"
+                                    className="tutorial-skip"
+                                    data-testid="tutorial-skip"
+                                    onClick={e => { e.preventDefault(); e.stopPropagation(); onDismissTutorial(); }}
+                                    title="ຂ້າມຄຳແນະນຳ"
+                                >
+                                    ✕
+                                </button>
+                            )}
                         </div>
                     )}
 

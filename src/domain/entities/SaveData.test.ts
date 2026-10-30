@@ -158,3 +158,33 @@ describe('Stage question rewards in a save', () =>
         expect(without.stageProgression.questionRewardedStages).toEqual([]);
     });
 });
+
+describe('Tutorial hints in a save', () =>
+{
+    it('starts a new game with every hint still to do', () =>
+    {
+        expect(createDefaultSaveSnapshot().tutorial).toEqual({ done: [], dismissed: false });
+    });
+
+    it('keeps what was done and whether the player skipped, dropping anything that is not an id', () =>
+    {
+        const saved = migrateSaveSnapshot({
+            version: CURRENT_SAVE_VERSION,
+            tutorial: { done: ['move', 5, 'herb'], dismissed: true },
+        });
+
+        expect(saved.tutorial).toEqual({ done: ['move', 'herb'], dismissed: true });
+    });
+
+    it('gives no hints to a save from before they existed that already has progress', () =>
+    {
+        const veteran = migrateSaveSnapshot({
+            version: CURRENT_SAVE_VERSION,
+            stageProgression: { unlockedStages: ['stage-001', 'stage-002'], completedStages: ['stage-001'] },
+        });
+        expect(veteran.tutorial.dismissed).toBe(true);
+
+        const newcomer = migrateSaveSnapshot({ version: CURRENT_SAVE_VERSION });
+        expect(newcomer.tutorial).toEqual({ done: [], dismissed: false });
+    });
+});

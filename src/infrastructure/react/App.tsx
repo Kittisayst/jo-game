@@ -16,6 +16,8 @@ import { SkinModal } from './components/SkinModal';
 import { useDialogue } from './hooks/useDialogue';
 import { useGameEvents } from './hooks/useGameEvents';
 import { useDevStageEntry } from './hooks/useDevStageEntry';
+import { dismissTutorialUseCase } from '../../application/NotifyTutorialUseCase';
+import { notifyTutorial } from '../tutorial';
 import { useGlobalShortcuts } from './hooks/useGlobalShortcuts';
 import { useModalState } from './hooks/useModalState';
 import { useSkinShop } from './hooks/useSkinShop';
@@ -134,6 +136,8 @@ function App ()
     // Bumped when books or the backpack change, so memoised values that read them recompute
     const [booksRevision, setBooksRevision] = useState(0);
     const [backpackRevision, setBackpackRevision] = useState(0);
+    // Bumped when a tutorial step is finished or skipped, so the hint on the HUD is read again
+    const [, setTutorialRevision] = useState(0);
 
     useEffect(() =>
     {
@@ -434,6 +438,17 @@ function App ()
         },
     });
 
+    // Opening the Backpack is a tutorial step
+    useEffect(() =>
+    {
+        if (isBackpackOpen) notifyTutorial('backpack-opened');
+    }, [isBackpackOpen]);
+
+    const tutorialStep = entities.tutorial.currentStep;
+    const tutorialText = tutorialStep
+        ? getGameContent().tutorial.find(step => step.id === tutorialStep.id)?.text
+        : undefined;
+
     /** Clearing a Stage sends the player home to learn and craft, not to a score screen. */
     const clearStage = (stageId: string) =>
     {
@@ -442,6 +457,7 @@ function App ()
         const isBossStage = stageNumber !== null && positionInRealm(stageNumber) === BOSS_STAGE_IN_REALM;
         const next = nextStageIdInRealm(stageId);
         const clear = completeStageUseCase(stageProgression, repositories.stageProgression, stageId, next);
+        notifyTutorial('stage-cleared');
         const bonus = isBossStage ? awardChapterClearUseCase(entities.wallet, clear.isFirstTimeClear) : 0;
         setWalletBalance(entities.wallet.balance);
         autoSaveGame();
@@ -456,6 +472,11 @@ function App ()
 
     useGameEvents({
         onStageCleared: payload => clearStage(payload.stageId),
+        onTutorialChanged: payload =>
+        {
+            if (payload.finished.length > 0) soundManager.playPowerUp();
+            setTutorialRevision(r => r + 1);
+        },
         onOpenStageQuestion: payload =>
         {
             // Walking out of a Stage asks one question about its lessons; a Stage with none to ask clears at once
@@ -471,8 +492,10 @@ function App ()
         onPlayerHealthChanged: payload => setHealth(payload.currentHealth),
         onPlayerDied: () =>
         {
-            // Dying costs half the carried Materials, then the player wakes up healed in the village
-            const result = returnToVillageUseCase('death', entities.backpack);
+            // Dying costs half the carried Materials, then the player wakes up healed in the village.
+            // A safe Stage (the first one) costs nothing.
+            const isSafeStage = getStageDefinition(getGameContent().stages, currentLevel)?.safe === true;
+            const result = returnToVillageUseCase(isSafeStage ? 'safe_waypoint' : 'death', entities.backpack);
             setBackpackRevision(r => r + 1);
             autoSaveGame();
 
@@ -483,7 +506,9 @@ function App ()
                 setTimeout(() => setVillageWelcomeToast(
                     lostCount > 0
                         ? `💀 ເຈົ້າສະຫຼົບ! ເສຍວັດສະດຸ ${lostCount} ຊິ້ນ ແຕ່ HP ຟື້ນເຕັມແລ້ວ`
-                        : '💀 ເຈົ້າສະຫຼົບ! ກັບມາໝູ່ບ້ານ HP ຟື້ນເຕັມແລ້ວ'
+                        : isSafeStage
+                            ? '💀 ເຈົ້າສະຫຼົບ! ດ່ານນີ້ປອດໄພ ບໍ່ເສຍວັດສະດຸ HP ຟື້ນເຕັມແລ້ວ'
+                            : '💀 ເຈົ້າສະຫຼົບ! ກັບມາໝູ່ບ້ານ HP ຟື້ນເຕັມແລ້ວ'
                 ), 300);
             }, 1200);
         },
@@ -584,6 +609,12 @@ function App ()
                     maxBackpackSlots={entities.backpack.maxSlots}
                     onTogglePause={handleTogglePause}
                     walletBalance={walletBalance}
+                    tutorialText={tutorialText}
+                    onDismissTutorial={() =>
+                    {
+                        dismissTutorialUseCase(entities.tutorial);
+                        autoSaveGame();
+                    }}
                 />
             )}
 
@@ -679,8 +710,9 @@ function App ()
                     setBooksRevision(r => r + 1);
                     autoSaveGame();
                 }}
-                onPageRead={() =>
+                onPageRead={(_bookId, _pageNumber, isFullyRead) =>
                 {
+                    if (isFullyRead) notifyTutorial('book-fully-read');
                     setBooksRevision(r => r + 1);
                     autoSaveGame();
                 }}

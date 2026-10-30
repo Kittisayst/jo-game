@@ -1,3 +1,4 @@
+import { TutorialSnapshot } from './TutorialProgress';
 import { SettingsData, StageProgressionData } from '../ports';
 import { BookProgressSnapshot } from './Book';
 import { BackpackSlotSnapshot } from './Backpack';
@@ -38,6 +39,8 @@ export interface SaveGameSnapshot
     practiceStats: DailyPracticeProgressSnapshot;
     repairedGates: string[];
     forgeUnlocked: boolean;
+    /** Hints of the first Stage that were done, and whether the player skipped them. Missing in older saves. */
+    tutorial: TutorialSnapshot;
 }
 
 export function createDefaultSaveSnapshot (slotId = 'slot_1'): SaveGameSnapshot
@@ -89,6 +92,7 @@ export function createDefaultSaveSnapshot (slotId = 'slot_1'): SaveGameSnapshot
         },
         repairedGates: [],
         forgeUnlocked: false,
+        tutorial: { done: [], dismissed: false },
     };
 }
 
@@ -222,6 +226,14 @@ export function migrateSaveSnapshot (raw: unknown, fallbackSlotId = 'slot_1'): S
         : [];
     const forgeUnlocked = Boolean(data.forgeUnlocked ?? books['book-ch1'].examPassed);
 
+    // A save made before the hints existed belongs to someone who already knows how to play: no hints for them
+    const rawTutorial = asRecord(data.tutorial);
+    const hasProgress = completedStages.length > 0 || books['book-ch1'].unlocked;
+    const tutorial: TutorialSnapshot = {
+        done: Array.isArray(rawTutorial.done) ? rawTutorial.done.filter((id): id is string => typeof id === 'string') : [],
+        dismissed: typeof rawTutorial.dismissed === 'boolean' ? rawTutorial.dismissed : data.tutorial === undefined && hasProgress,
+    };
+
     return {
         version: CURRENT_SAVE_VERSION,
         timestamp,
@@ -237,5 +249,6 @@ export function migrateSaveSnapshot (raw: unknown, fallbackSlotId = 'slot_1'): S
         practiceStats,
         repairedGates,
         forgeUnlocked,
+        tutorial,
     };
 }

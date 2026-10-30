@@ -10,6 +10,8 @@ import realms from '../../../public/data/realms.json';
 import stages from '../../../public/data/stages.json';
 import { parseStageDefinitions } from '../phaser/stages/StageDefinition';
 import { parseStageQuestion, parseStageScaling } from './ScalingCatalog';
+import { parseTutorial } from './TutorialCatalog';
+import tutorial from '../../../public/data/tutorial.json';
 import { scaleEnemyDefinition } from '../../domain/entities/StageScaling';
 import { parseBooks, parseEnemies, parseItems, parseQuestions, parseRecipes } from './ContentCatalog';
 import { parseNodes } from './NodeCatalog';
@@ -372,6 +374,41 @@ describe('validator errors', () =>
                 const broken = copy(stages) as unknown as { stageQuestion: { credit: number } };
                 broken.stageQuestion.credit = 2.5;
                 expect(() => parseStageQuestion(broken)).toThrow(/stageQuestion\.credit must be a whole number of Credit/);
+            });
+        });
+
+        describe('tutorial and safe stages', () =>
+        {
+            it('reads the tutorial steps in order', () =>
+            {
+                const steps = parseTutorial(tutorial);
+
+                expect(steps.map(s => s.id)).toEqual(['move', 'herb', 'tree', 'fight', 'backpack', 'exit', 'learn']);
+                expect(steps[1]).toMatchObject({ event: 'harvested:wild-herb' });
+                expect(steps.every(s => s.text.length > 0)).toBe(true);
+            });
+
+            it('rejects a repeated id, an unknown event and a step without text', () =>
+            {
+                const twice = JSON.parse(JSON.stringify(tutorial));
+                twice.steps[1].id = twice.steps[0].id;
+                expect(() => parseTutorial(twice)).toThrow(/steps\[1\]\.id must be a different id/);
+
+                const unknown = JSON.parse(JSON.stringify(tutorial));
+                unknown.steps[0].event = 'dance';
+                expect(() => parseTutorial(unknown)).toThrow(/steps\[0\]\.event must be one of moved, enemy-defeated/);
+
+                const silent = JSON.parse(JSON.stringify(tutorial));
+                silent.steps[0].text = '';
+                expect(() => parseTutorial(silent)).toThrow(/steps\[0\]\.text must be a non-empty string/);
+            });
+
+            it('marks only Stage 1 as safe', () =>
+            {
+                const parsed = parse(stages);
+
+                expect(parsed[0].safe).toBe(true);
+                expect(parsed.slice(1).some(s => s.safe)).toBe(false);
             });
         });
 

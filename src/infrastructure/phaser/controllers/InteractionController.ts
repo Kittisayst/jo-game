@@ -8,6 +8,7 @@ import type { NPC } from '../objects/NPC';
 import type { BrokenGate, ResourceNodeView, WaypointView } from '../scenery/StageBuilder';
 import type { InteractiveBuilding } from '../scenery/VillageBuilder';
 import type { Game } from '../scenes/Game';
+import { notifyTutorial } from '../../tutorial';
 
 /** Shortest time between two Strikes, so a held or mashed E key cannot fell a tree in an instant. */
 const STRIKE_COOLDOWN_MS = 400;
@@ -180,6 +181,7 @@ export class InteractionController
             node.markHarvestedVisual();
             scene.particleManager.emitCelebration(node.x, node.y - 20);
 
+            notifyTutorial(`harvested:${node.type}`);
             EventBus.emit('backpack-changed');
             showLootNotification(scene, node.x, node.y - 30, `🎒 ${describeDrops(result.drops)}`, '#22c55e');
             return;

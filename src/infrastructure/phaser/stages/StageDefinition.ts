@@ -140,6 +140,8 @@ export interface StageDefinition
     generated?: GeneratedLevel;
     /** Lesson numbers (`3-1`) the question at the end of this Stage is drawn from. */
     lessons: string[];
+    /** A safe Stage (the first one): dying in it loses no Materials. */
+    safe: boolean;
     zones: StageZone[];
 }
 
@@ -182,6 +184,7 @@ function placeholder (number: number): StageDefinition
         nameEn: `Stage ${number}`,
         layout: null,
         lessons: [],
+        safe: false,
         zones: [],
     };
 }
@@ -430,6 +433,7 @@ function parseStage (raw: unknown, index: number, nodes: ReadonlyMap<string, Nod
         nameEn: asString(entry.nameEn, `${path}.nameEn`),
         layout: generate ? null : asString(entry.layout, `${path}.layout`),
         generated,
+        safe: entry.safe === true,
         lessons: asArray(entry.lessons ?? [], `${path}.lessons`).map((lesson, j) =>
         {
             const text = asString(lesson, `${path}.lessons[${j}]`);

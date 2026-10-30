@@ -51,16 +51,18 @@ export async function makeHeroInvincible (page: Page): Promise<void>
 
 /**
  * Walks the hero out of the running Stage through its exit, until the Stage's question opens. The Stage freezes
- * the moment the hero passes the exit marker, so the walk ends there instead of at a position.
+ * the moment the hero passes the exit marker, so the walk ends there instead of at a position. A spec that only
+ * cares whether the way can be walked passes `fight: false` (the hero is invincible; the combat bot is slow
+ * and flaky when three specs share the CPU).
  */
-export async function walkOutOfStage (page: Page, bot: Bot): Promise<void>
+export async function walkOutOfStage (page: Page, bot: Bot, options: { fight?: boolean } = {}): Promise<void>
 {
   await bot.state(); // lets the helpers find the running game
   const exitX = await exitXOf(page);
   const modal = page.getByTestId('stage-question');
   const deadline = Date.now() + 90000;
   while (Date.now() < deadline && !(await modal.isVisible())) {
-    await bot.goTo(exitX + 55, { tolerance: 15, timeoutMs: 3000 });
+    await bot.goTo(exitX + 55, { tolerance: 15, timeoutMs: 3000, fight: options.fight ?? true });
   }
   await expect(modal).toBeVisible({ timeout: 1000 });
 }

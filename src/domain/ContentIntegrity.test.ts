@@ -7,6 +7,7 @@ import recipes from '../../public/data/recipes.json';
 import nodes from '../../public/data/nodes.json';
 import realms from '../../public/data/realms.json';
 import stages from '../../public/data/stages.json';
+import tutorial from '../../public/data/tutorial.json';
 
 /**
  * The game data files point at each other by id. A typo in one file silently breaks a loop
@@ -89,6 +90,22 @@ describe('content data integrity', () =>
             expect(book!.pages.some(p => p.pageNumber === q.pageNumber), `${q.id} page ${q.pageNumber}`).toBe(true);
             expect(q.correctIndex, q.id).toBeGreaterThanOrEqual(0);
             expect(q.correctIndex, q.id).toBeLessThan(q.options.length);
+        }
+    });
+
+    it('only asks the player to harvest nodes that exist and that Stage 1 has', () =>
+    {
+        const nodeIds = new Set(nodes.nodes.map(n => n.id));
+        const stage1 = (stages.stages[0] as { zones: { contents: { kind: string; node?: string }[] }[] }).zones
+            .flatMap(z => z.contents)
+            .filter(c => c.kind === 'node')
+            .map(c => c.node);
+
+        for (const step of tutorial.steps.filter(s => s.event.startsWith('harvested:')))
+        {
+            const node = step.event.split(':')[1];
+            expect(nodeIds.has(node), `${step.id} -> ${node}`).toBe(true);
+            expect(stage1, `Stage 1 has a ${node} for step ${step.id}`).toContain(node);
         }
     });
 
