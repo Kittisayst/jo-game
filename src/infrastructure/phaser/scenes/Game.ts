@@ -43,6 +43,7 @@ import { SKIN_CHANGED_EVENT, SkinChangedPayload } from '../../../application/Sel
 import { GAME_PAUSED_EVENT, GAME_RESUMED_EVENT } from '../../../application/TogglePauseUseCase';
 import { entities } from '../../composition';
 import { EnemyDefinition } from '../../../domain/entities/Enemy';
+import { scaleEnemyDefinition } from '../../../domain/entities/StageScaling';
 import { GROUND_SINK } from '../physicsConstants';
 import { awardBossRewardUseCase, reviveBossAfterFailedFinisherUseCase } from '../../../application/AwardBossRewardUseCase';
 
@@ -550,7 +551,9 @@ export class Game extends Scene
 
     private getEnemyDefinition (enemyId: string): EnemyDefinition | undefined
     {
-        return getGameContent().enemies.find(e => e.id === enemyId);
+        const definition = getGameContent().enemies.find(e => e.id === enemyId);
+        if (!definition || !this.stage) return definition;
+        return scaleEnemyDefinition(definition, this.stage.number, getGameContent().scaling);
     }
 
     private createEnemies ()

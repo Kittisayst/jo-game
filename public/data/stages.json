@@ -1,4 +1,5 @@
 {
+  "scaling": {"enemyHpPerStage": 0.08, "enemyDamagePerRealm": 1, "dropBonusPerRealm": 0.1},
   "stages": [
     {
       "number": 1, "realm": 1, "status": "ready",
@@ -21,22 +22,15 @@
     {
       "number": 2, "realm": 1, "status": "ready",
       "name": "ດ່ານ 2: ເສັ້ນທາງປ່າ", "nameEn": "Stage 2: Forest Path",
-      "layout": "assets/levels/stage-002.json",
+      "layout": {"generate": {"biome": "forest", "seed": 2, "screens": 2}},
       "zones": [
         {
           "id": "a", "name": "ເສັ້ນທາງປ່າ (Forest Path)",
           "contents": [
             {"kind": "waypoint", "x": 120, "name": "ຈຸດວາບປອດໄພ ດ່ານ 2", "label": "🌀 ຈຸດວາບປອດໄພ ດ່ານ 2"},
             {"kind": "sign", "x": 240, "text": "🌲 ເສັ້ນທາງປ່າ", "color": "#86efac", "stroke": "#064e3b"},
-            {"kind": "node", "node": "oak-tree", "x": 320},
-            {"kind": "node", "node": "wild-herb", "x": 420},
-            {"kind": "node", "node": "oak-tree", "x": 560},
-            {"kind": "node", "node": "oak-tree", "x": 660},
-            {"kind": "node", "node": "wild-herb", "x": 780},
-            {"kind": "enemy", "enemy": "forest-slime", "type": "slime", "x": 480, "y": 580, "patrolDistance": 100, "speed": 50},
-            {"kind": "enemy", "enemy": "forest-slime", "type": "slime", "x": 900, "y": 580, "patrolDistance": 120, "speed": 60},
-            {"kind": "enemy", "enemy": "forest-slime", "type": "slime", "x": 1250, "y": 580, "patrolDistance": 80, "speed": 40},
-            {"kind": "exit", "x": 1500}
+            {"kind": "spawn-pool", "nodes": ["oak-tree", "wild-herb"], "count": 5, "enemies": ["forest-slime"], "enemyCount": 3, "patrolDistance": 100, "speed": 50},
+            {"kind": "exit"}
           ]
         }
       ]
@@ -44,23 +38,15 @@
     {
       "number": 3, "realm": 1, "status": "ready",
       "name": "ດ່ານ 3: ລຳທານໍ້າໃນປ່າ", "nameEn": "Stage 3: Creek Woods",
-      "layout": "assets/levels/stage-003.json",
+      "layout": {"generate": {"biome": "forest", "seed": 3, "screens": 2}},
       "zones": [
         {
           "id": "a", "name": "ລຳທານໍ້າໃນປ່າ (Creek Woods)",
           "contents": [
             {"kind": "waypoint", "x": 120, "name": "ຈຸດວາບປອດໄພ ດ່ານ 3", "label": "🌀 ຈຸດວາບປອດໄພ ດ່ານ 3"},
             {"kind": "sign", "x": 240, "text": "🌲 ລຳທານໍ້າໃນປ່າ", "color": "#86efac", "stroke": "#064e3b"},
-            {"kind": "node", "node": "oak-tree", "x": 300},
-            {"kind": "node", "node": "oak-tree", "x": 460},
-            {"kind": "node", "node": "wild-herb", "x": 620},
-            {"kind": "node", "node": "oak-tree", "x": 860},
-            {"kind": "node", "node": "wild-herb", "x": 1040},
-            {"kind": "node", "node": "oak-tree", "x": 1400},
-            {"kind": "enemy", "enemy": "forest-slime", "type": "slime", "x": 540, "y": 580, "patrolDistance": 100, "speed": 50},
-            {"kind": "enemy", "enemy": "forest-slime", "type": "slime", "x": 780, "y": 580, "patrolDistance": 120, "speed": 60},
-            {"kind": "enemy", "enemy": "forest-slime", "type": "slime", "x": 1200, "y": 580, "patrolDistance": 100, "speed": 50},
-            {"kind": "exit", "x": 1500}
+            {"kind": "spawn-pool", "nodes": ["oak-tree", "wild-herb"], "count": 6, "enemies": ["forest-slime"], "enemyCount": 3, "patrolDistance": 100, "speed": 50},
+            {"kind": "exit"}
           ]
         }
       ]
@@ -68,22 +54,15 @@
     {
       "number": 4, "realm": 1, "status": "ready",
       "name": "ດ່ານ 4: ປາກຖ້ຳ", "nameEn": "Stage 4: Cave Mouth",
-      "layout": "assets/levels/stage-004.json",
+      "layout": {"generate": {"biome": "forest", "seed": 4, "screens": 2}},
       "zones": [
         {
           "id": "a", "name": "ປາກຖ້ຳ (Cave Mouth)",
           "contents": [
             {"kind": "waypoint", "x": 120, "name": "ຈຸດວາບປອດໄພ ດ່ານ 4", "label": "🌀 ຈຸດວາບປອດໄພ ດ່ານ 4"},
             {"kind": "sign", "x": 240, "text": "🌲 ປາກຖ້ຳ ຂ້າງໜ້າແມ່ນຖ້ຳສາຍແຮ່", "color": "#86efac", "stroke": "#064e3b"},
-            {"kind": "node", "node": "oak-tree", "x": 320},
-            {"kind": "node", "node": "wild-herb", "x": 420},
-            {"kind": "node", "node": "oak-tree", "x": 600},
-            {"kind": "node", "node": "wild-herb", "x": 760},
-            {"kind": "node", "node": "oak-tree", "x": 1000},
-            {"kind": "enemy", "enemy": "forest-slime", "type": "slime", "x": 520, "y": 580, "patrolDistance": 100, "speed": 50},
-            {"kind": "enemy", "enemy": "forest-slime", "type": "slime", "x": 880, "y": 580, "patrolDistance": 120, "speed": 60},
-            {"kind": "enemy", "enemy": "forest-slime", "type": "slime", "x": 1100, "y": 580, "patrolDistance": 80, "speed": 45},
-            {"kind": "exit", "x": 1500}
+            {"kind": "spawn-pool", "nodes": ["oak-tree", "wild-herb"], "count": 5, "enemies": ["forest-slime"], "enemyCount": 3, "patrolDistance": 100, "speed": 50},
+            {"kind": "exit"}
           ]
         }
       ]
@@ -111,20 +90,15 @@
     {
       "number": 6, "realm": 1, "status": "ready",
       "name": "ດ່ານ 6: ຖ້ຳແຄບ", "nameEn": "Stage 6: Narrow Cave",
-      "layout": "assets/levels/stage-006.json",
+      "layout": {"generate": {"biome": "cave", "seed": 6, "screens": 2}},
       "zones": [
         {
           "id": "a", "name": "ຖ້ຳແຄບ",
           "contents": [
             {"kind": "waypoint", "x": 120, "name": "ຈຸດວາບປອດໄພ ດ່ານ 6", "label": "🌀 ຈຸດວາບປອດໄພ ດ່ານ 6"},
             {"kind": "sign", "x": 260, "text": "⛏️ ຖ້ຳແຄບ", "color": "#cbd5e1", "stroke": "#1e293b"},
-            {"kind": "node", "node": "stone-rock", "x": 360},
-            {"kind": "node", "node": "iron-vein", "x": 560},
-            {"kind": "node", "node": "stone-rock", "x": 900},
-            {"kind": "node", "node": "iron-vein", "x": 1150},
-            {"kind": "enemy", "enemy": "rock-golem", "type": "slime-armored", "x": 700, "y": 580, "patrolDistance": 140, "speed": 45},
-            {"kind": "enemy", "enemy": "rock-golem", "type": "slime-armored", "x": 1400, "y": 580, "patrolDistance": 90, "speed": 35},
-            {"kind": "exit", "x": 1700}
+            {"kind": "spawn-pool", "nodes": ["stone-rock", "iron-vein"], "count": 4, "enemies": ["rock-golem"], "enemyCount": 2, "enemyType": "slime-armored", "patrolDistance": 120, "speed": 45},
+            {"kind": "exit"}
           ]
         }
       ]
@@ -132,20 +106,15 @@
     {
       "number": 7, "realm": 1, "status": "ready",
       "name": "ດ່ານ 7: ຖ້ຳເລິກ", "nameEn": "Stage 7: Deep Cave",
-      "layout": "assets/levels/stage-007.json",
+      "layout": {"generate": {"biome": "cave", "seed": 7, "screens": 3}},
       "zones": [
         {
           "id": "a", "name": "ຖ້ຳເລິກ",
           "contents": [
             {"kind": "waypoint", "x": 120, "name": "ຈຸດວາບປອດໄພ ດ່ານ 7", "label": "🌀 ຈຸດວາບປອດໄພ ດ່ານ 7"},
             {"kind": "sign", "x": 260, "text": "⛏️ ຖ້ຳເລິກ", "color": "#cbd5e1", "stroke": "#1e293b"},
-            {"kind": "node", "node": "iron-vein", "x": 330},
-            {"kind": "node", "node": "stone-rock", "x": 500},
-            {"kind": "node", "node": "iron-vein", "x": 880},
-            {"kind": "node", "node": "iron-vein", "x": 1450},
-            {"kind": "enemy", "enemy": "rock-golem", "type": "slime-armored", "x": 640, "y": 580, "patrolDistance": 140, "speed": 45},
-            {"kind": "enemy", "enemy": "rock-golem", "type": "slime-armored", "x": 1250, "y": 580, "patrolDistance": 120, "speed": 40},
-            {"kind": "exit", "x": 1700}
+            {"kind": "spawn-pool", "nodes": ["stone-rock", "iron-vein"], "count": 5, "enemies": ["rock-golem"], "enemyCount": 2, "enemyType": "slime-armored", "patrolDistance": 120, "speed": 45},
+            {"kind": "exit"}
           ]
         }
       ]
@@ -153,20 +122,15 @@
     {
       "number": 8, "realm": 1, "status": "ready",
       "name": "ດ່ານ 8: ສາຍແຮ່", "nameEn": "Stage 8: Ore Seam",
-      "layout": "assets/levels/stage-008.json",
+      "layout": {"generate": {"biome": "cave", "seed": 8, "screens": 3}},
       "zones": [
         {
           "id": "a", "name": "ສາຍແຮ່",
           "contents": [
             {"kind": "waypoint", "x": 120, "name": "ຈຸດວາບປອດໄພ ດ່ານ 8", "label": "🌀 ຈຸດວາບປອດໄພ ດ່ານ 8"},
             {"kind": "sign", "x": 260, "text": "⛏️ ສາຍແຮ່", "color": "#cbd5e1", "stroke": "#1e293b"},
-            {"kind": "node", "node": "stone-rock", "x": 340},
-            {"kind": "node", "node": "iron-vein", "x": 600},
-            {"kind": "node", "node": "iron-vein", "x": 950},
-            {"kind": "node", "node": "stone-rock", "x": 1500},
-            {"kind": "enemy", "enemy": "rock-golem", "type": "slime-armored", "x": 720, "y": 580, "patrolDistance": 140, "speed": 45},
-            {"kind": "enemy", "enemy": "rock-golem", "type": "slime-armored", "x": 1300, "y": 580, "patrolDistance": 100, "speed": 40},
-            {"kind": "exit", "x": 1700}
+            {"kind": "spawn-pool", "nodes": ["stone-rock", "iron-vein"], "count": 6, "enemies": ["rock-golem"], "enemyCount": 3, "enemyType": "slime-armored", "patrolDistance": 120, "speed": 45},
+            {"kind": "exit"}
           ]
         }
       ]
@@ -174,21 +138,15 @@
     {
       "number": 9, "realm": 1, "status": "ready",
       "name": "ດ່ານ 9: ໜ້າປະຕູໃຫຍ່", "nameEn": "Stage 9: Before the Gate",
-      "layout": "assets/levels/stage-009.json",
+      "layout": {"generate": {"biome": "cave", "seed": 9, "screens": 3}},
       "zones": [
         {
           "id": "a", "name": "ໜ້າປະຕູໃຫຍ່",
           "contents": [
             {"kind": "waypoint", "x": 120, "name": "ຈຸດວາບປອດໄພ ດ່ານ 9", "label": "🌀 ຈຸດວາບປອດໄພ ດ່ານ 9"},
             {"kind": "sign", "x": 260, "text": "⛏️ ໜ້າປະຕູໃຫຍ່", "color": "#cbd5e1", "stroke": "#1e293b"},
-            {"kind": "node", "node": "iron-vein", "x": 360},
-            {"kind": "node", "node": "stone-rock", "x": 520},
-            {"kind": "node", "node": "iron-vein", "x": 900},
-            {"kind": "node", "node": "iron-vein", "x": 1150},
-            {"kind": "enemy", "enemy": "rock-golem", "type": "slime-armored", "x": 660, "y": 580, "patrolDistance": 140, "speed": 45},
-            {"kind": "enemy", "enemy": "rock-golem", "type": "slime-armored", "x": 1000, "y": 580, "patrolDistance": 100, "speed": 40},
-            {"kind": "enemy", "enemy": "rock-golem", "type": "slime-armored", "x": 1500, "y": 580, "patrolDistance": 120, "speed": 45},
-            {"kind": "exit", "x": 1700}
+            {"kind": "spawn-pool", "nodes": ["stone-rock", "iron-vein"], "count": 6, "enemies": ["rock-golem"], "enemyCount": 4, "enemyType": "slime-armored", "patrolDistance": 120, "speed": 45},
+            {"kind": "exit"}
           ]
         }
       ]

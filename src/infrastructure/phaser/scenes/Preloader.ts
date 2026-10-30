@@ -75,7 +75,13 @@ export function enqueueGameAssets (scene: Scene): void
     // One level JSON per built Stage, cached under the Stage's id
     for (const stage of getGameContent().stages)
     {
-        if (isStageReady(stage) && stage.layout && !scene.cache.json.exists(stage.id))
+        if (!isStageReady(stage) || scene.cache.json.exists(stage.id)) continue;
+
+        if (stage.generated)
+        {
+            scene.cache.json.add(stage.id, stage.generated.level);
+        }
+        else if (stage.layout)
         {
             scene.load.json(stage.id, stage.layout);
         }

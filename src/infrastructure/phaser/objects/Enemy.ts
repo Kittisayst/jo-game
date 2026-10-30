@@ -17,6 +17,9 @@ const TEXTURE_KEYS: Record<EnemyType, string> = {
 export const SPIT_PROJECTILE_KEY = 'enemy-slime-ball';
 export const ROCK_PROJECTILE_KEY = 'enemy-rock-ball';
 
+/** Below this y (the world is 720 tall) an enemy has fallen through the floor. */
+const FELL_OUT_OF_WORLD_Y = 800;
+
 /**
  * An Arcade Physics sprite representing an enemy in the level.
  * Features an intelligent Finite State Machine and archetype-specific behaviors:
@@ -301,6 +304,15 @@ export class Enemy extends Physics.Arcade.Sprite
 
         const body = this.body as Phaser.Physics.Arcade.Body;
         if (!body) return;
+
+        // Safety net: at a very low frame rate an enemy can sink through the floor. Put it back where it
+        // started instead of letting it fall out of the world for good (see "Known issues" in the sprite-rows plan).
+        if (this.y > FELL_OUT_OF_WORLD_Y)
+        {
+            body.setVelocity(0, 0);
+            this.setPosition((this.leftBound + this.rightBound) / 2, this.baseY);
+            return;
+        }
 
         if (this.hopCooldown > 0)
         {

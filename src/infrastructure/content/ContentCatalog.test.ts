@@ -9,6 +9,8 @@ import nodes from '../../../public/data/nodes.json';
 import realms from '../../../public/data/realms.json';
 import stages from '../../../public/data/stages.json';
 import { parseStageDefinitions } from '../phaser/stages/StageDefinition';
+import { parseStageScaling } from './ScalingCatalog';
+import { scaleEnemyDefinition } from '../../domain/entities/StageScaling';
 import { parseBooks, parseEnemies, parseItems, parseQuestions, parseRecipes } from './ContentCatalog';
 import { parseNodes } from './NodeCatalog';
 import { parseRealms } from './RealmCatalog';
@@ -268,6 +270,85 @@ describe('validator errors', () =>
             const earlyBoss = copy(stages) as unknown as Loose;
             stage3(earlyBoss).zones[0].contents.push({ kind: 'boss', enemy: 'stage-ch1-boss', x: 900, y: 400 });
             expect(() => parse(earlyBoss)).toThrow(/without a boss/);
+        });
+
+        describe('generated stages', () =>
+        {
+            type Loose2 = { stages: { layout: unknown; zones: { contents: Record<string, unknown>[] }[] }[] };
+
+            it('builds the level of a generated stage and puts its exit at the end of it', () =>
+            {
+                const stage = parse(stages)[2];
+
+                expect(stage.layout).toBeNull();
+                expect(stage.generated?.level.scenery).toBe('forest');
+                expect(stage.generated?.level.worldWidth).toBe(1600);
+                expect(stage.zones[0].exit?.x).toBe(stage.generated!.exitX);
+                expect(stage.zones[0].resourceNodes).toHaveLength(6);
+                expect(stage.zones[0].enemySpawns).toHaveLength(3);
+            });
+
+            it('gives the same stage every time it is read', () =>
+            {
+                expect(parse(stages)[6]).toEqual(parse(stages)[6]);
+            });
+
+            it('leaves a hand-made stage on its level file', () =>
+            {
+                const stage = parse(stages)[0];
+
+                expect(stage.layout).toBe('assets/levels/stage-001.json');
+                expect(stage.generated).toBeUndefined();
+            });
+
+            it('rejects a spawn pool in a stage that is not generated', () =>
+            {
+                const broken = copy(stages) as unknown as Loose2;
+                broken.stages[0].zones[0].contents.push({ kind: 'spawn-pool', nodes: ['oak-tree'], count: 1 });
+
+                expect(() => parse(broken)).toThrow(/spawn-pool must be used only in a Stage with a generated layout|contents\[\d+\] must be used only in a Stage with a generated layout/);
+            });
+
+            it('rejects an unknown biome and a pool that does not fit', () =>
+            {
+                const badBiome = copy(stages) as unknown as Loose2;
+                badBiome.stages[2].layout = { generate: { biome: 'lava', seed: 3, screens: 2 } };
+                expect(() => parse(badBiome)).toThrow(/stages\[2\]\.layout\.generate\.biome must be one of forest, cave/);
+
+                const crowded = copy(stages) as unknown as Loose2;
+                const pool = crowded.stages[2].zones[0].contents.find(c => c.kind === 'spawn-pool')!;
+                pool.count = 30;
+                expect(() => parse(crowded)).toThrow(/a pool that fits the generated Stage/);
+            });
+
+            it('rejects a pool that names a node kind nodes.json does not have', () =>
+            {
+                const broken = copy(stages) as unknown as Loose2;
+                broken.stages[2].zones[0].contents.find(c => c.kind === 'spawn-pool')!.nodes = ['moon-tree'];
+
+                expect(() => parse(broken)).toThrow(/\.node must be an id from nodes\.json/);
+            });
+        });
+
+        describe('scaling', () =>
+        {
+            it('reads the numbers from stages.json and rejects a negative one', () =>
+            {
+                expect(parseStageScaling(stages)).toEqual({ enemyHpPerStage: 0.08, enemyDamagePerRealm: 1, dropBonusPerRealm: 0.1 });
+
+                const broken = copy(stages) as unknown as { scaling: Record<string, number> };
+                broken.scaling.enemyHpPerStage = -1;
+                expect(() => parseStageScaling(broken)).toThrow(/scaling\.enemyHpPerStage must be a number, 0 or more/);
+            });
+
+            it('makes the golems of stage 9 tougher than those of stage 6', () =>
+            {
+                const golem = parseEnemies(enemies).find(e => e.id === 'rock-golem')!;
+                const scaling = parseStageScaling(stages);
+
+                expect(scaleEnemyDefinition(golem, 9, scaling).maxHp).toBeGreaterThan(scaleEnemyDefinition(golem, 6, scaling).maxHp);
+                expect(scaleEnemyDefinition(golem, 1, scaling).maxHp).toBe(golem.maxHp);
+            });
         });
 
         it('rejects two realms of one colour and a node that needs no Strike', () =>
