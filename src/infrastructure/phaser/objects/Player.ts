@@ -29,6 +29,10 @@ export class Player extends Physics.Arcade.Sprite
     isDodging = false;
     /** An air dash was used since the hero last stood on the ground. */
     airDashUsed = false;
+    /** The scene sets this every frame from the unlocked abilities: one extra jump in the air. */
+    canDoubleJump = false;
+    /** The extra jump was used since the hero last stood on the ground (or kicked off a wall). */
+    doubleJumpUsed = false;
     /** Walking speed factor: a speed Potion and boots raise it (set by the scene every frame). */
     speedMultiplier = 1;
     facingDir = 1;
@@ -468,7 +472,7 @@ export class Player extends Physics.Arcade.Sprite
             });
         }
         this.wasInAir = !onGround;
-        if (onGround) this.airDashUsed = false;
+        if (onGround) { this.airDashUsed = false; this.doubleJumpUsed = false; }
 
         // A Dash steers the hero by itself until it ends (or hits a wall)
         if (this.dashMsLeft > 0)
@@ -612,6 +616,7 @@ export class Player extends Physics.Arcade.Sprite
             this.coyoteTimer = 0;
             this.isWallSliding = false;
             this.wallJumpLockout = 160;
+            this.doubleJumpUsed = false;
 
             // Kick off horizontally opposite to wall, leap upwards
             this.setVelocityX(-wallDir * 230);
@@ -627,6 +632,25 @@ export class Player extends Physics.Arcade.Sprite
                 scaleY: 1.18,
                 scaleX: 0.88,
                 duration: 100,
+                yoyo: true,
+                ease: 'Back.easeOut',
+            });
+        }
+
+        else if (this.jumpBufferTimer > 0 && this.canDoubleJump && !this.doubleJumpUsed && !onGround)
+        {
+            // Double jump: one more leap in the air, a little weaker than the first
+            this.jumpBufferTimer = 0;
+            this.doubleJumpUsed = true;
+            this.setVelocityY(-JUMP_SPEED * 0.9);
+            soundManager.playJump();
+            this.onJump?.(this.x, this.y + HEIGHT / 2);
+
+            this.scene.tweens.add({
+                targets: this,
+                scaleY: 1.2,
+                scaleX: 0.85,
+                duration: 110,
                 yoyo: true,
                 ease: 'Back.easeOut',
             });

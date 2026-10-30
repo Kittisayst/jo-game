@@ -43,6 +43,8 @@ export const SkillsPanel: React.FC<{ onChanged?: () => void }> = ({ onChanged })
     const { realms, books } = getGameContent();
     const airDash = entities.movement.has('air-dash');
     const airDashAfter = unlocks.find(u => u.ability === 'air-dash')?.afterBossStage;
+    const doubleJump = entities.movement.has('double-jump');
+    const doubleJumpAfter = unlocks.find(u => u.ability === 'double-jump')?.afterBossStage;
     const getItem = (id: string) => entities.itemCatalog.get(id);
 
     const equip = (slot: number, skillId: string | null) =>
@@ -90,6 +92,11 @@ export const SkillsPanel: React.FC<{ onChanged?: () => void }> = ({ onChanged })
                         {airDash
                             ? <span className="text-emerald-300">✅ ພຸ່ງກາງອາກາດ: ພຸ່ງໄດ້ 1 ເທື່ອຕໍ່ການໂດດ</span>
                             : <span className="text-amber-300">🔒 ພຸ່ງກາງອາກາດ: ປົດລັອກເມື່ອຊະນະ Boss ດ່ານ {airDashAfter}</span>}
+                    </p>
+                    <p className="text-sm" data-testid="double-jump-status" data-state={doubleJump ? 'learned' : 'locked'}>
+                        {doubleJump
+                            ? <span className="text-emerald-300">✅ ໂດດສອງຊັ້ນ: ກົດໂດດອີກຄັ້ງໃນອາກາດ 1 ເທື່ອຕໍ່ການໂດດ</span>
+                            : <span className="text-amber-300">🔒 ໂດດສອງຊັ້ນ: ປົດລັອກເມື່ອຊະນະ Boss ດ່ານ {doubleJumpAfter}</span>}
                     </p>
                 </div>
             </div>
