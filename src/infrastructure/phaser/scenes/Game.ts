@@ -45,7 +45,8 @@ import { entities } from '../../composition';
 import { EnemyDefinition } from '../../../domain/entities/Enemy';
 import { scaleEnemyDefinition } from '../../../domain/entities/StageScaling';
 import { GROUND_SINK } from '../physicsConstants';
-import { notifyTutorial } from '../../tutorial';
+import { notifyShardsCollected, notifyTutorial } from '../../tutorial';
+import { stashStoryOverflowUseCase } from '../../../application/PendingRewardsUseCases';
 import { armorSpeedBonusOf } from '../../../domain/entities/Armor';
 import { ITEM_BROKEN_EVENT, ITEM_WORN_EVENT, ItemBrokenPayload, ItemWornPayload } from '../../../application/WearItemUseCase';
 
@@ -332,14 +333,21 @@ export class Game extends Scene
         const onQuizFinisherPassed = () =>
         {
             this.boss?.playDefeatTween();
-            const reward = awardBossRewardUseCase(entities.backpack);
+            const bossSpawn = this.stage ? getStageBossSpawn(this.stage) : undefined;
+            const bossDrops = bossSpawn ? this.getEnemyDefinition(bossSpawn.enemyId)?.drops ?? [] : [];
+            const reward = awardBossRewardUseCase(entities.backpack, bossDrops);
+            // What did not fit is kept for later (story Materials) instead of being lost
+            const stash = stashStoryOverflowUseCase(reward.overflow, entities.pendingRewards, entities.itemCatalog);
+            notifyShardsCollected([...reward.collected, ...stash.stashed]);
             EventBus.emit('backpack-changed');
             const rewardText = describeDrops(reward.collected, ' & ');
             showLootNotification(
                 this,
                 this.player.x,
                 this.player.y - 40,
-                reward.overflow.length > 0 ? `${rewardText} 🎒 ກະເປົາເຕັມ!` : rewardText,
+                reward.overflow.length > 0
+                    ? `${rewardText} 🎒 ກະເປົາເຕັມ! ${describeDrops(stash.stashed, ' & ')} ເກັບໄວ້ໃຫ້ ຈະໄດ້ຮັບເມື່ອມີຊ່ອງວ່າງ`
+                    : rewardText,
                 '#a855f7'
             );
             this.particleManager.emitCelebration(this.player.x, this.player.y);

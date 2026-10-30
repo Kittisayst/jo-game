@@ -10,7 +10,9 @@ export interface TutorialStepDefinition extends TutorialStep
 }
 
 /** What can finish a step. `harvested:<node id>` is checked against `nodes.json` by ContentIntegrity.test.ts. */
-export const FIXED_TUTORIAL_EVENTS = ['moved', 'enemy-defeated', 'backpack-opened', 'stage-cleared', 'book-fully-read'] as const;
+export const FIXED_TUTORIAL_EVENTS = [
+    'moved', 'enemy-defeated', 'backpack-opened', 'stage-cleared', 'book-fully-read', 'portal-shard-collected', 'portal-block-placed',
+] as const;
 const HARVESTED = /^harvested:[a-z0-9-]+$/;
 
 export function isTutorialEvent (event: string): boolean
@@ -37,6 +39,12 @@ export function parseTutorial (raw: unknown): TutorialStepDefinition[]
             v.fail(`${p}.event`, `one of ${FIXED_TUTORIAL_EVENTS.join(', ')} or harvested:<node id>, got ${event}`);
         }
 
-        return { id, event, text: v.asString(step.text, `${p}.text`) };
+        const showAfter = v.optionalString(step.showAfter, `${p}.showAfter`);
+        if (showAfter !== undefined && !isTutorialEvent(showAfter))
+        {
+            v.fail(`${p}.showAfter`, `one of ${FIXED_TUTORIAL_EVENTS.join(', ')} or harvested:<node id>, got ${showAfter}`);
+        }
+
+        return { id, event, text: v.asString(step.text, `${p}.text`), ...(showAfter !== undefined ? { showAfter } : {}) };
     });
 }

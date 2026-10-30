@@ -52,6 +52,8 @@ export interface HudProps
     armor?: number;
     /** Timed Potion effects running, with the seconds left. */
     activeEffects?: { effect: 'strength' | 'speed'; remainingSeconds: number }[];
+    /** Story Materials waiting for a free Backpack slot. */
+    pendingRewardsCount?: number;
     /** The Potion chosen to be drunk with R, with how many are left. */
     quickSlot?: { id: string; name: string; icon: string; iconImage?: string; count: number } | null;
     onDrinkQuickSlot?: () => void;
@@ -77,6 +79,7 @@ export function Hud ({
     tutorialText,
     onDismissTutorial,
     armor = 0,
+    pendingRewardsCount = 0,
     activeEffects = [],
     quickSlot = null,
     onDrinkQuickSlot,
@@ -103,6 +106,17 @@ export function Hud ({
                     {armor > 0 && (
                         <div className="hud-badge armor-badge" data-testid="armor-hearts" data-armor={armor} title="ຫົວໃຈເກາະ: ເສຍກ່ອນຫົວໃຈປົກກະຕິ ແລະ ຟື້ນເມື່ອກັບໝູ່ບ້ານ">
                             <span className="badge-icon">{'🛡️'.repeat(Math.min(armor, 10))}</span>
+                        </div>
+                    )}
+
+                    {pendingRewardsCount > 0 && (
+                        <div
+                            className="hud-badge pending-badge"
+                            data-testid="pending-rewards"
+                            title="ວັດສະດຸເນື້ອເລື່ອງ (ເສດປະຕູ, ແກນບອສ, ຜລຶກ) ທີ່ກະເປົາເຕັມ ເກັບໄວ້ໃຫ້ ຈະເຂົ້າກະເປົາເມື່ອມີຊ່ອງວ່າງ"
+                        >
+                            <span className="badge-icon">📦</span>
+                            <span className="badge-label">ລໍຮັບ {pendingRewardsCount} (ກະເປົາເຕັມ)</span>
                         </div>
                     )}
 

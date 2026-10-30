@@ -49,6 +49,32 @@ export function positionInRealm (stageNumber: number): number
     return ((stageNumber - 1) % STAGES_PER_REALM) + 1;
 }
 
+/** Number of the first Stage of a Realm (Realm 2 starts at Stage 11). */
+export function firstStageOfRealm (realm: number): number
+{
+    return (realm - 1) * STAGES_PER_REALM + 1;
+}
+
+/** Number of the last Stage of a Realm, the one with its Boss. */
+export function lastStageOfRealm (realm: number): number
+{
+    return realm * STAGES_PER_REALM;
+}
+
+/**
+ * The Stage that opens when `stageId` is cleared: the next one of its Realm, or, after the Boss Stage, the first
+ * Stage of the next Realm when that Realm is already open (its Portal block was placed). Otherwise null.
+ */
+export function nextStageToUnlock (stageId: string, isRealmOpen: (realm: number) => boolean): string | null
+{
+    const stageNumber = stageNumberOf(stageId);
+    if (stageNumber === null) return null;
+    if (positionInRealm(stageNumber) < STAGES_PER_REALM) return stageIdOf(stageNumber + 1);
+
+    const nextRealm = realmOf(stageNumber) + 1;
+    return nextRealm <= REALM_COUNT && isRealmOpen(nextRealm) ? stageIdOf(firstStageOfRealm(nextRealm)) : null;
+}
+
 /**
  * The Stage that opens when this one is cleared: the next one of the same Realm.
  * The last Stage of a Realm opens nothing by itself, the next Realm needs its Portal block.

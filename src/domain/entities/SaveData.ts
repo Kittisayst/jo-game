@@ -1,4 +1,5 @@
 import { ARMOR_SLOTS, ArmorSlot, WornPiece } from './Armor';
+import type { PendingReward } from './PendingRewards';
 import { TutorialSnapshot } from './TutorialProgress';
 import { SettingsData, StageProgressionData } from '../ports';
 import { BookProgressSnapshot } from './Book';
@@ -40,6 +41,10 @@ export interface SaveGameSnapshot
     practiceStats: DailyPracticeProgressSnapshot;
     repairedGates: string[];
     forgeUnlocked: boolean;
+    /** Story Materials waiting for room in the Backpack. Missing in older saves. */
+    pendingRewards: PendingReward[];
+    /** Realms opened by placing Portal blocks, always including Realm 1. Missing in older saves. */
+    openedRealms: number[];
     /** The Potion chosen to be drunk with R, or null. Missing in older saves. */
     quickSlotItemId: string | null;
     /** Hints of the first Stage that were done, and whether the player skipped them. Missing in older saves. */
@@ -97,6 +102,8 @@ export function createDefaultSaveSnapshot (slotId = 'slot_1'): SaveGameSnapshot
         forgeUnlocked: false,
         tutorial: { done: [], dismissed: false },
         quickSlotItemId: null,
+        openedRealms: [1],
+        pendingRewards: [],
     };
 }
 
@@ -256,7 +263,19 @@ export function migrateSaveSnapshot (raw: unknown, fallbackSlotId = 'slot_1'): S
     const tutorial: TutorialSnapshot = {
         done: Array.isArray(rawTutorial.done) ? rawTutorial.done.filter((id): id is string => typeof id === 'string') : [],
         dismissed: typeof rawTutorial.dismissed === 'boolean' ? rawTutorial.dismissed : data.tutorial === undefined && hasProgress,
+        triggered: Array.isArray(rawTutorial.triggered) ? rawTutorial.triggered.filter((id): id is string => typeof id === 'string') : [],
     };
+    const pendingRewards: PendingReward[] = [];
+    for (const entry of Array.isArray(data.pendingRewards) ? data.pendingRewards : [])
+    {
+        const e = asRecord(entry);
+        if (typeof e.itemId === 'string' && e.itemId.length > 0 && typeof e.count === 'number' && e.count >= 1)
+        {
+            pendingRewards.push({ itemId: e.itemId, count: Math.floor(e.count) });
+        }
+    }
+    const openedRealms = Array.from(new Set([1, ...(Array.isArray(data.openedRealms) ? data.openedRealms : [])
+        .filter((n): n is number => Number.isInteger(n) && n >= 2 && n <= 10)])).sort((a, b) => a - b);
 
     return {
         version: CURRENT_SAVE_VERSION,
@@ -275,5 +294,7 @@ export function migrateSaveSnapshot (raw: unknown, fallbackSlotId = 'slot_1'): S
         forgeUnlocked,
         tutorial,
         quickSlotItemId,
+        openedRealms,
+        pendingRewards,
     };
 }

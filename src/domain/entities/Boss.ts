@@ -3,12 +3,6 @@ export type BossPhase = 1 | 2 | 3;
 /** Share of max HP the Boss recovers when the finisher question is answered wrongly. */
 export const FINISHER_FAIL_HEAL_RATIO = 0.15;
 
-/** Story Materials handed over once the finisher question is answered correctly. */
-export const BOSS_FINISHER_REWARD: ReadonlyArray<{ itemId: string; count: number }> = [
-    { itemId: 'boss-core', count: 1 },
-    { itemId: 'crystal', count: 3 },
-];
-
 /**
  * Domain entity representing the King Slime Boss.
  * Pure non-spatial state and business rules — see "Domain layer" in CONTEXT.md.

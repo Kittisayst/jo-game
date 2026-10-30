@@ -173,7 +173,7 @@ describe('Tutorial hints in a save', () =>
             tutorial: { done: ['move', 5, 'herb'], dismissed: true },
         });
 
-        expect(saved.tutorial).toEqual({ done: ['move', 'herb'], dismissed: true });
+        expect(saved.tutorial).toEqual({ done: ['move', 'herb'], dismissed: true, triggered: [] });
     });
 
     it('gives no hints to a save from before they existed that already has progress', () =>
@@ -185,7 +185,7 @@ describe('Tutorial hints in a save', () =>
         expect(veteran.tutorial.dismissed).toBe(true);
 
         const newcomer = migrateSaveSnapshot({ version: CURRENT_SAVE_VERSION });
-        expect(newcomer.tutorial).toEqual({ done: [], dismissed: false });
+        expect(newcomer.tutorial).toEqual({ done: [], dismissed: false, triggered: [] });
     });
 });
 
@@ -259,5 +259,41 @@ describe('Armor and the Quick slot in a save', () =>
 
         expect(saved.equipment.armor).toEqual({});
         expect(saved.quickSlotItemId).toBeNull();
+    });
+});
+
+describe('Opened Realms in a save', () =>
+{
+    it('always has Realm 1 and keeps the Realms that were opened in order', () =>
+    {
+        expect(createDefaultSaveSnapshot().openedRealms).toEqual([1]);
+        expect(migrateSaveSnapshot({ version: CURRENT_SAVE_VERSION, openedRealms: [3, 2] }).openedRealms).toEqual([1, 2, 3]);
+    });
+
+    it('drops anything that is not a Realm and loads a save without the field', () =>
+    {
+        expect(migrateSaveSnapshot({ version: CURRENT_SAVE_VERSION, openedRealms: [2, 11, 0, 'x', 2.5] }).openedRealms).toEqual([1, 2]);
+        expect(migrateSaveSnapshot({ version: CURRENT_SAVE_VERSION }).openedRealms).toEqual([1]);
+    });
+});
+
+describe('Waiting story Materials in a save', () =>
+{
+    it('starts empty, keeps what waits and drops nonsense', () =>
+    {
+        expect(createDefaultSaveSnapshot().pendingRewards).toEqual([]);
+
+        const saved = migrateSaveSnapshot({
+            version: CURRENT_SAVE_VERSION,
+            pendingRewards: [
+                { itemId: 'portal-shard-green', count: 3.9 },
+                { itemId: 'boss-core', count: 0 },
+                { itemId: 7, count: 2 },
+                'x',
+            ],
+        });
+
+        expect(saved.pendingRewards).toEqual([{ itemId: 'portal-shard-green', count: 3 }]);
+        expect(migrateSaveSnapshot({ version: CURRENT_SAVE_VERSION }).pendingRewards).toEqual([]);
     });
 });

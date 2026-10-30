@@ -484,7 +484,8 @@ describe('validator errors', () =>
             {
                 const steps = parseTutorial(tutorial);
 
-                expect(steps.map(s => s.id)).toEqual(['move', 'herb', 'tree', 'fight', 'backpack', 'exit', 'learn']);
+                expect(steps.map(s => s.id)).toEqual(['move', 'herb', 'tree', 'fight', 'backpack', 'exit', 'learn', 'portal']);
+                expect(steps[7]).toMatchObject({ event: 'portal-block-placed', showAfter: 'portal-shard-collected' });
                 expect(steps[1]).toMatchObject({ event: 'harvested:wild-herb' });
                 expect(steps.every(s => s.text.length > 0)).toBe(true);
             });

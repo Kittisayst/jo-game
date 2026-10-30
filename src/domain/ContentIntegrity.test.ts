@@ -144,6 +144,40 @@ describe('content data integrity', () =>
         }
     });
 
+    it('has a story shard and block for every Realm, a block recipe for each Realm with a Textbook, and shards from its bosses', () =>
+    {
+        type Story = { id: string; category: string; story?: boolean; iconImage?: string };
+        const all = items as Story[];
+        const miniboss = enemies.find(e => e.kind === 'miniboss')!;
+        const boss = enemies.find(e => e.kind === 'boss')!;
+        const dropOf = (e: { drops: { itemId: string; count: number }[] }, id: string) => e.drops.find(d => d.itemId === id)?.count;
+
+        for (const realm of realms.realms)
+        {
+            for (const id of [realm.shardItem, realm.blockItem])
+            {
+                const item = all.find(i => i.id === id);
+                expect(item, `${id} exists`).toBeDefined();
+                expect(item!.category, `${id} is a Material`).toBe('material');
+                expect(item!.story, `${id} is never lost`).toBe(true);
+                expect(item!.iconImage, `${id} has an icon`).toBeDefined();
+            }
+
+            // A Realm with a Textbook can teach its block, which takes 5 of its shards
+            if (realm.bookId)
+            {
+                const recipe = (recipes as LooseRecipe[]).find(r => r.resultItemId === realm.blockItem);
+                expect(recipe, `${realm.blockItem} can be crafted`).toBeDefined();
+                expect(recipe!.ingredients.find(i => i.itemId === realm.shardItem)?.count, `${realm.blockItem} takes 5 shards`).toBe(5);
+                expect(books.find(b => b.id === realm.bookId)!.unlockedRecipes, `${realm.bookId} teaches ${realm.blockItem}`).toContain(realm.blockItem);
+            }
+        }
+
+        // The Realm 1 Mini-boss gives 1 shard and its Boss 3
+        expect(dropOf(miniboss, 'portal-shard-green')).toBe(1);
+        expect(dropOf(boss, 'portal-shard-green')).toBe(3);
+    });
+
     describe('lessons', () =>
     {
         type LessonPage = { pageNumber: number; lesson?: string };

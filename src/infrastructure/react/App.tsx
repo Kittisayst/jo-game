@@ -18,6 +18,8 @@ import { useGameEvents } from './hooks/useGameEvents';
 import { useDevStageEntry } from './hooks/useDevStageEntry';
 import { dismissTutorialUseCase } from '../../application/NotifyTutorialUseCase';
 import { drinkPotionUseCase } from '../../application/DrinkPotionUseCase';
+import { placePortalBlockUseCase } from '../../application/PlacePortalBlockUseCase';
+import { claimPendingRewardsUseCase } from '../../application/PendingRewardsUseCases';
 import { notifyTutorial } from '../tutorial';
 import { useGlobalShortcuts } from './hooks/useGlobalShortcuts';
 import { useModalState } from './hooks/useModalState';
@@ -34,7 +36,7 @@ import { VirtualTouchControls } from './components/VirtualTouchControls';
 import { completeStageUseCase } from '../../application/CompleteStageUseCase';
 import { awardChapterClearUseCase } from '../../application/AwardChapterClearUseCase';
 import { selectStageUseCase } from '../../application/SelectStageUseCase';
-import { BOSS_STAGE_IN_REALM, nextStageIdInRealm, positionInRealm, stageNumberOf } from '../../domain/entities/StageNumber';
+import { BOSS_STAGE_IN_REALM, nextStageToUnlock, positionInRealm, stageNumberOf } from '../../domain/entities/StageNumber';
 import { getStageDefinition, isStageReady } from '../phaser/stages/StageDefinition';
 import { WEAPON_CONFIGS } from '../../domain/entities/EquipmentState';
 import { cycleEquippedWeaponUseCase } from '../../application/CycleEquippedWeaponUseCase';
@@ -468,6 +470,19 @@ function App ()
 
     const quickSlotDef = entities.quickSlotItemId ? entities.itemCatalog.get(entities.quickSlotItemId) : undefined;
 
+    // Story Materials a Boss dropped into a full Backpack move in as soon as there is room (checked when the
+    // Backpack changes or its window closes, and when the hero comes home)
+    useEffect(() =>
+    {
+        if (entities.pendingRewards.isEmpty) return;
+        const claimed = claimPendingRewardsUseCase(entities.pendingRewards, entities.backpack);
+        if (claimed.length === 0) return;
+
+        soundManager.playCoin();
+        setBackpackRevision(r => r + 1);
+        autoSaveGame();
+    }, [backpackRevision, isBackpackOpen, currentLevel]);
+
     // Opening the Backpack is a tutorial step
     useEffect(() =>
     {
@@ -479,13 +494,30 @@ function App ()
         ? getGameContent().tutorial.find(step => step.id === tutorialStep.id)?.text
         : undefined;
 
+    /** The World Gate: puts the Portal block that opens `realm` into its slot. Returns true when the Realm opened. */
+    const placePortalBlock = (realm: number): boolean =>
+    {
+        const result = placePortalBlockUseCase(realm, getGameContent().realms, entities.backpack, entities.realms, stageProgression);
+        if (!result.success)
+        {
+            soundManager.playHurt();
+            return false;
+        }
+
+        soundManager.playPowerUp();
+        notifyTutorial('portal-block-placed');
+        setBackpackRevision(r => r + 1);
+        autoSaveGame();
+        return true;
+    };
+
     /** Clearing a Stage sends the player home to learn and craft, not to a score screen. */
     const clearStage = (stageId: string) =>
     {
         // The next Stage of the Realm opens; the Realm's boss Stage opens nothing by itself.
         const stageNumber = stageNumberOf(stageId);
         const isBossStage = stageNumber !== null && positionInRealm(stageNumber) === BOSS_STAGE_IN_REALM;
-        const next = nextStageIdInRealm(stageId);
+        const next = nextStageToUnlock(stageId, realm => entities.realms.isRealmOpen(realm));
         const clear = completeStageUseCase(stageProgression, repositories.stageProgression, stageId, next);
         notifyTutorial('stage-cleared');
         const bonus = isBossStage ? awardChapterClearUseCase(entities.wallet, clear.isFirstTimeClear) : 0;
@@ -647,6 +679,7 @@ function App ()
                     onTogglePause={handleTogglePause}
                     walletBalance={walletBalance}
                     armor={entities.health.armor}
+                    pendingRewardsCount={entities.pendingRewards.total}
                     activeEffects={entities.effects.active}
                     quickSlot={quickSlotDef
                         ? {
@@ -732,6 +765,9 @@ function App ()
                     }}
                     onSelectStage={handleStartGame}
                     stageProgression={stageProgression}
+                    openedRealms={new Set(entities.realms.openedRealms)}
+                    blockCounts={Object.fromEntries(getGameContent().realms.map(r => [r.blockItem, entities.backpack.getItemCount(r.blockItem)]))}
+                    onPlaceBlock={placePortalBlock}
                 />
             )}
 

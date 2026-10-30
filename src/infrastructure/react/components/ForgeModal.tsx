@@ -169,7 +169,9 @@ export const ForgeModal: React.FC<ForgeModalProps> = ({ isOpen, onClose }) =>
                                                             <div>
                                                                 <h4 className="font-bold text-white">{resultItem?.name}</h4>
                                                                 <span className="text-xs text-orange-400 font-semibold">
-                                                                    {resultItem?.category === 'armor' ? `🛡️ +${resultItem.armorHearts}` : `ATK ${resultItem?.baseDamage}`}
+                                                                    {resultItem?.category === 'armor'
+                                                                        ? `🛡️ +${resultItem.armorHearts}`
+                                                                        : resultItem?.category === 'weapon' ? `ATK ${resultItem.baseDamage}` : `💠 ${resultItem?.nameEn ?? ''}`}
                                                                 </span>
                                                             </div>
                                                         </div>

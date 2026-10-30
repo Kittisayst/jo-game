@@ -1,7 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import {
+    firstStageOfRealm,
     isLessonNumber,
+    lastStageOfRealm,
     nextStageIdInRealm,
+    nextStageToUnlock,
     positionInRealm,
     realmOf,
     stageIdOf,
@@ -61,5 +64,36 @@ describe('stage numbers', () =>
         expect(isLessonNumber('101-1')).toBe(false);
         expect(isLessonNumber('12-0')).toBe(false);
         expect(isLessonNumber('12')).toBe(false);
+    });
+});
+
+describe('what clearing a Stage opens', () =>
+{
+    const closed = () => false;
+    const open = () => true;
+
+    it('finds the first and last Stage of a Realm', () =>
+    {
+        expect([firstStageOfRealm(1), lastStageOfRealm(1), firstStageOfRealm(2), lastStageOfRealm(10)]).toEqual([1, 10, 11, 100]);
+    });
+
+    it('opens the next Stage of the same Realm whatever the Realms', () =>
+    {
+        expect(nextStageToUnlock('stage-003', closed)).toBe('stage-004');
+        expect(nextStageToUnlock('stage-019', closed)).toBe('stage-020');
+    });
+
+    it('opens the first Stage of the next Realm after a Boss Stage only when that Realm is open', () =>
+    {
+        expect(nextStageToUnlock('stage-010', closed)).toBeNull();
+        expect(nextStageToUnlock('stage-010', realm => realm === 2)).toBe('stage-011');
+        expect(nextStageToUnlock('stage-020', realm => realm === 2)).toBeNull();
+        expect(nextStageToUnlock('stage-020', open)).toBe('stage-021');
+    });
+
+    it('opens nothing after the very last Stage or for the village', () =>
+    {
+        expect(nextStageToUnlock('stage-100', open)).toBeNull();
+        expect(nextStageToUnlock('village', open)).toBeNull();
     });
 });
