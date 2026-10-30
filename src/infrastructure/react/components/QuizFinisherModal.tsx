@@ -6,6 +6,8 @@ import { soundManager } from '../../audio/SoundManager';
 interface QuizFinisherModalProps
 {
     isOpen: boolean;
+    /** The Textbook the finisher question is drawn from (the Realm's own). */
+    bookId?: string;
     onClose: () => void;
     onPass: () => void;
     onFail: () => void;
@@ -13,6 +15,7 @@ interface QuizFinisherModalProps
 
 export const QuizFinisherModal: React.FC<QuizFinisherModalProps> = ({
     isOpen,
+    bookId = 'book-ch1',
     onClose,
     onPass,
     onFail,
@@ -27,18 +30,20 @@ export const QuizFinisherModal: React.FC<QuizFinisherModalProps> = ({
     {
         if (isOpen)
         {
-            const ch1Questions = getGameContent().questions.filter(q => q.bookId === 'book-ch1');
-            if (ch1Questions.length > 0)
+            const bookQuestions = getGameContent().questions.filter(q => q.bookId === bookId);
+            if (bookQuestions.length > 0)
             {
-                const rand = ch1Questions[Math.floor(Math.random() * ch1Questions.length)];
+                const rand = bookQuestions[Math.floor(Math.random() * bookQuestions.length)];
                 setQuestion(rand);
                 setSelectedOption(null);
                 setIsAnswered(false);
             }
         }
-    }, [isOpen]);
+    }, [isOpen, bookId]);
 
     if (!isOpen || !question) return null;
+
+    const chapter = getGameContent().books.find(book => book.id === bookId)?.chapter ?? 1;
 
     const handleSubmit = () =>
     {
@@ -71,7 +76,7 @@ export const QuizFinisherModal: React.FC<QuizFinisherModalProps> = ({
     };
 
     return (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/85 backdrop-blur-md p-4 animate-fade-in">
+        <div data-testid="quiz-finisher" className="fixed inset-0 z-[200] flex items-center justify-center bg-black/85 backdrop-blur-md p-4 animate-fade-in">
             <div className="relative w-full max-w-lg rounded-2xl bg-gradient-to-b from-purple-950 via-slate-900 to-slate-950 border-2 border-purple-500 shadow-2xl p-6 space-y-5 text-center">
                 <span className="text-5xl animate-pulse">⚡</span>
                 <div>
@@ -131,7 +136,7 @@ export const QuizFinisherModal: React.FC<QuizFinisherModalProps> = ({
                         </p>
                         {!isCorrect && (
                             <p className="text-xs text-indigo-300">
-                                📖 ອ່ານທົບທວນໄດ້ທີ່ໜ້າ {question.pageNumber} ຂອງຕຳລາບົດທີ 1 (ເປີດຈາກກະເປົາ ຫຼື ຫໍສະໝຸດໃນໝູ່ບ້ານ)
+                                📖 ອ່ານທົບທວນໄດ້ທີ່ໜ້າ {question.pageNumber} ຂອງຕຳລາບົດທີ {chapter} (ເປີດຈາກກະເປົາ ຫຼື ຫໍສະໝຸດໃນໝູ່ບ້ານ)
                             </p>
                         )}
                         <button

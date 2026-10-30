@@ -24,10 +24,10 @@ test.describe('The map of 100 stages', () => {
     await page.getByRole('button', { name: /ເລືອກດ່ານ/i }).click();
     await expect(page.locator('.realm-row')).toHaveCount(10);
     await expect(page.locator('.realm-cell')).toHaveCount(100);
-    // Stages 1-10 are built; 90 are placeholders
-    await expect(page.locator('.realm-cell.cell-placeholder')).toHaveCount(90);
+    // Stages 1-20 are built (Realms 1 and 2); 80 are placeholders
+    await expect(page.locator('.realm-cell.cell-placeholder')).toHaveCount(80);
     await expect(page.locator('.realm-cell.cell-open')).toHaveCount(1);
-    await expect(page.locator('.realm-cell.cell-locked')).toHaveCount(9);
+    await expect(page.locator('.realm-cell.cell-locked')).toHaveCount(19);
 
     // A grey stage cannot be entered: clicking it leaves the player on the map and starts no game
     // (aria-disabled makes Playwright wait for the button to be enabled, so the click is forced as a player could)

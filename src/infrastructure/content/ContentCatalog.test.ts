@@ -569,9 +569,15 @@ describe('validator errors', () =>
             it('reads the repair recipes and rejects a free repair and a repeated item', () =>
             {
                 const parsed = parseRepairs(repairs);
-                expect(parsed.map(r => r.itemId)).toEqual(['axe-t1', 'pickaxe-t1', 'iron-sword', 'crystal-sword', 'iron-helmet', 'iron-chestplate', 'iron-boots']);
-                expect(parsed.filter(r => r.building === 'workshop').map(r => r.itemId)).toEqual(['axe-t1', 'pickaxe-t1']);
-                expect(parsed.filter(r => r.building === 'forge').map(r => r.itemId)).toEqual(['iron-sword', 'crystal-sword', 'iron-helmet', 'iron-chestplate', 'iron-boots']);
+                expect(parsed.map(r => r.itemId)).toEqual([
+                    'axe-t1', 'pickaxe-t1', 'iron-sword', 'crystal-sword', 'iron-helmet', 'iron-chestplate', 'iron-boots',
+                    'axe-t2', 'pickaxe-t2', 'blue-sword', 'blue-helmet', 'blue-chestplate', 'blue-boots',
+                ]);
+                expect(parsed.filter(r => r.building === 'workshop').map(r => r.itemId)).toEqual(['axe-t1', 'pickaxe-t1', 'axe-t2', 'pickaxe-t2']);
+                expect(parsed.filter(r => r.building === 'forge').map(r => r.itemId)).toEqual([
+                    'iron-sword', 'crystal-sword', 'iron-helmet', 'iron-chestplate', 'iron-boots',
+                    'blue-sword', 'blue-helmet', 'blue-chestplate', 'blue-boots',
+                ]);
                 expect(parsed.every(r => r.ingredients.length > 0)).toBe(true);
 
                 const free = JSON.parse(JSON.stringify(repairs));

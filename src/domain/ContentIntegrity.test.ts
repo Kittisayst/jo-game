@@ -377,5 +377,38 @@ describe('content data integrity', () =>
                 if (book.requiredCompletedStageId) expect(stageIds.has(book.requiredCompletedStageId), book.id).toBe(true);
             }
         });
+
+        it('plays Realm 2 in full: Stages 11 to 20 are built, each with a lesson and questions from the Realm 2 Textbook', () =>
+        {
+            const realm2 = realms.realms.find(r => r.number === 2)!;
+            const book = books.find(b => b.id === realm2.bookId)!;
+            const lessons = new Set(book.pages.map(p => (p as { lesson?: string }).lesson));
+
+            for (let number = 11; number <= 20; number++)
+            {
+                const stage = stages.stages.find(s => s.number === number) as { status: string; lessons?: string[] };
+                expect(stage.status, `stage ${number}`).toBe('ready');
+                expect(stage.lessons, `stage ${number} lessons`).toEqual([`${number}-1`]);
+                expect(lessons.has(`${number}-1`), `book has lesson ${number}-1`).toBe(true);
+                expect(questions.filter(q => (q as { lesson?: string }).lesson === `${number}-1`).length, `questions for ${number}-1`).toBeGreaterThanOrEqual(3);
+            }
+            expect(stages.stages.find(s => s.number === 21)!.status).toBe('placeholder');
+        });
+
+        it('gives Realm 2 its Mini-boss (1 blue shard), its Boss (3 blue shards, finisher from its own Textbook) and Realm 2 gear', () =>
+        {
+            const realm2 = realms.realms.find(r => r.number === 2)!;
+            const dropOf = (id: string, itemId: string) => enemies.find(e => e.id === id)!.drops.find(d => d.itemId === itemId)?.count;
+
+            expect(dropOf('crystal-warden', realm2.shardItem)).toBe(1);
+            expect(dropOf('stage-ch2-boss', realm2.shardItem)).toBe(3);
+            expect((enemies.find(e => e.id === 'stage-ch2-boss') as { quizFinisher?: { bookId: string } }).quizFinisher?.bookId).toBe(realm2.bookId);
+
+            const taught = new Set(books.find(b => b.id === realm2.bookId)!.unlockedRecipes);
+            for (const id of ['axe-t2', 'pickaxe-t2', 'hammer-t2', 'blue-sword', 'blue-helmet', 'blue-chestplate', 'blue-boots'])
+            {
+                expect(taught.has(id), `${realm2.bookId} teaches ${id}`).toBe(true);
+            }
+        });
     });
 });

@@ -68,6 +68,7 @@ function App ()
     const shouldResumeInGame = initialSession !== null && initialSession !== 'title';
 
     const [currentLevel, setCurrentLevel] = useState(() => (shouldResumeInGame ? initialSession : 'village'));
+    const [quizFinisherBookId, setQuizFinisherBookId] = useState('book-ch1');
     const [health, setHealth] = useState(() => entities.health.current);
     const [walletBalance, setWalletBalance] = useState(() => entities.wallet.balance);
     const [equippedWeaponId, setEquippedWeaponId] = useState(() => entities.equipment.equippedWeaponId);
@@ -629,7 +630,11 @@ function App ()
             if (name) setWaypointName(name);
             setIsWaypointOpen(true);
         },
-        onOpenQuizFinisher: () => setIsQuizFinisherOpen(true),
+        onOpenQuizFinisher: payload =>
+        {
+            setQuizFinisherBookId(payload?.bookId ?? 'book-ch1');
+            setIsQuizFinisherOpen(true);
+        },
         onChangeLevel: levelKey => handleStartGame(levelKey),
         onBookExamPassed: () =>
         {
@@ -961,6 +966,7 @@ function App ()
 
             <QuizFinisherModal
                 isOpen={isQuizFinisherOpen}
+                bookId={quizFinisherBookId}
                 onClose={() => setIsQuizFinisherOpen(false)}
                 onPass={() =>
                 {

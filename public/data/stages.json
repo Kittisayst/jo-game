@@ -186,16 +186,589 @@
         }
       ]
     },
-    { "number": 11, "realm": 2, "status": "placeholder" },
-    { "number": 12, "realm": 2, "status": "placeholder" },
-    { "number": 13, "realm": 2, "status": "placeholder" },
-    { "number": 14, "realm": 2, "status": "placeholder" },
-    { "number": 15, "realm": 2, "status": "placeholder" },
-    { "number": 16, "realm": 2, "status": "placeholder" },
-    { "number": 17, "realm": 2, "status": "placeholder" },
-    { "number": 18, "realm": 2, "status": "placeholder" },
-    { "number": 19, "realm": 2, "status": "placeholder" },
-    { "number": 20, "realm": 2, "status": "placeholder" },
+    {
+      "number": 11,
+      "realm": 2,
+      "status": "ready",
+      "name": "ດ່ານ 11: ປາກຖ້ຳຜລຶກ",
+      "nameEn": "Stage 11: Crystal Cave Mouth",
+      "layout": {
+        "generate": {
+          "biome": "cave",
+          "seed": 11,
+          "screens": 2
+        }
+      },
+      "lessons": [
+        "11-1"
+      ],
+      "zones": [
+        {
+          "id": "a",
+          "name": "ປາກຖ້ຳຜລຶກ (Crystal Cave Mouth)",
+          "contents": [
+            {
+              "kind": "waypoint",
+              "x": 120,
+              "name": "ຈຸດວາບປອດໄພ ດ່ານ 11",
+              "label": "🌀 ຈຸດວາບປອດໄພ ດ່ານ 11"
+            },
+            {
+              "kind": "sign",
+              "x": 240,
+              "text": "💎 ປາກຖ້ຳຜລຶກ",
+              "color": "#93c5fd",
+              "stroke": "#1e3a8a"
+            },
+            {
+              "kind": "spawn-pool",
+              "nodes": [
+                "crystal-vein",
+                "cave-mushroom-patch",
+                "stone-rock"
+              ],
+              "count": 4,
+              "enemies": [
+                "crystal-slime"
+              ],
+              "enemyCount": 2,
+              "patrolDistance": 100,
+              "speed": 50
+            },
+            {
+              "kind": "exit"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 12,
+      "realm": 2,
+      "status": "ready",
+      "name": "ດ່ານ 12: ອຸໂມງສີຟ້າ",
+      "nameEn": "Stage 12: Blue Tunnel",
+      "layout": {
+        "generate": {
+          "biome": "cave",
+          "seed": 12,
+          "screens": 3
+        }
+      },
+      "lessons": [
+        "12-1"
+      ],
+      "zones": [
+        {
+          "id": "a",
+          "name": "ອຸໂມງສີຟ້າ (Blue Tunnel)",
+          "contents": [
+            {
+              "kind": "waypoint",
+              "x": 120,
+              "name": "ຈຸດວາບປອດໄພ ດ່ານ 12",
+              "label": "🌀 ຈຸດວາບປອດໄພ ດ່ານ 12"
+            },
+            {
+              "kind": "sign",
+              "x": 240,
+              "text": "💎 ອຸໂມງສີຟ້າ",
+              "color": "#93c5fd",
+              "stroke": "#1e3a8a"
+            },
+            {
+              "kind": "spawn-pool",
+              "nodes": [
+                "blue-ore-vein",
+                "stone-rock",
+                "cave-mushroom-patch"
+              ],
+              "count": 5,
+              "enemies": [
+                "crystal-slime"
+              ],
+              "enemyCount": 3,
+              "patrolDistance": 100,
+              "speed": 50
+            },
+            {
+              "kind": "exit"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 13,
+      "realm": 2,
+      "status": "ready",
+      "name": "ດ່ານ 13: ສວນເຫັດເຮືອງແສງ",
+      "nameEn": "Stage 13: Glowing Mushroom Grove",
+      "layout": {
+        "generate": {
+          "biome": "cave",
+          "seed": 13,
+          "screens": 3
+        }
+      },
+      "lessons": [
+        "13-1"
+      ],
+      "zones": [
+        {
+          "id": "a",
+          "name": "ສວນເຫັດເຮືອງແສງ (Glowing Mushroom Grove)",
+          "contents": [
+            {
+              "kind": "waypoint",
+              "x": 120,
+              "name": "ຈຸດວາບປອດໄພ ດ່ານ 13",
+              "label": "🌀 ຈຸດວາບປອດໄພ ດ່ານ 13"
+            },
+            {
+              "kind": "sign",
+              "x": 240,
+              "text": "💎 ສວນເຫັດເຮືອງແສງ",
+              "color": "#93c5fd",
+              "stroke": "#1e3a8a"
+            },
+            {
+              "kind": "spawn-pool",
+              "nodes": [
+                "cave-mushroom-patch",
+                "crystal-vein"
+              ],
+              "count": 5,
+              "enemies": [
+                "crystal-slime"
+              ],
+              "enemyCount": 3,
+              "patrolDistance": 100,
+              "speed": 50
+            },
+            {
+              "kind": "exit"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 14,
+      "realm": 2,
+      "status": "ready",
+      "name": "ດ່ານ 14: ສາຍແຮ່ຟ້າ",
+      "nameEn": "Stage 14: Blue Ore Seam",
+      "layout": {
+        "generate": {
+          "biome": "cave",
+          "seed": 14,
+          "screens": 3
+        }
+      },
+      "lessons": [
+        "14-1"
+      ],
+      "zones": [
+        {
+          "id": "a",
+          "name": "ສາຍແຮ່ຟ້າ (Blue Ore Seam)",
+          "contents": [
+            {
+              "kind": "waypoint",
+              "x": 120,
+              "name": "ຈຸດວາບປອດໄພ ດ່ານ 14",
+              "label": "🌀 ຈຸດວາບປອດໄພ ດ່ານ 14"
+            },
+            {
+              "kind": "sign",
+              "x": 240,
+              "text": "💎 ສາຍແຮ່ຟ້າ",
+              "color": "#93c5fd",
+              "stroke": "#1e3a8a"
+            },
+            {
+              "kind": "spawn-pool",
+              "nodes": [
+                "blue-ore-vein",
+                "iron-vein",
+                "crystal-vein"
+              ],
+              "count": 5,
+              "enemies": [
+                "crystal-slime"
+              ],
+              "enemyCount": 3,
+              "patrolDistance": 100,
+              "speed": 50
+            },
+            {
+              "kind": "exit"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 15,
+      "realm": 2,
+      "status": "ready",
+      "name": "ດ່ານ 15: ຜູ້ພິທັກຖ້ຳຜລຶກ",
+      "nameEn": "Stage 15: Crystal Warden",
+      "layout": "assets/levels/stage-015.json",
+      "lessons": [
+        "15-1"
+      ],
+      "zones": [
+        {
+          "id": "a",
+          "name": "ຖ້ຳຜູ້ພິທັກຜລຶກ (Warden Cave)",
+          "contents": [
+            {
+              "kind": "waypoint",
+              "x": 120,
+              "name": "ຈຸດວາບປອດໄພ ດ່ານ 15",
+              "label": "🌀 ຈຸດວາບປອດໄພ ດ່ານ 15"
+            },
+            {
+              "kind": "sign",
+              "x": 260,
+              "text": "💎 ເຂດຖ້ຳຜລຶກ\nຂຸດແຮ່ຟ້າດ້ວຍ Pickaxe",
+              "color": "#93c5fd",
+              "stroke": "#1e3a8a"
+            },
+            {
+              "kind": "node",
+              "node": "crystal-vein",
+              "x": 400
+            },
+            {
+              "kind": "node",
+              "node": "blue-ore-vein",
+              "x": 560
+            },
+            {
+              "kind": "node",
+              "node": "blue-ore-vein",
+              "x": 1000
+            },
+            {
+              "kind": "enemy",
+              "enemy": "crystal-golem",
+              "type": "slime-armored",
+              "x": 700,
+              "y": 580,
+              "patrolDistance": 140,
+              "speed": 45
+            },
+            {
+              "kind": "miniboss",
+              "enemy": "crystal-warden",
+              "type": "slime-armored",
+              "x": 1650,
+              "y": 560,
+              "patrolDistance": 160,
+              "speed": 40,
+              "sign": "⚠️ ຜູ້ພິທັກຖ້ຳຜລຶກ Crystal Warden\n(ປາບເພື່ອຮັບເສດປະຕູສີຟ້າ 💠)"
+            },
+            {
+              "kind": "exit",
+              "x": 2100
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 16,
+      "realm": 2,
+      "status": "ready",
+      "name": "ດ່ານ 16: ຫ້ອງໂຖງສະທ້ອນສຽງ",
+      "nameEn": "Stage 16: Echo Hall",
+      "layout": {
+        "generate": {
+          "biome": "cave",
+          "seed": 16,
+          "screens": 3
+        }
+      },
+      "lessons": [
+        "16-1"
+      ],
+      "zones": [
+        {
+          "id": "a",
+          "name": "ຫ້ອງໂຖງສະທ້ອນສຽງ (Echo Hall)",
+          "contents": [
+            {
+              "kind": "waypoint",
+              "x": 120,
+              "name": "ຈຸດວາບປອດໄພ ດ່ານ 16",
+              "label": "🌀 ຈຸດວາບປອດໄພ ດ່ານ 16"
+            },
+            {
+              "kind": "sign",
+              "x": 240,
+              "text": "💎 ຫ້ອງໂຖງສະທ້ອນສຽງ",
+              "color": "#93c5fd",
+              "stroke": "#1e3a8a"
+            },
+            {
+              "kind": "spawn-pool",
+              "nodes": [
+                "blue-ore-vein",
+                "cave-mushroom-patch",
+                "stone-rock"
+              ],
+              "count": 5,
+              "enemies": [
+                "crystal-golem"
+              ],
+              "enemyCount": 3,
+              "enemyType": "slime-armored",
+              "patrolDistance": 120,
+              "speed": 45
+            },
+            {
+              "kind": "exit"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 17,
+      "realm": 2,
+      "status": "ready",
+      "name": "ດ່ານ 17: ຖ້ຳເຫັດເລິກ",
+      "nameEn": "Stage 17: Deep Mushroom Cave",
+      "layout": {
+        "generate": {
+          "biome": "cave",
+          "seed": 17,
+          "screens": 4
+        }
+      },
+      "lessons": [
+        "17-1"
+      ],
+      "zones": [
+        {
+          "id": "a",
+          "name": "ຖ້ຳເຫັດເລິກ (Deep Mushroom Cave)",
+          "contents": [
+            {
+              "kind": "waypoint",
+              "x": 120,
+              "name": "ຈຸດວາບປອດໄພ ດ່ານ 17",
+              "label": "🌀 ຈຸດວາບປອດໄພ ດ່ານ 17"
+            },
+            {
+              "kind": "sign",
+              "x": 240,
+              "text": "💎 ຖ້ຳເຫັດເລິກ",
+              "color": "#93c5fd",
+              "stroke": "#1e3a8a"
+            },
+            {
+              "kind": "spawn-pool",
+              "nodes": [
+                "cave-mushroom-patch",
+                "blue-ore-vein",
+                "crystal-vein"
+              ],
+              "count": 6,
+              "enemies": [
+                "crystal-slime"
+              ],
+              "enemyCount": 4,
+              "patrolDistance": 100,
+              "speed": 50
+            },
+            {
+              "kind": "exit"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 18,
+      "realm": 2,
+      "status": "ready",
+      "name": "ດ່ານ 18: ຮ່ອມຜາຜລຶກ",
+      "nameEn": "Stage 18: Crystal Gorge",
+      "layout": {
+        "generate": {
+          "biome": "cave",
+          "seed": 18,
+          "screens": 4
+        }
+      },
+      "lessons": [
+        "18-1"
+      ],
+      "zones": [
+        {
+          "id": "a",
+          "name": "ຮ່ອມຜາຜລຶກ (Crystal Gorge)",
+          "contents": [
+            {
+              "kind": "waypoint",
+              "x": 120,
+              "name": "ຈຸດວາບປອດໄພ ດ່ານ 18",
+              "label": "🌀 ຈຸດວາບປອດໄພ ດ່ານ 18"
+            },
+            {
+              "kind": "sign",
+              "x": 240,
+              "text": "💎 ຮ່ອມຜາຜລຶກ",
+              "color": "#93c5fd",
+              "stroke": "#1e3a8a"
+            },
+            {
+              "kind": "spawn-pool",
+              "nodes": [
+                "blue-ore-vein",
+                "crystal-vein",
+                "iron-vein"
+              ],
+              "count": 6,
+              "enemies": [
+                "crystal-golem"
+              ],
+              "enemyCount": 4,
+              "enemyType": "slime-armored",
+              "patrolDistance": 120,
+              "speed": 45
+            },
+            {
+              "kind": "exit"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 19,
+      "realm": 2,
+      "status": "ready",
+      "name": "ດ່ານ 19: ຫ້ອງໜ້າລານບອສ",
+      "nameEn": "Stage 19: Antechamber",
+      "layout": {
+        "generate": {
+          "biome": "cave",
+          "seed": 19,
+          "screens": 4
+        }
+      },
+      "lessons": [
+        "19-1"
+      ],
+      "zones": [
+        {
+          "id": "a",
+          "name": "ຫ້ອງໜ້າລານບອສ (Antechamber)",
+          "contents": [
+            {
+              "kind": "waypoint",
+              "x": 120,
+              "name": "ຈຸດວາບປອດໄພ ດ່ານ 19",
+              "label": "🌀 ຈຸດວາບປອດໄພ ດ່ານ 19"
+            },
+            {
+              "kind": "sign",
+              "x": 240,
+              "text": "💎 ຫ້ອງໜ້າລານບອສ",
+              "color": "#93c5fd",
+              "stroke": "#1e3a8a"
+            },
+            {
+              "kind": "spawn-pool",
+              "nodes": [
+                "blue-ore-vein",
+                "cave-mushroom-patch",
+                "crystal-vein"
+              ],
+              "count": 6,
+              "enemies": [
+                "crystal-golem"
+              ],
+              "enemyCount": 5,
+              "enemyType": "slime-armored",
+              "patrolDistance": 120,
+              "speed": 45
+            },
+            {
+              "kind": "exit"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 20,
+      "realm": 2,
+      "status": "ready",
+      "name": "ດ່ານ 20: ລານບອສເຄືອຂ່າຍ",
+      "nameEn": "Stage 20: Network Overlord Arena",
+      "layout": "assets/levels/stage-020.json",
+      "lessons": [
+        "20-1"
+      ],
+      "zones": [
+        {
+          "id": "approach",
+          "name": "ທາງເຂົ້າລານບອສ (Arena Approach)",
+          "contents": [
+            {
+              "kind": "waypoint",
+              "x": 120,
+              "name": "ຈຸດວາບປອດໄພ ດ່ານ 20",
+              "label": "🌀 ຈຸດວາບປອດໄພ ດ່ານ 20"
+            },
+            {
+              "kind": "node",
+              "node": "blue-ore-vein",
+              "x": 350
+            },
+            {
+              "kind": "node",
+              "node": "stone-rock",
+              "x": 520
+            },
+            {
+              "kind": "enemy",
+              "enemy": "crystal-golem",
+              "type": "slime-armored",
+              "x": 450,
+              "y": 580,
+              "patrolDistance": 140,
+              "speed": 45
+            },
+            {
+              "kind": "waypoint",
+              "x": 800,
+              "name": "ຈຸດວາບປອດໄພ ໜ້າລານບອສ",
+              "label": "🌀 ຈຸດວາບປອດໄພ ໜ້າລານບອສ"
+            }
+          ]
+        },
+        {
+          "id": "boss",
+          "name": "ລານປະລອງບອສເຄືອຂ່າຍ (Boss Arena)",
+          "contents": [
+            {
+              "kind": "boss",
+              "enemy": "stage-ch2-boss",
+              "x": 1700,
+              "y": 400,
+              "banner": "👑 ຈອມມານເຄືອຂ່າຍ (Network Overlord) 👑\n(ຫຼົບຄື້ນສັນຍານ & ປິດສາກດ້ວຍຄວາມຮູ້!)"
+            }
+          ]
+        }
+      ]
+    },
     { "number": 21, "realm": 3, "status": "placeholder" },
     { "number": 22, "realm": 3, "status": "placeholder" },
     { "number": 23, "realm": 3, "status": "placeholder" },

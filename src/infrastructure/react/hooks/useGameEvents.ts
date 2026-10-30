@@ -34,7 +34,7 @@ export interface GameEventHandlers
     onOpenBackpack?: () => void;
     onOpenGateRepair?: (gateId?: string, requirements?: GateRequirements) => void;
     onOpenWaypoint?: (name?: string) => void;
-    onOpenQuizFinisher?: () => void;
+    onOpenQuizFinisher?: (payload?: { bookId?: string }) => void;
     onChangeLevel?: (levelKey: string) => void;
     onBookExamPassed?: () => void;
     onDailyPracticeCompleted?: () => void;
