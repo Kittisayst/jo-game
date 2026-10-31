@@ -5345,3 +5345,36 @@ button,
 .inline-block { display: inline-block; }
 .object-contain { object-fit: contain; }
 .select-none { user-select: none; }
+
+/* HUD, less crowded: the top-left shows only what to watch (stage, hearts, level, time) in one row, a second quiet
+   row holds the notices and the one hint, the right side is Credit, Backpack, Textbooks and the menu as small
+   buttons, and the sword, the Skills and the Potion sit in a hotbar at the bottom centre. */
+.hud-cluster-left {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+}
+
+.hud-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    pointer-events: auto;
+}
+
+.hud-notices .hud-badge {
+    padding: 4px 12px;
+    font-size: 0.82rem;
+    background: rgba(15, 23, 42, 0.6);
+    box-shadow: none;
+}
+
+.hud-cluster-right {
+    flex-shrink: 0;
+}
+
+.hud-hotbar {
+    align-items: center;
+    pointer-events: auto;
+}

@@ -7,6 +7,7 @@ import type { SkillSlotView } from '../skillSlots';
 import type { HeroLevelView } from '../heroLevelView';
 import type { WorldTimeView } from '../worldTimeView';
 import type { DurabilityReading } from '../../../domain/entities/Backpack';
+import { isTouchLayout } from '../../touchLayout';
 
 const OBJECTIVE_TEXT: Record<ObjectiveId, string> = {
     'buy-book': '📚 ຊື້ປຶ້ມຕຳລາບົດທີ 1 ທີ່ຫໍສະໝຸດ',
@@ -109,127 +110,137 @@ export function Hud ({
 }: HudProps)
 {
     const levelLabel = hudLabelOf(currentLevel);
+    const touch = isTouchLayout();
+    // The notices row exists only while there is something to say: a build, ripe plants, waiting rewards, a Potion, a hint
+    const hasNotices = Boolean(craftingJob) || gardenReadyCount > 0 || pendingRewardsCount > 0 || activeEffects.length > 0 || Boolean(tutorialText) || Boolean(objective);
 
     return (
         <>
             <div className="game-hud">
-                {/* Left Cluster: Player Vitals & Stage Progression */}
+                {/* Left: what the player must watch (stage, hearts, level, time), then one quiet line of notices */}
                 <div className="hud-cluster-left">
-                    <div className="hud-badge level-badge">
-                        <span className="badge-icon">🚩</span>
-                        <span className="badge-label">{levelLabel}</span>
-                    </div>
-
-                    <div className="hud-badge health-badge" data-testid="health-hearts" data-current={health} data-max={maxHealth}>
-                        <span className="badge-icon">
-                            {'❤️'.repeat(Math.max(0, health)) + '🖤'.repeat(Math.max(0, maxHealth - health))}
-                        </span>
-                    </div>
-
-                    {armor > 0 && (
-                        <div className="hud-badge armor-badge" data-testid="armor-hearts" data-armor={armor} title="ຫົວໃຈເກາະ: ເສຍກ່ອນຫົວໃຈປົກກະຕິ ແລະ ຟື້ນເມື່ອກັບໝູ່ບ້ານ">
-                            <span className="badge-icon">{'🛡️'.repeat(Math.min(armor, 10))}</span>
+                    <div className="hud-row" data-testid="hud-vitals">
+                        <div className="hud-badge level-badge">
+                            <span className="badge-icon">🚩</span>
+                            <span className="badge-label">{levelLabel}</span>
                         </div>
-                    )}
 
-                    {craftingJob && (
-                        <div
-                            className="hud-badge crafting-badge"
-                            data-testid="crafting-badge"
-                            data-state={craftingJob.remainingMs <= 0 ? 'ready' : 'building'}
-                            title="ໂຮງຊ່າງ/ໂຮງຕີເຫຼັກກຳລັງສ້າງ: ເວລານັບຕອນຫຼິ້ນເກມເທົ່ານັ້ນ"
-                        >
-                            <span className="badge-icon">{craftingJob.remainingMs <= 0 ? '✅' : '🔨'}</span>
-                            <span className="badge-label">
-                                {craftingJob.remainingMs <= 0 ? 'ສ້າງສຳເລັດ ໄປຮັບຂອງ' : `ກຳລັງສ້າງ ${formatCraftTime(craftingJob.remainingMs)}`}
+                        <div className="hud-badge health-badge" data-testid="health-hearts" data-current={health} data-max={maxHealth}>
+                            <span className="badge-icon">
+                                {'❤️'.repeat(Math.max(0, health)) + '🖤'.repeat(Math.max(0, maxHealth - health))}
                             </span>
                         </div>
-                    )}
 
-                    {gardenReadyCount > 0 && (
-                        <div className="hud-badge garden-badge" data-testid="garden-ready" title="ມີຜົນໃນສວນພ້ອມເກັບ: ໄປທີ່ປະຕູສວນໃນໝູ່ບ້ານ">
-                            <span className="badge-icon">🌿</span>
-                            <span className="badge-label">ສວນພ້ອມເກັບ {gardenReadyCount}</span>
-                        </div>
-                    )}
+                        {armor > 0 && (
+                            <div className="hud-badge armor-badge" data-testid="armor-hearts" data-armor={armor} title="ຫົວໃຈເກາະ: ເສຍກ່ອນຫົວໃຈປົກກະຕິ ແລະ ຟື້ນເມື່ອກັບໝູ່ບ້ານ">
+                                <span className="badge-icon">{'🛡️'.repeat(Math.min(armor, 10))}</span>
+                            </div>
+                        )}
 
-                    {pendingRewardsCount > 0 && (
-                        <div
-                            className="hud-badge pending-badge"
-                            data-testid="pending-rewards"
-                            title="ວັດສະດຸເນື້ອເລື່ອງ (ເສດປະຕູ, ແກນບອສ, ຜລຶກ) ທີ່ກະເປົາເຕັມ ເກັບໄວ້ໃຫ້ ຈະເຂົ້າກະເປົາເມື່ອມີຊ່ອງວ່າງ"
-                        >
-                            <span className="badge-icon">📦</span>
-                            <span className="badge-label">ລໍຮັບ {pendingRewardsCount} (ກະເປົາເຕັມ)</span>
-                        </div>
-                    )}
+                        {heroLevel && (
+                            <button
+                                type="button"
+                                onClick={e => { e.preventDefault(); e.stopPropagation(); onOpenCharacter?.(); }}
+                                className="hud-badge hero-level-badge"
+                                data-testid="hero-level"
+                                data-level={heroLevel.level}
+                                title={heroLevel.xpNeeded > 0 ? `[C] XP ${heroLevel.xp} / ${heroLevel.xpNeeded} (XP ມາຈາກການຂ້າ monster ເທົ່ານັ້ນ, ບໍ່ແມ່ນ Credit)` : 'ລະດັບສູງສຸດ'}
+                            >
+                                <span className="badge-icon">⭐</span>
+                                <span className="badge-value">Lv {heroLevel.level}</span>
+                                <span aria-hidden="true" style={{ display: 'inline-block', width: 44, height: 6, borderRadius: 3, background: 'rgba(148,163,184,0.35)', overflow: 'hidden' }}>
+                                    <span data-testid="hero-xp-bar" style={{ display: 'block', height: '100%', width: `${Math.round(heroLevel.fraction * 100)}%`, background: '#a5b4fc' }} />
+                                </span>
+                            </button>
+                        )}
 
-                    {activeEffects.map(active => (
-                        <div
-                            key={active.effect}
-                            className="hud-badge effect-badge"
-                            data-testid={`effect-${active.effect}`}
-                            title={active.effect === 'strength' ? 'ພະລັງໂຈມຕີ +50%' : 'ຄວາມໄວ +30%'}
-                        >
-                            <span className="badge-icon">{active.effect === 'strength' ? '💪' : '💨'}</span>
-                            <span className="badge-label">{active.remainingSeconds}s</span>
-                        </div>
-                    ))}
+                        {worldTime && (
+                            <div className="hud-badge world-time-badge" data-testid="world-time" data-phase={worldTime.phase} title={`${worldTime.label}: ອີກ ${worldTime.countdown} ຈະປ່ຽນ`}>
+                                <span className="badge-icon">{worldTime.icon}</span>
+                                <span className="badge-label">{worldTime.countdown}</span>
+                            </div>
+                        )}
+                    </div>
 
-                    {objective && (
-                        <div className="hud-badge objective-badge" title="ເປົ້າໝາຍຕໍ່ໄປ">
-                            <span className="badge-label">{OBJECTIVE_TEXT[objective]}</span>
-                        </div>
-                    )}
-
-                    {tutorialText && (
-                        <div className="hud-badge tutorial-badge" data-testid="tutorial-hint" title="ຄຳແນະນຳສຳລັບຜູ້ຫຼິ້ນໃໝ່">
-                            <span className="badge-label">{tutorialText}</span>
-                            {onDismissTutorial && (
-                                <button
-                                    type="button"
-                                    className="tutorial-skip"
-                                    data-testid="tutorial-skip"
-                                    onClick={e => { e.preventDefault(); e.stopPropagation(); onDismissTutorial(); }}
-                                    title="ຂ້າມຄຳແນະນຳ"
+                    {hasNotices && (
+                        <div className="hud-row hud-notices" data-testid="hud-notices">
+                            {craftingJob && (
+                                <div
+                                    className="hud-badge crafting-badge"
+                                    data-testid="crafting-badge"
+                                    data-state={craftingJob.remainingMs <= 0 ? 'ready' : 'building'}
+                                    title="ໂຮງຊ່າງ/ໂຮງຕີເຫຼັກກຳລັງສ້າງ: ເວລານັບຕອນຫຼິ້ນເກມເທົ່ານັ້ນ"
                                 >
-                                    ✕
-                                </button>
+                                    <span className="badge-icon">{craftingJob.remainingMs <= 0 ? '✅' : '🔨'}</span>
+                                    <span className="badge-label">
+                                        {craftingJob.remainingMs <= 0 ? 'ສ້າງສຳເລັດ ໄປຮັບຂອງ' : `ກຳລັງສ້າງ ${formatCraftTime(craftingJob.remainingMs)}`}
+                                    </span>
+                                </div>
                             )}
+
+                            {gardenReadyCount > 0 && (
+                                <div className="hud-badge garden-badge" data-testid="garden-ready" title="ມີຜົນໃນສວນພ້ອມເກັບ: ໄປທີ່ປະຕູສວນໃນໝູ່ບ້ານ">
+                                    <span className="badge-icon">🌿</span>
+                                    <span className="badge-label">ສວນພ້ອມເກັບ {gardenReadyCount}</span>
+                                </div>
+                            )}
+
+                            {pendingRewardsCount > 0 && (
+                                <div
+                                    className="hud-badge pending-badge"
+                                    data-testid="pending-rewards"
+                                    title="ວັດສະດຸເນື້ອເລື່ອງ (ເສດປະຕູ, ແກນບອສ, ຜລຶກ) ທີ່ກະເປົາເຕັມ ເກັບໄວ້ໃຫ້ ຈະເຂົ້າກະເປົາເມື່ອມີຊ່ອງວ່າງ"
+                                >
+                                    <span className="badge-icon">📦</span>
+                                    <span className="badge-label">ລໍຮັບ {pendingRewardsCount} (ກະເປົາເຕັມ)</span>
+                                </div>
+                            )}
+
+                            {activeEffects.map(active => (
+                                <div
+                                    key={active.effect}
+                                    className="hud-badge effect-badge"
+                                    data-testid={`effect-${active.effect}`}
+                                    title={active.effect === 'strength' ? 'ພະລັງໂຈມຕີ +50%' : 'ຄວາມໄວ +30%'}
+                                >
+                                    <span className="badge-icon">{active.effect === 'strength' ? '💪' : '💨'}</span>
+                                    <span className="badge-label">{active.remainingSeconds}s</span>
+                                </div>
+                            ))}
+
+                            {/* One hint at a time: the tutorial step while there is one, otherwise the next objective */}
+                            {tutorialText ? (
+                                <div className="hud-badge tutorial-badge" data-testid="tutorial-hint" title="ຄຳແນະນຳສຳລັບຜູ້ຫຼິ້ນໃໝ່">
+                                    <span className="badge-label">{tutorialText}</span>
+                                    {onDismissTutorial && (
+                                        <button
+                                            type="button"
+                                            className="tutorial-skip"
+                                            data-testid="tutorial-skip"
+                                            onClick={e => { e.preventDefault(); e.stopPropagation(); onDismissTutorial(); }}
+                                            title="ຂ້າມຄຳແນະນຳ"
+                                        >
+                                            ✕
+                                        </button>
+                                    )}
+                                </div>
+                            ) : objective ? (
+                                <div className="hud-badge objective-badge" title="ເປົ້າໝາຍຕໍ່ໄປ">
+                                    <span className="badge-label">{OBJECTIVE_TEXT[objective]}</span>
+                                </div>
+                            ) : null}
                         </div>
                     )}
+                </div>
 
-                    {heroLevel && (
-                        <button
-                            type="button"
-                            onClick={e => { e.preventDefault(); e.stopPropagation(); onOpenCharacter?.(); }}
-                            className="hud-badge hero-level-badge"
-                            data-testid="hero-level"
-                            data-level={heroLevel.level}
-                            title={heroLevel.xpNeeded > 0 ? `[C] XP ${heroLevel.xp} / ${heroLevel.xpNeeded} (XP ມາຈາກການຂ້າ monster ເທົ່ານັ້ນ, ບໍ່ແມ່ນ Credit)` : 'ລະດັບສູງສຸດ'}
-                        >
-                            <span className="badge-icon">⭐</span>
-                            <span className="badge-value">Lv {heroLevel.level}</span>
-                            <span aria-hidden="true" style={{ display: 'inline-block', width: 44, height: 6, borderRadius: 3, background: 'rgba(148,163,184,0.35)', overflow: 'hidden' }}>
-                                <span data-testid="hero-xp-bar" style={{ display: 'block', height: '100%', width: `${Math.round(heroLevel.fraction * 100)}%`, background: '#a5b4fc' }} />
-                            </span>
-                        </button>
-                    )}
-
-                    {worldTime && (
-                        <div className="hud-badge world-time-badge" data-testid="world-time" data-phase={worldTime.phase} title={`${worldTime.label}: ອີກ ${worldTime.countdown} ຈະປ່ຽນ`}>
-                            <span className="badge-icon">{worldTime.icon}</span>
-                            <span className="badge-label">{worldTime.countdown}</span>
-                        </div>
-                    )}
-
+                {/* Right: Credit, the Backpack and the Textbooks as small buttons, and the menu */}
+                <div className="hud-cluster-right">
                     {/* Permanent Knowledge Credit balance */}
                     <div className="hud-badge wallet-hud-badge" title="ເຄຣດິດຄວາມຮູ້ (Credit - ໄດ້ຮັບຈາກການຮຽນ & ສອບເສັງ)">
                         <span className="badge-icon">🎓</span>
                         <span className="badge-value">{walletBalance}</span>
                     </div>
 
-                    {/* Quick Backpack Button */}
                     {onOpenBackpack && (
                         <button
                             id="hud-backpack-btn"
@@ -240,7 +251,8 @@ export function Hud ({
                                 e.stopPropagation();
                                 onOpenBackpack();
                             }}
-                            title="ເປີດກະເປົາ (Backpack)"
+                            title="ເປີດກະເປົາ (Backpack) [I]"
+                            aria-label="ກະເປົາ"
                             type="button"
                         >
                             <span className="badge-icon">🎒</span>
@@ -248,7 +260,6 @@ export function Hud ({
                         </button>
                     )}
 
-                    {/* Quick Personal Textbook Reader Button */}
                     {onOpenLibrary && (
                         <button
                             id="hud-library-btn"
@@ -259,70 +270,15 @@ export function Hud ({
                                 e.stopPropagation();
                                 onOpenLibrary();
                             }}
-                            title="ເປີດອ່ານປຶ້ມຕຳລາທີ່ຊື້ແລ້ວ (ຊື້ປຶ້ມໄດ້ທີ່ອາຄານຫໍສະໝຸດໃນໝູ່ບ້ານ)"
+                            title={`ເປີດອ່ານປຶ້ມຕຳລາທີ່ຊື້ແລ້ວ (ມີ ${ownedBooksCount} ຫົວ; ຊື້ໄດ້ທີ່ອາຄານຫໍສະໝຸດໃນໝູ່ບ້ານ)`}
+                            aria-label="ຕຳລາ"
                             type="button"
                         >
                             <span className="badge-icon">📚</span>
-                            <span className="badge-label">ຕຳລາ ({ownedBooksCount})</span>
+                            <span className="badge-label">{ownedBooksCount}</span>
                         </button>
                     )}
 
-                    {quickSlot && (
-                        <button
-                            className="hud-badge quick-slot-badge"
-                            data-testid="quick-slot"
-                            onClick={e => { e.preventDefault(); e.stopPropagation(); onDrinkQuickSlot?.(); }}
-                            title={`ດື່ມ ${quickSlot.name} (ກົດ R)`}
-                            type="button"
-                        >
-                            <span className="badge-icon flex items-center">
-                                <ItemIcon iconImage={quickSlot.iconImage} icon={quickSlot.icon} size={20} />
-                            </span>
-                            <span className="badge-label">x{quickSlot.count}</span>
-                            <span className="badge-hint">[R]</span>
-                        </button>
-                    )}
-
-                    {skillSlots.map(view => view && (
-                        <button
-                            className="hud-badge skill-slot-badge"
-                            data-testid={`skill-slot-${view.key}`}
-                            data-state={view.cooldown > 0 ? 'cooling' : 'ready'}
-                            key={view.slot}
-                            onClick={e => { e.preventDefault(); e.stopPropagation(); onUseSkill?.(view.slot); }}
-                            title={`${view.name} (ກົດ ${view.key})`}
-                            type="button"
-                        >
-                            <span className="badge-icon">{view.icon}</span>
-                            <span className="badge-hint">[{view.key}]</span>
-                            <span className="skill-cooldown" style={{ height: `${Math.round(view.cooldown * 100)}%` }} />
-                        </button>
-                    ))}
-
-                    {/* Equipped Weapon Badge with Cycle button */}
-                    <button
-                        className="hud-badge weapon-hud-badge"
-                        onClick={(e) =>
-                        {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            onCycleWeapon();
-                        }}
-                        title="ປ່ຽນອາວຸດ (ກົດ Q)"
-                        type="button"
-                    >
-                        <span className="badge-icon flex items-center">
-                            <ItemIcon iconImage={equippedWeapon.iconImage} icon={equippedWeapon.icon} size={20} />
-                        </span>
-                        <span className="badge-label">{equippedWeapon.name}</span>
-                        {equippedWeapon.durability && <DurabilityBar reading={equippedWeapon.durability} compact />}
-                        <span className="badge-hint">[Q]</span>
-                    </button>
-
-                </div>
-
-                {/* Right Cluster: Utility Controls (Pause) */}
-                <div className="hud-cluster-right">
                     <button
                         id="hud-menu-btn"
                         className={`hud-badge hud-menu-btn ${isGamePaused ? 'paused-active' : ''}`}
@@ -340,6 +296,66 @@ export function Hud ({
                     </button>
                 </div>
             </div>
+
+            {/* Bottom centre: the things used in a fight (the sword, the Skills and the Potion). On a phone the touch
+                buttons already have the sword and the Skills, so only the Potion is here. */}
+            {(quickSlot || !touch) && (
+                <div className="hud-hotbar" data-testid="hud-hotbar">
+                    {quickSlot && (
+                        <button
+                            className="hud-badge quick-slot-badge"
+                            data-testid="quick-slot"
+                            onClick={e => { e.preventDefault(); e.stopPropagation(); onDrinkQuickSlot?.(); }}
+                            title={`ດື່ມ ${quickSlot.name} (ກົດ R)`}
+                            type="button"
+                        >
+                            <span className="badge-icon flex items-center">
+                                <ItemIcon iconImage={quickSlot.iconImage} icon={quickSlot.icon} size={20} />
+                            </span>
+                            <span className="badge-label">x{quickSlot.count}</span>
+                            <span className="badge-hint">[R]</span>
+                        </button>
+                    )}
+
+                    {!touch && skillSlots.map(view => view && (
+                        <button
+                            className="hud-badge skill-slot-badge"
+                            data-testid={`skill-slot-${view.key}`}
+                            data-state={view.cooldown > 0 ? 'cooling' : 'ready'}
+                            key={view.slot}
+                            onClick={e => { e.preventDefault(); e.stopPropagation(); onUseSkill?.(view.slot); }}
+                            title={`${view.name} (ກົດ ${view.key})`}
+                            type="button"
+                        >
+                            <span className="badge-icon">{view.icon}</span>
+                            <span className="badge-hint">[{view.key}]</span>
+                            <span className="skill-cooldown" style={{ height: `${Math.round(view.cooldown * 100)}%` }} />
+                        </button>
+                    ))}
+
+                    {/* Equipped Weapon Badge with Cycle button */}
+                    {!touch && (
+                        <button
+                            className="hud-badge weapon-hud-badge"
+                            onClick={(e) =>
+                            {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                onCycleWeapon();
+                            }}
+                            title="ປ່ຽນອາວຸດ (ກົດ Q)"
+                            type="button"
+                        >
+                            <span className="badge-icon flex items-center">
+                                <ItemIcon iconImage={equippedWeapon.iconImage} icon={equippedWeapon.icon} size={20} />
+                            </span>
+                            <span className="badge-label">{equippedWeapon.name}</span>
+                            {equippedWeapon.durability && <DurabilityBar reading={equippedWeapon.durability} compact />}
+                            <span className="badge-hint">[Q]</span>
+                        </button>
+                    )}
+                </div>
+            )}
 
             {/* Boss Bar */}
             {bossHp !== null && (
