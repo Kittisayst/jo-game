@@ -104,4 +104,21 @@ test.describe('Village polish', () => {
     expect(view.feetY).toBeLessThan(Math.min(...buttonTops) - 10);
     await context.close();
   });
+  test('on a desktop the ground is raised too: the hero is not at the bottom edge of the window', async ({ page }) => {
+    test.setTimeout(60000);
+    await page.goto('/?stage=2');
+    await expect(page.locator('.game-hud')).toBeVisible({ timeout: 20000 });
+    const bot = new Bot(page, false);
+    await bot.state();
+    await page.waitForTimeout(2500);
+    const view = await page.evaluate(() => {
+      const scene = (window as any).__botGame.scene.getScene('Game');
+      const cam = scene.cameras.main;
+      const feet = scene.player.y + 24;
+      return { zoom: cam.zoom as number, fraction: ((feet - cam.scrollY - cam.height / 2) * cam.zoom + cam.height / 2) / cam.height };
+    });
+    expect(view.zoom).toBe(1);
+    // Before, the feet were about 92 % down the window (the ground was its last strip)
+    expect(view.fraction).toBeLessThan(0.82);
+  });
 });

@@ -2,7 +2,7 @@ import { autoSaveGame } from '../../saveSnapshot';
 import { canSleep, sleepUseCase } from '../../../application/SleepUseCase';
 import { nightCreatureCount, nightCreatureIdsFor, scaleNightCreature, stageHasNightCreatures } from '../../../domain/entities/NightCreatures';
 import { DayNightOverlay } from '../effects/DayNightOverlay';
-import { isTouchLayout, TOUCH_GROUND_PAD, TOUCH_ZOOM } from '../../touchLayout';
+import { groundPad, viewZoom } from '../../touchLayout';
 import { tickWorldTimeUseCase, WORLD_PHASE_CHANGED_EVENT, type WorldPhaseChangedPayload } from '../../../application/TickWorldTimeUseCase';
 import { EventBus } from '../../EventBus';
 import { Input, Scene } from 'phaser';
@@ -181,17 +181,15 @@ export class Game extends Scene
 
         this.camera = this.cameras.main;
         this.camera.setBackgroundColor(0x87ceeb);
-        // On a phone the hero is drawn bigger, and there is soil below the ground so the camera can lift the hero
-        // above the on-screen buttons (they cover the bottom of the screen)
-        const touch = isTouchLayout();
-        const pad = touch ? TOUCH_GROUND_PAD : 0;
+        // There is soil below the ground so the camera can lift the hero off the bottom edge: on a phone also above the
+        // on-screen buttons, and the hero is drawn bigger there
+        const pad = groundPad();
         this.camera.setBounds(0, 0, this.level.worldWidth, WORLD_HEIGHT + pad);
-        if (touch)
-        {
-            this.camera.setZoom(TOUCH_ZOOM);
-            this.add.rectangle(this.level.worldWidth / 2, WORLD_HEIGHT + pad / 2, this.level.worldWidth, pad, 0x5a3418)
-                .setDepth(0.5);
-        }
+        this.camera.setZoom(viewZoom());
+        // Soil, a little darker with depth
+        const upper = Math.round(pad * 0.4);
+        this.add.rectangle(this.level.worldWidth / 2, WORLD_HEIGHT + upper / 2, this.level.worldWidth, upper, 0x6b3f1f).setDepth(0.5);
+        this.add.rectangle(this.level.worldWidth / 2, WORLD_HEIGHT + upper + (pad - upper) / 2, this.level.worldWidth, pad - upper, 0x4a2a14).setDepth(0.5);
 
         const isVillage = this.level.scenery === 'village' || this.currentLevelKey === 'village';
         const isGarden = this.currentLevelKey === GARDEN_LEVEL_KEY;
