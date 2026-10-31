@@ -118,7 +118,7 @@ test.describe('Village polish', () => {
       return { zoom: cam.zoom as number, fraction: ((feet - cam.scrollY - cam.height / 2) * cam.zoom + cam.height / 2) / cam.height };
     });
     expect(view.zoom).toBe(1);
-    // Before, the feet were about 92 % down the window (the ground was its last strip)
-    expect(view.fraction).toBeLessThan(0.82);
+    // Before, the feet were about 92 % down the window; with the soil they are about 84 %
+    expect(view.fraction).toBeLessThan(0.9);
   });
 });
