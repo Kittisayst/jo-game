@@ -15,6 +15,8 @@ import {
     SETTINGS_CHANGED_EVENT,
     SettingsChangedPayload,
 } from '../../application/UpdateSettingsUseCase';
+import { POTION_DRUNK_EVENT } from '../../application/DrinkPotionUseCase';
+import { QUEST_CLAIMED_EVENT } from '../../application/QuestUseCases';
 import { EventBus } from '../EventBus';
 
 // Village Hub melody (Warm pastoral-cyber C major pentatonic)
@@ -200,6 +202,8 @@ export class SoundManager
             this.setMusicMuted(musicMuted);
         });
         EventBus.on('dialogue-open-state', (isActive: boolean) => this.setDucked(isActive));
+        DomainEvents.on(POTION_DRUNK_EVENT, () => this.playPotionDrink());
+        DomainEvents.on(QUEST_CLAIMED_EVENT, () => this.playQuestClaim());
     }
 
     // --- BGM Engine ---
@@ -1135,6 +1139,126 @@ export class SoundManager
         this.connectOutput(crunchGain);
         crunch.start(now);
         crunch.stop(now + 0.07);
+    }
+
+    /**
+     * Potion Drinking Sound: bubbling liquid glug with a refreshing sparkle chime
+     */
+    playPotionDrink (): void
+    {
+        if (this._isMuted) return;
+        this.initContext();
+        if (!this.ctx) return;
+
+        const now = this.ctx.currentTime;
+
+        // Two cute liquid bubble glugs
+        [
+            { startFreq: 220, endFreq: 340, time: now, dur: 0.055 },
+            { startFreq: 290, endFreq: 460, time: now + 0.065, dur: 0.065 },
+        ].forEach(bubble =>
+        {
+            if (!this.ctx) return;
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(bubble.startFreq, bubble.time);
+            osc.frequency.exponentialRampToValueAtTime(bubble.endFreq, bubble.time + bubble.dur);
+
+            gain.gain.setValueAtTime(0.18, bubble.time);
+            gain.gain.exponentialRampToValueAtTime(0.001, bubble.time + bubble.dur);
+
+            osc.connect(gain);
+            this.connectOutput(gain);
+
+            osc.start(bubble.time);
+            osc.stop(bubble.time + bubble.dur);
+        });
+
+        // Refreshing high sparkle chime
+        const chimeStart = now + 0.13;
+        const chime = this.ctx.createOscillator();
+        const chimeGain = this.ctx.createGain();
+        chime.type = 'triangle';
+        chime.frequency.setValueAtTime(880, chimeStart);
+        chime.frequency.exponentialRampToValueAtTime(1318.51, chimeStart + 0.18);
+
+        chimeGain.gain.setValueAtTime(0.14, chimeStart);
+        chimeGain.gain.exponentialRampToValueAtTime(0.001, chimeStart + 0.22);
+
+        chime.connect(chimeGain);
+        this.connectOutput(chimeGain);
+        chime.start(chimeStart);
+        chime.stop(chimeStart + 0.22);
+    }
+
+    /**
+     * Quest Claim Fanfare: triumphant golden rising fanfare
+     */
+    playQuestClaim (): void
+    {
+        if (this._isMuted) return;
+        this.initContext();
+        if (!this.ctx) return;
+
+        const now = this.ctx.currentTime;
+        const notes = [523.25, 659.25, 783.99, 987.77, 1046.50, 1318.51];
+        const step = 0.07;
+
+        notes.forEach((freq, idx) =>
+        {
+            if (!this.ctx) return;
+            const startTime = now + idx * step;
+            const isLast = idx === notes.length - 1;
+            const duration = isLast ? 0.45 : 0.14;
+
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+
+            osc.type = isLast ? 'triangle' : 'sine';
+            osc.frequency.setValueAtTime(freq, startTime);
+            if (isLast)
+            {
+                osc.frequency.exponentialRampToValueAtTime(freq * 1.02, startTime + duration);
+            }
+
+            gain.gain.setValueAtTime(isLast ? 0.22 : 0.16, startTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+
+            osc.connect(gain);
+            this.connectOutput(gain);
+
+            osc.start(startTime);
+            osc.stop(startTime + duration);
+        });
+    }
+
+    /**
+     * UI Button Click Sound: crisp tactile select blip
+     */
+    playButtonClick (): void
+    {
+        if (this._isMuted) return;
+        this.initContext();
+        if (!this.ctx) return;
+
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(540, now);
+        osc.frequency.exponentialRampToValueAtTime(780, now + 0.035);
+
+        gain.gain.setValueAtTime(0.12, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.035);
+
+        osc.connect(gain);
+        this.connectOutput(gain);
+
+        osc.start(now);
+        osc.stop(now + 0.035);
     }
 }
 

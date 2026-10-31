@@ -76,6 +76,7 @@ export interface HudProps
     worldTime?: WorldTimeView;
     onOpenCharacter?: () => void;
     onUseSkill?: (slot: number) => void;
+    stageProgress?: { percent: number } | null;
 }
 
 export function Hud ({
@@ -110,6 +111,7 @@ export function Hud ({
     worldTime,
     onOpenCharacter,
     onUseSkill,
+    stageProgress = null,
 }: HudProps)
 {
     const levelLabel = hudLabelOf(currentLevel);
@@ -127,6 +129,24 @@ export function Hud ({
                             <span className="badge-icon">🚩</span>
                             <span className="badge-label">{levelLabel}</span>
                         </div>
+
+                        {stageProgress && (
+                            <div
+                                className="hud-badge stage-progress-badge"
+                                data-testid="stage-progress"
+                                title={`ໄລຍະທາງໃນດ່ານ: ${stageProgress.percent}%`}
+                            >
+                                <span className="badge-icon">🏃</span>
+                                <span className="badge-label">{stageProgress.percent}%</span>
+                                <div className="stage-progress-track" aria-hidden="true">
+                                    <div
+                                        className="stage-progress-fill"
+                                        style={{ width: `${stageProgress.percent}%` }}
+                                    />
+                                </div>
+                                <span className="badge-target">🌀</span>
+                            </div>
+                        )}
 
                         <div className="hud-badge health-badge" data-testid="health-hearts" data-current={health} data-max={maxHealth}>
                             <span className="badge-icon">

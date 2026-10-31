@@ -33,7 +33,7 @@ export const QuestBoardModal: React.FC<QuestBoardModalProps> = ({ isOpen, onClos
 
         if (result.success)
         {
-            soundManager.playPowerUp();
+            soundManager.playQuestClaim();
             setRevision(r => r + 1);
             autoSaveGame();
         }

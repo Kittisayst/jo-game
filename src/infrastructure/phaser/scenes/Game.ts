@@ -105,6 +105,7 @@ export class Game extends Scene
     private hasMovedAway = false;
     /** Walking past this x clears a Stage that has no boss (see `exit` in stages.json). */
     private stageExitX?: number;
+    private lastProgressPercent = -1;
     health: Health;
     currentLevelKey = 'village';
     currentSkinId = 'cyber-blue';
@@ -156,6 +157,7 @@ export class Game extends Scene
         this.craftingWorkers = [];
         this.stage = undefined;
         this.stageExitX = undefined;
+        this.lastProgressPercent = -1;
         this.bossBgmStarted = false;
     }
 
@@ -638,6 +640,18 @@ export class Game extends Scene
         {
             this.hasMovedAway = true;
             notifyTutorial('moved');
+        }
+
+        if (!isHomeLevel(this.currentLevelKey) && this.stageExitX !== undefined)
+        {
+            const startX = this.level?.spawn?.x ?? 120;
+            const fraction = (this.player.x - startX) / Math.max(1, this.stageExitX - startX);
+            const percent = Math.min(100, Math.max(0, Math.round(fraction * 100)));
+            if (percent !== this.lastProgressPercent)
+            {
+                this.lastProgressPercent = percent;
+                EventBus.emit('stage-progress-updated', { percent });
+            }
         }
 
         if (this.stageExitX !== undefined && this.player.x >= this.stageExitX)

@@ -53,7 +53,8 @@ export class CombatController
         if (!attack) return;
 
         const { weaponId, damage, range } = attack;
-        scene.player.triggerSlashVfx(weaponId);
+        const upgradeLevel = entities.equipment.getUpgradeLevel(weaponId);
+        scene.player.triggerSlashVfx(weaponId, upgradeLevel);
         soundManager.playSlash();
         this.resolveMeleeAttack(damage, range);
     }

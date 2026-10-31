@@ -109,7 +109,7 @@ export const ForgeModal: React.FC<ForgeModalProps> = ({ isOpen, onClose }) =>
                         {/* Tabs */}
                         <div className="flex gap-4 px-6 pt-3 border-b border-slate-700/60 bg-slate-900/40">
                             <button
-                                onClick={() => setActiveTab('craft')}
+                                onClick={() => { soundManager.playButtonClick(); setActiveTab('craft'); }}
                                 className={`pb-2.5 font-bold text-sm transition flex items-center gap-2 border-b-2 ${
                                     activeTab === 'craft'
                                         ? 'border-orange-400 text-orange-300'
@@ -121,7 +121,7 @@ export const ForgeModal: React.FC<ForgeModalProps> = ({ isOpen, onClose }) =>
                             </button>
 
                             <button
-                                onClick={() => setActiveTab('upgrade')}
+                                onClick={() => { soundManager.playButtonClick(); setActiveTab('upgrade'); }}
                                 className={`pb-2.5 font-bold text-sm transition flex items-center gap-2 border-b-2 ${
                                     activeTab === 'upgrade'
                                         ? 'border-orange-400 text-orange-300'
@@ -134,7 +134,7 @@ export const ForgeModal: React.FC<ForgeModalProps> = ({ isOpen, onClose }) =>
 
                             <button
                                 data-testid="forge-repair-tab"
-                                onClick={() => setActiveTab('repair')}
+                                onClick={() => { soundManager.playButtonClick(); setActiveTab('repair'); }}
                                 className={`pb-2.5 font-bold text-sm transition flex items-center gap-2 border-b-2 ${
                                     activeTab === 'repair'
                                         ? 'border-orange-400 text-orange-300'

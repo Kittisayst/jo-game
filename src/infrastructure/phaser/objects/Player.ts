@@ -328,7 +328,7 @@ export class Player extends Physics.Arcade.Sprite
         this.playAnimation('tool');
     }
 
-    triggerSlashVfx (weaponId: string): void
+    triggerSlashVfx (weaponId: string, upgradeLevel = 0): void
     {
         this.attackAnimTimer = ATTACK_ANIM_MS;
         this.playAnimation('attack');
@@ -360,6 +360,15 @@ export class Player extends Physics.Arcade.Sprite
             const vfx = this.scene.add.sprite(slashX, slashY, slashKey, 0);
             vfx.setDepth(15);
             vfx.setFlipX(this.facingDir < 0);
+            if (upgradeLevel > 0)
+            {
+                vfx.setScale(1 + upgradeLevel * 0.18);
+                if (upgradeLevel === 1) vfx.setTint(0xfde047);
+                else if (upgradeLevel === 2) vfx.setTint(0x38bdf8);
+                else vfx.setTint(0xf43f5e);
+                (this.scene as unknown as { particleManager?: { emitCelebration: (x: number, y: number) => void } })
+                    .particleManager?.emitCelebration(slashX, slashY);
+            }
             vfx.play(animKey);
             vfx.once('animationcomplete', () => vfx.destroy());
 

@@ -168,11 +168,15 @@ function App ()
     const [backpackRevision, setBackpackRevision] = useState(0);
     // Bumped when a tutorial step is finished or skipped, so the hint on the HUD is read again
     const [, setTutorialRevision] = useState(0);
+    const [stageProgress, setStageProgress] = useState<{ percent: number } | null>(null);
 
     useEffect(() =>
     {
         // Ensure legacy local storage keys are migrated into active save slot on startup
         saveManager.load();
+        const onProgress = ({ percent }: { percent: number }) => setStageProgress({ percent });
+        EventBus.on('stage-progress-updated', onProgress);
+        return () => { EventBus.off('stage-progress-updated', onProgress); };
     }, []);
 
     const handleCycleWeapon = () =>
@@ -297,6 +301,7 @@ function App ()
         setHealth(entities.health.max);
         setCurrentLevel(stageKey);
         setBossHp(null);
+        setStageProgress(isHomeLevel(stageKey) ? null : { percent: 0 });
 
         writeString(ACTIVE_SESSION_STORAGE_KEY, stageKey);
 
@@ -384,6 +389,7 @@ function App ()
 
         setCurrentLevel(target);
         setBossHp(null);
+        setStageProgress(isHomeLevel(target) ? null : { percent: 0 });
 
         phaserRef.current?.scene?.scene.restart({
             levelKey: target,
@@ -467,7 +473,7 @@ function App ()
         if (!itemId) return;
 
         const result = drinkPotionUseCase(entities.itemCatalog.get(itemId), entities.backpack, entities.health, entities.effects);
-        if (result.success) soundManager.playPowerUp(); else soundManager.playHurt();
+        if (result.success) soundManager.playPotionDrink(); else soundManager.playHurt();
         // A Potion that is used up (or gone) empties the slot
         if (entities.backpack.getItemCount(itemId) === 0) entities.quickSlotItemId = null;
         setBackpackRevision(r => r + 1);
@@ -816,6 +822,7 @@ function App ()
                     onOpenCharacter={() => setIsCharacterOpen(true)}
                     onUseSkill={slot => EventBus.emit('virtual-skill', { slot })}
                     activeEffects={entities.effects.active}
+                    stageProgress={stageProgress}
                     quickSlot={quickSlotDef
                         ? {
                             id: quickSlotDef.id,

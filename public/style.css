@@ -5443,3 +5443,38 @@ button,
 .quest-board-modal {
     display: flex;
 }
+
+/* Mini-Progress Bar in Stage */
+.stage-progress-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(15, 23, 42, 0.75);
+    border: 1px solid rgba(56, 189, 248, 0.5);
+    border-radius: 6px;
+    padding: 3px 8px;
+    color: #38bdf8;
+    box-shadow: 0 0 8px rgba(56, 189, 248, 0.2);
+}
+
+.stage-progress-track {
+    width: 60px;
+    height: 6px;
+    background: rgba(30, 41, 59, 0.85);
+    border: 1px solid rgba(71, 85, 105, 0.6);
+    border-radius: 3px;
+    overflow: hidden;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.stage-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #0ea5e9, #38bdf8);
+    transition: width 0.2s ease-out;
+    box-shadow: 0 0 6px rgba(56, 189, 248, 0.6);
+}
+
+.badge-target {
+    font-size: 11px;
+}
