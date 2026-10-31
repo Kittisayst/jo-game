@@ -17,6 +17,7 @@ export class DayNightOverlay
 {
     private readonly dark: Phaser.GameObjects.Rectangle;
     private readonly glow: Phaser.GameObjects.Image;
+    private readonly lights: Phaser.GameObjects.Image[] = [];
 
     constructor (private readonly scene: Scene)
     {
@@ -35,6 +36,18 @@ export class DayNightOverlay
             .setDisplaySize(GLOW_RADIUS * 2, GLOW_RADIUS * 2);
     }
 
+    /** A lamp that shines when it is dark (a lantern in the village), in world coordinates. */
+    addLight (x: number, y: number, radius: number): void
+    {
+        this.lights.push(
+            this.scene.add.image(x, y, GLOW_KEY)
+                .setDepth(902)
+                .setBlendMode(BlendModes.ADD)
+                .setAlpha(0)
+                .setDisplaySize(radius * 2, radius * 2)
+        );
+    }
+
     /** `darkness` 0 to 1 (the layer's opacity); `heroX` / `heroY` are world coordinates. */
     update (darkness: number, heroX: number, heroY: number): void
     {
@@ -45,6 +58,8 @@ export class DayNightOverlay
         this.glow.setPosition((heroX - camera.scrollX) * camera.zoom, (heroY - camera.scrollY) * camera.zoom);
         this.glow.setVisible(darkness > 0.02);
         this.dark.setVisible(darkness > 0.001);
+        // Lamps come on as it gets dark (a full glow once the night is as dark as it gets)
+        for (const light of this.lights) light.setAlpha(Math.min(0.75, darkness * 1.5));
     }
 
     private static ensureGlowTexture (scene: Scene): void

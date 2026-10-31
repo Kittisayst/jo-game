@@ -135,7 +135,7 @@ export function DialogueModal ({
                 <div className="dialogue-header">
                     <div className="dialogue-avatar-frame">
                         {portraitSrc ? (
-                            <img src={portraitSrc} alt="" width={48} height={48} className="pixel-art w-full h-full object-cover" />
+                            <img src={portraitSrc} alt="" width={48} height={48} className="pixel-art object-cover" style={{ width: '100%', height: '100%' }} />
                         ) : (
                             <span className="dialogue-avatar">{node.avatar || '💬'}</span>
                         )}

@@ -100,13 +100,22 @@ export class InteractionController
         // 1. Village buildings, and the Plots and signs of the Garden
         if (isHomeLevel(scene.currentLevelKey))
         {
+            // Spots can reach into each other (the Storage chest and the Library): the nearest one wins
+            let nearest: (typeof this.interactables.buildings)[number] | null = null;
+            let nearestDistance = 70;
             for (const b of this.interactables.buildings)
             {
-                if (Math.abs(px - b.x) < 70)
+                const distance = Math.abs(px - b.x);
+                if (distance < nearestDistance)
                 {
-                    show(b.x, b.label, b.action);
-                    return;
+                    nearest = b;
+                    nearestDistance = distance;
                 }
+            }
+            if (nearest)
+            {
+                show(nearest.x, nearest.label, nearest.action);
+                return;
             }
         }
 

@@ -5,6 +5,8 @@ import { defineConfig } from 'vitest/config';
 export default defineConfig({
     test: {
         environment: 'node',
+        // The style sheet is read as text by StyleClasses.test.ts (vitest empties CSS files unless asked)
+        css: { include: [/public\/style\.css/] },
         include: [
             'src/domain/**/*.test.ts',
             'src/application/**/*.test.ts',

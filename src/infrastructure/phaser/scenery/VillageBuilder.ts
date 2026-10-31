@@ -11,6 +11,10 @@ export interface InteractiveBuilding
 
 const FONT = '"Noto Sans Lao", sans-serif';
 const FORGE_X = 1140;
+/** Where the lanterns along the path stand (they shine at night, see `DayNightOverlay.addLight`). */
+export const VILLAGE_LANTERN_XS = [225, 495, 765, 1030, 1360];
+/** How high above the ground a lantern's flame is. */
+export const VILLAGE_LANTERN_FLAME_HEIGHT = 54;
 /** The Bed stands past the World Gate, at the east end of the village. */
 const BED_X = 1535;
 const FORGE_OPEN_LABEL = '⚔️ [E] ເຂົ້າໂຮງຕີເຫຼັກ (Forge)';
@@ -132,7 +136,7 @@ export function buildVillageScenery (scene: Phaser.Scene, baseY: number, forgeOp
     }
 
     // Lanterns along pathway
-    for (const lx of [225, 495, 765, 1030, 1360])
+    for (const lx of VILLAGE_LANTERN_XS)
     {
         if (scene.textures.exists('village-lantern'))
         {
