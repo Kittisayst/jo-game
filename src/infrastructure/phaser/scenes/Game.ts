@@ -3,6 +3,8 @@ import { canSleep, sleepUseCase } from '../../../application/SleepUseCase';
 import { nightCreatureCount, nightCreatureIdsFor, scaleNightCreature, stageHasNightCreatures } from '../../../domain/entities/NightCreatures';
 import { DayNightOverlay } from '../effects/DayNightOverlay';
 import { groundPad, viewZoom } from '../../touchLayout';
+import { fallIntoPitUseCase } from '../../../application/FallIntoPitUseCase';
+import { groundSpans, isNearPit } from '../../content/LevelPits';
 import { tickWorldTimeUseCase, WORLD_PHASE_CHANGED_EVENT, type WorldPhaseChangedPayload } from '../../../application/TickWorldTimeUseCase';
 import { EventBus } from '../../EventBus';
 import { Input, Scene } from 'phaser';
@@ -65,6 +67,9 @@ import { ITEM_BROKEN_EVENT, ITEM_WORN_EVENT, ItemBrokenPayload, ItemWornPayload 
 /** How far from the start the hero has walked when the hint "walk" counts as done (px). */
 const MOVED_AWAY_DISTANCE = 120;
 import { awardBossRewardUseCase, reviveBossAfterFailedFinisherUseCase } from '../../../application/AwardBossRewardUseCase';
+
+/** The hero dies in a pit when its centre is this far below the bottom of the world (the lower edge of the ground strip). */
+const FALL_DEATH_BELOW_GROUND = 40;
 
 /**
  * Hosts both the Village Hub and a Stage (chosen by `levelKey`). The scene builds the world,
@@ -177,7 +182,8 @@ export class Game extends Scene
         this.combat = new CombatController(this);
         this.skillController = new SkillController(this, this.combat);
 
-        this.physics.world.setBounds(0, 0, this.level.worldWidth, WORLD_HEIGHT);
+        // A level with pits has room below the ground to fall into (the hero dies when it falls past the ground, below)
+        this.physics.world.setBounds(0, 0, this.level.worldWidth, WORLD_HEIGHT + (this.level.pits?.length ? 600 : 0));
 
         this.camera = this.cameras.main;
         this.camera.setBackgroundColor(0x87ceeb);
@@ -186,10 +192,13 @@ export class Game extends Scene
         const pad = groundPad();
         this.camera.setBounds(0, 0, this.level.worldWidth, WORLD_HEIGHT + pad);
         this.camera.setZoom(viewZoom());
-        // Soil, a little darker with depth
+        // Soil under every stretch of ground (not under a pit), a little darker with depth
         const upper = Math.round(pad * 0.4);
-        this.add.rectangle(this.level.worldWidth / 2, WORLD_HEIGHT + upper / 2, this.level.worldWidth, upper, 0x6b3f1f).setDepth(0.5);
-        this.add.rectangle(this.level.worldWidth / 2, WORLD_HEIGHT + upper + (pad - upper) / 2, this.level.worldWidth, pad - upper, 0x4a2a14).setDepth(0.5);
+        for (const [from, to] of groundSpans(this.level.worldWidth, this.level.pits))
+        {
+            this.add.rectangle((from + to) / 2, WORLD_HEIGHT + upper / 2, to - from, upper, 0x6b3f1f).setDepth(0.5);
+            this.add.rectangle((from + to) / 2, WORLD_HEIGHT + upper + (pad - upper) / 2, to - from, pad - upper, 0x4a2a14).setDepth(0.5);
+        }
 
         const isVillage = this.level.scenery === 'village' || this.currentLevelKey === 'village';
         const isGarden = this.currentLevelKey === GARDEN_LEVEL_KEY;
@@ -197,7 +206,7 @@ export class Game extends Scene
         this.bossBgmStarted = false;
         this.skyBackdrop = createSky(this, this.level, backdropKey);
 
-        this.ground = createGround(this, this.level);
+        this.ground = createGround(this, this.level, pad);
         this.platforms = createPlatforms(this, this.level);
         this.movingPlatforms = createMovingPlatforms(this, this.level);
         this.spikes = createSpikes(this, this.level);
@@ -574,6 +583,12 @@ export class Game extends Scene
         entities.effects.tick(delta);
         entities.crafting.tick(delta);
         tickWorldTimeUseCase(entities.worldTime, delta);
+        if (this.player && !this.health.isDead && this.player.y > WORLD_HEIGHT + FALL_DEATH_BELOW_GROUND)
+        {
+            // Into a pit: dead at once, invincible or not
+            showLootNotification(this, this.player.x, WORLD_HEIGHT - 80, '🕳️ ຕົກເຫວ!', '#fca5a5');
+            fallIntoPitUseCase(this.health);
+        }
         if (this.player) this.dayNight?.update(entities.worldTime.darkness, this.player.x, this.player.y);
         entities.movement.tick(delta);
         entities.skillCooldowns.tick(delta);
@@ -791,6 +806,9 @@ export class Game extends Scene
                 const toRight = player.x + far;
                 x = toRight < this.level.worldWidth - 80 ? toRight : Math.max(80, player.x - far);
             }
+            // Not over a pit (it would fall in): the nearest clear spot, to the right first
+            for (let shift = 0; isNearPit(this.level.pits, x, 140) && shift < 800; shift += 20) x += 20;
+            if (isNearPit(this.level.pits, x, 140) || x > this.level.worldWidth - 60) continue;
             const id = ids[Math.floor(random.next() * ids.length)];
             const base = content.enemies.find(e => e.id === id);
             if (!base) continue;

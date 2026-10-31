@@ -9,6 +9,7 @@
  */
 
 import type { Level } from '../phaser/Level';
+import { isNearPit, PIT_END_MARGIN, PIT_START_MARGIN, PIT_WIDTHS, type Pit } from './LevelPits';
 
 export type Biome = 'forest' | 'cave';
 export const BIOMES: readonly Biome[] = ['forest', 'cave'];
@@ -21,6 +22,8 @@ export interface GenerateSpec
     screens: number;
     /** Add a secret ledge that only the air dash reaches (see `placeSecretLedge`). */
     secret?: boolean;
+    /** How many pits (gaps in the ground that kill) to cut, when they fit (see `placePits`). */
+    pits?: number;
 }
 
 export interface GeneratedLevel
@@ -30,6 +33,8 @@ export interface GeneratedLevel
     exitX: number;
     /** The secret ledge, when one was asked for and fits: its x and the y of the surface to stand on. */
     secret?: { x: number; surfaceY: number };
+    /** The pits that were asked for and fit (`level.pits` too); fewer than asked when the Stage has no room. */
+    pits: Pit[];
 }
 
 export const SCREEN_WIDTH = 800;
@@ -93,6 +98,45 @@ export function makeRandom (seed: number): () => number
     };
 }
 
+/** How far a pit stays from a platform's centre (half a platform and room to land and run up), a spike and another pit. */
+export const PIT_PLATFORM_CLEARANCE = 100;
+/** A spike this close to a pit is dropped: the pit is the hazard there. */
+export const PIT_SPIKE_CLEARANCE = 120;
+export const PIT_PIT_CLEARANCE = 250;
+/** How far a node must stand from a pit's edge, and an enemy (its patrol and its chase must not reach the edge). */
+export const NODE_PIT_CLEARANCE = 90;
+export const ENEMY_PIT_CLEARANCE = 170;
+
+/**
+ * Cuts up to `count` pits into the ground: each one of `PIT_WIDTHS` (an easy jump), in the middle of the Stage (not
+ * near the start or the exit), clear of every platform and other pit, so the hero can run up and jump. A pit takes
+ * the place of the spikes near it (a Stage with pits has those hazards instead of them): `generateLevel` drops them.
+ * Every free spot (every 10 px, every width) is listed and one is drawn, so a pit is found whenever there is room.
+ * The same seed gives the same pits. Fewer than `count` come back when the Stage has no room.
+ */
+export function placePits (count: number, seed: number, platforms: { x: number }[], exitX: number): Pit[]
+{
+    const random = makeRandom(seed ^ 0x9e3779b1);
+    const pits: Pit[] = [];
+    while (pits.length < count)
+    {
+        const free: Pit[] = [];
+        for (const width of PIT_WIDTHS)
+        {
+            for (let x = PIT_START_MARGIN; x + width <= exitX - PIT_END_MARGIN; x += 10)
+            {
+                const right = x + width;
+                const clear = platforms.every(p => p.x + PIT_PLATFORM_CLEARANCE <= x || p.x - PIT_PLATFORM_CLEARANCE >= right)
+                    && pits.every(q => q.x + q.width + PIT_PIT_CLEARANCE <= x || q.x - PIT_PIT_CLEARANCE >= right);
+                if (clear) free.push({ x, width });
+            }
+        }
+        if (free.length === 0) break;
+        pits.push(free[Math.floor(random() * free.length)]);
+    }
+    return pits.sort((a, b) => a.x - b.x);
+}
+
 function between (random: () => number, min: number, max: number): number
 {
     return Math.round(min + random() * (max - min));
@@ -146,6 +190,15 @@ export function generateLevel (spec: GenerateSpec): GeneratedLevel
     const secretPlatforms = secretX === undefined ? [] : [{ x: secretX, y: SECRET_Y }];
     if (secretX !== undefined) platforms.push({ x: secretX, y: SECRET_Y });
 
+    // Pits are cut last, with a random generator of their own, so a Stage without them is laid out as before
+    const pits = spec.pits ? placePits(spec.pits, spec.seed, platforms, exitX) : [];
+    // A pit takes the place of the spikes close to it
+    if (pits.length > 0)
+    {
+        const kept = spikes.filter(s => pits.every(p => s.x + PIT_SPIKE_CLEARANCE <= p.x || s.x - PIT_SPIKE_CLEARANCE >= p.x + p.width));
+        spikes.splice(0, spikes.length, ...kept);
+    }
+
     return {
         level: {
             worldWidth,
@@ -154,8 +207,10 @@ export function generateLevel (spec: GenerateSpec): GeneratedLevel
             platforms,
             ...(secretPlatforms.length > 0 ? { secretPlatforms } : {}),
             spikes,
+            ...(pits.length > 0 ? { pits } : {}),
         },
         exitX,
+        pits,
         ...(secretX !== undefined ? { secret: { x: secretX, surfaceY: SECRET_Y - 16 } } : {}),
     };
 }
@@ -240,6 +295,7 @@ export function placePool (generated: GeneratedLevel, pool: PoolSpec, seed: numb
         ...pick(pool.enemies, pool.enemyCount).map(id => ({ id, node: false })),
     ], random);
     const spikeXs = (generated.level.spikes ?? []).map(s => s.x);
+    const pits = generated.level.pits ?? [];
 
     items.forEach((item, i) =>
     {
@@ -250,6 +306,7 @@ export function placePool (generated: GeneratedLevel, pool: PoolSpec, seed: numb
         for (let c = from; c <= to; c += 10)
         {
             if (spikeXs.some(sx => Math.abs(sx - c) < clearance)) continue;
+            if (isNearPit(pits, c, item.node ? NODE_PIT_CLEARANCE : ENEMY_PIT_CLEARANCE)) continue;
             if (spot === undefined || Math.abs(c - centre) < Math.abs(spot - centre)) spot = c;
         }
         if (spot === undefined) throw new Error(`No spot clear of the spikes for ${item.id} near x=${Math.round(centre)}`);

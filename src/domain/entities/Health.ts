@@ -60,6 +60,15 @@ export class Health
         return this.isDead;
     }
 
+    /** Death at once, Armor and all (falling into a pit). Returns true when the hero was alive. */
+    kill (): boolean
+    {
+        if (this.isDead) return false;
+        this._armor = 0;
+        this._current = 0;
+        return true;
+    }
+
     /**
      * The worn Armor now gives `max` hearts. Putting a piece on gives its hearts at once; taking one off or
      * breaking one takes the same hearts away.

@@ -101,6 +101,10 @@ _Avoid_: attribute, skill (that is a Skill)
 The time of day in the world, counted in Game time (it moves only while the game runs, like the build queue, and is saved). One day is 20 minutes: dawn, day, dusk, **night** (the last 6 minutes), dawn. At night the world is darker (never so dark that the platforms and spikes cannot be read) and, in a later phase of the Hero Level plan, Night creatures walk the Stages and the hero can sleep at the Bed. Real time (the Garden's plants) does not follow it.
 _Avoid_: clock (that is the real-time `Clock` port), time of day (say World time)
 
+**Pit** (ເຫວ):
+A gap in a Stage's ground. The hero who falls into it dies at once (Armor, hearts, invincibility and the Dash do not matter: the ground is gone) and goes home like any death. A generated Stage with pits is told by its `pits` count in `stages.json`; each pit is at most 115 px wide (an easy jump), stands clear of platforms and the start and the exit, and takes the place of the spikes near it. There are none in the first Stage or in a Mini-boss or Boss Stage.
+_Avoid_: hole, trap, hazard (a spike is a hazard that hurts; a pit kills)
+
 **Night creature**:
 A special monster that walks a Stage only while it is night (one per Realm so far, listed in the `night` block of `stages.json`). It is tougher than the day's monsters of its Realm and pays more XP, it never appears near the hero, it drops Moon Dust, it walks a Stage once a night (leaving and coming back in the same night makes no new ones, so it is no way to farm), and it fades away at dawn (no drop, no XP). The first Stage and a Mini-boss or Boss Stage have none.
 _Avoid_: ghost, nightmare, boss (it is not one)

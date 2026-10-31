@@ -42,7 +42,7 @@
     {
       "number": 3, "realm": 1, "status": "ready",
       "name": "ດ່ານ 3: ລຳທານໍ້າໃນປ່າ", "nameEn": "Stage 3: Creek Woods",
-      "layout": {"generate": {"biome": "forest", "seed": 3, "screens": 2}},
+      "layout": {"generate": {"biome": "forest", "seed": 3, "screens": 2, "pits": 1}},
       "lessons": ["3-1"],
       "zones": [
         {
@@ -59,7 +59,7 @@
     {
       "number": 4, "realm": 1, "status": "ready",
       "name": "ດ່ານ 4: ປາກຖ້ຳ", "nameEn": "Stage 4: Cave Mouth",
-      "layout": {"generate": {"biome": "forest", "seed": 4, "screens": 2}},
+      "layout": {"generate": {"biome": "forest", "seed": 4, "screens": 2, "pits": 1}},
       "lessons": ["4-1"],
       "zones": [
         {
@@ -97,7 +97,7 @@
     {
       "number": 6, "realm": 1, "status": "ready",
       "name": "ດ່ານ 6: ຖ້ຳແຄບ", "nameEn": "Stage 6: Narrow Cave",
-      "layout": {"generate": {"biome": "cave", "seed": 6, "screens": 2}},
+      "layout": {"generate": {"biome": "cave", "seed": 6, "screens": 2, "pits": 1}},
       "lessons": ["6-1"],
       "zones": [
         {
@@ -114,7 +114,7 @@
     {
       "number": 7, "realm": 1, "status": "ready",
       "name": "ດ່ານ 7: ຖ້ຳເລິກ", "nameEn": "Stage 7: Deep Cave",
-      "layout": {"generate": {"biome": "cave", "seed": 7, "screens": 3}},
+      "layout": {"generate": {"biome": "cave", "seed": 7, "screens": 3, "pits": 1}},
       "lessons": ["7-1"],
       "zones": [
         {
@@ -131,7 +131,7 @@
     {
       "number": 8, "realm": 1, "status": "ready",
       "name": "ດ່ານ 8: ສາຍແຮ່", "nameEn": "Stage 8: Ore Seam",
-      "layout": {"generate": {"biome": "cave", "seed": 8, "screens": 3}},
+      "layout": {"generate": {"biome": "cave", "seed": 8, "screens": 3, "pits": 2}},
       "lessons": ["8-1"],
       "zones": [
         {
@@ -148,7 +148,7 @@
     {
       "number": 9, "realm": 1, "status": "ready",
       "name": "ດ່ານ 9: ໜ້າປະຕູໃຫຍ່", "nameEn": "Stage 9: Before the Gate",
-      "layout": {"generate": {"biome": "cave", "seed": 9, "screens": 3}},
+      "layout": {"generate": {"biome": "cave", "seed": 9, "screens": 3, "pits": 2}},
       "lessons": ["9-1"],
       "zones": [
         {
@@ -267,7 +267,8 @@
           "biome": "cave",
           "seed": 12,
           "screens": 3,
-          "secret": true
+          "secret": true,
+          "pits": 1
         }
       },
       "lessons": [
@@ -336,7 +337,8 @@
           "biome": "cave",
           "seed": 13,
           "screens": 4,
-          "secret": true
+          "secret": true,
+          "pits": 1
         }
       },
       "lessons": [
@@ -543,7 +545,8 @@
           "biome": "cave",
           "seed": 16,
           "screens": 3,
-          "secret": true
+          "secret": true,
+          "pits": 2
         }
       },
       "lessons": [
@@ -613,7 +616,8 @@
           "biome": "cave",
           "seed": 17,
           "screens": 4,
-          "secret": true
+          "secret": true,
+          "pits": 2
         }
       },
       "lessons": [
@@ -682,7 +686,8 @@
           "biome": "cave",
           "seed": 18,
           "screens": 4,
-          "secret": true
+          "secret": true,
+          "pits": 2
         }
       },
       "lessons": [
@@ -752,7 +757,8 @@
           "biome": "cave",
           "seed": 19,
           "screens": 4,
-          "secret": true
+          "secret": true,
+          "pits": 2
         }
       },
       "lessons": [
@@ -940,7 +946,8 @@
         "generate": {
           "biome": "forest",
           "seed": 22,
-          "screens": 3
+          "screens": 3,
+          "pits": 1
         }
       },
       "lessons": [
@@ -996,7 +1003,8 @@
         "generate": {
           "biome": "forest",
           "seed": 23,
-          "screens": 3
+          "screens": 3,
+          "pits": 1
         }
       },
       "lessons": [
@@ -1053,7 +1061,8 @@
         "generate": {
           "biome": "cave",
           "seed": 24,
-          "screens": 3
+          "screens": 3,
+          "pits": 2
         }
       },
       "lessons": [
@@ -1179,7 +1188,8 @@
         "generate": {
           "biome": "forest",
           "seed": 26,
-          "screens": 4
+          "screens": 4,
+          "pits": 2
         }
       },
       "lessons": [
@@ -1236,7 +1246,8 @@
         "generate": {
           "biome": "cave",
           "seed": 27,
-          "screens": 4
+          "screens": 4,
+          "pits": 2
         }
       },
       "lessons": [
@@ -1292,7 +1303,8 @@
         "generate": {
           "biome": "cave",
           "seed": 28,
-          "screens": 4
+          "screens": 4,
+          "pits": 2
         }
       },
       "lessons": [
@@ -1349,7 +1361,8 @@
         "generate": {
           "biome": "cave",
           "seed": 29,
-          "screens": 4
+          "screens": 4,
+          "pits": 2
         }
       },
       "lessons": [
