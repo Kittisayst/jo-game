@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { EventBus } from '../../EventBus';
 
 import type { SkillSlotView } from '../skillSlots';
+import { isTouchLayout } from '../../touchLayout';
 
 export interface VirtualTouchControlsProps {
     /** The skills on K and L, shown as two extra buttons when they are there. */
@@ -37,8 +38,7 @@ export const VirtualTouchControls: React.FC<VirtualTouchControlsProps> = ({ visi
     {
         const evaluateDevice = () =>
         {
-            const hasTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0 || window.innerWidth <= 1024;
-            setIsTouchEnvironment(hasTouch);
+            setIsTouchEnvironment(isTouchLayout());
         };
 
         evaluateDevice();

@@ -2,6 +2,7 @@ import { autoSaveGame } from '../../saveSnapshot';
 import { canSleep, sleepUseCase } from '../../../application/SleepUseCase';
 import { nightCreatureCount, nightCreatureIdsFor, scaleNightCreature, stageHasNightCreatures } from '../../../domain/entities/NightCreatures';
 import { DayNightOverlay } from '../effects/DayNightOverlay';
+import { isTouchLayout, TOUCH_GROUND_PAD, TOUCH_ZOOM } from '../../touchLayout';
 import { tickWorldTimeUseCase, WORLD_PHASE_CHANGED_EVENT, type WorldPhaseChangedPayload } from '../../../application/TickWorldTimeUseCase';
 import { EventBus } from '../../EventBus';
 import { Input, Scene } from 'phaser';
@@ -180,7 +181,17 @@ export class Game extends Scene
 
         this.camera = this.cameras.main;
         this.camera.setBackgroundColor(0x87ceeb);
-        this.camera.setBounds(0, 0, this.level.worldWidth, WORLD_HEIGHT);
+        // On a phone the hero is drawn bigger, and there is soil below the ground so the camera can lift the hero
+        // above the on-screen buttons (they cover the bottom of the screen)
+        const touch = isTouchLayout();
+        const pad = touch ? TOUCH_GROUND_PAD : 0;
+        this.camera.setBounds(0, 0, this.level.worldWidth, WORLD_HEIGHT + pad);
+        if (touch)
+        {
+            this.camera.setZoom(TOUCH_ZOOM);
+            this.add.rectangle(this.level.worldWidth / 2, WORLD_HEIGHT + pad / 2, this.level.worldWidth, pad, 0x5a3418)
+                .setDepth(0.5);
+        }
 
         const isVillage = this.level.scenery === 'village' || this.currentLevelKey === 'village';
         const isGarden = this.currentLevelKey === GARDEN_LEVEL_KEY;
