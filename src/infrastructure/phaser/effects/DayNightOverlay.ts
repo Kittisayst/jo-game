@@ -29,7 +29,6 @@ export class DayNightOverlay
             .setDepth(900);
 
         this.glow = scene.add.image(0, 0, GLOW_KEY)
-            .setScrollFactor(0)
             .setDepth(901)
             .setBlendMode(BlendModes.ADD)
             .setAlpha(0)
@@ -51,11 +50,10 @@ export class DayNightOverlay
     /** `darkness` 0 to 1 (the layer's opacity); `heroX` / `heroY` are world coordinates. */
     update (darkness: number, heroX: number, heroY: number): void
     {
-        const camera = this.scene.cameras.main;
         this.dark.setAlpha(darkness);
         // The light brightens the area round the hero a little less than the dark takes away
         this.glow.setAlpha(Math.min(0.45, darkness * 0.8));
-        this.glow.setPosition((heroX - camera.scrollX) * camera.zoom, (heroY - camera.scrollY) * camera.zoom);
+        this.glow.setPosition(heroX, heroY);
         this.glow.setVisible(darkness > 0.02);
         this.dark.setVisible(darkness > 0.001);
         // Lamps come on as it gets dark (a full glow once the night is as dark as it gets)

@@ -79,4 +79,46 @@ test.describe('Village polish', () => {
     expect(box!.height).toBeLessThanOrEqual(375 * 0.3);
     await context.close();
   });
+  test('on a phone the hero is drawn bigger and sits above the on-screen buttons', async ({ browser }) => {
+    test.setTimeout(90000);
+    const context = await browser.newContext({ viewport: { width: 812, height: 375 }, isMobile: true, hasTouch: true });
+    const page = await context.newPage();
+    await page.goto('/?stage=2');
+    await expect(page.locator('.game-hud')).toBeVisible({ timeout: 20000 });
+    const bot = new Bot(page, false);
+    await bot.state(); // lets the helpers find the running game
+    await page.waitForTimeout(2500);
+    const view = await page.evaluate(() => {
+      const scene = (window as any).__botGame.scene.getScene('Game');
+      const cam = scene.cameras.main;
+      const canvas = document.querySelector('canvas')!.getBoundingClientRect();
+      // Where the hero's feet are on the screen: the camera zooms about its centre
+      const feet = scene.player.y + 24;
+      const fraction = ((feet - cam.scrollY - cam.height / 2) * cam.zoom + cam.height / 2) / cam.height;
+      return { zoom: cam.zoom as number, feetY: canvas.top + fraction * canvas.height };
+    });
+    const buttonTops = await page.locator('.virtual-touch-btn').evaluateAll(els => els.map(e => e.getBoundingClientRect().top));
+    expect(view.zoom).toBeGreaterThan(1.2);
+    expect(buttonTops.length).toBeGreaterThan(2);
+    // The feet are clearly above the highest button
+    expect(view.feetY).toBeLessThan(Math.min(...buttonTops) - 10);
+    await context.close();
+  });
+  test('on a desktop the ground is raised too: the hero is not at the bottom edge of the window', async ({ page }) => {
+    test.setTimeout(60000);
+    await page.goto('/?stage=2');
+    await expect(page.locator('.game-hud')).toBeVisible({ timeout: 20000 });
+    const bot = new Bot(page, false);
+    await bot.state();
+    await page.waitForTimeout(2500);
+    const view = await page.evaluate(() => {
+      const scene = (window as any).__botGame.scene.getScene('Game');
+      const cam = scene.cameras.main;
+      const feet = scene.player.y + 24;
+      return { zoom: cam.zoom as number, fraction: ((feet - cam.scrollY - cam.height / 2) * cam.zoom + cam.height / 2) / cam.height };
+    });
+    expect(view.zoom).toBe(1);
+    // Before, the feet were about 92 % down the window; with the soil they are about 84 %
+    expect(view.fraction).toBeLessThan(0.9);
+  });
 });
