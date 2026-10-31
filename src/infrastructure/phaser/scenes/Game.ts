@@ -30,7 +30,7 @@ import {
     StageDefinition,
 } from '../stages/StageDefinition';
 import { buildStageScenery, BrokenGate, ResourceNodeView, WaypointView } from '../scenery/StageBuilder';
-import { buildVillageScenery, InteractiveBuilding } from '../scenery/VillageBuilder';
+import { buildVillageScenery, InteractiveBuilding, VILLAGE_LANTERN_FLAME_HEIGHT, VILLAGE_LANTERN_XS } from '../scenery/VillageBuilder';
 import { buildGarden, GardenView } from '../scenery/GardenBuilder';
 import { GARDEN_LEVEL_KEY, isHomeLevel } from '../levelCatalog';
 import { dashUseCase } from '../../../application/DashUseCase';
@@ -502,6 +502,11 @@ export class Game extends Scene
 
         // The dark layer of the night, and a word when the day turns
         this.dayNight = new DayNightOverlay(this);
+        if (this.currentLevelKey === 'village')
+        {
+            const groundY = WORLD_HEIGHT - GROUND_HEIGHT - 24;
+            for (const lx of VILLAGE_LANTERN_XS) this.dayNight.addLight(lx, groundY - VILLAGE_LANTERN_FLAME_HEIGHT, 90);
+        }
         const onWorldPhaseChanged = (payload: WorldPhaseChangedPayload) =>
         {
             const text = { dusk: '🌅 ຕາເວັນຕົກແລ້ວ...', night: '🌙 ກາງຄືນມາແລ້ວ!', dawn: '🌄 ຟ້າເລີ່ມແຈ້ງ', day: '☀️ ເຊົ້າແລ້ວ!' }[payload.phase];

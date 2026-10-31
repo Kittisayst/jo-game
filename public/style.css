@@ -5136,3 +5136,45 @@ button,
 .virtual-touch-skill.is-cooling {
     opacity: 0.45;
 }
+
+/* A phone held sideways (a short screen): the HUD is smaller so it does not cover half of the view. The long
+   texts shorten with "…" and the labels that only repeat an icon are hidden. */
+@media (max-height: 520px) {
+    .game-hud {
+        top: max(6px, env(safe-area-inset-top));
+        gap: 6px;
+    }
+
+    .hud-cluster-left {
+        gap: 4px;
+    }
+
+    .hud-badge {
+        padding: 3px 9px;
+        gap: 4px;
+        font-size: 0.78rem;
+    }
+
+    .hud-badge .badge-icon {
+        font-size: 0.95rem;
+    }
+
+    .objective-badge,
+    .tutorial-badge {
+        min-width: 0;
+        max-width: 30vw;
+    }
+
+    .objective-badge .badge-label,
+    .tutorial-badge .badge-label {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .library-hud-btn .badge-label,
+    .weapon-hud-btn .badge-label,
+    .weapon-hud-badge .badge-label {
+        display: none;
+    }
+}
