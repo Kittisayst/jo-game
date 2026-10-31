@@ -3425,10 +3425,12 @@ button,
 .bg-orange-600 { background-color: #ea580c !important; }
 .bg-purple-600 { background-color: #9333ea !important; }
 
-/* Gradients */
-.bg-gradient-to-b { background: linear-gradient(to bottom, #0f172a 0%, #020617 100%) !important; }
-.bg-gradient-to-r { background: linear-gradient(to right, #0f172a 0%, #020617 100%) !important; }
-.bg-gradient-to-br { background: linear-gradient(135deg, #0f172a 0%, #020617 100%) !important; }
+/* Gradients: bg-gradient-to-* reads its colour stops from from-*, via-* and to-* (set further down, after these
+   rules), and is the dark navy gradient when it has none. Before, the stops were ignored and every button and
+   window was the same navy, whatever colour its classes asked for. */
+.bg-gradient-to-b { --g-from: #0f172a; --g-to: #020617; --g-stops: var(--g-from), var(--g-to); background: linear-gradient(to bottom, var(--g-stops)) !important; }
+.bg-gradient-to-r { --g-from: #0f172a; --g-to: #020617; --g-stops: var(--g-from), var(--g-to); background: linear-gradient(to right, var(--g-stops)) !important; }
+.bg-gradient-to-br { --g-from: #0f172a; --g-to: #020617; --g-stops: var(--g-from), var(--g-to); background: linear-gradient(135deg, var(--g-stops)) !important; }
 
 .backdrop-blur-sm { backdrop-filter: blur(4px) !important; -webkit-backdrop-filter: blur(4px) !important; }
 .backdrop-blur-md { backdrop-filter: blur(12px) !important; -webkit-backdrop-filter: blur(12px) !important; }
@@ -5177,4 +5179,132 @@ button,
     .weapon-hud-badge .badge-label {
         display: none;
     }
+}
+
+/* Gradient stops, hover colours and the spacing and motion classes the windows use (all were missing and did nothing) */
+.from-slate-800 { --g-from: #1e293b; }
+.to-slate-800 { --g-to: #1e293b; }
+.via-slate-800 { --g-stops: var(--g-from), #1e293b, var(--g-to); }
+.hover\:from-slate-800:hover { --g-from: #1e293b; }
+.hover\:to-slate-800:hover { --g-to: #1e293b; }
+.from-slate-900 { --g-from: #0f172a; }
+.to-slate-900 { --g-to: #0f172a; }
+.via-slate-900 { --g-stops: var(--g-from), #0f172a, var(--g-to); }
+.hover\:from-slate-900:hover { --g-from: #0f172a; }
+.hover\:to-slate-900:hover { --g-to: #0f172a; }
+.from-slate-950 { --g-from: #020617; }
+.to-slate-950 { --g-to: #020617; }
+.via-slate-950 { --g-stops: var(--g-from), #020617, var(--g-to); }
+.hover\:from-slate-950:hover { --g-from: #020617; }
+.hover\:to-slate-950:hover { --g-to: #020617; }
+.from-emerald-500 { --g-from: #10b981; }
+.to-emerald-500 { --g-to: #10b981; }
+.via-emerald-500 { --g-stops: var(--g-from), #10b981, var(--g-to); }
+.hover\:from-emerald-500:hover { --g-from: #10b981; }
+.hover\:to-emerald-500:hover { --g-to: #10b981; }
+.from-emerald-600 { --g-from: #059669; }
+.to-emerald-600 { --g-to: #059669; }
+.via-emerald-600 { --g-stops: var(--g-from), #059669, var(--g-to); }
+.hover\:from-emerald-600:hover { --g-from: #059669; }
+.hover\:to-emerald-600:hover { --g-to: #059669; }
+.from-emerald-950 { --g-from: #022c22; }
+.to-emerald-950 { --g-to: #022c22; }
+.via-emerald-950 { --g-stops: var(--g-from), #022c22, var(--g-to); }
+.hover\:from-emerald-950:hover { --g-from: #022c22; }
+.hover\:to-emerald-950:hover { --g-to: #022c22; }
+.from-teal-500 { --g-from: #14b8a6; }
+.to-teal-500 { --g-to: #14b8a6; }
+.via-teal-500 { --g-stops: var(--g-from), #14b8a6, var(--g-to); }
+.hover\:from-teal-500:hover { --g-from: #14b8a6; }
+.hover\:to-teal-500:hover { --g-to: #14b8a6; }
+.from-teal-600 { --g-from: #0d9488; }
+.to-teal-600 { --g-to: #0d9488; }
+.via-teal-600 { --g-stops: var(--g-from), #0d9488, var(--g-to); }
+.hover\:from-teal-600:hover { --g-from: #0d9488; }
+.hover\:to-teal-600:hover { --g-to: #0d9488; }
+.from-sky-500 { --g-from: #0ea5e9; }
+.to-sky-500 { --g-to: #0ea5e9; }
+.via-sky-500 { --g-stops: var(--g-from), #0ea5e9, var(--g-to); }
+.hover\:from-sky-500:hover { --g-from: #0ea5e9; }
+.hover\:to-sky-500:hover { --g-to: #0ea5e9; }
+.from-sky-600 { --g-from: #0284c7; }
+.to-sky-600 { --g-to: #0284c7; }
+.via-sky-600 { --g-stops: var(--g-from), #0284c7, var(--g-to); }
+.hover\:from-sky-600:hover { --g-from: #0284c7; }
+.hover\:to-sky-600:hover { --g-to: #0284c7; }
+.from-indigo-500 { --g-from: #6366f1; }
+.to-indigo-500 { --g-to: #6366f1; }
+.via-indigo-500 { --g-stops: var(--g-from), #6366f1, var(--g-to); }
+.hover\:from-indigo-500:hover { --g-from: #6366f1; }
+.hover\:to-indigo-500:hover { --g-to: #6366f1; }
+.from-indigo-600 { --g-from: #4f46e5; }
+.to-indigo-600 { --g-to: #4f46e5; }
+.via-indigo-600 { --g-stops: var(--g-from), #4f46e5, var(--g-to); }
+.hover\:from-indigo-600:hover { --g-from: #4f46e5; }
+.hover\:to-indigo-600:hover { --g-to: #4f46e5; }
+.from-purple-500 { --g-from: #a855f7; }
+.to-purple-500 { --g-to: #a855f7; }
+.via-purple-500 { --g-stops: var(--g-from), #a855f7, var(--g-to); }
+.hover\:from-purple-500:hover { --g-from: #a855f7; }
+.hover\:to-purple-500:hover { --g-to: #a855f7; }
+.from-purple-600 { --g-from: #9333ea; }
+.to-purple-600 { --g-to: #9333ea; }
+.via-purple-600 { --g-stops: var(--g-from), #9333ea, var(--g-to); }
+.hover\:from-purple-600:hover { --g-from: #9333ea; }
+.hover\:to-purple-600:hover { --g-to: #9333ea; }
+.from-purple-950 { --g-from: #3b0764; }
+.to-purple-950 { --g-to: #3b0764; }
+.via-purple-950 { --g-stops: var(--g-from), #3b0764, var(--g-to); }
+.hover\:from-purple-950:hover { --g-from: #3b0764; }
+.hover\:to-purple-950:hover { --g-to: #3b0764; }
+.from-pink-600 { --g-from: #db2777; }
+.to-pink-600 { --g-to: #db2777; }
+.via-pink-600 { --g-stops: var(--g-from), #db2777, var(--g-to); }
+.hover\:from-pink-600:hover { --g-from: #db2777; }
+.hover\:to-pink-600:hover { --g-to: #db2777; }
+.from-amber-500 { --g-from: #f59e0b; }
+.to-amber-500 { --g-to: #f59e0b; }
+.via-amber-500 { --g-stops: var(--g-from), #f59e0b, var(--g-to); }
+.hover\:from-amber-500:hover { --g-from: #f59e0b; }
+.hover\:to-amber-500:hover { --g-to: #f59e0b; }
+.from-amber-600 { --g-from: #d97706; }
+.to-amber-600 { --g-to: #d97706; }
+.via-amber-600 { --g-stops: var(--g-from), #d97706, var(--g-to); }
+.hover\:from-amber-600:hover { --g-from: #d97706; }
+.hover\:to-amber-600:hover { --g-to: #d97706; }
+.from-orange-500 { --g-from: #f97316; }
+.to-orange-500 { --g-to: #f97316; }
+.via-orange-500 { --g-stops: var(--g-from), #f97316, var(--g-to); }
+.hover\:from-orange-500:hover { --g-from: #f97316; }
+.hover\:to-orange-500:hover { --g-to: #f97316; }
+.from-orange-600 { --g-from: #ea580c; }
+.to-orange-600 { --g-to: #ea580c; }
+.via-orange-600 { --g-stops: var(--g-from), #ea580c, var(--g-to); }
+.hover\:from-orange-600:hover { --g-from: #ea580c; }
+.hover\:to-orange-600:hover { --g-to: #ea580c; }
+.hover\:bg-indigo-500:hover { background-color: #6366f1 !important; }
+.hover\:bg-orange-500:hover { background-color: #f97316 !important; }
+.hover\:bg-purple-500:hover { background-color: #a855f7 !important; }
+.hover\:bg-slate-700\/60:hover { background-color: rgba(51, 65, 85, 0.6) !important; }
+.hover\:bg-rose-950\/40:hover { background-color: rgba(76, 5, 25, 0.4) !important; }
+.hover\:border-rose-500\/40:hover { border-color: rgba(244, 63, 94, 0.4) !important; }
+.p-1\.5 { padding: 0.375rem !important; }
+.px-4 { padding-left: 1rem !important; padding-right: 1rem !important; }
+.pb-2\.5 { padding-bottom: 0.625rem !important; }
+.mb-2 { margin-bottom: 0.5rem !important; }
+.mb-3 { margin-bottom: 0.75rem !important; }
+.left-1\.5 { left: 0.375rem !important; }
+.-right-1\.5 { right: -0.375rem !important; }
+.tracking-wide { letter-spacing: 0.025em; }
+.object-cover { object-fit: cover; }
+.outline-none { outline: none; }
+.shadow-sm { box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35); }
+.transition-all { transition: all 0.15s ease; }
+.animate-fade-in { animation: fadeIn 0.25s ease-out; }
+.animate-pulse { animation: twPulse 2s ease-in-out infinite; }
+.animate-bounce { animation: twBounce 1s infinite; }
+@keyframes twPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+@keyframes twBounce { 0%, 100% { transform: translateY(-20%); } 50% { transform: translateY(0); } }
+@media (min-width: 768px) {
+    .md\:w-1\/3 { width: 33.333333% !important; }
 }
