@@ -112,7 +112,7 @@ export function SkinModal ({
             <div className="outfit-card" role="dialog" aria-modal="true" aria-label="ຮ້ານຊຸດຂອງ Mina" onClick={e => e.stopPropagation()}>
                 <header className="outfit-header">
                     <span className="outfit-avatar" aria-hidden="true">
-                        <img src="assets/ui/portrait_mina.png" alt="" width={46} height={46} className="pixel-art w-full h-full object-cover" />
+                        <img src="assets/ui/portrait_mina.png" alt="" width={46} height={46} className="pixel-art object-cover" style={{ width: '100%', height: '100%' }} />
                     </span>
                     <div className="outfit-title">
                         <h2>ຮ້ານຊຸດຂອງ Mina</h2>

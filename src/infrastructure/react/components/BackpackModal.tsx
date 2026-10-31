@@ -257,14 +257,14 @@ export const BackpackModal: React.FC<BackpackModalProps> = ({ isOpen, onClose, o
                             </div>
                             <div className="w-36 sm:w-48 bg-slate-800 rounded-full h-1.5 mt-1 overflow-hidden border border-slate-700">
                                 <div
-                                    className={`h-full transition-all duration-300 ${
-                                        capacityPercentage >= 90
-                                            ? 'bg-rose-500'
-                                            : capacityPercentage >= 70
-                                                ? 'bg-amber-400'
-                                                : 'bg-cyan-400'
-                                    }`}
-                                    style={{ width: `${capacityPercentage}%` }}
+                                    data-testid="backpack-capacity-fill"
+                                    style={{
+                                        width: `${capacityPercentage}%`,
+                                        height: '100%',
+                                        transition: 'width 0.3s',
+                                        // rose / amber / cyan: bg-rose-500 and the like are not in style.css
+                                        backgroundColor: capacityPercentage >= 90 ? '#f43f5e' : capacityPercentage >= 70 ? '#fbbf24' : '#22d3ee',
+                                    }}
                                 />
                             </div>
                         </div>
@@ -358,7 +358,7 @@ export const BackpackModal: React.FC<BackpackModalProps> = ({ isOpen, onClose, o
                     {/* Left Pane: the worn Armor, then the slots grid (7 Cols on desktop) */}
                     <div className="md:col-span-7 bg-slate-950/40 p-3.5 rounded-2xl border border-slate-800/80 flex flex-col justify-between">
                         {/* Worn Armor: three places, they do not take Backpack slots */}
-                        <div className="grid grid-cols-3 gap-2.5 mb-3" data-testid="armor-panel">
+                        <div className="grid gap-2.5 mb-3" style={{ gridTemplateColumns: 'repeat(3, minmax(0, 1fr))' }} data-testid="armor-panel">
                             {ARMOR_SLOTS.map(slot =>
                             {
                                 const worn = entities.equipment.getArmor(slot);
@@ -370,7 +370,8 @@ export const BackpackModal: React.FC<BackpackModalProps> = ({ isOpen, onClose, o
                                         key={slot}
                                         data-testid={`armor-slot-${slot}`}
                                         data-item={worn?.itemId ?? ''}
-                                        className="rounded-xl border border-slate-700 bg-slate-900/60 p-2 flex flex-col items-center gap-1 min-h-[84px]"
+                                        className="rounded-xl border border-slate-700 bg-slate-900/60 p-2 flex flex-col items-center gap-1"
+                                        style={{ minHeight: 84 }}
                                     >
                                         <span className="text-[10px] uppercase tracking-wide text-slate-400">{ARMOR_SLOT_LABEL[slot]}</span>
                                         {worn && wornDef ? (
@@ -438,11 +439,12 @@ export const BackpackModal: React.FC<BackpackModalProps> = ({ isOpen, onClose, o
                                             setShowDiscardConfirm(false);
                                             soundManager.playSelect();
                                         }}
-                                        className={`relative aspect-square min-h-[58px] sm:min-h-[64px] rounded-xl border-2 flex flex-col items-center justify-center p-1.5 transition-all outline-none ${categoryStyle} ${
+                                        style={{ aspectRatio: '1', minHeight: 58, opacity: isFilteredOut ? 0.3 : 1 }}
+                                        className={`relative rounded-xl border-2 flex flex-col items-center justify-center p-1.5 transition-all outline-none ${categoryStyle} ${
                                             isSelected
                                                 ? 'ring-2 ring-cyan-400 ring-offset-2 ring-offset-slate-900 border-cyan-400 bg-cyan-950/50 shadow-lg shadow-cyan-500/30 scale-105 z-10'
                                                 : ''
-                                        } ${isFilteredOut ? 'opacity-30' : 'opacity-100'}`}
+                                        }`}
                                     >
                                         {/* Equipped Badge */}
                                         {isEquipped && (
@@ -469,7 +471,7 @@ export const BackpackModal: React.FC<BackpackModalProps> = ({ isOpen, onClose, o
                                                     {itemDef.name}
                                                 </span>
                                                 {wear && (
-                                                    <span className="absolute bottom-1 left-1.5 right-1.5">
+                                                    <span className="absolute bottom-1 right-1.5" style={{ left: 6 }}>
                                                         <DurabilityBar reading={wear} compact />
                                                     </span>
                                                 )}
@@ -752,7 +754,7 @@ export const BackpackModal: React.FC<BackpackModalProps> = ({ isOpen, onClose, o
                         ) : (
                             /* Empty Slot Selected */
                             <div className="flex-1 flex flex-col items-center justify-center text-center p-6 space-y-3">
-                                <span className="text-5xl opacity-30">📦</span>
+                                <span className="text-5xl" style={{ opacity: 0.3 }}>📦</span>
                                 <h4 className="font-bold text-slate-400 text-sm">ຊ່ອງນີ້ຍັງວ່າງເປົ່າ</h4>
                                 <p className="text-xs text-slate-500 max-w-[200px]">
                                     ອອກສຳຫຼວດດ່ານເພື່ອຕັດໄມ້, ຂຸດແຮ່ ຫຼື ສ້າງອຸປະກອນໃໝ່ທີ່ໂຮງຊ່າງ

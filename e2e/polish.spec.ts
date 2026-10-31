@@ -49,6 +49,23 @@ test.describe('Village polish', () => {
     await expect.poll(lit, { timeout: 3000 }).toBe(0);
   });
 
+  test('the Backpack shows its capacity bar and the three armor slots side by side', async ({ page }) => {
+    test.setTimeout(60000);
+    await page.goto('/?stage=2');
+    await expect(page.locator('.game-hud')).toBeVisible({ timeout: 20000 });
+    await page.waitForTimeout(1000);
+    await page.keyboard.press('KeyI');
+    const fill = page.getByTestId('backpack-capacity-fill');
+    await expect(fill).toBeVisible();
+    // The fill has a height and a colour (its classes were not in style.css, so it was an empty bar)
+    expect((await fill.boundingBox())!.height).toBeGreaterThanOrEqual(3);
+    expect(await fill.evaluate(el => getComputedStyle(el).backgroundColor)).not.toBe('rgba(0, 0, 0, 0)');
+
+    // Head, body and feet in one row, not three tall panels one under the other
+    const ys = await Promise.all(['head', 'body', 'feet'].map(async slot => (await page.getByTestId(`armor-slot-${slot}`).boundingBox())!.y));
+    expect(new Set(ys.map(Math.round)).size).toBe(1);
+  });
+
   test('on a phone held sideways the HUD leaves most of the screen free', async ({ browser }) => {
     test.setTimeout(90000);
     const context = await browser.newContext({ viewport: { width: 812, height: 375 }, isMobile: true, hasTouch: true });

@@ -2,8 +2,9 @@ import { describe, expect, it } from 'vitest';
 
 /**
  * `public/style.css` has only the utility classes someone wrote by hand: there is no Tailwind, so a class it lacks
- * does nothing. A missing *colour* class only loses a colour, but a missing *size* class (`h-2`, `min-h-[44px]`,
- * `max-w-xl`, `aspect-square`) makes a bar invisible, a touch target tiny or a window as wide as the screen.
+ * does nothing. A missing *colour* class only loses a colour, but a missing *size or layout* class (`h-2`,
+ * `min-h-[44px]`, `max-w-xl`, `aspect-square`, `grid-cols-3`, `opacity-30`) makes a bar invisible, a touch target
+ * tiny, a window as wide as the screen or a row of three stack in a column.
  * This test fails when a window uses a size class the CSS does not define; give the element an inline style
  * (or define the class) instead.
  */
@@ -14,15 +15,10 @@ const sources = import.meta.glob('../react/**/*.tsx', { query: '?raw', import: '
 const cssFiles = import.meta.glob('../../../public/style.css', { query: '?raw', import: 'default', eager: true }) as Record<string, string>;
 const css = Object.values(cssFiles).join('\n');
 
-const SIZE_CLASS = /^(?:(?:min|max)-)?(?:[hw]|size)-|^aspect-|^(?:top|bottom|left|right|inset)-/;
+const SIZE_CLASS = /^(?:(?:min|max)-)?(?:[hw]|size)-|^aspect-|^(?:top|bottom|left|right|inset)-|^grid-cols-|^col-span-|^opacity-/;
 
-/** Size classes older windows use without a definition; each is a layout to look at, not a pattern to copy. */
-const KNOWN_LEFTOVERS: Record<string, string[]> = {
-    'BackpackModal.tsx': ['aspect-square', 'h-full', 'left-1.5', 'min-h-[58px]', 'min-h-[84px]'],
-    'DialogueModal.tsx': ['h-full'],
-    'SkinModal.tsx': ['h-full'],
-    'TextbookModal.tsx': ['h-auto', 'max-w-xl'],
-};
+/** Size classes a window may use without a definition (none now; do not add one, give the element an inline style). */
+const KNOWN_LEFTOVERS: Record<string, string[]> = {};
 
 function definedClasses (): Set<string>
 {

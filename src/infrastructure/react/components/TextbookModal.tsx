@@ -601,7 +601,8 @@ export const TextbookModal: React.FC<TextbookModalProps> = ({
                                     <img
                                         src={activePage.illustration}
                                         alt={activePage.title}
-                                        className="w-full max-w-xl mx-auto h-auto block rounded-lg"
+                                        className="w-full mx-auto block rounded-lg"
+                                        style={{ maxWidth: 576, height: 'auto' }}
                                     />
                                 </div>
                             )}
