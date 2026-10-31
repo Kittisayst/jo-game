@@ -17,11 +17,12 @@ test.describe('Knowledge Quest Village HUD & Combat Controls E2E', () => {
     await page.getByRole('button', { name: /ເຂົ້າເກມ/i }).click();
     await expect(page.locator('canvas')).toBeVisible({ timeout: 10000 });
 
-    // 4. HUD shows Credit and the equipped sword, but no shop button and no consumable hotbar
+    // 4. HUD shows Credit and the equipped sword (in the bottom bar), but no shop button and no consumable slots
     await expect(page.locator('.wallet-hud-badge')).toBeVisible();
     await expect(page.locator('.weapon-hud-badge')).toBeVisible();
     await expect(page.locator('.shop-hud-btn')).toHaveCount(0);
-    await expect(page.locator('.hud-hotbar')).toHaveCount(0);
+    await expect(page.locator('.hud-hotbar .weapon-hud-badge')).toBeVisible();
+    await expect(page.locator('.hotbar-slot')).toHaveCount(0);
 
     // Wait for Phaser scene to load
     await page.waitForTimeout(1000);

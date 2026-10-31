@@ -4,7 +4,7 @@ import { Bot } from './helpers/bot';
 import { enterStage } from './helpers/stage';
 
 const sword = (page: Page) => page.evaluate(() => (window as any).__entities.backpack.getDurability('iron-sword'));
-const hudBarState = (page: Page) => page.locator('.game-hud').getByTestId('durability-bar').getAttribute('data-state');
+const hudBarState = (page: Page) => page.locator('.hud-hotbar').getByTestId('durability-bar').getAttribute('data-state');
 
 test.describe('Weapons wear out and are repaired at the Forge', () => {
   test('a sword breaks, hits for half, stays in the Backpack and is repaired for Materials', async ({ page }) => {

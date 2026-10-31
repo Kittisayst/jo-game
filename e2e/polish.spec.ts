@@ -121,4 +121,28 @@ test.describe('Village polish', () => {
     // Before, the feet were about 92 % down the window; with the soil they are about 84 %
     expect(view.fraction).toBeLessThan(0.9);
   });
+  test('the top of the screen is short: the vitals in one row, one hint at a time, the fight tools at the bottom', async ({ page }) => {
+    test.setTimeout(60000);
+    await page.goto('/?stage=2');
+    await expect(page.locator('.game-hud')).toBeVisible({ timeout: 20000 });
+    await page.waitForTimeout(1500);
+
+    // The top row: stage, hearts, level and time (no armor yet), not the sword, Skills or buttons
+    const vitals = page.getByTestId('hud-vitals');
+    expect(await vitals.locator('.hud-badge').count()).toBeLessThanOrEqual(5);
+    await expect(page.locator('.game-hud .weapon-hud-badge')).toHaveCount(0);
+    await expect(page.locator('.hud-hotbar .weapon-hud-badge')).toBeVisible();
+
+    // One hint at a time: the tutorial step while there is one, the objective after
+    const notices = page.getByTestId('hud-notices');
+    await expect(notices.getByTestId('tutorial-hint')).toBeVisible();
+    await expect(notices.locator('.objective-badge')).toHaveCount(0);
+    await page.getByTestId('tutorial-skip').click();
+    await expect(notices.locator('.objective-badge')).toBeVisible();
+    await expect(notices.getByTestId('tutorial-hint')).toHaveCount(0);
+
+    // The whole top is about two rows
+    const top = await page.locator('.hud-cluster-left').boundingBox();
+    expect(top!.height).toBeLessThan(120);
+  });
 });

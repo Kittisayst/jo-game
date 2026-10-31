@@ -29,7 +29,7 @@ test.describe('Knowledge Quest — Buy-to-Read Textbook & Chapter 1 Loop E2E', (
     await expect(creditBadge).toContainText('20');
 
     const textbookBtn = page.locator('#hud-library-btn');
-    await expect(textbookBtn).toContainText('ຕຳລາ (0)');
+    await expect(textbookBtn).toHaveText(/0$/);
 
     // 3. Clicking HUD Textbook button BEFORE buying shows Empty Reader State (no buy button!)
     await textbookBtn.click();
@@ -65,7 +65,7 @@ test.describe('Knowledge Quest — Buy-to-Read Textbook & Chapter 1 Loop E2E', (
     // Verify Wallet deducted 20 -> 0 and HUD textbook badge updated to (1)
     await expect(creditBadge).not.toContainText('20');
     await expect(creditBadge).toContainText('0');
-    await expect(textbookBtn).toContainText('ຕຳລາ (1)');
+    await expect(textbookBtn).toHaveText(/1$/);
 
     // The bought book moves from "For sale" to "My books" (unread: 0/5)
     await expect(mineTab).toHaveAttribute('aria-selected', 'true');
