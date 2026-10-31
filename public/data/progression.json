@@ -4,10 +4,10 @@
   "pointsPerLevel": 1,
   "overlevel": { "levelsPerStage": 1.5, "offset": 10, "xpShare": 0.2 },
   "stats": {
-    "attack": { "maxPoints": 50, "perPoint": 0.01 },
+    "attack": { "maxPoints": 50, "perPoint": 0.015 },
     "hearts": { "maxPoints": 30, "pointsPerHeart": 10 },
-    "guard": { "maxPoints": 30, "blockChancePerPoint": 0.01 },
-    "agility": { "maxPoints": 39, "speedPerPoint": 0.0025 }
+    "guard": { "maxPoints": 30, "blockChancePerPoint": 0.012 },
+    "agility": { "maxPoints": 39, "speedPerPoint": 0.004 }
   },
   "respec": { "ingredients": [{ "itemId": "moon-dust", "count": 3 }] }
 }

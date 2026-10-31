@@ -760,6 +760,10 @@ export class Game extends Scene
         if (!stageHasNightCreatures(stage, Boolean(getStageBossSpawn(stage)), hasMiniboss)) return;
         const ids = nightCreatureIdsFor(stage.realm, content.night);
         if (ids.length === 0) return;
+        // Once a night: leaving and coming back does not make new ones
+        const nightId = entities.worldTime.dayCount;
+        if (entities.nightHunts.hasHunted(stage.id, nightId)) return;
+        entities.nightHunts.markHunted(stage.id, nightId);
 
         const count = nightCreatureCount(this.level.worldWidth, content.night);
         const slot = this.level.worldWidth / count;

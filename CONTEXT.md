@@ -102,7 +102,7 @@ The time of day in the world, counted in Game time (it moves only while the game
 _Avoid_: clock (that is the real-time `Clock` port), time of day (say World time)
 
 **Night creature**:
-A special monster that walks a Stage only while it is night (one per Realm so far, listed in the `night` block of `stages.json`). It is tougher than the day's monsters of its Realm and pays more XP, it never appears near the hero, it drops Moon Dust, and it fades away at dawn (no drop, no XP). The first Stage and a Mini-boss or Boss Stage have none.
+A special monster that walks a Stage only while it is night (one per Realm so far, listed in the `night` block of `stages.json`). It is tougher than the day's monsters of its Realm and pays more XP, it never appears near the hero, it drops Moon Dust, it walks a Stage once a night (leaving and coming back in the same night makes no new ones, so it is no way to farm), and it fades away at dawn (no drop, no XP). The first Stage and a Mini-boss or Boss Stage have none.
 _Avoid_: ghost, nightmare, boss (it is not one)
 
 **Bed**:

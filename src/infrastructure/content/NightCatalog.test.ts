@@ -12,7 +12,7 @@ describe('the night block of stages.json', () =>
         const parsed = parseNightTuning(stages);
         expect(parsed.creaturesPerScreen).toBe(1);
         expect(parsed.hpMultiplier).toBe(1.6);
-        expect(parsed.xpMultiplier).toBe(2.5);
+        expect(parsed.xpMultiplier).toBe(1.5);
         expect(parsed.byRealm[1]).toEqual(['night-wisp']);
         expect(parsed.byRealm[3]).toEqual(['night-scarab']);
     });

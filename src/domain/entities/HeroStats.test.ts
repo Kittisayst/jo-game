@@ -66,3 +66,24 @@ describe('HeroStats', () =>
         expect(stats.totalSpent).toBe(0);
     });
 });
+
+describe('the real Stat sizes (progression.json)', () =>
+{
+    it('make a few points already change the damage of the first sword (12), and the last ones fill each ceiling', async () =>
+    {
+        const progression = (await import('../../../public/data/progression.json')).default;
+        const real = { stats: progression.stats, respec: progression.respec } as StatsTuning;
+        const stats = new HeroStats();
+        for (let i = 0; i < 3; i++) stats.add('attack', real);
+        expect(Math.round(12 * stats.attackMultiplier(real))).toBeGreaterThan(12);
+
+        const full = new HeroStats();
+        full.loadFrom({ attack: 50, hearts: 30, guard: 30, agility: 39 });
+        expect(full.attackMultiplier(real)).toBeCloseTo(1.75);
+        expect(full.bonusHearts(real)).toBe(3);
+        expect(full.blockChance(real)).toBeCloseTo(0.36);
+        expect(full.speedMultiplier(real)).toBeCloseTo(1.156);
+        // The top of the Attack Stat is about one sword tier (12 -> 22 is +83 %), so gear stays the main strength
+        expect(full.attackMultiplier(real)).toBeLessThan(22 / 12);
+    });
+});

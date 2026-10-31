@@ -1,6 +1,6 @@
 {
   "stageQuestion": {"credit": 5},
-  "night": {"creaturesPerScreen": 1, "hpMultiplier": 1.6, "xpMultiplier": 2.5, "minDistanceFromHero": 500, "byRealm": {"1": ["night-wisp"], "2": ["night-shade"], "3": ["night-scarab"]}},
+  "night": {"creaturesPerScreen": 1, "hpMultiplier": 1.6, "xpMultiplier": 1.5, "minDistanceFromHero": 500, "byRealm": {"1": ["night-wisp"], "2": ["night-shade"], "3": ["night-scarab"]}},
   "scaling": {"enemyHpPerStage": 0.08, "enemyDamagePerRealm": 1, "dropBonusPerRealm": 0.1, "enemyXpPerStage": 1.2},
   "stages": [
     {

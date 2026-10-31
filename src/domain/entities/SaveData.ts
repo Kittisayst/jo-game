@@ -7,6 +7,7 @@ import { MAX_TOOL_LEVEL } from './ToolUpgrades';
 import { HERO_LEVEL_CAP, type HeroLevelSnapshot } from './HeroLevel';
 import { STAT_IDS, type StatsSnapshot } from './HeroStats';
 import type { WorldTimeSnapshot } from './WorldTime';
+import type { NightHuntsSnapshot } from './NightHunts';
 import type { PendingReward } from './PendingRewards';
 import { TutorialSnapshot } from './TutorialProgress';
 import { SettingsData, StageProgressionData } from '../ports';
@@ -65,6 +66,8 @@ export interface SaveGameSnapshot
     heroStats: StatsSnapshot;
     /** Where in the day it is; null starts the first day (older saves). */
     worldTime: WorldTimeSnapshot | null;
+    /** Which Stages already had their night creatures tonight. Missing in older saves. */
+    nightHunts: NightHuntsSnapshot;
     /** What is in the Storage chest. Missing in older saves. */
     storage: BackpackSlotSnapshot[];
     /** When each small plant was last harvested (key = Stage id + node id, value = ms). Missing in older saves. */
@@ -141,6 +144,7 @@ export function createDefaultSaveSnapshot (slotId = 'slot_1'): SaveGameSnapshot
         heroLevel: { level: 1, xp: 0, unspentPoints: 0 },
         heroStats: { attack: 0, hearts: 0, guard: 0, agility: 0 },
         worldTime: null,
+        nightHunts: { nightId: -1, stages: [] },
         storage: [],
     };
 }
@@ -364,7 +368,14 @@ export function migrateSaveSnapshot (raw: unknown, fallbackSlotId = 'slot_1'): S
     for (const id of STAT_IDS) heroStats[id] = wholeIn(rawStats[id], 0, 1000, 0);
     const rawDay = asRecord(data.worldTime).dayFraction;
     const worldTime: WorldTimeSnapshot | null =
-        typeof rawDay === 'number' && Number.isFinite(rawDay) && rawDay >= 0 && rawDay < 1 ? { dayFraction: rawDay } : null;
+        typeof rawDay === 'number' && Number.isFinite(rawDay) && rawDay >= 0 && rawDay < 1
+            ? { dayFraction: rawDay, dayCount: wholeIn(asRecord(data.worldTime).dayCount, 0, 999_999, 0) }
+            : null;
+    const rawHunts = asRecord(data.nightHunts);
+    const nightHunts: NightHuntsSnapshot = {
+        nightId: wholeIn(rawHunts.nightId, -1, 999_999, -1),
+        stages: (Array.isArray(rawHunts.stages) ? rawHunts.stages : []).filter((id): id is string => typeof id === 'string' && isStageId(id)),
+    };
     const storage: BackpackSlotSnapshot[] = [];
     for (const slot of Array.isArray(data.storage) ? data.storage : [])
     {
@@ -424,6 +435,7 @@ export function migrateSaveSnapshot (raw: unknown, fallbackSlotId = 'slot_1'): S
         heroLevel,
         heroStats,
         worldTime,
+        nightHunts,
         storage,
     };
 }
