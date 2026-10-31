@@ -59,4 +59,14 @@ test.describe('Windows show their states', () => {
     expect(border).toBe('rgb(34, 211, 238)');
     expect(pageErrors).toEqual([]);
   });
+  test('the village welcome message does not sit over a window or the pause menu', async ({ page }) => {
+    test.setTimeout(60000);
+    await page.goto('/');
+    await page.getByRole('button', { name: /ເຂົ້າເກມ/i }).click();
+    await expect(page.locator('.game-hud')).toBeVisible({ timeout: 12000 });
+    const toast = page.locator('.village-welcome-toast');
+    await expect(toast).toBeVisible({ timeout: 5000 });
+    await page.getByRole('button', { name: /ເມນູ/ }).first().click();
+    await expect(toast).toHaveCount(0, { timeout: 300 });
+  });
 });
