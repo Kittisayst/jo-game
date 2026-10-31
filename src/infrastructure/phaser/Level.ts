@@ -30,6 +30,8 @@ export interface Level
     /** Platforms (also listed in `platforms`) that only the air dash reaches: a secret ledge with a reward on it. */
     secretPlatforms?: { x: number; y: number }[];
     spikes?: SpikeSpawnData[];
+    /** Gaps in the ground (ເຫວ): the hero who falls in dies. `x` is the left edge. Not in the first Stage or a boss arena. */
+    pits?: { x: number; width: number }[];
     movingPlatforms?: MovingPlatformSpawnData[];
     /** Which backdrop and ground the level has: the village, a forest, or a cave. */
     scenery?: 'village' | 'forest' | 'cave';

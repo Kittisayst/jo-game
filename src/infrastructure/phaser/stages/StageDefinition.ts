@@ -423,7 +423,7 @@ function parseZone (
     return parsed;
 }
 
-function parseGenerate (raw: unknown, path: string): { biome: Biome; seed: number; screens: number; secret: boolean }
+function parseGenerate (raw: unknown, path: string): { biome: Biome; seed: number; screens: number; secret: boolean; pits: number }
 {
     const generate = asObject(asObject(raw, path).generate, `${path}.generate`);
     const biome = asString(generate.biome, `${path}.generate.biome`) as Biome;
@@ -432,7 +432,9 @@ function parseGenerate (raw: unknown, path: string): { biome: Biome; seed: numbe
     if (!Number.isInteger(seed)) fail(`${path}.generate.seed`, 'a whole number');
     const screens = asNumber(generate.screens, `${path}.generate.screens`);
     if (generate.secret !== undefined && typeof generate.secret !== 'boolean') fail(`${path}.generate.secret`, 'true or false');
-    return { biome, seed, screens, secret: generate.secret === true };
+    const pits = generate.pits === undefined ? 0 : asNumber(generate.pits, `${path}.generate.pits`);
+    if (!Number.isInteger(pits) || pits < 0 || pits > 4) fail(`${path}.generate.pits`, 'a whole number of pits, 0 to 4');
+    return { biome, seed, screens, secret: generate.secret === true, pits };
 }
 
 function parseStage (raw: unknown, index: number, nodes: ReadonlyMap<string, NodeDefinition>): StageDefinition
@@ -479,6 +481,7 @@ function parseStage (raw: unknown, index: number, nodes: ReadonlyMap<string, Nod
     if (stage.zones.length === 0) fail(`${path}.zones`, 'at least one zone');
 
     if (generate?.secret && !generated?.secret) fail(`${path}.layout.generate.secret`, 'a secret ledge that fits this Stage (try another seed or more screens)');
+    if (generate && generated && generated.pits.length < generate.pits) fail(`${path}.layout.generate.pits`, `${generate.pits} pits that fit this Stage (only ${generated.pits.length} do: try another seed or more screens)`);
     if (generated?.secret)
     {
         const rewards = stage.zones.flatMap(z => z.resourceNodes).filter(n => n.secret).length;
@@ -497,6 +500,8 @@ function parseStage (raw: unknown, index: number, nodes: ReadonlyMap<string, Nod
     const exits = stage.zones.filter(z => z.exit).length;
     if (exits === 0 && !hasBoss) fail(`${path}.zones`, 'an exit or a boss, or the stage cannot be cleared');
     if (exits > 0 && hasBoss) fail(`${path}.zones`, 'either an exit or a boss, not both');
+    // No pit in the first Stage (it teaches the game and is safe) or in a Mini-boss or Boss Stage (the arena is the fight)
+    if (generated && generated.pits.length > 0 && (number === 1 || hasBoss || minibosses > 0)) fail(`${path}.layout.generate.pits`, 'no pits in the first Stage or in a Mini-boss or Boss Stage');
 
     const nodeIds = new Set<string>();
     for (const node of stage.zones.flatMap(z => z.resourceNodes))

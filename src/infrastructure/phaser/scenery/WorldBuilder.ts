@@ -1,3 +1,4 @@
+import { groundSpans } from '../../content/LevelPits';
 import { MovingPlatform } from '../objects/MovingPlatform';
 import { Platform } from '../objects/Platform';
 import { Spike } from '../objects/Spike';
@@ -81,7 +82,9 @@ export function createSky (
 
 export function createGround (
     scene: Phaser.Scene,
-    level: Level
+    level: Level,
+    /** World pixels below the ground that the camera can show: the pits are drawn down to there. */
+    below = 0
 ): Phaser.Physics.Arcade.StaticGroup
 {
     const textureKey = 'ground-tile';
@@ -99,29 +102,53 @@ export function createGround (
     }
 
     const groundY = WORLD_HEIGHT - GROUND_HEIGHT / 2;
-    const tileSprite = scene.add.tileSprite(level.worldWidth / 2, groundY, level.worldWidth, GROUND_HEIGHT, textureKey);
-    tileSprite.setDepth(4);
-
-    scene.physics.add.existing(tileSprite, true);
-
     const ground = scene.physics.add.staticGroup();
-    ground.add(tileSprite);
 
-    // Visual biome ground overlays aligned on 64px tile boundaries: cave floor, then the arena floor
+    // The ground is one strip per stretch between the pits (a level without pits has one strip, as before)
+    const spans = groundSpans(level.worldWidth, level.pits);
+    for (const [from, to] of spans)
+    {
+        const tileSprite = scene.add.tileSprite((from + to) / 2, groundY, to - from, GROUND_HEIGHT, textureKey);
+        tileSprite.tilePositionX = from;
+        tileSprite.setDepth(4);
+        scene.physics.add.existing(tileSprite, true);
+        ground.add(tileSprite);
+    }
+
+    // Visual biome ground overlays aligned on 64px tile boundaries: cave floor, then the arena floor. They are cut
+    // at the pits too, so a pit shows no floor.
+    const overlay = (key: string, from: number, to: number, depth: number): void =>
+    {
+        for (const [spanFrom, spanTo] of spans)
+        {
+            const start = Math.max(from, spanFrom);
+            const end = Math.min(to, spanTo);
+            if (end - start <= 0) continue;
+            const strip = scene.add.tileSprite((start + end) / 2, groundY, end - start, GROUND_HEIGHT, key);
+            strip.tilePositionX = start;
+            strip.setDepth(depth);
+        }
+    };
     const arenaFromX = level.arenaFromX ?? level.worldWidth;
     if (level.scenery === 'cave' && arenaFromX > 0 && scene.textures.exists('ground-tile-cavern'))
     {
-        scene.add.tileSprite(arenaFromX / 2, groundY, arenaFromX, GROUND_HEIGHT, 'ground-tile-cavern')
-            .setDepth(4.1);
+        overlay('ground-tile-cavern', 0, arenaFromX, 4.1);
     }
     if (level.arenaFromX !== undefined && scene.textures.exists('ground-tile-arena'))
     {
-        const arenaWidth = level.worldWidth - level.arenaFromX;
-        if (arenaWidth > 0)
-        {
-            scene.add.tileSprite(level.arenaFromX + arenaWidth / 2, groundY, arenaWidth, GROUND_HEIGHT, 'ground-tile-arena')
-                .setDepth(4.2);
-        }
+        overlay('ground-tile-arena', level.arenaFromX, level.worldWidth, 4.2);
+    }
+
+    // The pits: a dark drop, with the cut earth at the top
+    for (const pit of level.pits ?? [])
+    {
+        const top = WORLD_HEIGHT - GROUND_HEIGHT;
+        const depthPx = GROUND_HEIGHT + below + 400;
+        scene.add.rectangle(pit.x + pit.width / 2, top + depthPx / 2, pit.width, depthPx, 0x0b0612).setDepth(3);
+        scene.add.rectangle(pit.x + pit.width / 2, top + 45, pit.width, 90, 0x3b2314, 0.85).setDepth(3.1);
+        // A warning that blinks over it, so a pit is seen from far enough to jump
+        const warning = scene.add.text(pit.x + pit.width / 2, top - 46, '⚠️', { fontSize: '26px' }).setOrigin(0.5).setDepth(5);
+        scene.tweens.add({ targets: warning, alpha: 0.35, duration: 600, yoyo: true, repeat: -1 });
     }
 
     return ground;

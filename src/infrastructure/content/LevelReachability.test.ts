@@ -6,6 +6,7 @@ import skillsJson from '../../../public/data/skills.json';
 import { isStageReady, parseStageDefinitions } from '../phaser/stages/StageDefinition';
 import { parseNodes } from './NodeCatalog';
 import { BIOMES, generateLevel, SECRET_GAPS } from './StageGenerator';
+import { pitProblem } from './LevelPits';
 import { MAX_JUMP_RISE, MOVE_SPEED, JUMP_SPEED, GRAVITY_Y, PLATFORM_SURFACE_OFFSET, maxLeapGap } from '../phaser/physicsConstants';
 
 /**
@@ -31,6 +32,8 @@ type LevelData = {
     secretPlatforms?: { x: number; y: number }[];
     movingPlatforms?: { x: number; y: number; distanceX?: number; distanceY?: number }[];
     spikes?: { x: number; y: number }[];
+    worldWidth?: number;
+    pits?: { x: number; width: number }[];
 };
 
 const levelFiles = Object.entries(
@@ -101,6 +104,15 @@ describe('level layout', () =>
     {
         expect(MAX_JUMP_RISE).toBeGreaterThan(90);
         expect(MAX_JUMP_RISE).toBeLessThan(130);
+    });
+
+    it('has only sound pits in the hand-made levels (none is wider than an easy jump)', () =>
+    {
+        for (const { name, level } of stageLevels)
+        {
+            expect(pitProblem(level.worldWidth ?? 0, level.pits), name).toBeNull();
+            for (const pit of level.pits ?? []) expect(pit.width, name).toBeLessThanOrEqual(maxLeapGap(0) * 0.65);
+        }
     });
 
     it('lets the hero reach every platform in the village and in every built Stage', () =>

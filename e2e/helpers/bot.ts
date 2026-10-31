@@ -30,12 +30,14 @@ export interface BotState
   stageCleared: boolean;
   enemies: EnemyView[];
   spikes: number[];
+  /** The gaps in the ground: left edge and width. */
+  pits: { x: number; width: number }[];
   boss: { x: number; y: number; hp: number; maxHp: number; invulnerable: boolean; phase: number } | null;
 }
 
 const EMPTY: BotState = {
   ready: false, scene: '', x: -1, y: -1, onGround: false, facing: 1, hearts: 0, isDead: false,
-  isPaused: false, dialogue: false, stageCleared: false, enemies: [], spikes: [], boss: null,
+  isPaused: false, dialogue: false, stageCleared: false, enemies: [], spikes: [], pits: [], boss: null,
 };
 
 export async function readState (page: Page): Promise<BotState>
@@ -89,6 +91,7 @@ export async function readState (page: Page): Promise<BotState>
       stageCleared: !!scene.isStageCleared,
       enemies,
       spikes: scene.spikes.getChildren().map((s: any) => Math.round(s.x)),
+      pits: (scene.level?.pits ?? []).map((p: any) => ({ x: p.x, width: p.width })),
       boss,
     };
   }, EMPTY);
@@ -224,6 +227,19 @@ export class Bot
         }
 
         await this.walk(dir);
+
+        // Jump a pit at its edge: a running jump held to the top covers it (they are at most 115 px wide)
+        const pitAhead = s.pits.find(p => {
+          const edge = dir === 1 ? p.x : p.x + p.width;
+          const distance = (edge - s.x) * dir;
+          return distance > 0 && distance < 28;
+        });
+        if (pitAhead && s.onGround) {
+          await this.hold('Space', true);
+          await this.page.waitForTimeout(560);
+          await this.hold('Space', false);
+          continue;
+        }
 
         // Jump a spike that is just ahead
         const spikeAhead = s.spikes.some(sx => (sx - s.x) * dir > 0 && Math.abs(sx - s.x) < 85 && Math.abs(sx - s.x) > 30);
