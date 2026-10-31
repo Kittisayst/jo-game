@@ -56,8 +56,8 @@ export const CraftingStatus: React.FC<{ onCollected?: () => void }> = ({ onColle
                 </div>
                 {!ready && (
                     <div className="mt-1">
-                        <div className="h-2 rounded bg-slate-800 overflow-hidden">
-                            <div className="h-2 bg-emerald-500" style={{ width: `${progress}%` }} data-testid="crafting-progress" />
+                        <div className="rounded bg-slate-800 overflow-hidden" style={{ height: 8 }}>
+                            <div className="bg-emerald-500" style={{ height: 8, width: `${progress}%` }} data-testid="crafting-progress" />
                         </div>
                         <div className="text-xs text-slate-400 mt-1 font-mono" data-testid="crafting-time">
                             ເຫຼືອ {formatCraftTime(job.remainingMs)} (ນັບເວລາເກມ: ເດີນຕອນຫຼິ້ນເທົ່ານັ້ນ)
@@ -71,7 +71,7 @@ export const CraftingStatus: React.FC<{ onCollected?: () => void }> = ({ onColle
                     type="button"
                     onClick={collect}
                     data-testid="crafting-collect"
-                    className="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm"
+                    className="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm" style={{ minHeight: 44, paddingLeft: 16, paddingRight: 16 }}
                 >
                     ຮັບຂອງ
                 </button>

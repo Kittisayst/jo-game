@@ -14,6 +14,9 @@ test.describe('Character window and Stat points', () => {
     const modal = page.getByTestId('character-modal');
     await expect(modal).toBeVisible();
     await expect(page.getByTestId('character-level')).toContainText('Level 12');
+    // The XP bar and the + buttons have a size you can see and touch (style.css has no Tailwind: a class it lacks does nothing)
+    expect((await page.getByTestId('character-xp-bar').boundingBox())!.height).toBeGreaterThanOrEqual(6);
+    expect((await page.getByTestId('stat-hearts-add').boundingBox())!.height).toBeGreaterThanOrEqual(44);
     await expect(page.getByTestId('character-points')).toContainText('11');
 
     // 10 points in Hearts is one more heart, full at once
