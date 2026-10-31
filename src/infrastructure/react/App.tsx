@@ -710,7 +710,8 @@ function App ()
 
     return (
         <div id="app">
-            {villageWelcomeToast && (
+            {/* A window or the pause menu is on top: the toast would sit over its title */}
+            {villageWelcomeToast && !isGamePaused && !isSkinModalOpen && !modals.isAnyModalOpen && (
                 <div className="village-welcome-toast">{villageWelcomeToast}</div>
             )}
 
