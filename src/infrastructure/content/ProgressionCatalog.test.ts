@@ -30,7 +30,7 @@ describe('progression.json Stats', () =>
     it('reads the four Stats and the price of starting over', () =>
     {
         const parsed = parseStatsTuning(progression);
-        expect(parsed.stats.attack).toEqual({ maxPoints: 50, perPoint: 0.01 });
+        expect(parsed.stats.attack).toEqual({ maxPoints: 50, perPoint: 0.015 });
         expect(parsed.stats.hearts.pointsPerHeart).toBe(10);
         expect(parsed.respec.ingredients).toEqual([{ itemId: 'moon-dust', count: 3 }]);
     });

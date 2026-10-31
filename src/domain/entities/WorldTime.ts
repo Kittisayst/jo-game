@@ -26,11 +26,14 @@ export interface WorldTimeSnapshot
 {
     /** Where in the day it is, 0 up to (not including) 1. */
     dayFraction: number;
+    /** Days that have passed since the game began (a night belongs to the day it starts in). */
+    dayCount?: number;
 }
 
 export class WorldTime
 {
     private _fraction: number | null = null;
+    private _days = 0;
     private _tuning: WorldTimeTuning | null = null;
 
     /**
@@ -47,6 +50,13 @@ export class WorldTime
     reset (): void
     {
         this._fraction = this._tuning ? this._tuning.startAt : null;
+        this._days = 0;
+    }
+
+    /** Days that have passed since the game began. A night is told from the next by this number. */
+    get dayCount (): number
+    {
+        return this._days;
     }
 
     private get tuning (): WorldTimeTuning
@@ -126,7 +136,9 @@ export class WorldTime
     tick (deltaMs: number): void
     {
         if (!(deltaMs > 0)) return;
-        this._fraction = (this.dayFraction + deltaMs / this.dayMs) % 1;
+        const raw = this.dayFraction + deltaMs / this.dayMs;
+        this._days += Math.floor(raw);
+        this._fraction = raw % 1;
     }
 
     /** Sleeps through to the morning. Returns the Game time that went by. */
@@ -139,7 +151,7 @@ export class WorldTime
 
     toSnapshot (): WorldTimeSnapshot
     {
-        return { dayFraction: this._fraction ?? 0 };
+        return { dayFraction: this._fraction ?? 0, dayCount: this._days };
     }
 
     /** Loads a save; a value out of 0 up to 1 leaves the clock to start the day at `startAt`. */
@@ -148,5 +160,7 @@ export class WorldTime
         const value = snapshot?.dayFraction;
         const valid = typeof value === 'number' && Number.isFinite(value) && value >= 0 && value < 1;
         this._fraction = valid ? value : (this._tuning ? this._tuning.startAt : null);
+        const days = snapshot?.dayCount;
+        this._days = valid && typeof days === 'number' && Number.isInteger(days) && days >= 0 && days < 1_000_000 ? days : 0;
     }
 }

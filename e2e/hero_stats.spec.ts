@@ -68,8 +68,8 @@ test.describe('Character window and Stat points', () => {
       e.heroLevel.loadFrom({ level: 40, xp: 0, unspentPoints: 0 });
       e.heroStats.loadFrom({ attack: 0, hearts: 0, guard: 30, agility: 39 });
     });
-    // The scene sets the speed factor every frame from the Stat (39 points of 0.25 % = +9.75 %)
-    await expect.poll(() => page.evaluate(() => (window as any).__botGame.scene.getScene('Game').player.speedMultiplier as number)).toBeCloseTo(1.0975, 3);
+    // The scene sets the speed factor every frame from the Stat (39 points of 0.4 % = +15.6 %)
+    await expect.poll(() => page.evaluate(() => (window as any).__botGame.scene.getScene('Game').player.speedMultiplier as number)).toBeCloseTo(1.156, 3);
 
     const snapshot = await page.evaluate(() => (window as any).__entities.toSnapshot('manual-1') as { heroStats: unknown });
     expect(snapshot.heroStats).toEqual({ attack: 0, hearts: 0, guard: 30, agility: 39 });

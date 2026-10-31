@@ -71,5 +71,15 @@ test.describe('Night creatures', () => {
     // Back to the first Stage's neighbour by reloading the scene at night (the clock is kept)
     await page.evaluate(() => (window as any).__botGame.scene.getScene('Game').scene.restart({ levelKey: 'stage-003' }));
     await expect.poll(async () => (await creatures(page)).length, { timeout: 6000 }).toBeGreaterThanOrEqual(1);
+
+    // Once a night: the same Stage again in the same night has none (no farming by leaving and coming back)
+    await page.evaluate(() => (window as any).__botGame.scene.getScene('Game').scene.restart({ levelKey: 'stage-003' }));
+    await page.waitForTimeout(1500);
+    expect(await creatures(page)).toEqual([]);
+
+    // The next night they walk it again: through the morning, the day, and into the night
+    await page.evaluate(() => (window as any).__advanceWorldTime(7 * 60_000));
+    await page.evaluate(() => (window as any).__advanceWorldTime(12.5 * 60_000));
+    await expect.poll(async () => (await creatures(page)).length, { timeout: 6000 }).toBeGreaterThanOrEqual(1);
   });
 });

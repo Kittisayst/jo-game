@@ -95,7 +95,7 @@ describe('WorldTime', () =>
     it('saves and loads where in the day it is; nonsense starts the day over', () =>
     {
         const time = clockAt(15);
-        expect(time.toSnapshot()).toEqual({ dayFraction: 0.75 });
+        expect(time.toSnapshot()).toEqual({ dayFraction: 0.75, dayCount: 0 });
 
         const other = new WorldTime();
         other.configure(tuning);
@@ -110,5 +110,35 @@ describe('WorldTime', () =>
     it('needs its numbers before it is used', () =>
     {
         expect(() => new WorldTime().phase).toThrow(/configure/);
+    });
+});
+
+describe('WorldTime day count', () =>
+{
+    it('counts the days that pass, also several at once, and keeps the count in a save', () =>
+    {
+        const time = clockAt(19);
+        expect(time.dayCount).toBe(0);
+        time.tick(2 * MIN);
+        expect(time.dayCount).toBe(1);
+        time.tick(45 * MIN);
+        expect(time.dayCount).toBe(3);
+
+        const other = new WorldTime();
+        other.configure(tuning);
+        other.loadFrom(time.toSnapshot());
+        expect(other.dayCount).toBe(3);
+        other.loadFrom({ dayFraction: 0.5, dayCount: -2 });
+        expect(other.dayCount).toBe(0);
+        other.reset();
+        expect(other.dayCount).toBe(0);
+    });
+
+    it('sleeping to the morning starts a new day', () =>
+    {
+        const time = clockAt(15);
+        const before = time.dayCount;
+        time.skipToMorning();
+        expect(time.dayCount).toBe(before + 1);
     });
 });

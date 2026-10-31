@@ -462,9 +462,19 @@ describe('World time in a save', () =>
 {
     it('keeps where in the day it is and starts an older save with none', () =>
     {
-        expect(migrateSaveSnapshot({ version: CURRENT_SAVE_VERSION, worldTime: { dayFraction: 0.8 } }).worldTime).toEqual({ dayFraction: 0.8 });
+        expect(migrateSaveSnapshot({ version: CURRENT_SAVE_VERSION, worldTime: { dayFraction: 0.8, dayCount: 4 } }).worldTime).toEqual({ dayFraction: 0.8, dayCount: 4 });
         expect(migrateSaveSnapshot({ version: CURRENT_SAVE_VERSION }).worldTime).toBeNull();
         expect(migrateSaveSnapshot({ version: CURRENT_SAVE_VERSION, worldTime: { dayFraction: 1 } }).worldTime).toBeNull();
         expect(migrateSaveSnapshot({ version: CURRENT_SAVE_VERSION, worldTime: { dayFraction: 'x' } }).worldTime).toBeNull();
+    });
+});
+
+describe('Night hunts in a save', () =>
+{
+    it('keeps the night and its Stages, and drops anything that is not a Stage id', () =>
+    {
+        const saved = migrateSaveSnapshot({ version: CURRENT_SAVE_VERSION, nightHunts: { nightId: 3, stages: ['stage-002', 'stage-9999', 7, 'village'] } });
+        expect(saved.nightHunts).toEqual({ nightId: 3, stages: ['stage-002'] });
+        expect(migrateSaveSnapshot({ version: CURRENT_SAVE_VERSION }).nightHunts).toEqual({ nightId: -1, stages: [] });
     });
 });

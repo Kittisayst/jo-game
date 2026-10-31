@@ -22,6 +22,7 @@ import { ToolUpgrades } from './ToolUpgrades';
 import { HeroLevel } from './HeroLevel';
 import { HeroStats } from './HeroStats';
 import { WorldTime } from './WorldTime';
+import { NightHunts } from './NightHunts';
 import { PendingRewards } from './PendingRewards';
 import { PlantRegrowth } from './PlantRegrowth';
 import { RealmProgression } from './RealmProgression';
@@ -70,6 +71,8 @@ export class GameState
     readonly heroStats = new HeroStats();
     /** The time of day (Game time, saved). Needs `configure` once the content has loaded. */
     readonly worldTime = new WorldTime();
+    /** Which Stages already had their night creatures tonight (so a Stage gives them once a night). */
+    readonly nightHunts = new NightHunts();
     /** The Storage chest: 40 slots, never touched by dying. */
     readonly storage: Backpack;
     /** Timed Potion effects running on the hero (not saved). */
@@ -140,6 +143,7 @@ export class GameState
             heroLevel: this.heroLevel.toSnapshot(),
             heroStats: this.heroStats.toSnapshot(),
             worldTime: this.worldTime.toSnapshot(),
+            nightHunts: this.nightHunts.toSnapshot(),
             storage: this.storage.toSnapshot(),
         };
     }
@@ -192,6 +196,7 @@ export class GameState
         this.heroLevel.loadFrom(snapshot.heroLevel);
         this.heroStats.loadFrom(snapshot.heroStats);
         this.worldTime.loadFrom(snapshot.worldTime ?? undefined);
+        this.nightHunts.loadFrom(snapshot.nightHunts);
         this.storage.loadFromSnapshot(snapshot.storage ?? []);
         this.effects.clear();
         this.syncArmor();
