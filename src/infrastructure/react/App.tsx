@@ -68,6 +68,9 @@ import {
     removeKey,
 } from '../storage/safeStorage';
 
+// Development only: lets a browser test open a window (`__eventBus.emit('open-forge')`) the way the scene does
+if (import.meta.env.DEV) (window as unknown as { __eventBus: typeof EventBus }).__eventBus = EventBus;
+
 function App ()
 {
     const phaserRef = useRef<IRefPhaserGame | null>(null);
