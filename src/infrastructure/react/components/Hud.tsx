@@ -59,6 +59,8 @@ export interface HudProps
     activeEffects?: { effect: 'strength' | 'speed'; remainingSeconds: number }[];
     /** How many Garden Plots are ready to harvest. */
     gardenReadyCount?: number;
+    /** Quests finished and waiting for reward claim. */
+    questClaimableCount?: number;
     /** What the Workshop/Forge is making, or null. */
     craftingJob?: { resultItemId: string; remainingMs: number } | null;
     /** Story Materials waiting for a free Backpack slot. */
@@ -98,6 +100,7 @@ export function Hud ({
     armor = 0,
     pendingRewardsCount = 0,
     gardenReadyCount = 0,
+    questClaimableCount = 0,
     craftingJob = null,
     activeEffects = [],
     quickSlot = null,
@@ -112,7 +115,7 @@ export function Hud ({
     const levelLabel = hudLabelOf(currentLevel);
     const touch = isTouchLayout();
     // The notices row exists only while there is something to say: a build, ripe plants, waiting rewards, a Potion, a hint
-    const hasNotices = Boolean(craftingJob) || gardenReadyCount > 0 || pendingRewardsCount > 0 || activeEffects.length > 0 || Boolean(tutorialText) || Boolean(objective);
+    const hasNotices = Boolean(craftingJob) || gardenReadyCount > 0 || pendingRewardsCount > 0 || activeEffects.length > 0 || questClaimableCount > 0 || Boolean(tutorialText) || Boolean(objective);
 
     return (
         <>
@@ -193,6 +196,17 @@ export function Hud ({
                                 >
                                     <span className="badge-icon">📦</span>
                                     <span className="badge-label">ລໍຮັບ {pendingRewardsCount} (ກະເປົາເຕັມ)</span>
+                                </div>
+                            )}
+
+                            {(questClaimableCount ?? 0) > 0 && (
+                                <div
+                                    className="hud-badge quest-claimable-badge"
+                                    data-testid="quest-claimable"
+                                    title="ມີພາລະກິດສຳເລັດແລ້ວ: ໄປຮັບລາງວັນທີ່ກະດານພາລະກິດໃນໝູ່ບ້ານ"
+                                >
+                                    <span className="badge-icon">📜</span>
+                                    <span className="badge-label">ຮັບລາງວັນພາລະກິດ {questClaimableCount}</span>
                                 </div>
                             )}
 

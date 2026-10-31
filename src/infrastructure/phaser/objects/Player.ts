@@ -340,6 +340,8 @@ export class Player extends Physics.Arcade.Sprite
             'wooden-sword': 'slash-wood',
             'iron-sword': 'slash-iron',
             'crystal-sword': 'slash-crystal',
+            'blue-sword': 'slash-blue',
+            'copper-sword': 'slash-copper',
         };
         const slashKey = slashSprites[weaponId];
 
@@ -375,6 +377,8 @@ export class Player extends Physics.Arcade.Sprite
             'wooden-sword': 0xd4a373,
             'iron-sword': 0xe2e8f0,
             'crystal-sword': 0xa855f7,
+            'blue-sword': 0x0284c7,
+            'copper-sword': 0xea580c,
         };
 
         const slash = this.scene.add.graphics({ x: slashX, y: slashY });

@@ -28,6 +28,7 @@ import { PlantRegrowth } from './PlantRegrowth';
 import { RealmProgression } from './RealmProgression';
 import { TutorialProgress } from './TutorialProgress';
 import { Wallet } from './Wallet';
+import { QuestBoard } from './Quest';
 
 const FIRST_BOOK_ID = 'book-ch1';
 
@@ -75,6 +76,8 @@ export class GameState
     readonly nightHunts = new NightHunts();
     /** The Storage chest: 40 slots, never touched by dying. */
     readonly storage: Backpack;
+    /** The Village Quest Board with daily/bounty tasks. */
+    readonly questBoard = new QuestBoard();
     /** Timed Potion effects running on the hero (not saved). */
     readonly effects = new ActiveEffects();
     /** The Potion chosen to be drunk with R, or null. */
@@ -145,6 +148,7 @@ export class GameState
             worldTime: this.worldTime.toSnapshot(),
             nightHunts: this.nightHunts.toSnapshot(),
             storage: this.storage.toSnapshot(),
+            quests: this.questBoard.toSnapshot(),
         };
     }
 
@@ -198,6 +202,7 @@ export class GameState
         this.worldTime.loadFrom(snapshot.worldTime ?? undefined);
         this.nightHunts.loadFrom(snapshot.nightHunts);
         this.storage.loadFromSnapshot(snapshot.storage ?? []);
+        this.questBoard.loadFrom(snapshot.quests);
         this.effects.clear();
         this.syncArmor();
         this.health.reset();

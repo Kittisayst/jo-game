@@ -56,8 +56,15 @@ import { readHeroLevel } from './heroLevelView';
 import { readWorldTime } from './worldTimeView';
 import { syncHearts } from '../heroStats';
 import { syncMovement, syncSkills } from '../skills';
-import { GARDEN_LEVEL_KEY, isHomeLevel } from '../phaser/levelCatalog';
+import { isHomeLevel } from '../phaser/levelCatalog';
 import { StorageModal } from './components/StorageModal';
+import { QuestBoardModal } from './components/QuestBoardModal';
+import { DomainEvents } from '../../domain/DomainEvents';
+import { recordQuestProgressUseCase, QUEST_COMPLETED_EVENT, type QuestCompletedPayload } from '../../application/QuestUseCases';
+import { RESOURCE_HARVESTED_EVENT, type ResourceHarvestedPayload } from '../../application/HarvestResourceNodeUseCase';
+import { POTION_DRUNK_EVENT, type PotionDrunkPayload } from '../../application/DrinkPotionUseCase';
+import { RECIPE_CRAFTED_EVENT } from '../../application/CraftRecipeUseCase';
+import { CRAFT_COLLECTED_EVENT } from '../../application/CraftingJobUseCases';
 import { CharacterModal } from './components/CharacterModal';
 import { answerStageQuestionUseCase, pickStageQuestion } from '../../application/AnswerStageQuestionUseCase';
 import { returnToVillageUseCase } from '../../application/ReturnToVillageUseCase';
@@ -152,6 +159,7 @@ function App ()
         stageQuestion, setStageQuestion,
         isGardenOpen, setIsGardenOpen,
         isStorageOpen, setIsStorageOpen,
+        isQuestBoardOpen, setIsQuestBoardOpen,
         isCharacterOpen, setIsCharacterOpen,
     } = modals;
 
@@ -277,7 +285,7 @@ function App ()
         if (!isHomeLevel(stageKey) && (!stage || !isStageReady(stage))) return;
 
         // The village and the Garden are always open; only a Stage has to be unlocked
-        const success = stageKey === GARDEN_LEVEL_KEY || selectStageUseCase(stageProgression, stageKey);
+        const success = isHomeLevel(stageKey) || selectStageUseCase(stageProgression, stageKey);
         if (!success) return;
 
         resumeGameUseCase(pauseState);
@@ -489,6 +497,54 @@ function App ()
         if (syncSkills().length + syncMovement().length > 0) autoSaveGame();
     }, []);
 
+
+    useEffect(() =>
+    {
+        const onHarvest = (payload: ResourceHarvestedPayload) =>
+        {
+            if (payload?.drops)
+            {
+                for (const drop of payload.drops)
+                {
+                    recordQuestProgressUseCase(entities.questBoard, 'gather', drop.itemId, drop.count);
+                }
+            }
+        };
+
+        const onPotionDrunk = (payload: PotionDrunkPayload) =>
+        {
+            recordQuestProgressUseCase(entities.questBoard, 'drink_potion', payload.effect, 1);
+        };
+
+        const onCrafted = () =>
+        {
+            recordQuestProgressUseCase(entities.questBoard, 'craft', undefined, 1);
+        };
+
+        const onQuestCompleted = (payload: QuestCompletedPayload) =>
+        {
+            setVillageWelcomeToast(`📜 ພາລະກິດສຳເລັດ: ${payload.title}! (ໄປຮັບລາງວັນທີ່ໝູ່ບ້ານ)`);
+            soundManager.playPowerUp();
+            setBackpackRevision(r => r + 1);
+            autoSaveGame();
+        };
+
+        DomainEvents.on(RESOURCE_HARVESTED_EVENT, onHarvest);
+        DomainEvents.on(POTION_DRUNK_EVENT, onPotionDrunk);
+        DomainEvents.on(RECIPE_CRAFTED_EVENT, onCrafted);
+        DomainEvents.on(CRAFT_COLLECTED_EVENT, onCrafted);
+        DomainEvents.on(QUEST_COMPLETED_EVENT, onQuestCompleted);
+
+        return () =>
+        {
+            DomainEvents.off(RESOURCE_HARVESTED_EVENT, onHarvest);
+            DomainEvents.off(POTION_DRUNK_EVENT, onPotionDrunk);
+            DomainEvents.off(RECIPE_CRAFTED_EVENT, onCrafted);
+            DomainEvents.off(CRAFT_COLLECTED_EVENT, onCrafted);
+            DomainEvents.off(QUEST_COMPLETED_EVENT, onQuestCompleted);
+        };
+    }, []);
+
     // The clock of the day counts down on the HUD: one redraw a second
     useEffect(() =>
     {
@@ -578,7 +634,10 @@ function App ()
     };
 
     useGameEvents({
-        onStageCleared: payload => clearStage(payload.stageId),
+        onStageCleared: payload => {
+            clearStage(payload.stageId);
+            recordQuestProgressUseCase(entities.questBoard, 'clear_stage', undefined, 1);
+        },
         onItemWornOrRepaired: () => setBackpackRevision(r => r + 1),
         onTutorialChanged: payload =>
         {
@@ -646,6 +705,7 @@ function App ()
             autoSaveGame();
         },
         onOpenStorage: () => setIsStorageOpen(true),
+        onOpenQuestBoard: () => setIsQuestBoardOpen(true),
         onWeaponChanged: weaponId =>
         {
             setEquippedWeaponId(weaponId);
@@ -748,6 +808,7 @@ function App ()
                     armor={entities.health.armor}
                     pendingRewardsCount={entities.pendingRewards.total}
                     gardenReadyCount={entities.garden.readyCount(clock.now(), growMinutesOf(entities.itemCatalog))}
+                    questClaimableCount={entities.questBoard.claimableCount}
                     craftingJob={entities.crafting.job}
                     skillSlots={readSkillSlots()}
                     heroLevel={readHeroLevel()}
@@ -1024,6 +1085,11 @@ function App ()
                     setBackpackRevision(r => r + 1);
                     autoSaveGame();
                 }}
+            />
+
+            <QuestBoardModal
+                isOpen={isQuestBoardOpen}
+                onClose={() => setIsQuestBoardOpen(false)}
             />
 
             <StorageModal

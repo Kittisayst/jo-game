@@ -34,7 +34,7 @@ export interface Level
     pits?: { x: number; width: number }[];
     movingPlatforms?: MovingPlatformSpawnData[];
     /** Which backdrop and ground the level has: the village, a forest, or a cave. */
-    scenery?: 'village' | 'forest' | 'cave';
+    scenery?: 'village' | 'forest' | 'cave' | 'desert';
     /** Where the boss arena starts, when a cave level ends in one (the backdrop and ground change from here). */
     arenaFromX?: number;
 }

@@ -11,11 +11,13 @@ const IMAGE_ASSETS: readonly { key: string; path: string }[] = [
     { key: 'bg-plains', path: 'assets/backgrounds/bg_plains.jpg' },
     { key: 'bg-cavern', path: 'assets/backgrounds/bg_cavern.jpg' },
     { key: 'bg-boss-arena', path: 'assets/backgrounds/bg_boss_arena.jpg' },
+    { key: 'bg-desert', path: 'assets/backgrounds/bg_desert.jpg' },
 
     // Terrain & Hazards
     { key: 'ground-tile', path: 'assets/environment/tile_ground.png' },
     { key: 'ground-tile-cavern', path: 'assets/environment/tile_ground_cavern.png' },
     { key: 'ground-tile-arena', path: 'assets/environment/tile_ground_arena.png' },
+    { key: 'ground-tile-desert', path: 'assets/environment/tile_ground_desert.png' },
     { key: 'platform-texture', path: 'assets/environment/platform.png' },
     { key: 'moving-platform-texture', path: 'assets/environment/moving_platform.png' },
     { key: 'spike-texture', path: 'assets/environment/spikes.png' },
@@ -30,6 +32,7 @@ const IMAGE_ASSETS: readonly { key: string; path: string }[] = [
     { key: 'village-tree', path: 'assets/environment/village_tree.png' },
     { key: 'village-lantern', path: 'assets/environment/village_lantern.png' },
     { key: 'signpost', path: 'assets/environment/signpost.png' },
+    { key: 'quest-board', path: 'assets/environment/quest_board.png' },
 ];
 
 const SPRITESHEET_ASSETS: readonly { key: string; path: string; frameWidth: number; frameHeight: number }[] = [
@@ -62,16 +65,26 @@ const SPRITESHEET_ASSETS: readonly { key: string; path: string; frameWidth: numb
     // Enemies, Mini-Boss & Chapter Boss (4 frames each)
     { key: 'enemy-slime', path: 'assets/characters/enemy_slime.png', frameWidth: 32, frameHeight: 28 },
     { key: 'enemy-rock-golem', path: 'assets/characters/enemy_rock_golem.png', frameWidth: 48, frameHeight: 40 },
+    { key: 'enemy-crystal-slime', path: 'assets/characters/enemy_crystal_slime.png', frameWidth: 32, frameHeight: 28 },
+    { key: 'enemy-crystal-golem', path: 'assets/characters/enemy_crystal_golem.png', frameWidth: 48, frameHeight: 40 },
+    { key: 'enemy-sand-slime', path: 'assets/characters/enemy_sand_slime.png', frameWidth: 32, frameHeight: 28 },
+    { key: 'enemy-sand-golem', path: 'assets/characters/enemy_sand_golem.png', frameWidth: 48, frameHeight: 40 },
     { key: 'enemy-night-wisp', path: 'assets/characters/night_wisp.png', frameWidth: 32, frameHeight: 28 },
     { key: 'enemy-night-shade', path: 'assets/characters/night_shade.png', frameWidth: 32, frameHeight: 28 },
     { key: 'enemy-night-scarab', path: 'assets/characters/night_scarab.png', frameWidth: 32, frameHeight: 28 },
     { key: 'miniboss-cave-guardian', path: 'assets/characters/miniboss_cave_guardian.png', frameWidth: 64, frameHeight: 64 },
+    { key: 'miniboss-crystal-warden', path: 'assets/characters/miniboss_crystal_warden.png', frameWidth: 64, frameHeight: 64 },
+    { key: 'miniboss-dune-sentinel', path: 'assets/characters/miniboss_dune_sentinel.png', frameWidth: 64, frameHeight: 64 },
     { key: 'boss-hardware-overlord', path: 'assets/characters/boss_hardware_overlord.png', frameWidth: 96, frameHeight: 80 },
+    { key: 'boss-network-core', path: 'assets/characters/boss_network_core.png', frameWidth: 96, frameHeight: 80 },
+    { key: 'boss-kernel-titan', path: 'assets/characters/boss_kernel_titan.png', frameWidth: 96, frameHeight: 80 },
 
     // Weapon Slash VFX (3 frames of 48x48)
     { key: 'slash-wood', path: 'assets/vfx/slash_wood.png', frameWidth: 48, frameHeight: 48 },
     { key: 'slash-iron', path: 'assets/vfx/slash_iron.png', frameWidth: 48, frameHeight: 48 },
     { key: 'slash-crystal', path: 'assets/vfx/slash_crystal.png', frameWidth: 48, frameHeight: 48 },
+    { key: 'slash-blue', path: 'assets/vfx/slash_blue.png', frameWidth: 48, frameHeight: 48 },
+    { key: 'slash-copper', path: 'assets/vfx/slash_copper.png', frameWidth: 48, frameHeight: 48 },
 ];
 
 /** Queues every level JSON, image, and spritesheet not yet in Phaser's cache. */

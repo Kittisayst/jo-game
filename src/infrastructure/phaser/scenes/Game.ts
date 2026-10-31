@@ -202,7 +202,13 @@ export class Game extends Scene
 
         const isVillage = this.level.scenery === 'village' || this.currentLevelKey === 'village';
         const isGarden = this.currentLevelKey === GARDEN_LEVEL_KEY;
-        const backdropKey = isVillage ? 'bg-village' : (this.level.scenery === 'cave' ? 'bg-cavern' : 'bg-plains');
+        const backdropKey = isVillage
+            ? 'bg-village'
+            : (this.level.scenery === 'cave'
+                ? 'bg-cavern'
+                : (this.level.scenery === 'desert'
+                    ? 'bg-desert'
+                    : 'bg-plains'));
         this.bossBgmStarted = false;
         this.skyBackdrop = createSky(this, this.level, backdropKey);
 
@@ -323,7 +329,7 @@ export class Game extends Scene
         if (bossSpawn)
         {
             const bossDefinition = this.getEnemyDefinition(bossSpawn.enemyId);
-            this.boss = new Boss(this, bossSpawn.x, bossSpawn.y, bossDefinition?.maxHp ?? 5);
+            this.boss = new Boss(this, bossSpawn.x, bossSpawn.y, bossDefinition?.maxHp ?? 5, bossSpawn.enemyId);
             this.boss.xp = bossDefinition?.xp ?? 0;
             this.boss.awaitFinisher = true;
             this.combat.bindBoss(this.boss, () =>
@@ -348,7 +354,9 @@ export class Game extends Scene
 
         const destroyOnHit = (proj: unknown) =>
         {
-            (proj as Phaser.Physics.Arcade.Sprite).destroy();
+            const sprite = proj as Phaser.Physics.Arcade.Sprite;
+            if (sprite.texture?.key === 'boss-seismic-wave') return;
+            sprite.destroy();
         };
         this.physics.add.collider(this.enemyProjectiles, this.ground, destroyOnHit);
         this.physics.add.collider(this.enemyProjectiles, this.platforms, destroyOnHit);
@@ -574,6 +582,10 @@ export class Game extends Scene
         });
 
         entities.attackCooldown.reset();
+        if (import.meta.env.DEV)
+        {
+            (window as unknown as { __phaserGameScene?: Game }).__phaserGameScene = this;
+        }
         EventBus.emit('current-scene-ready', this);
     }
 

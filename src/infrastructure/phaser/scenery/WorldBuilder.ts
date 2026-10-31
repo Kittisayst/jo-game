@@ -134,6 +134,10 @@ export function createGround (
     {
         overlay('ground-tile-cavern', 0, arenaFromX, 4.1);
     }
+    if (level.scenery === 'desert' && arenaFromX > 0 && scene.textures.exists('ground-tile-desert'))
+    {
+        overlay('ground-tile-desert', 0, arenaFromX, 4.1);
+    }
     if (level.arenaFromX !== undefined && scene.textures.exists('ground-tile-arena'))
     {
         overlay('ground-tile-arena', level.arenaFromX, level.worldWidth, 4.2);

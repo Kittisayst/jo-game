@@ -17,6 +17,7 @@ export const VILLAGE_LANTERN_XS = [225, 495, 765, 1030, 1360];
 export const VILLAGE_LANTERN_FLAME_HEIGHT = 54;
 /** The Bed stands past the World Gate, at the east end of the village. */
 const BED_X = 1535;
+const QUEST_BOARD_X = 460;
 const FORGE_OPEN_LABEL = '⚔️ [E] ເຂົ້າໂຮງຕີເຫຼັກ (Forge)';
 
 /**
@@ -156,6 +157,7 @@ export function buildVillageScenery (scene: Phaser.Scene, baseY: number, forgeOp
     // The Garden door (x = 1010) and the Storage chest (x = 235): drawn with shapes until real art replaces them
     addGardenDoor(scene, 1010, baseY);
     addStorageChest(scene, 235, baseY);
+    addQuestBoard(scene, QUEST_BOARD_X, baseY);
     addBed(scene, BED_X, baseY);
 
     // Welcome signpost & text at village entrance (x = 120)
@@ -239,6 +241,17 @@ export function buildVillageScenery (scene: Phaser.Scene, baseY: number, forgeOp
         forge,
         { x: 235, label: '📦 [E] ເປີດຫີບເກັບຂອງ (Storage)', action: () => EventBus.emit('open-storage') },
         {
+            x: QUEST_BOARD_X,
+            get label (): string
+            {
+                const claimable = entities.questBoard.claimableCount;
+                return claimable > 0
+                    ? `📜 [E] ກະດານພາລະກິດ (✨ ພ້ອມຮັບ ${claimable} ລາງວັນ!)`
+                    : '📜 [E] ກວດເບິ່ງກະດານພາລະກິດ (Quest Board)';
+            },
+            action: () => EventBus.emit('open-quest-board'),
+        },
+        {
             x: BED_X,
             // Read again every time the prompt shows: it changes with the time of day
             get label (): string
@@ -318,4 +331,31 @@ function addStorageChest (scene: Phaser.Scene, x: number, baseY: number): void
     g.fillStyle(0xfacc15, 1);
     g.fillRect(x - 3, baseY - 26, 6, 8);
     addLabel(scene, x, baseY - 66, '📦 ຫີບເກັບຂອງ (Storage)\n[E] ເປີດຫີບ', '#fde68a', '#451a03');
+}
+
+function addQuestBoard (scene: Phaser.Scene, x: number, baseY: number): void
+{
+    if (scene.textures.exists('quest-board'))
+    {
+        scene.add.image(x, baseY + 2, 'quest-board').setOrigin(0.5, 1).setDepth(2);
+    }
+    const sign = scene.add.text(x, baseY - 70, '📜 ກະດານພາລະກິດ (Quest Board)\n[E] ເບິ່ງພາລະກິດ', {
+        fontFamily: FONT,
+        fontSize: '12px',
+        color: '#fef08a',
+        stroke: '#0f172a',
+        strokeThickness: 3,
+        align: 'center',
+    });
+    sign.setOrigin(0.5, 0.5);
+    sign.setDepth(2.5);
+
+    scene.tweens.add({
+        targets: sign,
+        y: baseY - 76,
+        duration: 950,
+        yoyo: true,
+        repeat: -1,
+        ease: 'Sine.easeInOut',
+    });
 }

@@ -37,6 +37,7 @@ export function useModalState ()
     const [isStageMapOpen, setIsStageMapOpen] = useState(false);
     const [isGardenOpen, setIsGardenOpen] = useState(false);
     const [isStorageOpen, setIsStorageOpen] = useState(false);
+    const [isQuestBoardOpen, setIsQuestBoardOpen] = useState(false);
     const [isCharacterOpen, setIsCharacterOpen] = useState(false);
     // Not closed by Esc: the Stage is frozen until the player has answered
     const [stageQuestion, setStageQuestion] = useState<StageQuestionState | null>(null);
@@ -56,6 +57,7 @@ export function useModalState ()
         stageMap: isStageMapOpen,
         garden: isGardenOpen,
         storage: isStorageOpen,
+        questBoard: isQuestBoardOpen,
         character: isCharacterOpen,
         stageQuestion: stageQuestion !== null,
     };
@@ -79,6 +81,7 @@ export function useModalState ()
         if (now.stageMap) { setIsStageMapOpen(false); return true; }
         if (now.garden) { setIsGardenOpen(false); return true; }
         if (now.storage) { setIsStorageOpen(false); return true; }
+        if (now.questBoard) { setIsQuestBoardOpen(false); return true; }
         if (now.character) { setIsCharacterOpen(false); return true; }
         return false;
     };
@@ -106,6 +109,7 @@ export function useModalState ()
         isStageMapOpen, setIsStageMapOpen,
         isGardenOpen, setIsGardenOpen,
         isStorageOpen, setIsStorageOpen,
+        isQuestBoardOpen, setIsQuestBoardOpen,
         isCharacterOpen, setIsCharacterOpen,
         stageQuestion, setStageQuestion,
         closeTopModal,

@@ -10,6 +10,7 @@ import type { WorldTimeSnapshot } from './WorldTime';
 import type { NightHuntsSnapshot } from './NightHunts';
 import type { PendingReward } from './PendingRewards';
 import { TutorialSnapshot } from './TutorialProgress';
+import type { QuestSnapshot } from './Quest';
 import { SettingsData, StageProgressionData } from '../ports';
 import { BookProgressSnapshot } from './Book';
 import { BackpackSlotSnapshot } from './Backpack';
@@ -80,6 +81,8 @@ export interface SaveGameSnapshot
     quickSlotItemId: string | null;
     /** Hints of the first Stage that were done, and whether the player skipped them. Missing in older saves. */
     tutorial: TutorialSnapshot;
+    /** Completed/claimed quest board tasks. Missing in older saves. */
+    quests?: QuestSnapshot;
 }
 
 export function createDefaultSaveSnapshot (slotId = 'slot_1'): SaveGameSnapshot
@@ -146,6 +149,7 @@ export function createDefaultSaveSnapshot (slotId = 'slot_1'): SaveGameSnapshot
         worldTime: null,
         nightHunts: { nightId: -1, stages: [] },
         storage: [],
+        quests: { quests: [] },
     };
 }
 

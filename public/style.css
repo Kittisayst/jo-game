@@ -5378,3 +5378,68 @@ button,
     align-items: center;
     pointer-events: auto;
 }
+
+
+/* Potion Buff Timer HUD */
+.hud-notices .effect-badge {
+    border-radius: 6px;
+    font-weight: 600;
+    animation: buffPulse 1.8s infinite ease-in-out;
+}
+
+.hud-notices .effect-strength {
+    background: rgba(185, 28, 28, 0.45);
+    border: 1px solid #ef4444;
+    color: #fca5a5;
+    box-shadow: 0 0 10px rgba(239, 68, 68, 0.35);
+}
+
+.hud-notices .effect-speed {
+    background: rgba(14, 116, 144, 0.45);
+    border: 1px solid #38bdf8;
+    color: #7dd3fc;
+    box-shadow: 0 0 10px rgba(56, 189, 248, 0.35);
+}
+
+@keyframes buffPulse {
+    0%, 100% {
+        transform: scale(1);
+        filter: brightness(1);
+    }
+    50% {
+        transform: scale(1.04);
+        filter: brightness(1.2);
+    }
+}
+
+/* Quest Claimable HUD Notice */
+.hud-notices .quest-claimable-badge {
+    background: rgba(161, 98, 7, 0.45);
+    border: 1px solid #facc15;
+    color: #fef08a;
+    box-shadow: 0 0 12px rgba(250, 204, 21, 0.3);
+    animation: questGlow 2s infinite ease-in-out;
+}
+
+@keyframes questGlow {
+    0%, 100% {
+        box-shadow: 0 0 8px rgba(250, 204, 21, 0.2);
+    }
+    50% {
+        box-shadow: 0 0 16px rgba(250, 204, 21, 0.5);
+    }
+}
+
+
+.modal-backdrop {
+    position: fixed;
+    inset: 0;
+}
+
+.modal-container {
+    position: relative;
+}
+
+.quest-board-modal {
+    display: flex;
+}

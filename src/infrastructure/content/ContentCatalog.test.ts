@@ -319,7 +319,7 @@ describe('validator errors', () =>
             {
                 const badBiome = copy(stages) as unknown as Loose2;
                 badBiome.stages[2].layout = { generate: { biome: 'lava', seed: 3, screens: 2 } };
-                expect(() => parse(badBiome)).toThrow(/stages\[2\]\.layout\.generate\.biome must be one of forest, cave/);
+                expect(() => parse(badBiome)).toThrow(/stages\[2\]\.layout\.generate\.biome must be one of forest, cave, desert/);
 
                 const crowded = copy(stages) as unknown as Loose2;
                 const pool = crowded.stages[2].zones[0].contents.find(c => c.kind === 'spawn-pool')!;

@@ -71,7 +71,13 @@ export class Enemy extends Physics.Arcade.Sprite
         const defTexMap: Record<string, string> = {
             'forest-slime': 'enemy-slime',
             'rock-golem': 'enemy-rock-golem',
+            'crystal-slime': 'enemy-crystal-slime',
+            'crystal-golem': 'enemy-crystal-golem',
+            'sand-slime': 'enemy-sand-slime',
+            'sand-golem': 'enemy-sand-golem',
             'cave-guardian': 'miniboss-cave-guardian',
+            'crystal-warden': 'miniboss-crystal-warden',
+            'dune-sentinel': 'miniboss-dune-sentinel',
             'night-wisp': 'enemy-night-wisp',
             'night-shade': 'enemy-night-shade',
             'night-scarab': 'enemy-night-scarab',
@@ -101,13 +107,13 @@ export class Enemy extends Physics.Arcade.Sprite
         const body = this.body as Phaser.Physics.Arcade.Body;
         if (body)
         {
-            if (texKey === 'miniboss-cave-guardian')
+            if (texKey.startsWith('miniboss-'))
             {
                 this.spriteHeight = 64;
                 body.setSize(48, 54 - GROUND_SINK);
                 body.setOffset(8, 10);
             }
-            else if (texKey === 'enemy-rock-golem')
+            else if (texKey.endsWith('-golem'))
             {
                 this.spriteHeight = 40;
                 body.setSize(38, 32 - GROUND_SINK);
