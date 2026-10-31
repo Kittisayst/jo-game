@@ -57,7 +57,8 @@ export const StorageModal: React.FC<StorageModalProps> = ({ isOpen, onClose, onC
                             disabled={!slot}
                             onClick={() => move(container, other, index, otherName)}
                             title={item ? `${item.name} (ກົດເພື່ອຍ້າຍໄປ${otherName})` : ''}
-                            className={`relative aspect-square min-h-[44px] rounded-lg border flex items-center justify-center ${
+                            style={{ aspectRatio: '1', minHeight: 44 }}
+                            className={`relative rounded-lg border flex items-center justify-center ${
                                 slot ? 'bg-slate-800/80 border-slate-600 hover:border-cyan-400' : 'bg-slate-900/40 border-slate-800'
                             }`}
                         >
@@ -65,7 +66,7 @@ export const StorageModal: React.FC<StorageModalProps> = ({ isOpen, onClose, onC
                                 <>
                                     <ItemIcon iconImage={item.iconImage} icon={item.icon} size={24} />
                                     {slot.count > 1 && (
-                                        <span className="absolute bottom-0.5 right-1 text-[10px] font-mono font-bold text-cyan-300">{slot.count}</span>
+                                        <span className="absolute text-[10px] font-mono font-bold text-cyan-300" style={{ bottom: 2, right: 4 }}>{slot.count}</span>
                                     )}
                                 </>
                             )}

@@ -84,12 +84,14 @@ export const CharacterModal: React.FC<CharacterModalProps> = ({ isOpen, onClose,
 
     return (
         <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/75 backdrop-blur-sm p-4 animate-fade-in">
-            <div className="relative w-full max-w-xl rounded-2xl bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 border-2 border-indigo-400/50 shadow-2xl overflow-hidden flex flex-col max-h-[90vh]" data-testid="character-modal">
-                <div className="flex items-center justify-between px-6 py-4 border-b border-indigo-400/30 bg-slate-900/80">
+            <div className="relative w-full rounded-2xl border-2 shadow-2xl overflow-hidden flex flex-col"
+                style={{ maxWidth: 560, maxHeight: '92vh', background: 'linear-gradient(180deg, #0f172a, #1e293b 55%, #0f172a)', borderColor: 'rgba(129, 140, 248, 0.5)' }}
+                data-testid="character-modal">
+                <div className="flex items-center justify-between px-6 py-4 border-b bg-slate-900/80" style={{ borderColor: 'rgba(129, 140, 248, 0.3)' }}>
                     <div className="flex items-center gap-3">
                         <span className="text-3xl">⭐</span>
                         <div>
-                            <h2 className="text-xl font-bold text-indigo-200">ຕົວລະຄອນ (Character)</h2>
+                            <h2 className="text-xl font-bold" style={{ color: '#c7d2fe' }}>ຕົວລະຄອນ (Character)</h2>
                             <p className="text-xs text-slate-400">XP ມາຈາກການຂ້າ monster ເທົ່ານັ້ນ. ອຸປະກອນຈາກຕຳລາບົດຍັງເປັນພະລັງຫຼັກ.</p>
                         </div>
                     </div>
@@ -98,12 +100,12 @@ export const CharacterModal: React.FC<CharacterModalProps> = ({ isOpen, onClose,
 
                 <div className="p-5 overflow-y-auto flex-1 space-y-4">
                     <div className="rounded-xl border border-slate-700/60 bg-slate-800/50 p-4">
-                        <div className="flex items-baseline justify-between">
+                        <div className="flex justify-between" style={{ alignItems: 'baseline' }}>
                             <span className="text-lg font-bold text-white" data-testid="character-level">Level {heroLevel.level} <span className="text-xs text-slate-400">/ {progression.maxLevel}</span></span>
-                            <span className="text-sm text-indigo-200" data-testid="character-points">ແຕ້ມທີ່ເຫຼືອ: {heroLevel.unspentPoints}</span>
+                            <span className="text-sm" style={{ color: '#c7d2fe' }} data-testid="character-points">ແຕ້ມທີ່ເຫຼືອ: {heroLevel.unspentPoints}</span>
                         </div>
-                        <div className="mt-2 h-2 rounded-full bg-slate-700 overflow-hidden">
-                            <div className="h-full bg-indigo-300" style={{ width: `${isMax ? 100 : Math.round((heroLevel.xp / needed) * 100)}%` }} />
+                        <div className="mt-2 rounded-full overflow-hidden" style={{ height: 8, background: '#334155' }} data-testid="character-xp-bar">
+                            <div style={{ height: '100%', background: '#a5b4fc', width: `${isMax ? 100 : Math.round((heroLevel.xp / needed) * 100)}%` }} />
                         </div>
                         <p className="mt-1 text-xs text-slate-400">{isMax ? 'ລະດັບສູງສຸດ' : `XP ${heroLevel.xp} / ${needed}`}</p>
                     </div>
@@ -117,6 +119,7 @@ export const CharacterModal: React.FC<CharacterModalProps> = ({ isOpen, onClose,
                             const max = statsTuning.stats[id].maxPoints;
                             const points = heroStats.pointsIn(id);
                             const full = points >= max;
+                            const disabledAdd = full || heroLevel.unspentPoints <= 0;
                             return (
                                 <div key={id} className="flex items-center gap-3 rounded-xl border border-slate-700/60 bg-slate-800/50 p-3" data-testid={`stat-${id}`} data-points={points}>
                                     <span className="text-2xl">{view.icon}</span>
@@ -128,10 +131,15 @@ export const CharacterModal: React.FC<CharacterModalProps> = ({ isOpen, onClose,
                                     <button
                                         type="button"
                                         data-testid={`stat-${id}-add`}
-                                        disabled={full || heroLevel.unspentPoints <= 0}
+                                        disabled={disabledAdd}
                                         onClick={() => spend(id)}
                                         aria-label={`+1 ${view.name}`}
-                                        className="min-w-[44px] min-h-[44px] rounded-lg border border-indigo-400/60 bg-indigo-500/20 text-indigo-100 font-bold disabled:opacity-40 hover:bg-indigo-500/40"
+                                        className="rounded-lg border font-bold"
+                                        style={{
+                                            minWidth: 44, minHeight: 44, fontSize: 20, cursor: disabledAdd ? 'not-allowed' : 'pointer',
+                                            borderColor: 'rgba(129, 140, 248, 0.6)', background: 'rgba(99, 102, 241, 0.25)', color: '#e0e7ff',
+                                            opacity: disabledAdd ? 0.35 : 1,
+                                        }}
                                     >
                                         +
                                     </button>
@@ -146,7 +154,8 @@ export const CharacterModal: React.FC<CharacterModalProps> = ({ isOpen, onClose,
                             type="button"
                             data-testid="stat-reset"
                             onClick={reset}
-                            className="min-h-[44px] px-3 rounded-lg border border-slate-600 bg-slate-800 text-slate-200 hover:border-amber-400"
+                            className="px-3 rounded-lg border"
+                            style={{ minHeight: 44, borderColor: '#475569', background: '#1e293b', color: '#e2e8f0' }}
                         >
                             ຣີເຊັດແຕ້ມ
                         </button>

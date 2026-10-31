@@ -48,6 +48,8 @@ test.describe('Build time at the Workshop', () => {
     expect(await count(page, 'wood')).toBe(25);
     expect(await count(page, 'axe-t1')).toBe(axesBefore);
     await expect(page.getByTestId('crafting-status')).toHaveAttribute('data-state', 'building');
+    // The progress bar has a height (its class once did not exist, so it was invisible)
+    expect((await page.getByTestId('crafting-progress').boundingBox())!.height).toBeGreaterThanOrEqual(6);
     await expect(page.getByRole('button', { name: 'ກຳລັງສ້າງອັນອື່ນຢູ່' }).first()).toBeDisabled();
 
     // The job is part of the save
