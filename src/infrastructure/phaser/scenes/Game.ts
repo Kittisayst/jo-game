@@ -242,7 +242,19 @@ export class Game extends Scene
             const bounmy = new NPC(this, 1380, baseY + GROUND_SINK, 'npc-bounmy', '🏹 [E] ລົມກັບນາຍພານບຸນມີ');
             bounmy.onInteract = () => EventBus.emit('start-dialogue', 'hunter_bounmy');
 
-            this.villagers = [elder, mina, bounmy];
+            const vanh = new NPC(this, 680, baseY + GROUND_SINK, 'npc-scholar', '📜 [E] ລົມກັບອາຈານ ວັນ');
+            vanh.onInteract = () => EventBus.emit('start-dialogue', 'master_vanh');
+
+            const chanthy = new NPC(this, 950, baseY + GROUND_SINK, 'npc-chanthy', '🌿 [E] ລົມກັບແມ່ເຖົ້າ ຈັນທີ');
+            chanthy.onInteract = () => EventBus.emit('start-dialogue', 'grandma_chanthy');
+
+            const kham = new NPC(this, 1660, baseY + GROUND_SINK, 'npc-kham', '⚔️ [E] ລົມກັບນັກດາບ ຄຳ');
+            kham.onInteract = () => EventBus.emit('start-dialogue', 'swordsman_kham');
+
+            const noy = new NPC(this, 2310, baseY + GROUND_SINK, 'npc-noy', '⛩️ [E] ລົມກັບນາງນ້ອຍ (ສານປົກປ້ອງ)');
+            noy.onInteract = () => EventBus.emit('start-dialogue', 'shrine_noy');
+
+            this.villagers = [elder, vanh, chanthy, mina, bounmy, kham, noy];
 
             // Whoever builds something stands in front of its building, with the time left over the head
             this.craftingWorkers = [

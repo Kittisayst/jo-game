@@ -15,6 +15,11 @@ import { ARCHAEOLOGIST_SOMCHAY_DIALOGUE } from '../../dialogue/somchayDialogue';
 import { stageGuideKeoDialogue } from '../../dialogue/stageGuideKeoDialogue';
 import { uncleThongDialogue } from '../../dialogue/uncleThongDialogue';
 import { drCyberDialogue } from '../../dialogue/drCyberDialogue';
+import { masterVanhDialogue } from '../../dialogue/masterVanhDialogue';
+import { grandmaChanthyDialogue } from '../../dialogue/grandmaChanthyDialogue';
+import { swordsmanKhamDialogue } from '../../dialogue/swordsmanKhamDialogue';
+import { shrineNoyDialogue } from '../../dialogue/shrineNoyDialogue';
+import { soundManager } from '../../audio/SoundManager';
 import { entities } from '../../composition';
 import { EventBus } from '../../EventBus';
 
@@ -78,7 +83,15 @@ export function useDialogue (onOpenSkinShop: () => void)
                                     ? uncleThongDialogue
                                     : graphId === 'dr_cyber'
                                         ? drCyberDialogue
-                                        : null;
+                                        : graphId === 'master_vanh'
+                                            ? masterVanhDialogue
+                                            : graphId === 'grandma_chanthy'
+                                                ? grandmaChanthyDialogue
+                                                : graphId === 'swordsman_kham'
+                                                    ? swordsmanKhamDialogue
+                                                    : graphId === 'shrine_noy'
+                                                        ? shrineNoyDialogue
+                                                        : null;
             if (!graph) return;
 
             startDialogueUseCase(entities.dialogueState, graph);
@@ -107,6 +120,22 @@ export function useDialogue (onOpenSkinShop: () => void)
             else if (action === 'enter-dungeon') EventBus.emit('change-level', 'dungeon');
             else if (action === 'open-quest-board') EventBus.emit('open-quest-board');
             else if (action === 'give-dungeon-key') EventBus.emit('give-dungeon-key');
+            else if (action === 'give-scholar-reward')
+            {
+                entities.wallet.earn(25);
+                soundManager.playCoin();
+            }
+            else if (action === 'give-herbalist-gift')
+            {
+                entities.backpack.addItem('herb', 2);
+                entities.backpack.addItem('seed-herb', 2);
+                EventBus.emit('backpack-changed');
+                soundManager.playReward();
+            }
+            else if (action === 'give-shrine-blessing')
+            {
+                soundManager.playReward();
+            }
         };
 
         DomainEvents.on<DialogueActionPayload>(DIALOGUE_ACTION_EVENT, onAction);

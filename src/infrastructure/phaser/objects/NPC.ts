@@ -164,6 +164,71 @@ export class NPC extends Physics.Arcade.Sprite
             graphics.fillStyle(0xf59e0b, 1); // torch/lantern glow
             graphics.fillCircle(WIDTH - 4, 24, 4);
         }
+        else if (textureKey === 'npc-scholar')
+        {
+            // Master Vanh: Royal blue scholar robe with gold trim & digital scroll
+            graphics.fillStyle(0x1e3a8a, 1);
+            graphics.fillRoundedRect(0, 0, WIDTH, HEIGHT, 6);
+            graphics.fillStyle(0x3b82f6, 1); // inner robe
+            graphics.fillRect(6, 14, WIDTH - 12, 18);
+            graphics.fillStyle(0xfef08a, 1); // face
+            graphics.fillRect(8, 8, WIDTH - 16, 8);
+            graphics.fillStyle(0x1e293b, 1); // scholar cap
+            graphics.fillRect(4, 2, WIDTH - 8, 6);
+            graphics.fillStyle(0xfbbf24, 1); // gold sash
+            graphics.fillRect(6, 26, WIDTH - 12, 4);
+            graphics.fillStyle(0x38bdf8, 1); // glowing scroll in hand
+            graphics.fillRect(WIDTH - 8, 22, 6, 12);
+        }
+        else if (textureKey === 'npc-chanthy')
+        {
+            // Grandma Chanthy: Emerald sinh, pink woven sash, herb basket
+            graphics.fillStyle(0x065f46, 1);
+            graphics.fillRoundedRect(0, 0, WIDTH, HEIGHT, 6);
+            graphics.fillStyle(0x047857, 1); // sinh skirt
+            graphics.fillRect(4, 22, WIDTH - 8, 24);
+            graphics.fillStyle(0xfef08a, 1); // face
+            graphics.fillRect(8, 8, WIDTH - 16, 8);
+            graphics.fillStyle(0xf472b6, 1); // pink traditional sash
+            graphics.fillRect(6, 12, 6, 18);
+            graphics.fillStyle(0x92400e, 1); // woven basket
+            graphics.fillRect(WIDTH - 8, 24, 7, 10);
+            graphics.fillStyle(0x4ade80, 1); // green herbs in basket
+            graphics.fillCircle(WIDTH - 5, 22, 4);
+        }
+        else if (textureKey === 'npc-kham')
+        {
+            // Swordsman Kham: Crimson martial arts gi, white headband, wooden practice bokken
+            graphics.fillStyle(0x991b1b, 1);
+            graphics.fillRoundedRect(0, 0, WIDTH, HEIGHT, 6);
+            graphics.fillStyle(0xb91c1c, 1); // gi torso
+            graphics.fillRect(4, 12, WIDTH - 8, 20);
+            graphics.fillStyle(0xfef08a, 1); // face
+            graphics.fillRect(8, 8, WIDTH - 16, 8);
+            graphics.fillStyle(0xf8fafc, 1); // white headband
+            graphics.fillRect(4, 6, WIDTH - 8, 4);
+            graphics.fillStyle(0x0f172a, 1); // black martial belt
+            graphics.fillRect(4, 28, WIDTH - 8, 4);
+            graphics.fillStyle(0x78350f, 1); // wooden sword on back
+            graphics.lineStyle(2, 0x78350f, 1);
+            graphics.lineBetween(4, 10, WIDTH - 4, 38);
+        }
+        else if (textureKey === 'npc-noy')
+        {
+            // Shrine Maiden Noy: White kimono, red hakama skirt, prayer bell
+            graphics.fillStyle(0xf8fafc, 1);
+            graphics.fillRoundedRect(0, 0, WIDTH, HEIGHT, 6);
+            graphics.fillStyle(0xdc2626, 1); // crimson hakama skirt
+            graphics.fillRect(4, 24, WIDTH - 8, 22);
+            graphics.fillStyle(0xfef08a, 1); // face
+            graphics.fillRect(8, 8, WIDTH - 16, 8);
+            graphics.fillStyle(0x0f172a, 1); // dark hair
+            graphics.fillRect(4, 2, WIDTH - 8, 6);
+            graphics.fillStyle(0xef4444, 1); // red hair ribbon
+            graphics.fillCircle(8, 4, 3);
+            graphics.fillStyle(0xfbbf24, 1); // gold prayer bell
+            graphics.fillCircle(WIDTH - 5, 24, 4);
+        }
         else
         {
             graphics.fillStyle(0x1e3a8a, 1);
