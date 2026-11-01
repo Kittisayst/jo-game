@@ -1407,6 +1407,14 @@ export class SoundManager
             osc.stop(now + n.t + n.d);
         });
     }
+
+    /**
+     * Reward celebration chime
+     */
+    playReward (): void
+    {
+        this.playChestOpen();
+    }
 }
 
 export const soundManager = new SoundManager();

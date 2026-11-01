@@ -1,3 +1,4 @@
+import { soundManager } from '../../audio/SoundManager';
 import { canSleep } from '../../../application/SleepUseCase';
 import { entities } from '../../composition';
 import { EventBus } from '../../EventBus';
@@ -17,7 +18,7 @@ export const VILLAGE_LANTERN_XS = [225, 495, 765, 1030, 1360];
 export const VILLAGE_LANTERN_FLAME_HEIGHT = 54;
 /** The Bed stands past the World Gate, at the east end of the village. */
 const BED_X = 1535;
-const QUEST_BOARD_X = 460;
+const QUEST_BOARD_X = 510;
 const FORGE_OPEN_LABEL = '⚔️ [E] ເຂົ້າໂຮງຕີເຫຼັກ (Forge)';
 
 /**
@@ -160,6 +161,11 @@ export function buildVillageScenery (scene: Phaser.Scene, baseY: number, forgeOp
     addQuestBoard(scene, QUEST_BOARD_X, baseY);
     addBed(scene, BED_X, baseY);
     addDungeonEntrance(scene, 1460, baseY);
+    addTrainingDummy(scene, 1720, baseY);
+    addWaterWell(scene, 1860, baseY);
+    addLoreMonument(scene, 2000, baseY);
+    addWatchtowerVisuals(scene, 2250, baseY);
+    addVillageShrine(scene, 2360, baseY);
 
     // Welcome signpost & text at village entrance (x = 120)
     if (scene.textures.exists('signpost'))
@@ -266,6 +272,118 @@ export function buildVillageScenery (scene: Phaser.Scene, baseY: number, forgeOp
         { x: 1010, label: '🌱 [E] ເຂົ້າສວນຜັກ (Garden)', action: () => EventBus.emit('change-level', 'garden') },
         { x: 1460, label: '🗝️ [E] ລົງສູ່ຄຸກໃຕ້ດິນບູຮານ (Dungeon)', action: () => EventBus.emit('change-level', 'dungeon') },
         { x: 1420, label: '🌀 [E] ເລືອກດ່ານຜະຈົນໄພ (World Map)', action: () => EventBus.emit('open-stage-map') },
+        {
+            x: 1720,
+            label: '🎯 [E] ທົດສອບອາວຸດ (Training Dummy)',
+            action: () => {
+                const weaponId = entities.equipment.equippedWeaponId;
+                const weaponDef = weaponId ? entities.itemCatalog.get(weaponId) : undefined;
+                const damage = weaponDef?.attack ?? 5;
+                soundManager.playSlash();
+                scene.cameras.main.shake(80, 0.003);
+                const toast = scene.add.text(1720, baseY - 60, `💥 ${weaponDef?.name ?? 'ມືເປົ່າ'} ໂຈມຕີ! ${damage} DMG!`, {
+                    fontFamily: FONT,
+                    fontSize: '13px',
+                    color: '#fde047',
+                    stroke: '#0f172a',
+                    strokeThickness: 3,
+                }).setOrigin(0.5, 0.5).setDepth(20);
+                scene.tweens.add({
+                    targets: toast,
+                    y: baseY - 100,
+                    alpha: 0,
+                    duration: 1200,
+                    onComplete: () => toast.destroy(),
+                });
+            },
+        },
+        {
+            x: 1860,
+            label: '💧 [E] ຕັກນ້ຳສ້າງບູຮານ (Village Well)',
+            action: () => {
+                entities.health.heal(1);
+                soundManager.playPowerUp();
+                const toast = scene.add.text(1860, baseY - 70, '✨ ດື່ມນ້ຳສ້າງບູຮານ! ຟື້ນຟູ 1 ຫົວໃຈ ແລະ ສົດຊື່ນ', {
+                    fontFamily: FONT,
+                    fontSize: '13px',
+                    color: '#38bdf8',
+                    stroke: '#0f172a',
+                    strokeThickness: 3,
+                }).setOrigin(0.5, 0.5).setDepth(20);
+                scene.tweens.add({
+                    targets: toast,
+                    y: baseY - 110,
+                    alpha: 0,
+                    duration: 1600,
+                    onComplete: () => toast.destroy(),
+                });
+            },
+        },
+        {
+            x: 2000,
+            label: '🗿 [E] ອ່ານສີລາຈາລຶກບູຮານ (Lore Monument)',
+            action: () => {
+                soundManager.playSelect();
+                const toast = scene.add.text(2000, baseY - 90, '📜 "ແດນປັນຍາທັງ 3: ຮາດແວ, ເນັດເວີກ ແລະ ເຄີນເນລ ລໍຖ້າຜູ້ກ້າ!"', {
+                    fontFamily: FONT,
+                    fontSize: '12px',
+                    color: '#c084fc',
+                    stroke: '#0f172a',
+                    strokeThickness: 3,
+                }).setOrigin(0.5, 0.5).setDepth(20);
+                scene.tweens.add({
+                    targets: toast,
+                    y: baseY - 130,
+                    alpha: 0,
+                    duration: 2500,
+                    onComplete: () => toast.destroy(),
+                });
+            },
+        },
+        {
+            x: 2250,
+            label: '🔭 [E] ສ່ອງກ້ອງຊົມວິວດິນແດນ (Scenic View)',
+            action: () => {
+                soundManager.playReward();
+                scene.cameras.main.shake(100, 0.003);
+                const toast = scene.add.text(2250, 430 - 40, '🔭 ເຫັນຍອດເຂົາບູຮານ ແລະ ດິນແດນອັນກວ້າງໃຫຍ່ໄກສຸດສາຍຕາ!', {
+                    fontFamily: FONT,
+                    fontSize: '12px',
+                    color: '#fbbf24',
+                    stroke: '#0f172a',
+                    strokeThickness: 3,
+                }).setOrigin(0.5, 0.5).setDepth(20);
+                scene.tweens.add({
+                    targets: toast,
+                    y: 430 - 80,
+                    alpha: 0,
+                    duration: 2200,
+                    onComplete: () => toast.destroy(),
+                });
+            },
+        },
+        {
+            x: 2360,
+            label: '⛩️ [E] ສັກກາລະສານປົກປ້ອງໝູ່ບ້ານ (Village Shrine)',
+            action: () => {
+                soundManager.playCoin();
+                soundManager.playPowerUp();
+                const toast = scene.add.text(2360, baseY - 80, '✨ ຂໍພອນສຳເລັດ! ໄດ້ຮັບພອນແຫ່ງຄວາມກ້າຫານ ແລະ ໂຊກລາບ', {
+                    fontFamily: FONT,
+                    fontSize: '12px',
+                    color: '#fef08a',
+                    stroke: '#0f172a',
+                    strokeThickness: 3,
+                }).setOrigin(0.5, 0.5).setDepth(20);
+                scene.tweens.add({
+                    targets: toast,
+                    y: baseY - 120,
+                    alpha: 0,
+                    duration: 2000,
+                    onComplete: () => toast.destroy(),
+                });
+            },
+        },
     ];
 }
 
@@ -386,4 +504,108 @@ function addDungeonEntrance (scene: Phaser.Scene, x: number, baseY: number): voi
         strokeThickness: 3,
         align: 'center',
     }).setOrigin(0.5, 0.5).setDepth(2.5);
+}
+
+function addTrainingDummy (scene: Phaser.Scene, x: number, baseY: number): void
+{
+    const g = scene.add.graphics();
+    g.setDepth(1.6);
+    // Wooden post
+    g.fillStyle(0x78350f, 1);
+    g.fillRect(x - 3, baseY - 50, 6, 50);
+    g.fillRect(x - 18, baseY - 38, 36, 6);
+    // Straw armor body
+    g.fillStyle(0xca8a04, 1);
+    g.fillRoundedRect(x - 12, baseY - 44, 24, 26, 4);
+    // Target bullseye
+    g.fillStyle(0xef4444, 1);
+    g.fillCircle(x, baseY - 31, 6);
+    g.fillStyle(0xf8fafc, 1);
+    g.fillCircle(x, baseY - 31, 3);
+    addLabel(scene, x, baseY - 62, '🎯 ຫຸ່ນເຟືອງ (Training Dummy)', '#fef08a', '#451a03');
+}
+
+function addWaterWell (scene: Phaser.Scene, x: number, baseY: number): void
+{
+    const g = scene.add.graphics();
+    g.setDepth(1.6);
+    // Stone base
+    g.fillStyle(0x475569, 1);
+    g.fillRoundedRect(x - 22, baseY - 32, 44, 32, 5);
+    g.fillStyle(0x1e293b, 1);
+    g.fillRect(x - 18, baseY - 30, 36, 4);
+    // Posts & gabled canopy
+    g.fillStyle(0x78350f, 1);
+    g.fillRect(x - 18, baseY - 62, 5, 32);
+    g.fillRect(x + 13, baseY - 62, 5, 32);
+    g.fillStyle(0xb45309, 1);
+    g.fillTriangle(x - 26, baseY - 60, x, baseY - 78, x + 26, baseY - 60);
+    // Bucket
+    g.fillStyle(0xd97706, 1);
+    g.fillRect(x - 5, baseY - 42, 10, 10);
+    addLabel(scene, x, baseY - 88, '💧 ນ້ຳສ້າງບູຮານ (Village Well)', '#7dd3fc', '#0c4a6e');
+}
+
+function addLoreMonument (scene: Phaser.Scene, x: number, baseY: number): void
+{
+    const g = scene.add.graphics();
+    g.setDepth(1.6);
+    // Pedestal
+    g.fillStyle(0x1e293b, 1);
+    g.fillRoundedRect(x - 20, baseY - 12, 40, 12, 3);
+    // Obelisk
+    g.fillStyle(0x475569, 1);
+    g.fillRect(x - 12, baseY - 72, 24, 60);
+    g.fillTriangle(x - 12, baseY - 72, x, baseY - 88, x + 12, baseY - 72);
+    // Glowing runes
+    g.fillStyle(0x38bdf8, 1);
+    g.fillRect(x - 4, baseY - 60, 8, 3);
+    g.fillRect(x - 6, baseY - 50, 12, 3);
+    g.fillRect(x - 4, baseY - 40, 8, 3);
+    addLabel(scene, x, baseY - 98, '🗿 ສີລາຈາລຶກ (History Monument)', '#d8b4fe', '#3b0764');
+}
+
+function addWatchtowerVisuals (scene: Phaser.Scene, x: number, baseY: number): void
+{
+    const g = scene.add.graphics();
+    g.setDepth(1.4);
+    // Tower wooden legs & cross braces
+    g.fillStyle(0x78350f, 1);
+    g.fillRect(x - 40, baseY - 170, 8, 170);
+    g.fillRect(x + 32, baseY - 170, 8, 170);
+    g.lineStyle(4, 0x78350f, 1);
+    g.lineBetween(x - 36, baseY - 20, x + 36, baseY - 90);
+    g.lineBetween(x + 36, baseY - 20, x - 36, baseY - 90);
+    g.lineBetween(x - 36, baseY - 90, x + 36, baseY - 160);
+    g.lineBetween(x + 36, baseY - 90, x - 36, baseY - 160);
+    // Deck floor & railing
+    g.fillStyle(0x92400e, 1);
+    g.fillRect(x - 50, baseY - 175, 100, 10);
+    g.fillRect(x - 48, baseY - 200, 6, 25);
+    g.fillRect(x + 42, baseY - 200, 6, 25);
+    g.fillRect(x - 48, baseY - 202, 96, 5);
+    // Telescope
+    g.fillStyle(0xfbbf24, 1);
+    g.fillCircle(x, baseY - 188, 4);
+    g.fillRect(x - 2, baseY - 192, 14, 5);
+    addLabel(scene, x, baseY - 216, '🔭 ຫໍສັງເກດການ (Lookout Tower)', '#fde047', '#451a03');
+}
+
+function addVillageShrine (scene: Phaser.Scene, x: number, baseY: number): void
+{
+    const g = scene.add.graphics();
+    g.setDepth(1.6);
+    // Shrine Torii pillars
+    g.fillStyle(0x991b1b, 1);
+    g.fillRect(x - 26, baseY - 70, 7, 70);
+    g.fillRect(x + 19, baseY - 70, 7, 70);
+    // Roof beam
+    g.fillStyle(0xb91c1c, 1);
+    g.fillRoundedRect(x - 34, baseY - 78, 68, 10, 3);
+    g.fillRect(x - 28, baseY - 64, 56, 5);
+    // Sacred golden bell
+    g.fillStyle(0xfbbf24, 1);
+    g.fillCircle(x, baseY - 50, 7);
+    g.fillRect(x - 4, baseY - 44, 8, 4);
+    addLabel(scene, x, baseY - 90, '⛩️ ສານປົກປ້ອງໝູ່ບ້ານ (Village Shrine)', '#fef08a', '#450a0a');
 }

@@ -1,11 +1,15 @@
 {
-    "worldWidth": 1600,
+    "worldWidth": 2400,
     "scenery": "village",
     "spawn": {
         "x": 120,
         "y": 556
     },
-    "platforms": [],
+    "platforms": [
+        { "x": 1950, "y": 590 },
+        { "x": 2100, "y": 510 },
+        { "x": 2250, "y": 430 }
+    ],
     "enemies": [],
     "spikes": [],
     "movingPlatforms": []

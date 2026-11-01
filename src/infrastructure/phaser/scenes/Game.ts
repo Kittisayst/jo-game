@@ -231,7 +231,7 @@ export class Game extends Scene
                 Boolean(entities.forgeUnlocked || entities.books['book-ch1']?.examPassed)
             );
             const baseY = WORLD_HEIGHT - GROUND_HEIGHT - 24;
-            const elder = new NPC(this, 460, baseY + GROUND_SINK, 'npc-elder', '💬 [E] ລົມກັບຫົວໜ້າໝູ່ບ້ານ');
+            const elder = new NPC(this, 410, baseY + GROUND_SINK, 'npc-elder', '💬 [E] ລົມກັບຫົວໜ້າໝູ່ບ້ານ');
             elder.onInteract = () => EventBus.emit('start-dialogue', 'village_elder');
 
             // Mina runs the Skin shop at the little market between the Forge and the World Gate
