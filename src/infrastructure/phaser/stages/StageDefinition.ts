@@ -28,9 +28,9 @@ import { makeValidators } from '../../content/validate';
 
 export type { StageDrop };
 
-const ENEMY_TYPES: EnemyType[] = ['slime', 'slime-flying', 'slime-armored', 'slime-spitter'];
+const ENEMY_TYPES: EnemyType[] = ['slime', 'slime-flying', 'slime-armored', 'slime-spitter', 'bat', 'spider', 'skeleton'];
 export const STAGE_CONTENT_KINDS = [
-    'node', 'enemy', 'miniboss', 'boss', 'sign', 'waypoint', 'gate', 'exit', 'spawn-pool',
+    'node', 'enemy', 'miniboss', 'boss', 'sign', 'waypoint', 'gate', 'exit', 'spawn-pool', 'npc',
 ] as const;
 export type StageContentKind = typeof STAGE_CONTENT_KINDS[number];
 /** Where enemies stand when a Stage does not say (the top of the ground minus the enemy). */
@@ -119,6 +119,17 @@ export interface StageExit
     x: number;
 }
 
+export interface StageNPC
+{
+    id: string;
+    name: string;
+    role: string;
+    x: number;
+    y?: number;
+    dialogueId: string;
+    label?: string;
+}
+
 export interface StageZone
 {
     id: string;
@@ -127,6 +138,7 @@ export interface StageZone
     waypoints: StageWaypoint[];
     resourceNodes: StageResourceNode[];
     enemySpawns: StageEnemySpawn[];
+    npcs?: StageNPC[];
     gate?: StageGate;
     bossSpawn?: StageBossSpawn;
     exit?: StageExit;
@@ -339,6 +351,7 @@ function parseZone (
         waypoints: [],
         resourceNodes: [],
         enemySpawns: [],
+        npcs: [],
     };
 
     asArray(zone.contents, `${path}.contents`).forEach((rawEntry, i) =>
@@ -413,6 +426,18 @@ function parseZone (
                         ? context.generated.exitX
                         : asNumber(entry.x, `${entryPath}.x`),
                 };
+                break;
+            case 'npc':
+                parsed.npcs = parsed.npcs ?? [];
+                parsed.npcs.push({
+                    id: asString(entry.id, `${entryPath}.id`),
+                    name: asString(entry.name, `${entryPath}.name`),
+                    role: optionalString(entry.role, `${entryPath}.role`) ?? 'npc-elder',
+                    x: asNumber(entry.x, `${entryPath}.x`),
+                    y: optionalNumber(entry.y, `${entryPath}.y`),
+                    dialogueId: asString(entry.dialogueId, `${entryPath}.dialogueId`),
+                    label: optionalString(entry.label, `${entryPath}.label`),
+                });
                 break;
             case 'spawn-pool':
                 parseSpawnPool(entry, entryPath, nodes, context, parsed);

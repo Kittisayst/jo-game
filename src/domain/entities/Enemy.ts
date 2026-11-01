@@ -2,7 +2,7 @@ import type { EnemyAttackPlan } from './EnemyAttackPlanner';
 
 export type EnemyState = 'patrol' | 'alert' | 'chase' | 'return';
 
-export type EnemyType = 'slime' | 'slime-flying' | 'slime-armored' | 'slime-spitter';
+export type EnemyType = 'slime' | 'slime-flying' | 'slime-armored' | 'slime-spitter' | 'bat' | 'spider' | 'skeleton';
 
 export type EnemyKind = 'normal' | 'elite' | 'miniboss' | 'boss';
 
@@ -61,6 +61,24 @@ export const ENEMY_ARCHETYPES: Record<EnemyType, EnemyArchetype> = {
         name: 'Toxic Spitter Slime',
         maxHp: 2,
         speed: 55,
+    },
+    'bat': {
+        type: 'bat',
+        name: 'Cave Bat',
+        maxHp: 1,
+        speed: 85,
+    },
+    'spider': {
+        type: 'spider',
+        name: 'Dungeon Spider',
+        maxHp: 2,
+        speed: 90,
+    },
+    'skeleton': {
+        type: 'skeleton',
+        name: 'Skeleton Warrior',
+        maxHp: 3,
+        speed: 45,
     },
 };
 

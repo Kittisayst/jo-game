@@ -10,6 +10,9 @@ import { DomainEvents } from '../../../domain/DomainEvents';
 import { DIALOGUE_ACTION_EVENT, DialogueActionPayload } from '../../../application/AdvanceDialogueUseCase';
 import { createSkinShopDialogue, OPEN_SKIN_SHOP_ACTION } from '../../dialogue/skinShopDialogue';
 import { VILLAGE_ELDER_DIALOGUE } from '../../dialogue/villageElderDialogue';
+import { HUNTER_BOUNMY_DIALOGUE } from '../../dialogue/hunterBounmyDialogue';
+import { ARCHAEOLOGIST_SOMCHAY_DIALOGUE } from '../../dialogue/somchayDialogue';
+import { stageGuideKeoDialogue } from '../../dialogue/stageGuideKeoDialogue';
 import { entities } from '../../composition';
 import { EventBus } from '../../EventBus';
 
@@ -63,7 +66,13 @@ export function useDialogue (onOpenSkinShop: () => void)
                 ? VILLAGE_ELDER_DIALOGUE
                 : graphId === 'skin_shop'
                     ? createSkinShopDialogue(Boolean(entities.books['book-ch1']?.isUnlocked))
-                    : null;
+                    : graphId === 'hunter_bounmy'
+                        ? HUNTER_BOUNMY_DIALOGUE
+                        : (graphId === 'somchay' || graphId === 'archaeologist_somchay')
+                            ? ARCHAEOLOGIST_SOMCHAY_DIALOGUE
+                            : graphId === 'stage_guide_keo'
+                                ? stageGuideKeoDialogue
+                                : null;
             if (!graph) return;
 
             startDialogueUseCase(entities.dialogueState, graph);
@@ -89,6 +98,8 @@ export function useDialogue (onOpenSkinShop: () => void)
         const onAction = ({ action }: DialogueActionPayload) =>
         {
             if (action === OPEN_SKIN_SHOP_ACTION) openShopRef.current();
+            else if (action === 'enter-dungeon') EventBus.emit('change-level', 'dungeon');
+            else if (action === 'open-quest-board') EventBus.emit('open-quest-board');
         };
 
         DomainEvents.on<DialogueActionPayload>(DIALOGUE_ACTION_EVENT, onAction);

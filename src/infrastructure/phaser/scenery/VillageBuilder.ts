@@ -159,6 +159,7 @@ export function buildVillageScenery (scene: Phaser.Scene, baseY: number, forgeOp
     addStorageChest(scene, 235, baseY);
     addQuestBoard(scene, QUEST_BOARD_X, baseY);
     addBed(scene, BED_X, baseY);
+    addDungeonEntrance(scene, 1460, baseY);
 
     // Welcome signpost & text at village entrance (x = 120)
     if (scene.textures.exists('signpost'))
@@ -263,6 +264,7 @@ export function buildVillageScenery (scene: Phaser.Scene, baseY: number, forgeOp
             action: () => EventBus.emit('sleep-at-bed'),
         },
         { x: 1010, label: '🌱 [E] ເຂົ້າສວນຜັກ (Garden)', action: () => EventBus.emit('change-level', 'garden') },
+        { x: 1460, label: '🗝️ [E] ລົງສູ່ຄຸກໃຕ້ດິນບູຮານ (Dungeon)', action: () => EventBus.emit('change-level', 'dungeon') },
         { x: 1420, label: '🌀 [E] ເລືອກດ່ານຜະຈົນໄພ (World Map)', action: () => EventBus.emit('open-stage-map') },
     ];
 }
@@ -358,4 +360,30 @@ function addQuestBoard (scene: Phaser.Scene, x: number, baseY: number): void
         repeat: -1,
         ease: 'Sine.easeInOut',
     });
+}
+
+function addDungeonEntrance (scene: Phaser.Scene, x: number, baseY: number): void
+{
+    const g = scene.add.graphics();
+    g.setDepth(1.5);
+    // Dark stone archway
+    g.fillStyle(0x1e293b, 1);
+    g.fillRoundedRect(x - 28, baseY - 64, 56, 64, 8);
+    // Dark cellar cavern opening
+    g.fillStyle(0x020617, 1);
+    g.fillRoundedRect(x - 20, baseY - 52, 40, 52, 6);
+    // Torch beside arch
+    g.fillStyle(0x78350f, 1);
+    g.fillRect(x - 26, baseY - 44, 4, 16);
+    g.fillStyle(0xf59e0b, 1);
+    g.fillCircle(x - 24, baseY - 46, 5);
+    // Sign above arch
+    scene.add.text(x, baseY - 74, '🗝️ ຄຸກໃຕ້ດິນ (Dungeon)', {
+        fontFamily: FONT,
+        fontSize: '11px',
+        color: '#f87171',
+        stroke: '#450a0a',
+        strokeThickness: 3,
+        align: 'center',
+    }).setOrigin(0.5, 0.5).setDepth(2.5);
 }

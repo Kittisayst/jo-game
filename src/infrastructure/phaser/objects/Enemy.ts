@@ -12,6 +12,9 @@ const TEXTURE_KEYS: Record<EnemyType, string> = {
     'slime-flying': 'enemy-slime-flying',
     'slime-armored': 'enemy-slime-armored',
     'slime-spitter': 'enemy-slime-spitter',
+    'bat': 'enemy-cave-bat',
+    'spider': 'enemy-dungeon-spider',
+    'skeleton': 'enemy-dungeon-skeleton',
 };
 
 export const SPIT_PROJECTILE_KEY = 'enemy-slime-ball';
@@ -81,6 +84,9 @@ export class Enemy extends Physics.Arcade.Sprite
             'night-wisp': 'enemy-night-wisp',
             'night-shade': 'enemy-night-shade',
             'night-scarab': 'enemy-night-scarab',
+            'cave-bat': 'enemy-cave-bat',
+            'dungeon-spider': 'enemy-dungeon-spider',
+            'dungeon-skeleton': 'enemy-dungeon-skeleton',
         };
         const preferredTex = definition ? defTexMap[definition.id] : undefined;
         const texKey = (preferredTex && scene.textures.exists(preferredTex))
@@ -119,11 +125,22 @@ export class Enemy extends Physics.Arcade.Sprite
                 body.setSize(38, 32 - GROUND_SINK);
                 body.setOffset(5, 8);
             }
-            else if (type === 'slime-flying')
+            else if (type === 'slime-flying' || type === 'bat')
             {
                 body.allowGravity = false;
                 body.setSize(24, 20);
                 body.setOffset(4, 6);
+            }
+            else if (type === 'spider')
+            {
+                body.setSize(26, 18 - GROUND_SINK);
+                body.setOffset(3, 10);
+            }
+            else if (type === 'skeleton')
+            {
+                this.spriteHeight = 32;
+                body.setSize(24, 30 - GROUND_SINK);
+                body.setOffset(4, 2);
             }
             else if (type === 'slime-armored')
             {
@@ -344,8 +361,8 @@ export class Enemy extends Physics.Arcade.Sprite
             return;
         }
 
-        // Flying slime floating logic
-        if (this.enemyType === 'slime-flying')
+        // Flying slime and cave bat floating logic
+        if (this.enemyType === 'slime-flying' || this.enemyType === 'bat')
         {
             this.updateFlyingBehavior(playerX, playerY, delta, body);
             return;
@@ -530,6 +547,13 @@ export class Enemy extends Physics.Arcade.Sprite
                 // Detection check: player within 150px and vertical elevation within 80px
                 const isFacingPlayer = (this.flipX && dx < 0) || (!this.flipX && dx > 0);
                 const detectionRadius = isFacingPlayer ? 160 : 85;
+
+                if (this.enemyType === 'spider' && distance <= 110 && Math.abs(dy) <= 50 && this.hopCooldown <= 0)
+                {
+                    this.hopCooldown = 1600;
+                    const pounceDir = dx < 0 ? -1 : 1;
+                    this.setVelocity(pounceDir * (this.speed * 1.5), -190);
+                }
 
                 if (distance <= detectionRadius && Math.abs(dy) <= 80)
                 {

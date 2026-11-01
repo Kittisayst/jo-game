@@ -132,6 +132,38 @@ export class NPC extends Physics.Arcade.Sprite
             graphics.fillStyle(0xd97706, 1);
             graphics.fillRect(WIDTH - 6, 16, 6, 18);
         }
+        else if (textureKey === 'npc-bounmy')
+        {
+            // Hunter Bounmy: Forest green cloak, leather quiver and hunter cap
+            graphics.fillStyle(0x166534, 1);
+            graphics.fillRoundedRect(0, 0, WIDTH, HEIGHT, 6);
+            graphics.fillStyle(0x78350f, 1); // leather vest
+            graphics.fillRect(6, 12, WIDTH - 12, 14);
+            graphics.fillStyle(0xfef08a, 1); // face
+            graphics.fillRect(8, 8, WIDTH - 16, 8);
+            graphics.fillStyle(0x15803d, 1); // hunter cap
+            graphics.fillRect(4, 2, WIDTH - 8, 6);
+            graphics.fillStyle(0xd97706, 1); // quiver strap
+            graphics.lineStyle(2, 0x92400e, 1);
+            graphics.lineBetween(6, 12, WIDTH - 6, 26);
+        }
+        else if (textureKey === 'npc-somchay')
+        {
+            // Archaeologist Somchay: Explorer khaki jacket, explorer hat, mining torch
+            graphics.fillStyle(0xb45309, 1);
+            graphics.fillRoundedRect(0, 0, WIDTH, HEIGHT, 6);
+            graphics.fillStyle(0xd97706, 1); // khaki jacket
+            graphics.fillRect(6, 14, WIDTH - 12, 16);
+            graphics.fillStyle(0xfef08a, 1); // face
+            graphics.fillRect(8, 8, WIDTH - 16, 8);
+            graphics.fillStyle(0x78350f, 1); // explorer hat
+            graphics.fillRect(4, 2, WIDTH - 8, 6);
+            graphics.fillStyle(0x38bdf8, 1); // glasses
+            graphics.fillCircle(11, 12, 2);
+            graphics.fillCircle(21, 12, 2);
+            graphics.fillStyle(0xf59e0b, 1); // torch/lantern glow
+            graphics.fillCircle(WIDTH - 4, 24, 4);
+        }
         else
         {
             graphics.fillStyle(0x1e3a8a, 1);

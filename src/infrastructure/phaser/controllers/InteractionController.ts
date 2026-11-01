@@ -12,7 +12,7 @@ import type { BrokenGate, ResourceNodeView, WaypointView } from '../scenery/Stag
 import type { InteractiveBuilding } from '../scenery/VillageBuilder';
 import type { Game } from '../scenes/Game';
 import { notifyTutorial } from '../../tutorial';
-import { isHomeLevel } from '../levelCatalog';
+import { DUNGEON_LEVEL_KEY, isHomeLevel } from '../levelCatalog';
 
 /** Shortest time between two Strikes, so a held or mashed E key cannot fell a tree in an instant. */
 const STRIKE_COOLDOWN_MS = 400;
@@ -98,7 +98,7 @@ export class InteractionController
         };
 
         // 1. Village buildings, and the Plots and signs of the Garden
-        if (isHomeLevel(scene.currentLevelKey))
+        if (isHomeLevel(scene.currentLevelKey) || scene.currentLevelKey === DUNGEON_LEVEL_KEY)
         {
             // Spots can reach into each other (the Storage chest and the Library): the nearest one wins
             let nearest: (typeof this.interactables.buildings)[number] | null = null;

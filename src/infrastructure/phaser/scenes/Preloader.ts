@@ -1,5 +1,5 @@
 import { Scene } from 'phaser';
-import { GARDEN_LEVEL_KEY, GARDEN_LEVEL_PATH, VILLAGE_LEVEL_KEY, VILLAGE_LEVEL_PATH } from '../levelCatalog';
+import { DUNGEON_LEVEL_KEY, DUNGEON_LEVEL_PATH, GARDEN_LEVEL_KEY, GARDEN_LEVEL_PATH, VILLAGE_LEVEL_KEY, VILLAGE_LEVEL_PATH } from '../levelCatalog';
 import { isStageReady } from '../stages/StageDefinition';
 import { getGameContent } from '../../content/ContentCatalog';
 import { heldTextureKey } from '../objects/HeldItemSprite';
@@ -79,6 +79,11 @@ const SPRITESHEET_ASSETS: readonly { key: string; path: string; frameWidth: numb
     { key: 'boss-network-core', path: 'assets/characters/boss_network_core.png', frameWidth: 96, frameHeight: 80 },
     { key: 'boss-kernel-titan', path: 'assets/characters/boss_kernel_titan.png', frameWidth: 96, frameHeight: 80 },
 
+    // Dungeon monsters (4 frames each)
+    { key: 'enemy-cave-bat', path: 'assets/characters/enemy_cave_bat.png', frameWidth: 32, frameHeight: 28 },
+    { key: 'enemy-dungeon-spider', path: 'assets/characters/enemy_dungeon_spider.png', frameWidth: 32, frameHeight: 28 },
+    { key: 'enemy-dungeon-skeleton', path: 'assets/characters/enemy_dungeon_skeleton.png', frameWidth: 32, frameHeight: 32 },
+
     // Weapon Slash VFX (3 frames of 48x48)
     { key: 'slash-wood', path: 'assets/vfx/slash_wood.png', frameWidth: 48, frameHeight: 48 },
     { key: 'slash-iron', path: 'assets/vfx/slash_iron.png', frameWidth: 48, frameHeight: 48 },
@@ -97,6 +102,10 @@ export function enqueueGameAssets (scene: Scene): void
     if (!scene.cache.json.exists(GARDEN_LEVEL_KEY))
     {
         scene.load.json(GARDEN_LEVEL_KEY, GARDEN_LEVEL_PATH);
+    }
+    if (!scene.cache.json.exists(DUNGEON_LEVEL_KEY))
+    {
+        scene.load.json(DUNGEON_LEVEL_KEY, DUNGEON_LEVEL_PATH);
     }
 
     // One level JSON per built Stage, cached under the Stage's id

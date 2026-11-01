@@ -9,8 +9,16 @@
     "damage": 8,
     "speed": 60,
     "drops": [
-      { "itemId": "fiber", "chance": 0.8, "count": 1 },
-      { "itemId": "herb", "chance": 0.4, "count": 1 }
+      {
+        "itemId": "fiber",
+        "chance": 0.8,
+        "count": 1
+      },
+      {
+        "itemId": "herb",
+        "chance": 0.4,
+        "count": 1
+      }
     ]
   },
   {
@@ -23,7 +31,11 @@
     "damage": 15,
     "speed": 40,
     "drops": [
-      { "itemId": "stone", "chance": 1.0, "count": 3 }
+      {
+        "itemId": "stone",
+        "chance": 1.0,
+        "count": 3
+      }
     ]
   },
   {
@@ -39,13 +51,36 @@
       "engageRange": 500,
       "cooldownMs": 2500,
       "moves": [
-        { "id": "charge", "telegraphMs": 800, "minDistance": 0, "maxDistance": 260, "speed": 360, "durationMs": 700, "stunMs": 1000 },
-        { "id": "rock-throw", "telegraphMs": 600, "minDistance": 240, "maxDistance": 500, "speed": 260, "projectiles": 3 }
+        {
+          "id": "charge",
+          "telegraphMs": 800,
+          "minDistance": 0,
+          "maxDistance": 260,
+          "speed": 360,
+          "durationMs": 700,
+          "stunMs": 1000
+        },
+        {
+          "id": "rock-throw",
+          "telegraphMs": 600,
+          "minDistance": 240,
+          "maxDistance": 500,
+          "speed": 260,
+          "projectiles": 3
+        }
       ]
     },
     "drops": [
-      { "itemId": "crystal", "chance": 1.0, "count": 2 },
-      { "itemId": "portal-shard-green", "chance": 1.0, "count": 1 }
+      {
+        "itemId": "crystal",
+        "chance": 1.0,
+        "count": 2
+      },
+      {
+        "itemId": "portal-shard-green",
+        "chance": 1.0,
+        "count": 1
+      }
     ]
   },
   {
@@ -58,18 +93,42 @@
     "damage": 25,
     "speed": 70,
     "phases": [
-      { "phase": 1, "hpThreshold": 1.0, "description": "ໂຈມຕີປົກກະຕິ ແລະ ພຸ່ງຕຳ" },
-      { "phase": 2, "hpThreshold": 0.66, "description": "ຍິງຄື້ນກະແສໄຟຟ້າ" },
-      { "phase": 3, "hpThreshold": 0.33, "description": "ບ້າຄັ່ງ ຄວາມໄວໂຈມຕີເພີ່ມຂຶ້ນ" }
+      {
+        "phase": 1,
+        "hpThreshold": 1.0,
+        "description": "ໂຈມຕີປົກກະຕິ ແລະ ພຸ່ງຕຳ"
+      },
+      {
+        "phase": 2,
+        "hpThreshold": 0.66,
+        "description": "ຍິງຄື້ນກະແສໄຟຟ້າ"
+      },
+      {
+        "phase": 3,
+        "hpThreshold": 0.33,
+        "description": "ບ້າຄັ່ງ ຄວາມໄວໂຈມຕີເພີ່ມຂຶ້ນ"
+      }
     ],
     "quizFinisher": {
       "bookId": "book-ch1",
       "requiredPass": true
     },
     "drops": [
-      { "itemId": "boss-core", "chance": 1.0, "count": 1 },
-      { "itemId": "crystal", "chance": 1.0, "count": 3 },
-      { "itemId": "portal-shard-green", "chance": 1.0, "count": 3 }
+      {
+        "itemId": "boss-core",
+        "chance": 1.0,
+        "count": 1
+      },
+      {
+        "itemId": "crystal",
+        "chance": 1.0,
+        "count": 3
+      },
+      {
+        "itemId": "portal-shard-green",
+        "chance": 1.0,
+        "count": 3
+      }
     ]
   },
   {
@@ -411,6 +470,72 @@
       {
         "itemId": "cactus-pulp",
         "chance": 0.3,
+        "count": 1
+      }
+    ]
+  },
+  {
+    "id": "cave-bat",
+    "name": "ເຈຍຖ້ຳ",
+    "nameEn": "Cave Bat",
+    "kind": "normal",
+    "maxHp": 18,
+    "xp": 8,
+    "damage": 6,
+    "speed": 85,
+    "drops": [
+      {
+        "itemId": "bat-wing",
+        "chance": 0.8,
+        "count": 1
+      },
+      {
+        "itemId": "herb",
+        "chance": 0.3,
+        "count": 1
+      }
+    ]
+  },
+  {
+    "id": "dungeon-spider",
+    "name": "ແມງມຸມຄຸກ",
+    "nameEn": "Dungeon Spider",
+    "kind": "normal",
+    "maxHp": 32,
+    "xp": 12,
+    "damage": 10,
+    "speed": 90,
+    "drops": [
+      {
+        "itemId": "spider-silk",
+        "chance": 0.8,
+        "count": 1
+      },
+      {
+        "itemId": "fiber",
+        "chance": 0.5,
+        "count": 1
+      }
+    ]
+  },
+  {
+    "id": "dungeon-skeleton",
+    "name": "ໂຄງກະດູກນັກຮົບ",
+    "nameEn": "Skeleton Warrior",
+    "kind": "normal",
+    "maxHp": 55,
+    "xp": 20,
+    "damage": 15,
+    "speed": 45,
+    "drops": [
+      {
+        "itemId": "bone-shard",
+        "chance": 0.9,
+        "count": 2
+      },
+      {
+        "itemId": "iron-ore",
+        "chance": 0.4,
         "count": 1
       }
     ]

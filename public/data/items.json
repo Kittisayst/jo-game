@@ -865,5 +865,52 @@
     "maxStack": 99,
     "icon": "🌙",
     "iconImage": "assets/items/moon-dust.png"
+  },
+  {
+    "id": "bat-wing",
+    "name": "ປີກເຈຍຖ້ຳ",
+    "nameEn": "Cave Bat Wing",
+    "description": "ປີກບາງໆຂອງເຈຍຖ້ຳ ໃຊ້ສຳລັບປຸງຢາເພີ່ມຄວາມໄວ",
+    "category": "material",
+    "maxStack": 30,
+    "icon": "🦇",
+    "iconImage": "assets/items/bat-wing.png"
+  },
+  {
+    "id": "spider-silk",
+    "name": "ໃຍແມງມຸມພິດ",
+    "nameEn": "Venomous Spider Silk",
+    "description": "ເສັ້ນໃຍພິເສດທີ່ມີຄວາມໜຽວແໜ້ນສູງ ໃຊ້ສຳລັບຖັກເກາະ",
+    "category": "material",
+    "maxStack": 30,
+    "icon": "🕸️",
+    "iconImage": "assets/items/spider-silk.png"
+  },
+  {
+    "id": "bone-shard",
+    "name": "ເສດກະດູກບູຮານ",
+    "nameEn": "Ancient Bone Shard",
+    "description": "ຊິ້ນສ່ວນກະດູກແຂງແກ່ນ ຈາກໂຄງກະດູກນັກຮົບ",
+    "category": "material",
+    "maxStack": 30,
+    "icon": "🦴",
+    "iconImage": "assets/items/bone-shard.png"
+  },
+  {
+    "id": "bone-sword",
+    "name": "ດາບກະດູກບູຮານ",
+    "nameEn": "Ancient Bone Sword",
+    "description": "ດາບທີ່ສ້າງຈາກກະດູກແຂງແກ່ນ ພະລັງໂຈມຕີ ATK 18",
+    "category": "weapon",
+    "maxStack": 1,
+    "baseDamage": 18,
+    "durability": 100,
+    "icon": "🗡️",
+    "iconImage": "assets/items/bone-sword.png",
+    "held": {
+      "image": "assets/held/bone-sword.png",
+      "gripX": 16,
+      "gripY": 26
+    }
   }
 ]

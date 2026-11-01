@@ -342,6 +342,7 @@ export class Player extends Physics.Arcade.Sprite
             'crystal-sword': 'slash-crystal',
             'blue-sword': 'slash-blue',
             'copper-sword': 'slash-copper',
+            'bone-sword': 'slash-iron',
         };
         const slashKey = slashSprites[weaponId];
 

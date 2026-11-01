@@ -56,7 +56,7 @@ import { readHeroLevel } from './heroLevelView';
 import { readWorldTime } from './worldTimeView';
 import { syncHearts } from '../heroStats';
 import { syncMovement, syncSkills } from '../skills';
-import { isHomeLevel } from '../phaser/levelCatalog';
+import { isHomeLevel, isSpecialLevel } from '../phaser/levelCatalog';
 import { StorageModal } from './components/StorageModal';
 import { QuestBoardModal } from './components/QuestBoardModal';
 import { DomainEvents } from '../../domain/DomainEvents';
@@ -286,10 +286,10 @@ function App ()
     {
         // A Stage that is not built yet (grey on the map) has no level to load
         const stage = getStageDefinition(getGameContent().stages, stageKey);
-        if (!isHomeLevel(stageKey) && (!stage || !isStageReady(stage))) return;
+        if (!isSpecialLevel(stageKey) && (!stage || !isStageReady(stage))) return;
 
-        // The village and the Garden are always open; only a Stage has to be unlocked
-        const success = isHomeLevel(stageKey) || selectStageUseCase(stageProgression, stageKey);
+        // The village, Garden and Dungeon are always open; only a Stage has to be unlocked
+        const success = isSpecialLevel(stageKey) || selectStageUseCase(stageProgression, stageKey);
         if (!success) return;
 
         resumeGameUseCase(pauseState);
@@ -301,7 +301,7 @@ function App ()
         setHealth(entities.health.max);
         setCurrentLevel(stageKey);
         setBossHp(null);
-        setStageProgress(isHomeLevel(stageKey) ? null : { percent: 0 });
+        setStageProgress(isSpecialLevel(stageKey) ? null : { percent: 0 });
 
         writeString(ACTIVE_SESSION_STORAGE_KEY, stageKey);
 
@@ -389,7 +389,7 @@ function App ()
 
         setCurrentLevel(target);
         setBossHp(null);
-        setStageProgress(isHomeLevel(target) ? null : { percent: 0 });
+        setStageProgress(isSpecialLevel(target) ? null : { percent: 0 });
 
         phaserRef.current?.scene?.scene.restart({
             levelKey: target,

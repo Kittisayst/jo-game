@@ -56,6 +56,15 @@
               "stroke": "#064e3b"
             },
             {
+              "kind": "npc",
+              "id": "npc-guide-keo",
+              "name": "ແກ້ວ (ນັກສຳຫຼວດຝຶກຫັດ)",
+              "role": "npc-elder",
+              "x": 320,
+              "dialogueId": "stage_guide_keo",
+              "label": "💬 [E] ລົມກັບນັກສຳຫຼວດແກ້ວ"
+            },
+            {
               "kind": "node",
               "node": "wild-herb",
               "x": 420,

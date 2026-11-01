@@ -204,9 +204,10 @@ export class Game extends Scene
 
         const isVillage = this.level.scenery === 'village' || this.currentLevelKey === 'village';
         const isGarden = this.currentLevelKey === GARDEN_LEVEL_KEY;
+        const isDungeon = this.currentLevelKey === 'dungeon';
         const backdropKey = isVillage
             ? 'bg-village'
-            : (this.level.scenery === 'cave'
+            : (this.level.scenery === 'cave' || isDungeon
                 ? 'bg-cavern'
                 : (this.level.scenery === 'desert'
                     ? 'bg-desert'
@@ -237,7 +238,11 @@ export class Game extends Scene
             const mina = new NPC(this, 1290, baseY + GROUND_SINK, 'npc-mina', '🛍️ [E] ລົມກັບ Mina (ຮ້ານຊຸດ)');
             mina.onInteract = () => EventBus.emit('start-dialogue', 'skin_shop');
 
-            this.villagers = [elder, mina];
+            // Hunter Bounmy stands at x = 1380 near the dungeon entrance
+            const bounmy = new NPC(this, 1380, baseY + GROUND_SINK, 'npc-bounmy', '🏹 [E] ລົມກັບນາຍພານບຸນມີ');
+            bounmy.onInteract = () => EventBus.emit('start-dialogue', 'hunter_bounmy');
+
+            this.villagers = [elder, mina, bounmy];
 
             // Whoever builds something stands in front of its building, with the time left over the head
             this.craftingWorkers = [
@@ -250,6 +255,78 @@ export class Game extends Scene
             this.gardenView = buildGarden(this, GROUND_Y, change => EventBus.emit('garden-changed', change));
             this.interactiveBuildings = this.gardenView.buildings;
         }
+        else if (isDungeon)
+        {
+            const baseY = WORLD_HEIGHT - GROUND_HEIGHT - 24;
+            const somchay = new NPC(this, 650, baseY + GROUND_SINK, 'npc-somchay', '💬 [E] ລົມກັບນັກບູຮານຄະດີ ສົມຊາຍ');
+            somchay.onInteract = () => EventBus.emit('start-dialogue', 'archaeologist_somchay');
+            this.villagers = [somchay];
+
+            // Campfire visual at x = 620
+            const campG = this.add.graphics();
+            campG.fillStyle(0x78350f, 1);
+            campG.fillRect(614, GROUND_Y - 8, 12, 8);
+            campG.fillStyle(0xf97316, 1);
+            campG.fillTriangle(612, GROUND_Y - 6, 628, GROUND_Y - 6, 620, GROUND_Y - 24);
+            campG.fillStyle(0xfef08a, 0.9);
+            campG.fillTriangle(615, GROUND_Y - 6, 625, GROUND_Y - 6, 620, GROUND_Y - 18);
+
+            // Exit arch visual at x = 80
+            const exitG = this.add.graphics();
+            exitG.fillStyle(0x334155, 1);
+            exitG.fillRoundedRect(60, GROUND_Y - 56, 40, 56, 6);
+            exitG.fillStyle(0x020617, 1);
+            exitG.fillRoundedRect(68, GROUND_Y - 48, 24, 48, 4);
+
+            // Chest visual at x = 1450
+            const chestG = this.add.graphics();
+            chestG.fillStyle(0x92400e, 1);
+            chestG.fillRoundedRect(1435, GROUND_Y - 28, 30, 28, 4);
+            chestG.fillStyle(0xfbbf24, 1);
+            chestG.fillRect(1435, GROUND_Y - 16, 30, 4);
+            chestG.fillCircle(1450, GROUND_Y - 14, 3);
+
+            let chestOpened = false;
+            this.interactiveBuildings = [
+                {
+                    x: 80,
+                    label: '🚪 [E] ກັບຄືນສູ່ໝູ່ບ້ານ (Return to Village)',
+                    action: () => EventBus.emit('change-level', 'village'),
+                },
+                {
+                    x: 1450,
+                    get label () {
+                        return chestOpened
+                            ? '📦 [E] ຫີບສົມບັດບູຮານ (ເປີດແລ້ວ)'
+                            : '🗝️ [E] ເປີດຫີບສົມບັດບູຮານ (Dungeon Chest)';
+                    },
+                    action: () => {
+                        if (chestOpened) return;
+                        chestOpened = true;
+                        entities.wallet.earn(100);
+                        entities.backpack.addItem('bone-shard', 2);
+                        entities.backpack.addItem('spider-silk', 2);
+                        entities.backpack.addItem('bat-wing', 2);
+                        entities.backpack.addItem('herb-potion', 1);
+                        soundManager.playReward();
+                        const toast = this.add.text(1450, GROUND_Y - 70, '✨ ເປີດຫີບສົມບັດບູຮານ! +100 Coins, +ວັດຖຸດິບ', {
+                            fontFamily: '"Noto Sans Lao", sans-serif',
+                            fontSize: '13px',
+                            color: '#fef08a',
+                            stroke: '#0f172a',
+                            strokeThickness: 3,
+                        }).setOrigin(0.5, 0.5).setDepth(20);
+                        this.tweens.add({
+                            targets: toast,
+                            y: GROUND_Y - 110,
+                            alpha: 0,
+                            duration: 1800,
+                            onComplete: () => toast.destroy(),
+                        });
+                    },
+                },
+            ];
+        }
         else if (this.stage)
         {
             const built = buildStageScenery(this, this.stage, GROUND_Y, entities.repairedGates, {
@@ -259,6 +336,7 @@ export class Game extends Scene
             this.resourceNodes = built.resourceNodes;
             this.waypoints = built.waypoints;
             this.brokenGate = built.brokenGate;
+            this.villagers = built.npcs;
         }
 
         // Saplings grow in real time, also while the hero stands next to one: look twice a second
@@ -907,7 +985,11 @@ export class Game extends Scene
     {
         const enemies = this.physics.add.group();
 
-        for (const spawn of this.stage ? getStageEnemySpawns(this.stage) : [])
+        const spawns = this.stage
+            ? getStageEnemySpawns(this.stage)
+            : (this.level.enemies ?? []);
+
+        for (const spawn of spawns)
         {
             const enemy = new Enemy(
                 this,
