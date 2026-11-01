@@ -539,5 +539,48 @@
         "count": 1
       }
     ]
+  },
+  {
+    "id": "dungeon-spider-queen",
+    "name": "ຣາຊິນີແມງມຸມບູຮານ",
+    "nameEn": "Ancient Spider Queen",
+    "kind": "boss",
+    "maxHp": 220,
+    "xp": 200,
+    "damage": 20,
+    "speed": 65,
+    "phases": [
+      {
+        "phase": 1,
+        "hpThreshold": 1.0,
+        "description": "ຍິງໃຍພິດ ແລະ ຮຽກລູກນ້ອງ"
+      },
+      {
+        "phase": 2,
+        "hpThreshold": 0.5,
+        "description": "ບ້າຄັ່ງ ພຸ່ງໂຈມຕີຮຸນແຮງ"
+      }
+    ],
+    "quizFinisher": {
+      "bookId": "book-ch1",
+      "requiredPass": true
+    },
+    "drops": [
+      {
+        "itemId": "spider-silk",
+        "chance": 1.0,
+        "count": 5
+      },
+      {
+        "itemId": "bone-shard",
+        "chance": 1.0,
+        "count": 4
+      },
+      {
+        "itemId": "crystal",
+        "chance": 1.0,
+        "count": 2
+      }
+    ]
   }
 ]

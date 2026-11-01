@@ -13,6 +13,8 @@ import { VILLAGE_ELDER_DIALOGUE } from '../../dialogue/villageElderDialogue';
 import { HUNTER_BOUNMY_DIALOGUE } from '../../dialogue/hunterBounmyDialogue';
 import { ARCHAEOLOGIST_SOMCHAY_DIALOGUE } from '../../dialogue/somchayDialogue';
 import { stageGuideKeoDialogue } from '../../dialogue/stageGuideKeoDialogue';
+import { uncleThongDialogue } from '../../dialogue/uncleThongDialogue';
+import { drCyberDialogue } from '../../dialogue/drCyberDialogue';
 import { entities } from '../../composition';
 import { EventBus } from '../../EventBus';
 
@@ -72,7 +74,11 @@ export function useDialogue (onOpenSkinShop: () => void)
                             ? ARCHAEOLOGIST_SOMCHAY_DIALOGUE
                             : graphId === 'stage_guide_keo'
                                 ? stageGuideKeoDialogue
-                                : null;
+                                : graphId === 'uncle_thong'
+                                    ? uncleThongDialogue
+                                    : graphId === 'dr_cyber'
+                                        ? drCyberDialogue
+                                        : null;
             if (!graph) return;
 
             startDialogueUseCase(entities.dialogueState, graph);
@@ -100,6 +106,7 @@ export function useDialogue (onOpenSkinShop: () => void)
             if (action === OPEN_SKIN_SHOP_ACTION) openShopRef.current();
             else if (action === 'enter-dungeon') EventBus.emit('change-level', 'dungeon');
             else if (action === 'open-quest-board') EventBus.emit('open-quest-board');
+            else if (action === 'give-dungeon-key') EventBus.emit('give-dungeon-key');
         };
 
         DomainEvents.on<DialogueActionPayload>(DIALOGUE_ACTION_EVENT, onAction);

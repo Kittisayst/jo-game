@@ -415,7 +415,8 @@ export class Enemy extends Physics.Arcade.Sprite
                     this.alertTimer = 300;
                     this.setVelocity(0, 0);
                     this.showAlertIndicator();
-                    soundManager.playDroneBuzz();
+                    if (this.enemyType === 'bat') soundManager.playBatFlap();
+                    else soundManager.playDroneBuzz();
                 }
                 break;
             }
@@ -444,7 +445,8 @@ export class Enemy extends Physics.Arcade.Sprite
                 if (this.buzzTimer >= 1800)
                 {
                     this.buzzTimer = 0;
-                    soundManager.playDroneBuzz();
+                    if (this.enemyType === 'bat') soundManager.playBatFlap();
+                    else soundManager.playDroneBuzz();
                 }
 
                 // Swoop towards player in 2D air space
@@ -553,6 +555,7 @@ export class Enemy extends Physics.Arcade.Sprite
                     this.hopCooldown = 1600;
                     const pounceDir = dx < 0 ? -1 : 1;
                     this.setVelocity(pounceDir * (this.speed * 1.5), -190);
+                    soundManager.playSpiderHiss();
                 }
 
                 if (distance <= detectionRadius && Math.abs(dy) <= 80)
@@ -724,6 +727,10 @@ export class Enemy extends Physics.Arcade.Sprite
             {
                 effectiveDamage = amount * 2;
             }
+        }
+        else if (this.enemyType === 'skeleton')
+        {
+            soundManager.playBoneClank();
         }
 
         const result = this.entity.takeDamage(effectiveDamage);

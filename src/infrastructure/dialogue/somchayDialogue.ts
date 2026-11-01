@@ -16,7 +16,7 @@ export const ARCHAEOLOGIST_SOMCHAY_DIALOGUE: DialogueGraph = {
             id: 'status',
             speaker: 'ນັກບູຮານຄະດີ ສົມຊາຍ (Archaeologist Somchay)',
             avatar: '🧭',
-            line: 'ຂ້ອຍຖືກຝູງເຈຍ ແລະ ແມງມຸມໂຈມຕີຈົນຂາເຈັບໜີບໍ່ໄດ້. ແຖມທາງຂ້າງໜ້າຍັງມີໂຄງກະດູກເຝົ້າຫີບສົມບັດບູຮານຢູ່!',
+            line: 'ຂ້ອຍຖືກຝູງເຈຍ ແລະ ແມງມຸມໂຈມຕີຈົນຂາເຈັບໜີບໍ່ໄດ້. ແຖມທາງຂ້າງໜ້າຍັງມີໂຄງກະດູກເຝົ້າຫີບສົມບັດບູຮານ ແລະ ປະຕູສູ່ຮັງພະຍາແມງມຸມ!',
             choices: [
                 {
                     text: '🦇 ວິທີຮັບມືກັບສັດຕູໃນນີ້?',
@@ -27,8 +27,13 @@ export const ARCHAEOLOGIST_SOMCHAY_DIALOGUE: DialogueGraph = {
                     to: 'chest_info',
                 },
                 {
+                    text: '🗝️ ປະຕູໃຫຍ່ຫຼັງຫີບສົມບັດແມ່ນຫຍັງ?',
+                    to: 'boss_gate_info',
+                },
+                {
                     text: '⚔️ ພັກຜ່ອນຢູ່ແຄ້ມນີ້ເດີ ຂ້ອຍຈະໄປກວາດລ້າງທາງໜ້າໃຫ້!',
                     to: 'go_forward',
+                    action: 'give-dungeon-key',
                 },
             ],
         },
@@ -45,6 +50,7 @@ export const ARCHAEOLOGIST_SOMCHAY_DIALOGUE: DialogueGraph = {
                 {
                     text: '⚔️ ຂ້ອຍພ້ອມສູ້ແລ້ວ!',
                     to: 'go_forward',
+                    action: 'give-dungeon-key',
                 },
             ],
         },
@@ -55,8 +61,26 @@ export const ARCHAEOLOGIST_SOMCHAY_DIALOGUE: DialogueGraph = {
             line: 'ຫີບສົມບັດ (Dungeon Chest) ຢູ່ຫ້ອງເລິກສຸດທ້າຍດັນຈ້ຽນ! ຖ້າເຈົ້າປາບໂຄງກະດູກໄດ້ ຈະສາມາດເປີດຫີບຮັບ Crystal ແລະ ດາບກະດູກບູຮານໄດ້ເລີຍ!',
             choices: [
                 {
+                    text: '🗝️ ແລ້ວປະຕູໃຫຍ່ດ້ານຫຼັງເດ?',
+                    to: 'boss_gate_info',
+                },
+                {
                     text: '🚀 ຂ້ອຍຈະໄປເປີດຫີບດຽວນີ້!',
                     to: 'go_forward',
+                    action: 'give-dungeon-key',
+                },
+            ],
+        },
+        boss_gate_info: {
+            id: 'boss_gate_info',
+            speaker: 'ນັກບູຮານຄະດີ ສົມຊາຍ (Archaeologist Somchay)',
+            avatar: '🧭',
+            line: 'ນັ້ນຄືປະຕູຮັງຂອງພະຍາແມງມຸມ (Spider Queen)! ຂ້ອຍຄົ້ນພົບກະແຈບູຮານ (Dungeon Key) ນີ້ໃນຊາກຫັກພັງ, ຂ້ອຍຂໍມອບໃຫ້ເຈົ້າ! ຈົ່ງລະວັງພິດ ແລະ ໃຍໜຽວຂອງມັນເດີ!',
+            choices: [
+                {
+                    text: '🗝️ ຮັບກະແຈຄຸກໃຕ້ດິນ ແລະ ໄປປາບພະຍາແມງມຸມ!',
+                    to: 'go_forward',
+                    action: 'give-dungeon-key',
                 },
             ],
         },
@@ -64,7 +88,7 @@ export const ARCHAEOLOGIST_SOMCHAY_DIALOGUE: DialogueGraph = {
             id: 'go_forward',
             speaker: 'ນັກບູຮານຄະດີ ສົມຊາຍ (Archaeologist Somchay)',
             avatar: '🧭',
-            line: 'ລະວັງຕົວເດີ Jo! ຂ້ອຍຈະລໍຖ້າເຈົ້າຢູ່ທີ່ກອງໄຟແຫ່ງນີ້!',
+            line: 'ລະວັງຕົວເດີ Jo! ນີ້ຄືກະແຈຄຸກໃຕ້ດິນ (Dungeon Key), ໃຊ້ໄຂປະຕູໃຫຍ່ໄປປາບພະຍາແມງມຸມໄດ້ເລີຍ! ຂ້ອຍຈະລໍຖ້າເຈົ້າຢູ່ທີ່ກອງໄຟແຫ່ງນີ້!',
             end: true,
         },
     },

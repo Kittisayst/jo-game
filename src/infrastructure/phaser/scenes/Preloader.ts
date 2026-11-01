@@ -78,6 +78,7 @@ const SPRITESHEET_ASSETS: readonly { key: string; path: string; frameWidth: numb
     { key: 'boss-hardware-overlord', path: 'assets/characters/boss_hardware_overlord.png', frameWidth: 96, frameHeight: 80 },
     { key: 'boss-network-core', path: 'assets/characters/boss_network_core.png', frameWidth: 96, frameHeight: 80 },
     { key: 'boss-kernel-titan', path: 'assets/characters/boss_kernel_titan.png', frameWidth: 96, frameHeight: 80 },
+    { key: 'boss-spider-queen', path: 'assets/characters/boss_spider_queen.png', frameWidth: 96, frameHeight: 80 },
 
     // Dungeon monsters (4 frames each)
     { key: 'enemy-cave-bat', path: 'assets/characters/enemy_cave_bat.png', frameWidth: 32, frameHeight: 28 },

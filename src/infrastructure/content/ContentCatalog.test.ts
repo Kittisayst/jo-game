@@ -573,14 +573,14 @@ describe('validator errors', () =>
                     'axe-t1', 'pickaxe-t1', 'iron-sword', 'crystal-sword', 'iron-helmet', 'iron-chestplate', 'iron-boots',
                     'axe-t2', 'pickaxe-t2', 'blue-sword', 'blue-helmet', 'blue-chestplate', 'blue-boots',
                     'axe-t3', 'pickaxe-t3', 'copper-sword', 'copper-helmet', 'copper-chestplate', 'copper-boots',
-                    'bone-sword',
+                    'bone-sword', 'shadow-silk-robe', 'venom-bone-blade',
                 ]);
-                expect(parsed.filter(r => r.building === 'workshop').map(r => r.itemId)).toEqual(['axe-t1', 'pickaxe-t1', 'axe-t2', 'pickaxe-t2', 'axe-t3', 'pickaxe-t3']);
+                expect(parsed.filter(r => r.building === 'workshop').map(r => r.itemId)).toEqual(['axe-t1', 'pickaxe-t1', 'axe-t2', 'pickaxe-t2', 'axe-t3', 'pickaxe-t3', 'shadow-silk-robe']);
                 expect(parsed.filter(r => r.building === 'forge').map(r => r.itemId)).toEqual([
                     'iron-sword', 'crystal-sword', 'iron-helmet', 'iron-chestplate', 'iron-boots',
                     'blue-sword', 'blue-helmet', 'blue-chestplate', 'blue-boots',
                     'copper-sword', 'copper-helmet', 'copper-chestplate', 'copper-boots',
-                    'bone-sword',
+                    'bone-sword', 'venom-bone-blade',
                 ]);
                 expect(parsed.every(r => r.ingredients.length > 0)).toBe(true);
 

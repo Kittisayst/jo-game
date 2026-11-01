@@ -8,8 +8,14 @@
     "creditCost": 0,
     "craftSeconds": 15,
     "ingredients": [
-      { "itemId": "wood", "count": 5 },
-      { "itemId": "stone", "count": 2 }
+      {
+        "itemId": "wood",
+        "count": 5
+      },
+      {
+        "itemId": "stone",
+        "count": 2
+      }
     ]
   },
   {
@@ -21,8 +27,14 @@
     "creditCost": 0,
     "craftSeconds": 15,
     "ingredients": [
-      { "itemId": "wood", "count": 8 },
-      { "itemId": "stone", "count": 5 }
+      {
+        "itemId": "wood",
+        "count": 8
+      },
+      {
+        "itemId": "stone",
+        "count": 5
+      }
     ]
   },
   {
@@ -34,8 +46,14 @@
     "creditCost": 0,
     "craftSeconds": 15,
     "ingredients": [
-      { "itemId": "wood", "count": 6 },
-      { "itemId": "iron-ore", "count": 4 }
+      {
+        "itemId": "wood",
+        "count": 6
+      },
+      {
+        "itemId": "iron-ore",
+        "count": 4
+      }
     ]
   },
   {
@@ -46,9 +64,18 @@
     "requiredBookRecipe": "repair-kit",
     "creditCost": 0,
     "ingredients": [
-      { "itemId": "wood", "count": 5 },
-      { "itemId": "iron-ore", "count": 3 },
-      { "itemId": "crystal", "count": 1 }
+      {
+        "itemId": "wood",
+        "count": 5
+      },
+      {
+        "itemId": "iron-ore",
+        "count": 3
+      },
+      {
+        "itemId": "crystal",
+        "count": 1
+      }
     ]
   },
   {
@@ -59,8 +86,14 @@
     "requiredBookRecipe": null,
     "creditCost": 0,
     "ingredients": [
-      { "itemId": "herb", "count": 2 },
-      { "itemId": "wood", "count": 1 }
+      {
+        "itemId": "herb",
+        "count": 2
+      },
+      {
+        "itemId": "wood",
+        "count": 1
+      }
     ]
   },
   {
@@ -72,8 +105,14 @@
     "creditCost": 10,
     "craftSeconds": 30,
     "ingredients": [
-      { "itemId": "iron-ore", "count": 10 },
-      { "itemId": "wood", "count": 5 }
+      {
+        "itemId": "iron-ore",
+        "count": 10
+      },
+      {
+        "itemId": "wood",
+        "count": 5
+      }
     ]
   },
   {
@@ -85,8 +124,14 @@
     "creditCost": 30,
     "craftSeconds": 60,
     "ingredients": [
-      { "itemId": "crystal", "count": 3 },
-      { "itemId": "iron-ore", "count": 15 }
+      {
+        "itemId": "crystal",
+        "count": 3
+      },
+      {
+        "itemId": "iron-ore",
+        "count": 15
+      }
     ]
   },
   {
@@ -97,7 +142,10 @@
     "creditCost": 5,
     "bonusDamage": 5,
     "ingredients": [
-      { "itemId": "iron-ore", "count": 4 }
+      {
+        "itemId": "iron-ore",
+        "count": 4
+      }
     ]
   },
   {
@@ -108,7 +156,10 @@
     "creditCost": 10,
     "bonusDamage": 5,
     "ingredients": [
-      { "itemId": "iron-ore", "count": 8 }
+      {
+        "itemId": "iron-ore",
+        "count": 8
+      }
     ]
   },
   {
@@ -119,8 +170,14 @@
     "creditCost": 15,
     "bonusDamage": 6,
     "ingredients": [
-      { "itemId": "iron-ore", "count": 12 },
-      { "itemId": "crystal", "count": 1 }
+      {
+        "itemId": "iron-ore",
+        "count": 12
+      },
+      {
+        "itemId": "crystal",
+        "count": 1
+      }
     ]
   },
   {
@@ -131,7 +188,10 @@
     "creditCost": 10,
     "bonusDamage": 8,
     "ingredients": [
-      { "itemId": "crystal", "count": 2 }
+      {
+        "itemId": "crystal",
+        "count": 2
+      }
     ]
   },
   {
@@ -142,7 +202,10 @@
     "creditCost": 20,
     "bonusDamage": 8,
     "ingredients": [
-      { "itemId": "crystal", "count": 4 }
+      {
+        "itemId": "crystal",
+        "count": 4
+      }
     ]
   },
   {
@@ -153,8 +216,14 @@
     "creditCost": 30,
     "bonusDamage": 10,
     "ingredients": [
-      { "itemId": "crystal", "count": 6 },
-      { "itemId": "boss-core", "count": 1 }
+      {
+        "itemId": "crystal",
+        "count": 6
+      },
+      {
+        "itemId": "boss-core",
+        "count": 1
+      }
     ]
   },
   {
@@ -471,8 +540,14 @@
     "creditCost": 0,
     "strikeWeight": 1.5,
     "ingredients": [
-      { "itemId": "wood", "count": 10 },
-      { "itemId": "stone", "count": 5 }
+      {
+        "itemId": "wood",
+        "count": 10
+      },
+      {
+        "itemId": "stone",
+        "count": 5
+      }
     ]
   },
   {
@@ -483,9 +558,18 @@
     "creditCost": 0,
     "strikeWeight": 2,
     "ingredients": [
-      { "itemId": "wood", "count": 15 },
-      { "itemId": "stone", "count": 10 },
-      { "itemId": "iron-ore", "count": 5 }
+      {
+        "itemId": "wood",
+        "count": 15
+      },
+      {
+        "itemId": "stone",
+        "count": 10
+      },
+      {
+        "itemId": "iron-ore",
+        "count": 5
+      }
     ]
   },
   {
@@ -496,9 +580,18 @@
     "creditCost": 0,
     "strikeWeight": 3,
     "ingredients": [
-      { "itemId": "wood", "count": 25 },
-      { "itemId": "stone", "count": 15 },
-      { "itemId": "iron-ore", "count": 10 }
+      {
+        "itemId": "wood",
+        "count": 25
+      },
+      {
+        "itemId": "stone",
+        "count": 15
+      },
+      {
+        "itemId": "iron-ore",
+        "count": 10
+      }
     ]
   },
   {
@@ -509,8 +602,14 @@
     "creditCost": 0,
     "strikeWeight": 1.5,
     "ingredients": [
-      { "itemId": "wood", "count": 8 },
-      { "itemId": "stone", "count": 8 }
+      {
+        "itemId": "wood",
+        "count": 8
+      },
+      {
+        "itemId": "stone",
+        "count": 8
+      }
     ]
   },
   {
@@ -521,9 +620,18 @@
     "creditCost": 0,
     "strikeWeight": 2,
     "ingredients": [
-      { "itemId": "wood", "count": 12 },
-      { "itemId": "stone", "count": 14 },
-      { "itemId": "iron-ore", "count": 5 }
+      {
+        "itemId": "wood",
+        "count": 12
+      },
+      {
+        "itemId": "stone",
+        "count": 14
+      },
+      {
+        "itemId": "iron-ore",
+        "count": 5
+      }
     ]
   },
   {
@@ -534,9 +642,18 @@
     "creditCost": 0,
     "strikeWeight": 3,
     "ingredients": [
-      { "itemId": "wood", "count": 20 },
-      { "itemId": "stone", "count": 20 },
-      { "itemId": "iron-ore", "count": 10 }
+      {
+        "itemId": "wood",
+        "count": 20
+      },
+      {
+        "itemId": "stone",
+        "count": 20
+      },
+      {
+        "itemId": "iron-ore",
+        "count": 10
+      }
     ]
   },
   {
@@ -547,8 +664,14 @@
     "creditCost": 0,
     "strikeWeight": 1.5,
     "ingredients": [
-      { "itemId": "blue-ore", "count": 5 },
-      { "itemId": "wood", "count": 15 }
+      {
+        "itemId": "blue-ore",
+        "count": 5
+      },
+      {
+        "itemId": "wood",
+        "count": 15
+      }
     ]
   },
   {
@@ -559,9 +682,18 @@
     "creditCost": 0,
     "strikeWeight": 2,
     "ingredients": [
-      { "itemId": "blue-ore", "count": 10 },
-      { "itemId": "wood", "count": 20 },
-      { "itemId": "iron-ore", "count": 5 }
+      {
+        "itemId": "blue-ore",
+        "count": 10
+      },
+      {
+        "itemId": "wood",
+        "count": 20
+      },
+      {
+        "itemId": "iron-ore",
+        "count": 5
+      }
     ]
   },
   {
@@ -572,9 +704,18 @@
     "creditCost": 0,
     "strikeWeight": 3,
     "ingredients": [
-      { "itemId": "blue-ore", "count": 18 },
-      { "itemId": "wood", "count": 30 },
-      { "itemId": "iron-ore", "count": 10 }
+      {
+        "itemId": "blue-ore",
+        "count": 18
+      },
+      {
+        "itemId": "wood",
+        "count": 30
+      },
+      {
+        "itemId": "iron-ore",
+        "count": 10
+      }
     ]
   },
   {
@@ -585,8 +726,14 @@
     "creditCost": 0,
     "strikeWeight": 1.5,
     "ingredients": [
-      { "itemId": "blue-ore", "count": 6 },
-      { "itemId": "stone", "count": 12 }
+      {
+        "itemId": "blue-ore",
+        "count": 6
+      },
+      {
+        "itemId": "stone",
+        "count": 12
+      }
     ]
   },
   {
@@ -597,9 +744,18 @@
     "creditCost": 0,
     "strikeWeight": 2,
     "ingredients": [
-      { "itemId": "blue-ore", "count": 12 },
-      { "itemId": "stone", "count": 18 },
-      { "itemId": "iron-ore", "count": 5 }
+      {
+        "itemId": "blue-ore",
+        "count": 12
+      },
+      {
+        "itemId": "stone",
+        "count": 18
+      },
+      {
+        "itemId": "iron-ore",
+        "count": 5
+      }
     ]
   },
   {
@@ -610,9 +766,18 @@
     "creditCost": 0,
     "strikeWeight": 3,
     "ingredients": [
-      { "itemId": "blue-ore", "count": 20 },
-      { "itemId": "stone", "count": 25 },
-      { "itemId": "iron-ore", "count": 10 }
+      {
+        "itemId": "blue-ore",
+        "count": 20
+      },
+      {
+        "itemId": "stone",
+        "count": 25
+      },
+      {
+        "itemId": "iron-ore",
+        "count": 10
+      }
     ]
   },
   {
@@ -896,6 +1061,66 @@
       {
         "itemId": "iron-ore",
         "count": 14
+      }
+    ]
+  },
+  {
+    "id": "recipe-feather-fall-potion",
+    "resultItemId": "feather-fall-potion",
+    "resultCount": 1,
+    "building": "workshop",
+    "requiredBookRecipe": null,
+    "creditCost": 0,
+    "ingredients": [
+      {
+        "itemId": "bat-wing",
+        "count": 2
+      },
+      {
+        "itemId": "herb",
+        "count": 2
+      }
+    ]
+  },
+  {
+    "id": "recipe-shadow-silk-robe",
+    "resultItemId": "shadow-silk-robe",
+    "resultCount": 1,
+    "building": "workshop",
+    "requiredBookRecipe": "shadow-silk-robe",
+    "creditCost": 0,
+    "craftSeconds": 30,
+    "ingredients": [
+      {
+        "itemId": "spider-silk",
+        "count": 4
+      },
+      {
+        "itemId": "fiber",
+        "count": 3
+      }
+    ]
+  },
+  {
+    "id": "recipe-venom-bone-blade",
+    "resultItemId": "venom-bone-blade",
+    "resultCount": 1,
+    "building": "forge",
+    "requiredBookRecipe": null,
+    "creditCost": 0,
+    "craftSeconds": 45,
+    "ingredients": [
+      {
+        "itemId": "bone-sword",
+        "count": 1
+      },
+      {
+        "itemId": "spider-silk",
+        "count": 3
+      },
+      {
+        "itemId": "bone-shard",
+        "count": 2
       }
     ]
   }

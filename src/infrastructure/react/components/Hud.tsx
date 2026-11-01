@@ -396,7 +396,7 @@ export function Hud ({
                 <div className="boss-hud-container">
                     <div className="boss-hud-header">
                         <span className="boss-title">
-                            {currentLevel === 'stage-010' ? '⚡ ຈອມມານຮາດແວບູຮານ (Hardware Overlord)' : '👑 BOSS'}
+                            {currentLevel === 'stage-010' ? '⚡ ຈອມມານຮາດແວບູຮານ (Hardware Overlord)' : currentLevel === 'dungeon' ? '🕷️ ພະຍາແມງມຸມ (Spider Queen)' : '👑 BOSS'}
                         </span>
                         <span className="boss-hp-number">{bossHp} / {bossMaxHp} HP</span>
                     </div>

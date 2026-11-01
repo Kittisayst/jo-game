@@ -267,6 +267,34 @@
           "count": 1
         }
       ]
+    },
+    {
+      "itemId": "shadow-silk-robe",
+      "building": "workshop",
+      "ingredients": [
+        {
+          "itemId": "spider-silk",
+          "count": 2
+        },
+        {
+          "itemId": "fiber",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "itemId": "venom-bone-blade",
+      "building": "forge",
+      "ingredients": [
+        {
+          "itemId": "bone-shard",
+          "count": 2
+        },
+        {
+          "itemId": "spider-silk",
+          "count": 1
+        }
+      ]
     }
   ]
 }

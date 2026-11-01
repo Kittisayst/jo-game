@@ -1260,6 +1260,153 @@ export class SoundManager
         osc.start(now);
         osc.stop(now + 0.035);
     }
+
+    /**
+     * Cave Bat wing flap whoosh sound
+     */
+    playBatFlap (): void
+    {
+        if (this._isMuted) return;
+        this.initContext();
+        if (!this.ctx) return;
+
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(220, now);
+        osc.frequency.exponentialRampToValueAtTime(55, now + 0.09);
+
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.09);
+
+        osc.connect(gain);
+        this.connectOutput(gain);
+
+        osc.start(now);
+        osc.stop(now + 0.09);
+    }
+
+    /**
+     * Dungeon Spider hiss / skitter sound
+     */
+    playSpiderHiss (): void
+    {
+        if (this._isMuted) return;
+        this.initContext();
+        if (!this.ctx) return;
+
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(980, now);
+        osc.frequency.exponentialRampToValueAtTime(420, now + 0.12);
+
+        gain.gain.setValueAtTime(0.18, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+
+        osc.connect(gain);
+        this.connectOutput(gain);
+
+        osc.start(now);
+        osc.stop(now + 0.12);
+    }
+
+    /**
+     * Dungeon Skeleton bone clank / rattle strike sound
+     */
+    playBoneClank (): void
+    {
+        if (this._isMuted) return;
+        this.initContext();
+        if (!this.ctx) return;
+
+        const now = this.ctx.currentTime;
+        const freqs = [420, 680, 890];
+        freqs.forEach(freq => {
+            if (!this.ctx) return;
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(freq, now);
+            osc.frequency.exponentialRampToValueAtTime(freq * 0.7, now + 0.08);
+
+            gain.gain.setValueAtTime(0.15, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+
+            osc.connect(gain);
+            this.connectOutput(gain);
+
+            osc.start(now);
+            osc.stop(now + 0.08);
+        });
+    }
+
+    /**
+     * Dungeon Spider web shot projectile sound
+     */
+    playWebShot (): void
+    {
+        if (this._isMuted) return;
+        this.initContext();
+        if (!this.ctx) return;
+
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(520, now);
+        osc.frequency.exponentialRampToValueAtTime(180, now + 0.11);
+
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.11);
+
+        osc.connect(gain);
+        this.connectOutput(gain);
+
+        osc.start(now);
+        osc.stop(now + 0.11);
+    }
+
+    /**
+     * Dungeon Treasure Chest opening creak & shimmer sound
+     */
+    playChestOpen (): void
+    {
+        if (this._isMuted) return;
+        this.initContext();
+        if (!this.ctx) return;
+
+        const now = this.ctx.currentTime;
+        // Chime sequence
+        const notes = [
+            { f: 587.33, t: 0.0, d: 0.12 },
+            { f: 880.00, t: 0.08, d: 0.14 },
+            { f: 1174.66, t: 0.16, d: 0.25 },
+        ];
+        notes.forEach(n => {
+            if (!this.ctx) return;
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(n.f, now + n.t);
+
+            gain.gain.setValueAtTime(0.18, now + n.t);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + n.t + n.d);
+
+            osc.connect(gain);
+            this.connectOutput(gain);
+
+            osc.start(now + n.t);
+            osc.stop(now + n.t + n.d);
+        });
+    }
 }
 
 export const soundManager = new SoundManager();

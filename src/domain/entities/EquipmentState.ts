@@ -48,6 +48,15 @@ export const WEAPON_CONFIGS: Record<string, WeaponConfig> = {
         maxLevel: 3,
         upgradeBonuses: [0, 4, 8, 14], // 18 -> 22 -> 26 -> 32
     },
+    'venom-bone-blade': {
+        id: 'venom-bone-blade',
+        name: 'ດາບກະດູກອາບພິດ',
+        baseDamage: 26,
+        cooldownMs: 320,
+        range: 52,
+        maxLevel: 3,
+        upgradeBonuses: [0, 6, 12, 20], // 26 -> 32 -> 38 -> 46
+    },
 };
 
 export interface EquipmentSnapshot

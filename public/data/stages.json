@@ -296,6 +296,15 @@
               "stroke": "#1e293b"
             },
             {
+              "kind": "npc",
+              "id": "npc-thong",
+              "name": "ລຸງທອງ (ນັກຂຸດຄົ້ນ)",
+              "role": "npc-elder",
+              "x": 360,
+              "dialogueId": "uncle_thong",
+              "label": "💬 [E] ລົມກັບລຸງທອງ ນັກຂຸດຄົ້ນ"
+            },
+            {
               "kind": "node",
               "node": "stone-rock",
               "x": 400
@@ -585,6 +594,15 @@
               "x": 120,
               "name": "ຈຸດວາບປອດໄພ ດ່ານ 10",
               "label": "🌀 ຈຸດວາບປອດໄພ ດ່ານ 10"
+            },
+            {
+              "kind": "npc",
+              "id": "npc-dr-cyber",
+              "name": "ດຣ. ໄຊເບີ (ວິສະວະກອນ)",
+              "role": "npc-elder",
+              "x": 280,
+              "dialogueId": "dr_cyber",
+              "label": "💬 [E] ລົມກັບ ດຣ. ໄຊເບີ"
             },
             {
               "kind": "node",

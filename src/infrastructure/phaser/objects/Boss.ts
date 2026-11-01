@@ -8,6 +8,7 @@ const BOSS_TEXTURE_MAP: Record<string, string> = {
     'stage-ch1-boss': 'boss-hardware-overlord',
     'stage-ch2-boss': 'boss-network-core',
     'stage-ch3-boss': 'boss-kernel-titan',
+    'dungeon-spider-queen': 'boss-spider-queen',
 };
 const WIDTH = 96;
 const HEIGHT = 80;

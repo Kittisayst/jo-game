@@ -912,5 +912,61 @@
       "gripX": 16,
       "gripY": 26
     }
+  },
+  {
+    "id": "dungeon-key",
+    "name": "ກະແຈຄຸກໃຕ້ດິນບູຮານ",
+    "nameEn": "Ancient Dungeon Key",
+    "description": "ກະແຈຫີນບູຮານສຳລັບໄຂປະຕູສູ່ຫ້ອງຣາຊິນີແມງມຸມ",
+    "category": "material",
+    "icon": "🗝️",
+    "iconImage": "assets/items/dungeon-key.png",
+    "maxStack": 1,
+    "creditValue": 50
+  },
+  {
+    "id": "shadow-silk-robe",
+    "name": "ເສື້ອຄຸມເງົາມືດ",
+    "nameEn": "Shadow Silk Robe",
+    "description": "ເສື້ອຄຸມທີ່ຖັກທໍຈາກໃຍແມງມຸມຄຸກ ເພີ່ມຄວາມວ່ອງໄວ ແລະ ປ້ອງກັນ",
+    "category": "armor",
+    "icon": "🥋",
+    "iconImage": "assets/items/shadow-silk-robe.png",
+    "slot": "body",
+    "durability": 120,
+    "maxStack": 1,
+    "creditValue": 60,
+    "armorHearts": 2
+  },
+  {
+    "id": "feather-fall-potion",
+    "name": "ຢາຂົນນົກເບົາຕົວ",
+    "nameEn": "Feather Fall Potion",
+    "description": "ຢາສະກັດຈາກປີກເຈຍຖ້ຳ ຊ່ວຍຟື້ນຟູ 2 ຫົວໃຈ ແລະ ເຮັດໃຫ້ຮ່າງກາຍເບົາສະບາຍ",
+    "category": "consumable",
+    "icon": "🧪",
+    "iconImage": "assets/items/feather-fall-potion.png",
+    "effect": "speed",
+    "maxStack": 20,
+    "creditValue": 25,
+    "durationSec": 60
+  },
+  {
+    "id": "venom-bone-blade",
+    "name": "ດາບກະດູກອາບພິດ",
+    "nameEn": "Venom Bone Blade",
+    "description": "ດາບກະດູກບູຮານທີ່ເຄືອບດ້ວຍພິດແມງມຸມ ໂຈມຕີຮຸນແຮງ ແລະ ວ່ອງໄວ",
+    "category": "weapon",
+    "icon": "🗡️",
+    "iconImage": "assets/items/venom-bone-blade.png",
+    "held": {
+      "image": "assets/held/venom-bone-blade.png",
+      "gripX": 16,
+      "gripY": 26
+    },
+    "attack": 26,
+    "durability": 120,
+    "maxStack": 1,
+    "creditValue": 80
   }
 ]
