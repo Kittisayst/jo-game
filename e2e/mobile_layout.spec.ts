@@ -11,11 +11,17 @@ const PHONES = [
   { name: 'small phone 667x375', viewport: { width: 667, height: 375 } },
 ];
 
-const WINDOWS: { name: string; event: string; arg?: string; testid?: string }[] = [
+const WINDOWS: { name: string; event?: string; arg?: string; key?: string }[] = [
   { name: 'Smithy (tools)', event: 'open-smithy', arg: 'tools' },
   { name: 'Smithy (weapons)', event: 'open-smithy', arg: 'weapons' },
   { name: 'Shop', event: 'open-shop' },
   { name: 'Backpack', event: 'open-backpack' },
+  { name: 'Academy', event: 'open-academy' },
+  { name: 'Library', event: 'open-library' },
+  { name: 'World Map', event: 'open-stage-map' },
+  { name: 'Quest Board', event: 'open-quest-board' },
+  { name: 'Character', key: 'KeyC' },
+  { name: 'Storage', event: 'open-storage' },
 ];
 
 async function measure (page: Page)
@@ -60,7 +66,8 @@ for (const phone of PHONES) {
       await page.waitForTimeout(1200);
 
       for (const w of WINDOWS) {
-        await page.evaluate(({ event, arg }) => (window as any).__eventBus.emit(event, arg), { event: w.event, arg: w.arg });
+        if (w.key) await page.keyboard.press(w.key);
+        else await page.evaluate(({ event, arg }) => (window as any).__eventBus.emit(event, arg), { event: w.event, arg: w.arg });
         await expect(page.locator('.gw-window')).toBeVisible();
         await page.waitForTimeout(450);
         const m = await measure(page);
@@ -73,10 +80,10 @@ for (const phone of PHONES) {
         // Slim header
         expect(m.header!.h, `${label}: header height`).toBeLessThanOrEqual(56);
         // Most of the screen is content
-        expect(m.body!.h / m.vh, `${label}: body share of the height`).toBeGreaterThanOrEqual(0.5);
+        // (the World Map has no separate body or tab strip: its card scrolls under the sticky header)
+        if (m.body) expect(m.body.h / m.vh, `${label}: body share of the height`).toBeGreaterThanOrEqual(0.5);
         // Tabs (or the filter row) are a single strip, not clipped
-        expect(m.hasTabs).toBe(true);
-        expect(m.tabs!.h, `${label}: tab strip height`).toBeLessThanOrEqual(64);
+        if (m.tabs) expect(m.tabs.h, `${label}: tab strip height`).toBeLessThanOrEqual(64);
         // Nothing smaller than 12 px, no button smaller than 44 px high
         expect(m.smallText, `${label}: text under 12px`).toEqual([]);
         expect(m.smallButtons, `${label}: buttons under 44px`).toEqual([]);

@@ -5626,6 +5626,17 @@ button,
     .gw-header h2 {
         font-size: 1rem !important;
         line-height: 1.25;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    /* A long title shortens with "…" instead of wrapping to a second row */
+    .gw-header .outfit-title,
+    .gw-header .stage-map-title-group,
+    .gw-header > div:first-child {
+        min-width: 0;
+        flex: 1 1 auto;
     }
 
     .gw-header .gw-icon {
@@ -5761,5 +5772,71 @@ button,
 
     [data-testid="armor-panel"] > * {
         min-height: 56px !important;
+    }
+}
+
+/* Small dialogs (Waypoint, Gate repair, Garden seed picker): a compact centred card, not a full-screen sheet */
+@media (max-height: 520px) {
+    .gw-overlay-sm {
+        padding: 8px !important;
+    }
+
+    .gw-dialog {
+        max-height: calc(100% - 16px) !important;
+        overflow-y: auto !important;
+    }
+
+    .gw-compact {
+        padding: 12px !important;
+    }
+
+    .gw-compact > * + * {
+        margin-top: 8px !important;
+    }
+
+    /* The World Map has no body wrapper: the card scrolls and its header stays on top */
+    .stage-map-card.gw-window {
+        display: block !important;
+        overflow-y: auto !important;
+        padding: 0 max(10px, env(safe-area-inset-right)) 8px max(10px, env(safe-area-inset-left)) !important;
+    }
+
+    .stage-map-card.gw-window > .gw-header {
+        position: sticky;
+        top: 0;
+        z-index: 3;
+        margin: 0 calc(-1 * max(10px, env(safe-area-inset-left))) 6px calc(-1 * max(10px, env(safe-area-inset-left)));
+        background: #0f172a;
+    }
+
+    /* The Library header carries a Credit chip: keep it on one line */
+    .gw-header .outfit-wallet {
+        white-space: nowrap;
+        font-size: var(--gw-font-s);
+        padding: 4px 8px;
+    }
+
+    /* The round Library emblem stretched into a pill in the slim header: the title is enough */
+    .gw-header .outfit-avatar {
+        display: none;
+    }
+}
+
+/* Phone sheet details found while measuring (the Library had its own small-screen header that wrapped the Credit
+   chip to a row of its own; the World Map portal numbers were 11 px) */
+@media (max-height: 520px) {
+    .lib-card .gw-header.outfit-header {
+        flex-wrap: nowrap !important;
+        gap: 8px;
+    }
+
+    .lib-card .gw-header .outfit-wallet {
+        order: 0;
+        flex: 0 0 auto;
+        text-align: right;
+    }
+
+    .gw-window .portal-slot-label {
+        font-size: var(--gw-font-s);
     }
 }
