@@ -36,7 +36,9 @@ export default defineConfig({
                 skipWaiting: true,
             },
             manifest: {
-                id: 'knowledge-quest',
+                // The app's identity on the phone (Chrome's default is the start page path). It was 'knowledge-quest';
+                // a new id lets a phone with a broken install of the old one install afresh.
+                id: '/jo-game/',
                 name: 'ພະຈົນໄພຄວາມຮູ້ - Knowledge Quest',
                 short_name: 'Knowledge Quest',
                 description: 'ເກມຜະຈົນໄພຮຽນຮູ້: ອ່ານຕຳລາ ສ້າງອຸປະກອນ ແລະ ສຳຫຼວດດ່ານ',

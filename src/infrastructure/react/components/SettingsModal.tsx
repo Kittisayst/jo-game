@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { saveManager, SaveSlotId, SlotMetadata } from '../../storage/SaveManager';
 import { canToggleFullscreen, isFullscreen, toggleFullscreen } from '../../fullscreen';
+import { useInstallPrompt } from '../hooks/useInstallPrompt';
 
 export interface SettingsModalProps
 {
@@ -30,6 +31,7 @@ export function SettingsModal ({
     const [selectedSlot, setSelectedSlot] = useState<SaveSlotId>(() => saveManager.getActiveSlot());
     const [fullscreen, setFullscreen] = useState(isFullscreen);
     const showFullscreen = canToggleFullscreen();
+    const installPrompt = useInstallPrompt();
 
     useEffect(() =>
     {
@@ -199,6 +201,23 @@ export function SettingsModal ({
                         </button>
                     </div>
                 </div>
+
+                {installPrompt.available && (
+                    <div className="settings-section">
+                        <div className="settings-section-title">📲 ແອັບ (Install)</div>
+                        <div className="settings-toggle-row">
+                            <span className="settings-row-label">ຕິດຕັ້ງເກມເປັນແອັບໃນເຄື່ອງນີ້</span>
+                            <button
+                                className="settings-switch-btn on"
+                                data-testid="settings-install-button"
+                                onClick={() => { void installPrompt.install(); }}
+                                type="button"
+                            >
+                                ຕິດຕັ້ງ
+                            </button>
+                        </div>
+                    </div>
+                )}
 
                 {showFullscreen && (
                     <div className="settings-section">
