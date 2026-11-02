@@ -5942,3 +5942,98 @@ button,
         justify-content: center;
     }
 }
+
+/* ===== Pause menu on a phone held sideways =====
+   The card (header, level, two sound switches, four buttons) is about 560 px tall: on a 412 or 375 px screen the
+   lower buttons were cut off with no way to reach them. Two columns (status and sound on the left, the four buttons
+   on the right), a slim header, and a scroll as the safety net. */
+@media (max-height: 520px) {
+    .pause-menu-overlay {
+        padding: 8px;
+        box-sizing: border-box;
+    }
+
+    .pause-menu-card {
+        display: grid !important;
+        grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+        grid-template-areas:
+            "header header"
+            "stats buttons"
+            "audio buttons";
+        align-content: start;
+        gap: 8px 14px !important;
+        width: min(760px, 100%) !important;
+        max-width: none !important;
+        max-height: calc(100% - 16px) !important;
+        overflow-y: auto !important;
+        padding: 10px 14px !important;
+        border-radius: 14px;
+        box-sizing: border-box;
+    }
+
+    .pause-header {
+        grid-area: header;
+        align-items: center;
+        min-height: var(--gw-header-h);
+    }
+
+    .pause-title {
+        font-size: 1.05rem;
+        margin: 0;
+    }
+
+    .pause-subtitle {
+        display: none;
+    }
+
+    .pause-stats-banner {
+        grid-area: stats;
+        padding: 6px 10px;
+    }
+
+    .pause-stat-label {
+        font-size: var(--gw-font-s);
+    }
+
+    .pause-audio-box {
+        grid-area: audio;
+        padding: 4px 8px;
+    }
+
+    .pause-audio-row {
+        min-height: var(--tap);
+    }
+
+    .pause-audio-name {
+        font-size: 0.85rem;
+    }
+
+    .pause-buttons-list {
+        grid-area: buttons;
+        gap: 8px;
+        align-self: start;
+    }
+
+    .pause-menu-card .menu-action-btn {
+        min-height: var(--tap);
+        padding: 8px 12px;
+        font-size: 0.9rem;
+    }
+
+    .pause-menu-card .settings-switch-btn {
+        min-height: 40px;
+        min-width: var(--tap);
+    }
+}
+
+/* The Exit button of the pause menu had no look at all (only the focus ring was styled): a red outline button */
+.menu-action-btn.danger {
+    background: rgba(127, 29, 29, 0.35);
+    border: 1px solid rgba(248, 113, 113, 0.6);
+    color: #fecaca;
+}
+
+.menu-action-btn.danger:hover {
+    background: rgba(185, 28, 28, 0.55);
+    color: #ffffff;
+}
