@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { test, expect } from '@playwright/test';
 import { walkRightTo } from './helpers/gameProbe';
 
@@ -25,11 +26,13 @@ test.describe('Knowledge Quest — Buy-to-Read Textbook & Chapter 1 Loop E2E', (
     await page.waitForTimeout(1000);
 
     // 2. Verify initial state: 20 Credit (exactly the first textbook) & 0 Owned Textbooks
-    const creditBadge = page.locator('.wallet-hud-badge');
-    await expect(creditBadge).toContainText('20');
+    // (the HUD no longer shows the Credit or the number of books: the state is read from the game)
+    const credit = () => page.evaluate(() => (window as any).__entities.wallet.balance as number);
+    const ownedBooks = () => page.evaluate(() => Object.values((window as any).__entities.books).filter((b: any) => b.isUnlocked).length);
+    expect(await credit()).toBe(20);
 
     const textbookBtn = page.locator('#hud-library-btn');
-    await expect(textbookBtn).toHaveText(/0$/);
+    expect(await ownedBooks()).toBe(0);
 
     // 3. Clicking HUD Textbook button BEFORE buying shows Empty Reader State (no buy button!)
     await textbookBtn.click();
@@ -63,9 +66,8 @@ test.describe('Knowledge Quest — Buy-to-Read Textbook & Chapter 1 Loop E2E', (
     await buyCh1Btn.click();
 
     // Verify Wallet deducted 20 -> 0 and HUD textbook badge updated to (1)
-    await expect(creditBadge).not.toContainText('20');
-    await expect(creditBadge).toContainText('0');
-    await expect(textbookBtn).toHaveText(/1$/);
+    expect(await credit()).toBe(0);
+    expect(await ownedBooks()).toBe(1);
 
     // The bought book moves from "For sale" to "My books" (unread: 0/5)
     await expect(mineTab).toHaveAttribute('aria-selected', 'true');

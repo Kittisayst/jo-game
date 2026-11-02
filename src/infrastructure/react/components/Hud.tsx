@@ -86,7 +86,7 @@ export function Hud ({
     isGamePaused,
     bossHp,
     bossMaxHp,
-    walletBalance,
+    // walletBalance is not shown in the HUD any more (the Credit badge was removed)
     equippedWeapon,
     objective,
     onTogglePause,
@@ -125,57 +125,82 @@ export function Hud ({
                 {/* Left: what the player must watch (stage, hearts, level, time), then one quiet line of notices */}
                 <div className="hud-cluster-left">
                     <div className="hud-row" data-testid="hud-vitals">
-                        <div className="hud-badge level-badge">
-                            <span className="badge-icon">🚩</span>
-                            <span className="badge-label">{levelLabel}</span>
-                        </div>
-
-                        {stageProgress && (
-                            <div
-                                className="hud-badge stage-progress-badge"
-                                data-testid="stage-progress"
-                                title={`ໄລຍະທາງໃນດ່ານ: ${stageProgress.percent}%`}
-                            >
-                                <span className="badge-icon">🏃</span>
-                                <span className="badge-label">{stageProgress.percent}%</span>
-                                <div className="stage-progress-track" aria-hidden="true">
-                                    <div
-                                        className="stage-progress-fill"
-                                        style={{ width: `${stageProgress.percent}%` }}
-                                    />
-                                </div>
-                                <span className="badge-target">🌀</span>
-                            </div>
-                        )}
-
-                        <div className="hud-badge health-badge" data-testid="health-hearts" data-current={health} data-max={maxHealth}>
-                            <span className="badge-icon">
-                                {'❤️'.repeat(Math.max(0, health)) + '🖤'.repeat(Math.max(0, maxHealth - health))}
-                            </span>
-                        </div>
-
-                        {armor > 0 && (
-                            <div className="hud-badge armor-badge" data-testid="armor-hearts" data-armor={armor} title="ຫົວໃຈເກາະ: ເສຍກ່ອນຫົວໃຈປົກກະຕິ ແລະ ຟື້ນເມື່ອກັບໝູ່ບ້ານ">
-                                <span className="badge-icon">{'🛡️'.repeat(Math.min(armor, 10))}</span>
-                            </div>
-                        )}
-
-                        {heroLevel && (
+                        {/* Unified Player Status: Level Circle (XP progress ring + number inside) + Hearts extending to the right */}
+                        <div className="hud-player-vitals" data-testid="hud-player-vitals">
                             <button
                                 type="button"
                                 onClick={e => { e.preventDefault(); e.stopPropagation(); onOpenCharacter?.(); }}
-                                className="hud-badge hero-level-badge"
+                                className="hud-level-circle-btn hero-level-badge"
                                 data-testid="hero-level"
-                                data-level={heroLevel.level}
-                                title={heroLevel.xpNeeded > 0 ? `[C] XP ${heroLevel.xp} / ${heroLevel.xpNeeded} (XP ມາຈາກການຂ້າ monster ເທົ່ານັ້ນ, ບໍ່ແມ່ນ Credit)` : 'ລະດັບສູງສຸດ'}
+                                data-level={heroLevel?.level ?? 1}
+                                title={heroLevel && heroLevel.xpNeeded > 0 ? `[C] XP ${heroLevel.xp} / ${heroLevel.xpNeeded} (XP ມາຈາກການຂ້າ monster ເທົ່ານັ້ນ)` : (heroLevel ? 'ລະດັບສູງສຸດ' : 'Hero Level')}
+                                aria-label={`Hero Level ${heroLevel?.level ?? 1}`}
                             >
-                                <span className="badge-icon">⭐</span>
-                                <span className="badge-value">Lv {heroLevel.level}</span>
-                                <span aria-hidden="true" className="hud-xp-track" style={{ display: 'inline-block', width: 44, height: 6, borderRadius: 3, background: 'rgba(148,163,184,0.35)', overflow: 'hidden' }}>
-                                    <span data-testid="hero-xp-bar" style={{ display: 'block', height: '100%', width: `${Math.round(heroLevel.fraction * 100)}%`, background: '#a5b4fc' }} />
-                                </span>
+                                <svg className="hud-level-svg" viewBox="0 0 44 44" aria-hidden="true">
+                                    <defs>
+                                        <linearGradient id="hud-xp-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                            <stop offset="0%" stopColor="#38bdf8" />
+                                            <stop offset="100%" stopColor="#818cf8" />
+                                        </linearGradient>
+                                    </defs>
+                                    <circle
+                                        className="hud-level-ring-bg"
+                                        cx="22"
+                                        cy="22"
+                                        r="18"
+                                        fill="none"
+                                        strokeWidth="3.5"
+                                    />
+                                    <circle
+                                        className="hud-level-ring-fill"
+                                        cx="22"
+                                        cy="22"
+                                        r="18"
+                                        fill="none"
+                                        stroke="url(#hud-xp-gradient)"
+                                        strokeWidth="3.5"
+                                        strokeDasharray={113.097}
+                                        strokeDashoffset={113.097 * (1 - Math.min(1, Math.max(0, heroLevel?.fraction ?? 0)))}
+                                        strokeLinecap="round"
+                                        transform="rotate(-90 22 22)"
+                                    />
+                                </svg>
+                                <div className="hud-level-number-wrap">
+                                    <span className="hud-level-number">{heroLevel?.level ?? 1}</span>
+                                </div>
+                                <span
+                                    data-testid="hero-xp-bar"
+                                    style={{ display: 'none' }}
+                                    aria-hidden="true"
+                                />
                             </button>
-                        )}
+
+                            <div
+                                className="hud-vitals-pill health-badge"
+                                data-testid="health-hearts"
+                                data-current={health}
+                                data-max={maxHealth}
+                                title={`ພະລັງຊີວິດ: ${health}/${maxHealth}`}
+                            >
+                                <span className="hud-hearts-icons">
+                                    {'❤️'.repeat(Math.max(0, health)) + '🖤'.repeat(Math.max(0, maxHealth - health))}
+                                </span>
+
+                                {armor > 0 && (
+                                    <div
+                                        className="hud-armor-subpill armor-badge"
+                                        data-testid="armor-hearts"
+                                        data-armor={armor}
+                                        title="ຫົວໃຈເກາະ: ເສຍກ່ອນຫົວໃຈປົກກະຕິ ແລະ ຟື້ນເມື່ອກັບໝູ່ບ້ານ"
+                                    >
+                                        <span className="badge-icon">{'🛡️'.repeat(Math.min(armor, 10))}</span>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* The name of the place is not shown any more; it stays for screen readers */}
+                        <span className="level-badge hud-sr-only" data-testid="level-label">{levelLabel}</span>
 
                         {worldTime && (
                             <div className="hud-badge world-time-badge" data-testid="world-time" data-phase={worldTime.phase} title={`${worldTime.label}: ອີກ ${worldTime.countdown} ຈະປ່ຽນ`}>
@@ -269,11 +294,24 @@ export function Hud ({
 
                 {/* Right: Credit, the Backpack and the Textbooks as small buttons, and the menu */}
                 <div className="hud-cluster-right">
-                    {/* Permanent Knowledge Credit balance */}
-                    <div className="hud-badge wallet-hud-badge" title="ເຄຣດິດຄວາມຮູ້ (Credit - ໄດ້ຮັບຈາກການຮຽນ & ສອບເສັງ)">
-                        <span className="badge-icon">🎓</span>
-                        <span className="badge-value">{walletBalance}</span>
-                    </div>
+                    {/* How far along the Stage the hero is (not shown in the village) */}
+                    {stageProgress && (
+                        <div
+                            className="hud-badge stage-progress-badge"
+                            data-testid="stage-progress"
+                            title={`ໄລຍະທາງໃນດ່ານ: ${stageProgress.percent}%`}
+                        >
+                            <span className="badge-icon">🏃</span>
+                            <span className="badge-label">{stageProgress.percent}%</span>
+                            <div className="stage-progress-track" aria-hidden="true">
+                                <div
+                                    className="stage-progress-fill"
+                                    style={{ width: `${stageProgress.percent}%` }}
+                                />
+                            </div>
+                            <span className="badge-target">🌀</span>
+                        </div>
+                    )}
 
                     {onOpenBackpack && (
                         <button
@@ -285,12 +323,11 @@ export function Hud ({
                                 e.stopPropagation();
                                 onOpenBackpack();
                             }}
-                            title="ເປີດກະເປົາ (Backpack) [I]"
-                            aria-label="ກະເປົາ"
+                            title={`ເປີດກະເປົາ (Backpack) [I] · ${backpackCount}/${maxBackpackSlots} ຊ່ອງ`}
+                            aria-label={`ກະເປົາ ${backpackCount}/${maxBackpackSlots}`}
                             type="button"
                         >
                             <span className="badge-icon">🎒</span>
-                            <span className="badge-label">{backpackCount}/{maxBackpackSlots}</span>
                         </button>
                     )}
 
@@ -309,7 +346,6 @@ export function Hud ({
                             type="button"
                         >
                             <span className="badge-icon">📚</span>
-                            <span className="badge-label">{ownedBooksCount}</span>
                         </button>
                     )}
 
