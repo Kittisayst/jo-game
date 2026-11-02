@@ -1,7 +1,7 @@
 # Deploy the game to GitHub Pages
 
 - **Date:** 2026-11-02
-- **Status:** planned
+- **Status:** steps 1, 2, 3, 6 done (font URLs, workflow, local check under /jo-game/, docs); steps 4 and 5 (turn Pages on, first deploy) wait for the owner
 - **Project:** jo-game (Knowledge Quest)
 
 ## Goal

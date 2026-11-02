@@ -14,6 +14,7 @@ The plan for growing the game to 100 Stages in 10 Realms (Phase 0–10, each wit
 npm install          # install dependencies
 npm run dev-nolog    # dev server, no ping — prefer this one (npm run dev sends an anonymous template usage ping)
 npm run build-nolog  # production build to dist/, no ping (npm run build pings)
+                     # main deploys to GitHub Pages (.github/workflows/deploy.yml, base ./); files in public/ must use relative urls (url('fonts/..'), not /fonts/..)
 npx tsc --noEmit -p tsconfig.json   # typecheck (no dedicated npm script exists)
 npm run lint         # eslint .
 npm run test         # domain/application unit tests once (Vitest)
