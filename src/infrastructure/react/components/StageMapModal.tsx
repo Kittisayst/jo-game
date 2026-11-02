@@ -71,18 +71,18 @@ export function StageMapModal ({
     };
 
     return (
-        <div className="stage-map-overlay" onClick={onClose}>
-            <div className="stage-map-card" onClick={e => e.stopPropagation()}>
-                <div className="stage-map-header">
+        <div className="gw-overlay stage-map-overlay" onClick={onClose}>
+            <div className="gw-window stage-map-card" onClick={e => e.stopPropagation()}>
+                <div className="gw-header stage-map-header">
                     <div className="stage-map-title-group">
-                        <span className="stage-map-icon">🗺️</span>
+                        <span className="gw-icon stage-map-icon">🗺️</span>
                         <div>
                             <h2>ແຜນທີ່ 100 ດ່ານ (World Map)</h2>
-                            <p className="stage-map-subtitle">10 ມິຕິ × 10 ດ່ານ. ເລືອກດ່ານທີ່ເປີດແລ້ວ ຫຼື ຄຸກໃຕ້ດິນ ເພື່ອເດີນທາງໄປຜະຈົນໄພ</p>
+                            <p className="gw-subtitle stage-map-subtitle">10 ມິຕິ × 10 ດ່ານ. ເລືອກດ່ານທີ່ເປີດແລ້ວ ຫຼື ຄຸກໃຕ້ດິນ ເພື່ອເດີນທາງໄປຜະຈົນໄພ</p>
                         </div>
                     </div>
                     <button
-                        className="skin-close-btn"
+                        className="skin-close-btn gw-close"
                         onClick={onClose}
                         type="button"
                         aria-label="Close"

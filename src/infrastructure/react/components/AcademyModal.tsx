@@ -197,28 +197,28 @@ export const AcademyModal: React.FC<AcademyModalProps> = ({
     const canPracticeToday = entities.spacedRepetition.canPracticeToday(todayDate);
 
     return (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/75 backdrop-blur-sm p-4 animate-fade-in">
-            <div className="relative w-full max-w-3xl rounded-2xl bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 border-2 border-indigo-500/50 shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+        <div className="gw-overlay fixed inset-0 z-[200] flex items-center justify-center bg-black/75 backdrop-blur-sm p-4 animate-fade-in">
+            <div className="gw-window relative w-full max-w-3xl rounded-2xl bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 border-2 border-indigo-500/50 shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
                 
                 {/* Header */}
-                <div className="flex items-center justify-between px-6 py-4 border-b border-indigo-500/30 bg-slate-900/80">
+                <div className="gw-header flex items-center justify-between px-6 py-4 border-b border-indigo-500/30 bg-slate-900/80">
                     <div className="flex items-center gap-3">
-                        <span className="text-3xl">🏛️</span>
+                        <span className="gw-icon text-3xl">🏛️</span>
                         <div>
                             <h2 className="text-xl font-bold text-indigo-300">ສະຖາບັນຝຶກຝົນວິຊາການ (Academy)</h2>
-                            <p className="text-xs text-slate-400">ສອບເສັງທົດສອບຄວາມຮູ້ເພື່ອຮັບ Credit ແລະ ປົດລັອກໂຮງຕີເຫຼັກ</p>
+                            <p className="gw-subtitle text-xs text-slate-400">ສອບເສັງທົດສອບຄວາມຮູ້ເພື່ອຮັບ Credit ແລະ ປົດລັອກໂຮງຕີເຫຼັກ</p>
                         </div>
                     </div>
                     <button
                         onClick={onClose}
-                        className="rounded-lg p-2 text-slate-400 hover:text-white hover:bg-slate-700/60 transition"
+                        className="gw-close rounded-lg p-2 text-slate-400 hover:text-white hover:bg-slate-700/60 transition"
                     >
                         ✕
                     </button>
                 </div>
 
                 {/* Tabs */}
-                <div className="flex gap-4 px-6 pt-3 border-b border-slate-700/60 bg-slate-900/40">
+                <div className="gw-tabs flex gap-4 px-6 pt-3 border-b border-slate-700/60 bg-slate-900/40">
                     <button
                         onClick={() => { setActiveTab('exam'); soundManager.playSelect(); }}
                         className={`pb-2.5 font-bold text-sm transition flex items-center gap-2 border-b-2 ${
@@ -258,7 +258,7 @@ export const AcademyModal: React.FC<AcademyModalProps> = ({
                 </div>
 
                 {/* Body Content */}
-                <div className="p-6 overflow-y-auto flex-1 space-y-4 text-slate-200">
+                <div className="gw-body p-6 overflow-y-auto flex-1 space-y-4 text-slate-200">
                     {activeTab === 'exam' ? (
                         /* ================= EXAM TAB ================= */
                         <div>

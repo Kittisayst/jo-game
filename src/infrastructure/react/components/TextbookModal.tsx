@@ -318,11 +318,11 @@ export const TextbookModal: React.FC<TextbookModalProps> = ({
     };
 
     return (
-        <div className="outfit-overlay lib-overlay">
-            <div className="outfit-card lib-card">
+        <div className="gw-overlay outfit-overlay lib-overlay">
+            <div className="gw-window outfit-card lib-card">
 
                 {/* Header */}
-                <div className="outfit-header">
+                <div className="gw-header outfit-header">
                     <div className="outfit-avatar">{isStore ? '🏛️' : '📚'}</div>
                     <div className="outfit-title">
                         <h2>
@@ -330,19 +330,19 @@ export const TextbookModal: React.FC<TextbookModalProps> = ({
                                 ? 'ຫໍສະໝຸດແຫ່ງປັນຍາ (Library Bookstore)'
                                 : 'ປຶ້ມຕຳລາສ່ວນຕົວ (My Textbooks)'}
                         </h2>
-                        <p>
+                        <p className="gw-subtitle">
                             {isStore
                                 ? 'ຊື້ປຶ້ມດ້ວຍ Credit · ເກັບໄວ້ໃນຊັ້ນຂອງຂ້ອຍ · ເປີດອ່ານເພື່ອປົດລັອກການສອບເສັງ'
                                 : 'ເປີດອ່ານທົບທວນປຶ້ມຕຳລາທີ່ຊື້ມາແລ້ວໄດ້ທຸກເວລາ'}
                         </p>
                     </div>
                     <div className="outfit-wallet">🎓 {entities.wallet.balance} Credit</div>
-                    <button className="outfit-close" onClick={onClose} title="ປິດ (Escape)">✕</button>
+                    <button className="gw-close outfit-close" onClick={onClose} title="ປິດ (Escape)">✕</button>
                 </div>
 
                 {/* The three parts of the Library */}
                 {isStore && (
-                    <div className="lib-tabs" role="tablist">
+                    <div className="gw-tabs lib-tabs" role="tablist">
                         {tabs.map(t => (
                             <button
                                 key={t.id}
@@ -365,7 +365,7 @@ export const TextbookModal: React.FC<TextbookModalProps> = ({
 
                 {/* ==================== FOR SALE ==================== */}
                 {isStore && tab === 'shop' && (
-                    <div className="lib-body">
+                    <div className="gw-body lib-body">
                         <p className="lib-hint">💡 ຕ້ອງຊື້ປຶ້ມກ່ອນ ຈຶ່ງສາມາດເປີດອ່ານ ແລະ ສອບເສັງໄດ້</p>
 
                         {booksForSale.length === 0 && (
@@ -449,7 +449,7 @@ export const TextbookModal: React.FC<TextbookModalProps> = ({
 
                 {/* ==================== MY BOOKS ==================== */}
                 {isStore && tab === 'mine' && (
-                    <div className="lib-body">
+                    <div className="gw-body lib-body">
                         {ownedBooks.length === 0 ? (
                             <div className="lib-empty">
                                 <div className="lib-empty-icon">📕🔒</div>

@@ -37,22 +37,22 @@ export const GardenSeedPicker: React.FC<GardenSeedPickerProps> = ({ isOpen, plot
     };
 
     return (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 p-4 animate-fade-in">
+        <div className="gw-overlay-sm fixed inset-0 z-[200] flex items-center justify-center bg-black/60 p-4 animate-fade-in">
             <div
-                className="relative w-full max-w-lg rounded-2xl bg-slate-900 border-2 border-emerald-500/50 shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
+                className="gw-dialog relative w-full max-w-lg rounded-2xl bg-slate-900 border-2 border-emerald-500/50 shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
                 data-testid="seed-picker"
             >
-                <div className="flex items-center justify-between px-5 py-3 border-b border-emerald-500/30 bg-slate-900/80">
+                <div className="gw-header flex items-center justify-between px-5 py-3 border-b border-emerald-500/30 bg-slate-900/80">
                     <div className="flex items-center gap-3">
                         <span className="text-2xl">🌱</span>
                         <h2 className="text-lg font-bold text-emerald-300">ເລືອກເມັດທີ່ຈະປູກໃນແປງ {plotIndex + 1}</h2>
                     </div>
-                    <button type="button" onClick={onClose} className="skin-close-btn" aria-label="Close">✕</button>
+                    <button type="button" onClick={onClose} className="skin-close-btn gw-close" aria-label="Close">✕</button>
                 </div>
 
-                <div className="p-5 overflow-y-auto flex-1 space-y-2">
+                <div className="gw-body p-5 overflow-y-auto flex-1 space-y-2">
                     {seeds.length === 0 ? (
-                        <p className="text-xs text-slate-400">ຍັງບໍ່ມີເມັດໃນກະເປົາ. ເກັບສະໝຸນໄພ, ຫຍ້າເສັ້ນໃຍ ຫຼືຕັດຕົ້ນໄມ້ໃນດ່ານເພື່ອໄດ້ເມັດ.</p>
+                        <p className="gw-subtitle text-xs text-slate-400">ຍັງບໍ່ມີເມັດໃນກະເປົາ. ເກັບສະໝຸນໄພ, ຫຍ້າເສັ້ນໃຍ ຫຼືຕັດຕົ້ນໄມ້ໃນດ່ານເພື່ອໄດ້ເມັດ.</p>
                     ) : (
                         <div className="flex flex-col gap-2">
                             {seeds.map(seed => (

@@ -78,20 +78,20 @@ export const StorageModal: React.FC<StorageModalProps> = ({ isOpen, onClose, onC
     );
 
     return (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/75 backdrop-blur-sm p-4 animate-fade-in">
-            <div className="relative w-full max-w-4xl rounded-2xl bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 border-2 border-amber-500/50 shadow-2xl overflow-hidden flex flex-col max-h-[90vh]" data-testid="storage-modal">
-                <div className="flex items-center justify-between px-6 py-4 border-b border-amber-500/30 bg-slate-900/80">
+        <div className="gw-overlay fixed inset-0 z-[200] flex items-center justify-center bg-black/75 backdrop-blur-sm p-4 animate-fade-in">
+            <div className="gw-window relative w-full max-w-4xl rounded-2xl bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 border-2 border-amber-500/50 shadow-2xl overflow-hidden flex flex-col max-h-[90vh]" data-testid="storage-modal">
+                <div className="gw-header flex items-center justify-between px-6 py-4 border-b border-amber-500/30 bg-slate-900/80">
                     <div className="flex items-center gap-3">
-                        <span className="text-3xl">📦</span>
+                        <span className="gw-icon text-3xl">📦</span>
                         <div>
                             <h2 className="text-xl font-bold text-amber-300">ຫີບເກັບຂອງ (Storage)</h2>
-                            <p className="text-xs text-slate-400">ຂອງໃນຫີບບໍ່ເສຍເມື່ອຕາຍ. ກົດຊ່ອງເພື່ອຍ້າຍຂ້າມໄປອີກຝັ່ງ.</p>
+                            <p className="gw-subtitle text-xs text-slate-400">ຂອງໃນຫີບບໍ່ເສຍເມື່ອຕາຍ. ກົດຊ່ອງເພື່ອຍ້າຍຂ້າມໄປອີກຝັ່ງ.</p>
                         </div>
                     </div>
-                    <button type="button" onClick={onClose} className="skin-close-btn" aria-label="Close">✕</button>
+                    <button type="button" onClick={onClose} className="skin-close-btn gw-close" aria-label="Close">✕</button>
                 </div>
 
-                <div className="p-5 overflow-y-auto flex-1 space-y-3">
+                <div className="gw-body p-5 overflow-y-auto flex-1 space-y-3">
                     {notice && <p role="status" className="text-xs text-amber-300">{notice}</p>}
                     <div className="flex flex-col md:flex-row gap-4">
                         {pane('🎒 ກະເປົາ', backpack, storage, 'ຫີບ', 'backpack')}

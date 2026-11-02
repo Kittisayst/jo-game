@@ -1,7 +1,7 @@
 # Mobile UI: smaller, clearer, more room for the game
 
 - **Date:** 2026-11-02
-- **Status:** M1 and M2 done for Smithy, Shop and Backpack (shared `.gw-*` classes, phone tier in `style.css`, `e2e/mobile_layout.spec.ts`); other windows, M3–M5 still planned
+- **Status:** M1 and M2 done for 10 windows (Smithy, Shop, Backpack, Academy, Library, World Map, Quest Board, Character, Storage + the small dialogs Waypoint, Gate repair, Garden seed picker); M3–M5 still planned
 - **Project:** jo-game (Knowledge Quest)
 
 ## Goal

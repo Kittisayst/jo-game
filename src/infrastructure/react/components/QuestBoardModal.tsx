@@ -68,7 +68,7 @@ export const QuestBoardModal: React.FC<QuestBoardModalProps> = ({ isOpen, onClos
     const outsideClaimable = questBoard.getByCategory('outside').filter(q => q.completed && !q.claimed).length;
 
     return (
-        <div className="modal-backdrop" onClick={onClose} style={{
+        <div className="gw-overlay modal-backdrop" onClick={onClose} style={{
             position: 'fixed',
             inset: 0,
             background: 'rgba(15, 23, 42, 0.75)',
@@ -79,7 +79,7 @@ export const QuestBoardModal: React.FC<QuestBoardModalProps> = ({ isOpen, onClos
             zIndex: 100,
         }}>
             <div
-                className="modal-container quest-board-modal"
+                className="gw-window modal-container quest-board-modal"
                 onClick={e => e.stopPropagation()}
                 style={{
                     background: '#1e293b',
@@ -97,7 +97,7 @@ export const QuestBoardModal: React.FC<QuestBoardModalProps> = ({ isOpen, onClos
                 }}
             >
                 {/* Header */}
-                <div style={{
+                <div className="gw-header" style={{
                     padding: '16px 20px',
                     borderBottom: '1px solid #334155',
                     display: 'flex',
@@ -109,7 +109,7 @@ export const QuestBoardModal: React.FC<QuestBoardModalProps> = ({ isOpen, onClos
                         <h2 style={{ margin: 0, fontSize: '1.25rem', color: '#fef08a', display: 'flex', alignItems: 'center', gap: '8px' }}>
                             <span>📜</span> ກະດານພາລະກິດແຫ່ງປັນຍາ (Quest Board)
                         </h2>
-                        <p style={{ margin: '4px 0 0', fontSize: '0.85rem', color: '#94a3b8' }}>
+                        <p className="gw-subtitle" style={{ margin: '4px 0 0', fontSize: '0.85rem', color: '#94a3b8' }}>
                             ຮັບພາລະກິດເພື່ອຮັບ Credit ແລະ ນ້ຳຢາເສີມພະລັງ
                             {claimableCount > 0 && (
                                 <span style={{ marginLeft: '8px', color: '#38bdf8', fontWeight: 'bold' }}>
@@ -121,6 +121,7 @@ export const QuestBoardModal: React.FC<QuestBoardModalProps> = ({ isOpen, onClos
                     <button
                         type="button"
                         aria-label="Close"
+                        className="gw-close"
                         onClick={onClose}
                         style={{
                             background: '#334155',
@@ -141,7 +142,7 @@ export const QuestBoardModal: React.FC<QuestBoardModalProps> = ({ isOpen, onClos
                 </div>
 
                 {/* 3 Category Tabs: Story, Daily, Outside */}
-                <div style={{
+                <div className="gw-tabs" style={{
                     display: 'flex',
                     background: '#0f172a',
                     padding: '0 20px',
@@ -167,7 +168,7 @@ export const QuestBoardModal: React.FC<QuestBoardModalProps> = ({ isOpen, onClos
                     >
                         <span>📖 ເນື້ອເລື່ອງ (Story)</span>
                         {storyClaimable > 0 && (
-                            <span style={{ background: '#eab308', color: '#0f172a', borderRadius: '10px', padding: '1px 6px', fontSize: '0.72rem', fontWeight: 'bold' }}>
+                            <span style={{ background: '#eab308', color: '#0f172a', borderRadius: '10px', padding: '1px 6px', fontSize: '0.75rem', fontWeight: 'bold' }}>
                                 {storyClaimable}
                             </span>
                         )}
@@ -192,7 +193,7 @@ export const QuestBoardModal: React.FC<QuestBoardModalProps> = ({ isOpen, onClos
                     >
                         <span>📅 ປະຈຳວັນ (Daily)</span>
                         {dailyClaimable > 0 && (
-                            <span style={{ background: '#eab308', color: '#0f172a', borderRadius: '10px', padding: '1px 6px', fontSize: '0.72rem', fontWeight: 'bold' }}>
+                            <span style={{ background: '#eab308', color: '#0f172a', borderRadius: '10px', padding: '1px 6px', fontSize: '0.75rem', fontWeight: 'bold' }}>
                                 {dailyClaimable}
                             </span>
                         )}
@@ -217,7 +218,7 @@ export const QuestBoardModal: React.FC<QuestBoardModalProps> = ({ isOpen, onClos
                     >
                         <span>🌲 ພາລະກິດນອກ (Outside)</span>
                         {outsideClaimable > 0 && (
-                            <span style={{ background: '#eab308', color: '#0f172a', borderRadius: '10px', padding: '1px 6px', fontSize: '0.72rem', fontWeight: 'bold' }}>
+                            <span style={{ background: '#eab308', color: '#0f172a', borderRadius: '10px', padding: '1px 6px', fontSize: '0.75rem', fontWeight: 'bold' }}>
                                 {outsideClaimable}
                             </span>
                         )}
@@ -225,7 +226,7 @@ export const QuestBoardModal: React.FC<QuestBoardModalProps> = ({ isOpen, onClos
                 </div>
 
                 {/* Quest List */}
-                <div style={{
+                <div className="gw-body" style={{
                     padding: '16px 20px',
                     overflowY: 'auto',
                     display: 'flex',
@@ -282,7 +283,7 @@ export const QuestBoardModal: React.FC<QuestBoardModalProps> = ({ isOpen, onClos
                                                 </span>
                                                 {quest.completed && !quest.claimed && (
                                                     <span style={{
-                                                        fontSize: '0.7rem',
+                                                        fontSize: '0.75rem',
                                                         background: '#eab30825',
                                                         color: '#facc15',
                                                         border: '1px solid #facc15',
@@ -295,7 +296,7 @@ export const QuestBoardModal: React.FC<QuestBoardModalProps> = ({ isOpen, onClos
                                                 )}
                                                 {quest.accepted && !quest.completed && (
                                                     <span style={{
-                                                        fontSize: '0.7rem',
+                                                        fontSize: '0.75rem',
                                                         background: '#0284c725',
                                                         color: '#38bdf8',
                                                         border: '1px solid #38bdf8',
@@ -428,7 +429,7 @@ export const QuestBoardModal: React.FC<QuestBoardModalProps> = ({ isOpen, onClos
                                                                 borderRadius: '4px',
                                                                 color: '#94a3b8',
                                                                 padding: '4px 6px',
-                                                                fontSize: '0.7rem',
+                                                                fontSize: '0.75rem',
                                                                 cursor: 'pointer',
                                                             }}
                                                         >

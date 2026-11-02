@@ -81,28 +81,28 @@ export const GateRepairModal: React.FC<GateRepairModalProps> = ({
     };
 
     return (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/75 backdrop-blur-sm p-4 animate-fade-in">
-            <div className="relative w-full max-w-lg rounded-2xl bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 border-2 border-amber-500/50 shadow-2xl overflow-hidden flex flex-col">
+        <div className="gw-overlay-sm fixed inset-0 z-[200] flex items-center justify-center bg-black/75 backdrop-blur-sm p-4 animate-fade-in">
+            <div className="gw-dialog relative w-full max-w-lg rounded-2xl bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 border-2 border-amber-500/50 shadow-2xl overflow-hidden flex flex-col">
                 
                 {/* Header */}
-                <div className="flex items-center justify-between px-6 py-4 border-b border-amber-500/30 bg-slate-900/80">
+                <div className="gw-header flex items-center justify-between px-6 py-4 border-b border-amber-500/30 bg-slate-900/80">
                     <div className="flex items-center gap-3">
-                        <span className="text-3xl">🚪</span>
+                        <span className="gw-icon text-3xl">🚪</span>
                         <div>
                             <h2 className="text-lg font-bold text-amber-300">ສ້ອມແປງປະຕູໃຫຍ່ທີ່ຫັກພັງ (Broken Gate)</h2>
-                            <p className="text-xs text-slate-400">ຕ້ອງໃຊ້ອຸປະກອນຊ່າງ ແລະ ຕອບຄຳຖາມຄວາມຮູ້ 1 ຂໍ້</p>
+                            <p className="gw-subtitle text-xs text-slate-400">ຕ້ອງໃຊ້ອຸປະກອນຊ່າງ ແລະ ຕອບຄຳຖາມຄວາມຮູ້ 1 ຂໍ້</p>
                         </div>
                     </div>
                     <button
                         onClick={onClose}
-                        className="rounded-lg p-2 text-slate-400 hover:text-white hover:bg-slate-700/60 transition"
+                        className="gw-close rounded-lg p-2 text-slate-400 hover:text-white hover:bg-slate-700/60 transition"
                     >
                         ✕
                     </button>
                 </div>
 
                 {/* Content */}
-                <div className="p-6 space-y-4">
+                <div className="gw-body p-6 space-y-4 overflow-y-auto">
                     {/* Requirements checklist */}
                     <div className="bg-slate-900/70 p-4 rounded-xl border border-slate-800 space-y-2 text-xs">
                         <span className="font-bold text-slate-300 block mb-1">ເງື່ອນໄຂການສ້ອມແປງ:</span>

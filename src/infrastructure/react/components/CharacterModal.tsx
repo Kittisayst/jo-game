@@ -83,22 +83,22 @@ export const CharacterModal: React.FC<CharacterModalProps> = ({ isOpen, onClose,
     const costText = statsTuning.respec.ingredients.map(i => `${itemCatalog.get(i.itemId)?.name ?? i.itemId} x${i.count}`).join(', ');
 
     return (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/75 backdrop-blur-sm p-4 animate-fade-in">
-            <div className="relative w-full rounded-2xl border-2 shadow-2xl overflow-hidden flex flex-col"
+        <div className="gw-overlay fixed inset-0 z-[200] flex items-center justify-center bg-black/75 backdrop-blur-sm p-4 animate-fade-in">
+            <div className="gw-window relative w-full rounded-2xl border-2 shadow-2xl overflow-hidden flex flex-col"
                 style={{ maxWidth: 560, maxHeight: '92vh', background: 'linear-gradient(180deg, #0f172a, #1e293b 55%, #0f172a)', borderColor: 'rgba(129, 140, 248, 0.5)' }}
                 data-testid="character-modal">
-                <div className="flex items-center justify-between px-6 py-4 border-b bg-slate-900/80" style={{ borderColor: 'rgba(129, 140, 248, 0.3)' }}>
+                <div className="gw-header flex items-center justify-between px-6 py-4 border-b bg-slate-900/80" style={{ borderColor: 'rgba(129, 140, 248, 0.3)' }}>
                     <div className="flex items-center gap-3">
-                        <span className="text-3xl">⭐</span>
+                        <span className="gw-icon text-3xl">⭐</span>
                         <div>
                             <h2 className="text-xl font-bold" style={{ color: '#c7d2fe' }}>ຕົວລະຄອນ (Character)</h2>
-                            <p className="text-xs text-slate-400">XP ມາຈາກການຂ້າ monster ເທົ່ານັ້ນ. ອຸປະກອນຈາກຕຳລາບົດຍັງເປັນພະລັງຫຼັກ.</p>
+                            <p className="gw-subtitle text-xs text-slate-400">XP ມາຈາກການຂ້າ monster ເທົ່ານັ້ນ. ອຸປະກອນຈາກຕຳລາບົດຍັງເປັນພະລັງຫຼັກ.</p>
                         </div>
                     </div>
-                    <button type="button" onClick={onClose} className="skin-close-btn" aria-label="Close">✕</button>
+                    <button type="button" onClick={onClose} className="skin-close-btn gw-close" aria-label="Close">✕</button>
                 </div>
 
-                <div className="p-5 overflow-y-auto flex-1 space-y-4">
+                <div className="gw-body p-5 overflow-y-auto flex-1 space-y-4">
                     <div className="rounded-xl border border-slate-700/60 bg-slate-800/50 p-4">
                         <div className="flex justify-between" style={{ alignItems: 'baseline' }}>
                             <span className="text-lg font-bold text-white" data-testid="character-level">Level {heroLevel.level} <span className="text-xs text-slate-400">/ {progression.maxLevel}</span></span>
