@@ -44,7 +44,7 @@ export const RecipeGrid: React.FC<RecipeGridProps> = ({ building, onChanged }) =
     };
 
     return (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4" data-testid={`recipes-${building}`}>
+        <div className="gw-grid grid grid-cols-1 md:grid-cols-2 gap-4" data-testid={`recipes-${building}`}>
             {recipes.map(recipe =>
             {
                 const resultItem = getItem(recipe.resultItemId);
@@ -67,7 +67,7 @@ export const RecipeGrid: React.FC<RecipeGridProps> = ({ building, onChanged }) =
                 return (
                     <div
                         key={recipe.id}
-                        className={`p-4 rounded-xl border flex flex-col justify-between transition ${cardClass}`}
+                        className={`gw-card p-4 rounded-xl border flex flex-col justify-between transition ${cardClass}`}
                     >
                         <div className="space-y-3">
                             <div className="flex items-center justify-between">
@@ -94,7 +94,7 @@ export const RecipeGrid: React.FC<RecipeGridProps> = ({ building, onChanged }) =
                                 )}
                             </div>
 
-                            <p className="text-xs text-slate-300">{resultItem?.description}</p>
+                            <p className="gw-card-desc text-xs text-slate-300">{resultItem?.description}</p>
 
                             {!isLocked && !canCraft && missing.length > 0 && (
                                 <p className="text-xs text-rose-300" data-testid="missing-ingredients">
@@ -102,7 +102,7 @@ export const RecipeGrid: React.FC<RecipeGridProps> = ({ building, onChanged }) =
                                 </p>
                             )}
 
-                            <div className="space-y-1 bg-slate-900/60 p-2.5 rounded-lg border border-slate-800">
+                            <div className="gw-ingredients space-y-1 bg-slate-900/60 p-2.5 rounded-lg border border-slate-800">
                                 <span className="text-xs text-slate-400 font-semibold block mb-1">ວັດສະດຸທີ່ຕ້ອງການ:</span>
                                 <div className="flex flex-wrap gap-2">
                                     {recipe.ingredients.map(ing =>

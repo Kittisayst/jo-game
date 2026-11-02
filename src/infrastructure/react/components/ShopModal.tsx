@@ -58,21 +58,21 @@ export const ShopModal: React.FC<ShopModalProps> = ({ isOpen, onClose }) =>
     };
 
     return (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/75 backdrop-blur-sm p-4 animate-fade-in" data-testid="shop-modal">
-            <div className="relative w-full max-w-3xl rounded-2xl bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 border-2 border-emerald-500/50 shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+        <div className="gw-overlay fixed inset-0 z-[200] flex items-center justify-center bg-black/75 backdrop-blur-sm p-4 animate-fade-in" data-testid="shop-modal">
+            <div className="gw-window relative w-full max-w-3xl rounded-2xl bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 border-2 border-emerald-500/50 shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
 
-                <div className="flex items-center justify-between px-6 py-4 border-b border-emerald-500/30 bg-slate-900/80">
+                <div className="gw-header flex items-center justify-between px-6 py-4 border-b border-emerald-500/30 bg-slate-900/80">
                     <div className="flex items-center gap-3">
-                        <span className="text-3xl">🌿</span>
+                        <span className="gw-icon text-3xl">🌿</span>
                         <div>
                             <h2 className="text-xl font-bold text-emerald-300">ຮ້ານແມ່ເຖົ້າ ຈັນທີ</h2>
-                            <p className="text-xs text-slate-400">ແລກວັດຖຸດິບທີ່ເຈົ້າເກັບມາ ເອົາເມັດ ຢາ ແລະ ຂອງໃຊ້ (ບໍ່ໃຊ້ເຄຣດິດ)</p>
+                            <p className="gw-subtitle text-xs text-slate-400">ແລກວັດຖຸດິບທີ່ເຈົ້າເກັບມາ ເອົາເມັດ ຢາ ແລະ ຂອງໃຊ້ (ບໍ່ໃຊ້ເຄຣດິດ)</p>
                         </div>
                     </div>
-                    <button onClick={onClose} className="rounded-lg p-2 text-slate-400 hover:text-white hover:bg-slate-700/60 transition">✕</button>
+                    <button onClick={onClose} className="gw-close rounded-lg p-2 text-slate-400 hover:text-white hover:bg-slate-700/60 transition">✕</button>
                 </div>
 
-                <div className="flex gap-4 px-6 pt-3 border-b border-slate-700/60 bg-slate-900/40 overflow-x-auto">
+                <div className="gw-tabs flex gap-4 px-6 pt-3 border-b border-slate-700/60 bg-slate-900/40 overflow-x-auto">
                     {TABS.map(({ id, icon, label }) => (
                         <button
                             key={id}
@@ -89,9 +89,9 @@ export const ShopModal: React.FC<ShopModalProps> = ({ isOpen, onClose }) =>
                     ))}
                 </div>
 
-                <div className="p-6 overflow-y-auto flex-1 space-y-4">
+                <div className="gw-body p-6 overflow-y-auto flex-1 space-y-4">
                     {message && <p className="text-sm text-amber-300 text-center" data-testid="shop-message">{message}</p>}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="gw-grid grid grid-cols-1 md:grid-cols-2 gap-4">
                         {entries.map(entry =>
                         {
                             const item = getItem(entry.itemId);
@@ -102,7 +102,7 @@ export const ShopModal: React.FC<ShopModalProps> = ({ isOpen, onClose }) =>
                                 <div
                                     key={entry.itemId}
                                     data-testid={`shop-item-${entry.itemId}`}
-                                    className={`p-4 rounded-xl border flex flex-col justify-between space-y-3 ${
+                                    className={`gw-card p-4 rounded-xl border flex flex-col justify-between space-y-3 ${
                                         canBuy ? 'bg-slate-800/80 border-emerald-500/40' : 'bg-slate-800/40 border-slate-700/60'
                                     }`}
                                 >
@@ -117,7 +117,7 @@ export const ShopModal: React.FC<ShopModalProps> = ({ isOpen, onClose }) =>
                                                 </p>
                                             </div>
                                         </div>
-                                        <p className="text-xs text-slate-300">{item?.description}</p>
+                                        <p className="gw-card-desc text-xs text-slate-300">{item?.description}</p>
                                         <div className="flex flex-wrap gap-2">
                                             {entry.price.map(ing =>
                                             {
@@ -153,7 +153,7 @@ export const ShopModal: React.FC<ShopModalProps> = ({ isOpen, onClose }) =>
                     </div>
                 </div>
 
-                <div className="px-6 py-3 border-t border-slate-700/60 bg-slate-900/80 flex items-center justify-between text-xs text-slate-400">
+                <div className="gw-footer px-6 py-3 border-t border-slate-700/60 bg-slate-900/80 flex items-center justify-between text-xs text-slate-400">
                     <span>🎒 ກະເປົາ: {entities.backpack.usedSlotsCount} / {entities.backpack.maxSlots} ຊ່ອງ</span>
                     <span>🌅 ມື້ທີ {dayCount + 1} ຂອງເກມ</span>
                 </div>
