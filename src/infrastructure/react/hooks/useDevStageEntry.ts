@@ -19,7 +19,22 @@ export function useDevStageEntry (startStage: (stageKey: string) => void): void
     {
         if (!import.meta.env.DEV) return;
 
-        const requested = Number(new URLSearchParams(window.location.search).get('stage'));
+        const raw = new URLSearchParams(window.location.search).get('stage');
+        if (!raw) return;
+
+        if (raw === 'village')
+        {
+            const onSceneReady = (scene: Phaser.Scene) =>
+            {
+                if (scene.scene.key !== 'Title') return;
+                EventBus.off('current-scene-ready', onSceneReady);
+                startRef.current('village');
+            };
+            EventBus.on('current-scene-ready', onSceneReady);
+            return () => { EventBus.off('current-scene-ready', onSceneReady); };
+        }
+
+        const requested = Number(raw);
         if (!Number.isInteger(requested) || requested < 1 || requested > STAGE_COUNT) return;
 
         const stage = getGameContent().stages[requested - 1];

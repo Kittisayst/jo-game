@@ -328,7 +328,7 @@ export class Player extends Physics.Arcade.Sprite
         this.playAnimation('tool');
     }
 
-    triggerSlashVfx (weaponId: string): void
+    triggerSlashVfx (weaponId: string, upgradeLevel = 0): void
     {
         this.attackAnimTimer = ATTACK_ANIM_MS;
         this.playAnimation('attack');
@@ -340,6 +340,10 @@ export class Player extends Physics.Arcade.Sprite
             'wooden-sword': 'slash-wood',
             'iron-sword': 'slash-iron',
             'crystal-sword': 'slash-crystal',
+            'blue-sword': 'slash-blue',
+            'copper-sword': 'slash-copper',
+            'bone-sword': 'slash-iron',
+            'venom-bone-blade': 'slash-crystal',
         };
         const slashKey = slashSprites[weaponId];
 
@@ -358,6 +362,15 @@ export class Player extends Physics.Arcade.Sprite
             const vfx = this.scene.add.sprite(slashX, slashY, slashKey, 0);
             vfx.setDepth(15);
             vfx.setFlipX(this.facingDir < 0);
+            if (upgradeLevel > 0)
+            {
+                vfx.setScale(1 + upgradeLevel * 0.18);
+                if (upgradeLevel === 1) vfx.setTint(0xfde047);
+                else if (upgradeLevel === 2) vfx.setTint(0x38bdf8);
+                else vfx.setTint(0xf43f5e);
+                (this.scene as unknown as { particleManager?: { emitCelebration: (x: number, y: number) => void } })
+                    .particleManager?.emitCelebration(slashX, slashY);
+            }
             vfx.play(animKey);
             vfx.once('animationcomplete', () => vfx.destroy());
 
@@ -375,6 +388,8 @@ export class Player extends Physics.Arcade.Sprite
             'wooden-sword': 0xd4a373,
             'iron-sword': 0xe2e8f0,
             'crystal-sword': 0xa855f7,
+            'blue-sword': 0x0284c7,
+            'copper-sword': 0xea580c,
         };
 
         const slash = this.scene.add.graphics({ x: slashX, y: slashY });

@@ -1,188 +1,656 @@
 {
-  "stageQuestion": {"credit": 5},
-  "night": {"creaturesPerScreen": 1, "hpMultiplier": 1.6, "xpMultiplier": 1.5, "minDistanceFromHero": 500, "byRealm": {"1": ["night-wisp"], "2": ["night-shade"], "3": ["night-scarab"]}},
-  "scaling": {"enemyHpPerStage": 0.08, "enemyDamagePerRealm": 1, "dropBonusPerRealm": 0.1, "enemyXpPerStage": 1.2},
+  "stageQuestion": {
+    "credit": 5
+  },
+  "night": {
+    "creaturesPerScreen": 1,
+    "hpMultiplier": 1.6,
+    "xpMultiplier": 1.5,
+    "minDistanceFromHero": 500,
+    "byRealm": {
+      "1": [
+        "night-wisp"
+      ],
+      "2": [
+        "night-shade"
+      ],
+      "3": [
+        "night-scarab"
+      ]
+    }
+  },
+  "scaling": {
+    "enemyHpPerStage": 0.08,
+    "enemyDamagePerRealm": 1,
+    "dropBonusPerRealm": 0.1,
+    "enemyXpPerStage": 1.2
+  },
   "stages": [
     {
-      "number": 1, "realm": 1, "status": "ready", "safe": true,
-      "name": "ດ່ານ 1: ປາກທາງປ່າ", "nameEn": "Stage 1: Forest Edge",
+      "number": 1,
+      "realm": 1,
+      "status": "ready",
+      "safe": true,
+      "name": "ດ່ານ 1: ປາກທາງປ່າ",
+      "nameEn": "Stage 1: Forest Edge",
       "layout": "assets/levels/stage-001.json",
-      "lessons": ["1-1"],
+      "lessons": [
+        "1-1"
+      ],
       "zones": [
         {
-          "id": "a", "name": "ປາກທາງປ່າ (Forest Edge)",
+          "id": "a",
+          "name": "ປາກທາງປ່າ (Forest Edge)",
           "contents": [
-            {"kind": "waypoint", "x": 120, "name": "ຈຸດວາບປອດໄພ ປາກທາງປ່າ", "label": "🌀 ຈຸດວາບປອດໄພ ປາກທາງປ່າ"},
-            {"kind": "sign", "x": 240, "text": "🌲 ດ່ານ 1: ປາກທາງປ່າ\n[E] ເກັບສະໝຸນໄພ ແລະ ຕັດໄມ້", "color": "#86efac", "stroke": "#064e3b"},
-            {"kind": "node", "node": "wild-herb", "x": 420, "overrides": {"seed": {"itemId": "herb-seed", "chance": 1}}},
-            {"kind": "node", "node": "oak-tree", "x": 560},
-            {"kind": "enemy", "enemy": "forest-slime", "type": "slime", "x": 800, "y": 580, "patrolDistance": 60, "speed": 30},
-            {"kind": "exit", "x": 1200}
+            {
+              "kind": "waypoint",
+              "x": 120,
+              "name": "ຈຸດວາບປອດໄພ ປາກທາງປ່າ",
+              "label": "🌀 ຈຸດວາບປອດໄພ ປາກທາງປ່າ"
+            },
+            {
+              "kind": "sign",
+              "x": 240,
+              "text": "🌲 ດ່ານ 1: ປາກທາງປ່າ\n[E] ເກັບສະໝຸນໄພ ແລະ ຕັດໄມ້",
+              "color": "#86efac",
+              "stroke": "#064e3b"
+            },
+            {
+              "kind": "npc",
+              "id": "npc-guide-keo",
+              "name": "ແກ້ວ (ນັກສຳຫຼວດຝຶກຫັດ)",
+              "role": "npc-guide-keo",
+              "x": 320,
+              "dialogueId": "stage_guide_keo",
+              "label": "💬 [E] ລົມກັບນັກສຳຫຼວດແກ້ວ"
+            },
+            {
+              "kind": "node",
+              "node": "wild-herb",
+              "x": 420,
+              "overrides": {
+                "seed": {
+                  "itemId": "herb-seed",
+                  "chance": 1
+                }
+              }
+            },
+            {
+              "kind": "node",
+              "node": "oak-tree",
+              "x": 560
+            },
+            {
+              "kind": "enemy",
+              "enemy": "forest-slime",
+              "type": "slime",
+              "x": 800,
+              "y": 580,
+              "patrolDistance": 60,
+              "speed": 30
+            },
+            {
+              "kind": "exit",
+              "x": 1200
+            }
           ]
         }
       ]
     },
     {
-      "number": 2, "realm": 1, "status": "ready",
-      "name": "ດ່ານ 2: ເສັ້ນທາງປ່າ", "nameEn": "Stage 2: Forest Path",
-      "layout": {"generate": {"biome": "forest", "seed": 2, "screens": 2}},
-      "lessons": ["2-1"],
+      "number": 2,
+      "realm": 1,
+      "status": "ready",
+      "name": "ດ່ານ 2: ເສັ້ນທາງປ່າ",
+      "nameEn": "Stage 2: Forest Path",
+      "layout": {
+        "generate": {
+          "biome": "forest",
+          "seed": 2,
+          "screens": 2
+        }
+      },
+      "lessons": [
+        "2-1"
+      ],
       "zones": [
         {
-          "id": "a", "name": "ເສັ້ນທາງປ່າ (Forest Path)",
+          "id": "a",
+          "name": "ເສັ້ນທາງປ່າ (Forest Path)",
           "contents": [
-            {"kind": "waypoint", "x": 120, "name": "ຈຸດວາບປອດໄພ ດ່ານ 2", "label": "🌀 ຈຸດວາບປອດໄພ ດ່ານ 2"},
-            {"kind": "sign", "x": 240, "text": "🌲 ເສັ້ນທາງປ່າ", "color": "#86efac", "stroke": "#064e3b"},
-            {"kind": "spawn-pool", "nodes": ["oak-tree", "wild-herb", "fiber-grass"], "count": 5, "enemies": ["forest-slime"], "enemyCount": 3, "patrolDistance": 100, "speed": 50},
-            {"kind": "exit"}
+            {
+              "kind": "waypoint",
+              "x": 120,
+              "name": "ຈຸດວາບປອດໄພ ດ່ານ 2",
+              "label": "🌀 ຈຸດວາບປອດໄພ ດ່ານ 2"
+            },
+            {
+              "kind": "sign",
+              "x": 240,
+              "text": "🌲 ເສັ້ນທາງປ່າ",
+              "color": "#86efac",
+              "stroke": "#064e3b"
+            },
+            {
+              "kind": "spawn-pool",
+              "nodes": [
+                "oak-tree",
+                "wild-herb",
+                "fiber-grass"
+              ],
+              "count": 5,
+              "enemies": [
+                "forest-slime"
+              ],
+              "enemyCount": 3,
+              "patrolDistance": 100,
+              "speed": 50
+            },
+            {
+              "kind": "exit"
+            }
           ]
         }
       ]
     },
     {
-      "number": 3, "realm": 1, "status": "ready",
-      "name": "ດ່ານ 3: ລຳທານໍ້າໃນປ່າ", "nameEn": "Stage 3: Creek Woods",
-      "layout": {"generate": {"biome": "forest", "seed": 3, "screens": 2, "pits": 1}},
-      "lessons": ["3-1"],
+      "number": 3,
+      "realm": 1,
+      "status": "ready",
+      "name": "ດ່ານ 3: ລຳທານໍ້າໃນປ່າ",
+      "nameEn": "Stage 3: Creek Woods",
+      "layout": {
+        "generate": {
+          "biome": "forest",
+          "seed": 3,
+          "screens": 2,
+          "pits": 1
+        }
+      },
+      "lessons": [
+        "3-1"
+      ],
       "zones": [
         {
-          "id": "a", "name": "ລຳທານໍ້າໃນປ່າ (Creek Woods)",
+          "id": "a",
+          "name": "ລຳທານໍ້າໃນປ່າ (Creek Woods)",
           "contents": [
-            {"kind": "waypoint", "x": 120, "name": "ຈຸດວາບປອດໄພ ດ່ານ 3", "label": "🌀 ຈຸດວາບປອດໄພ ດ່ານ 3"},
-            {"kind": "sign", "x": 240, "text": "🌲 ລຳທານໍ້າໃນປ່າ", "color": "#86efac", "stroke": "#064e3b"},
-            {"kind": "spawn-pool", "nodes": ["oak-tree", "wild-herb", "fiber-grass"], "count": 6, "enemies": ["forest-slime"], "enemyCount": 3, "patrolDistance": 100, "speed": 50},
-            {"kind": "exit"}
+            {
+              "kind": "waypoint",
+              "x": 120,
+              "name": "ຈຸດວາບປອດໄພ ດ່ານ 3",
+              "label": "🌀 ຈຸດວາບປອດໄພ ດ່ານ 3"
+            },
+            {
+              "kind": "sign",
+              "x": 240,
+              "text": "🌲 ລຳທານໍ້າໃນປ່າ",
+              "color": "#86efac",
+              "stroke": "#064e3b"
+            },
+            {
+              "kind": "spawn-pool",
+              "nodes": [
+                "oak-tree",
+                "wild-herb",
+                "fiber-grass"
+              ],
+              "count": 6,
+              "enemies": [
+                "forest-slime"
+              ],
+              "enemyCount": 3,
+              "patrolDistance": 100,
+              "speed": 50
+            },
+            {
+              "kind": "exit"
+            }
           ]
         }
       ]
     },
     {
-      "number": 4, "realm": 1, "status": "ready",
-      "name": "ດ່ານ 4: ປາກຖ້ຳ", "nameEn": "Stage 4: Cave Mouth",
-      "layout": {"generate": {"biome": "forest", "seed": 4, "screens": 2, "pits": 1}},
-      "lessons": ["4-1"],
+      "number": 4,
+      "realm": 1,
+      "status": "ready",
+      "name": "ດ່ານ 4: ປາກຖ້ຳ",
+      "nameEn": "Stage 4: Cave Mouth",
+      "layout": {
+        "generate": {
+          "biome": "forest",
+          "seed": 4,
+          "screens": 2,
+          "pits": 1
+        }
+      },
+      "lessons": [
+        "4-1"
+      ],
       "zones": [
         {
-          "id": "a", "name": "ປາກຖ້ຳ (Cave Mouth)",
+          "id": "a",
+          "name": "ປາກຖ້ຳ (Cave Mouth)",
           "contents": [
-            {"kind": "waypoint", "x": 120, "name": "ຈຸດວາບປອດໄພ ດ່ານ 4", "label": "🌀 ຈຸດວາບປອດໄພ ດ່ານ 4"},
-            {"kind": "sign", "x": 240, "text": "🌲 ປາກຖ້ຳ ຂ້າງໜ້າແມ່ນຖ້ຳສາຍແຮ່", "color": "#86efac", "stroke": "#064e3b"},
-            {"kind": "spawn-pool", "nodes": ["oak-tree", "wild-herb", "fiber-grass"], "count": 5, "enemies": ["forest-slime"], "enemyCount": 3, "patrolDistance": 100, "speed": 50},
-            {"kind": "exit"}
+            {
+              "kind": "waypoint",
+              "x": 120,
+              "name": "ຈຸດວາບປອດໄພ ດ່ານ 4",
+              "label": "🌀 ຈຸດວາບປອດໄພ ດ່ານ 4"
+            },
+            {
+              "kind": "sign",
+              "x": 240,
+              "text": "🌲 ປາກຖ້ຳ ຂ້າງໜ້າແມ່ນຖ້ຳສາຍແຮ່",
+              "color": "#86efac",
+              "stroke": "#064e3b"
+            },
+            {
+              "kind": "spawn-pool",
+              "nodes": [
+                "oak-tree",
+                "wild-herb",
+                "fiber-grass"
+              ],
+              "count": 5,
+              "enemies": [
+                "forest-slime"
+              ],
+              "enemyCount": 3,
+              "patrolDistance": 100,
+              "speed": 50
+            },
+            {
+              "kind": "exit"
+            }
           ]
         }
       ]
     },
     {
-      "number": 5, "realm": 1, "status": "ready",
-      "name": "ດ່ານ 5: ຜູ້ພິທັກຖ້ຳ", "nameEn": "Stage 5: Cave Guardian",
+      "number": 5,
+      "realm": 1,
+      "status": "ready",
+      "name": "ດ່ານ 5: ຜູ້ພິທັກຖ້ຳ",
+      "nameEn": "Stage 5: Cave Guardian",
       "layout": "assets/levels/stage-005.json",
-      "lessons": ["5-1"],
+      "lessons": [
+        "5-1"
+      ],
       "zones": [
         {
-          "id": "a", "name": "ຖ້ຳຜູ້ພິທັກ (Guardian Cave)",
+          "id": "a",
+          "name": "ຖ້ຳຜູ້ພິທັກ (Guardian Cave)",
           "contents": [
-            {"kind": "waypoint", "x": 120, "name": "ຈຸດວາບປອດໄພ ດ່ານ 5", "label": "🌀 ຈຸດວາບປອດໄພ ດ່ານ 5"},
-            {"kind": "sign", "x": 260, "text": "⛏️ ເຂດຖ້ຳສາຍແຮ່\nຕ້ອງໃຊ້ Pickaxe ຂຸດແຮ່ເຫຼັກ", "color": "#cbd5e1", "stroke": "#1e293b"},
-            {"kind": "node", "node": "stone-rock", "x": 400},
-            {"kind": "node", "node": "iron-vein", "x": 560},
-            {"kind": "node", "node": "iron-vein", "x": 1000},
-            {"kind": "enemy", "enemy": "rock-golem", "type": "slime-armored", "x": 700, "y": 580, "patrolDistance": 140, "speed": 45},
-            {"kind": "miniboss", "enemy": "cave-guardian", "type": "slime-armored", "x": 1550, "y": 560, "patrolDistance": 160, "speed": 40, "sign": "⚠️ ຜູ້ພິທັກຖ້ຳ Cave Guardian\n(ປາບເພື່ອຮັບຜລຶກແກ້ວ 💎)"},
-            {"kind": "exit", "x": 1900}
+            {
+              "kind": "waypoint",
+              "x": 120,
+              "name": "ຈຸດວາບປອດໄພ ດ່ານ 5",
+              "label": "🌀 ຈຸດວາບປອດໄພ ດ່ານ 5"
+            },
+            {
+              "kind": "sign",
+              "x": 260,
+              "text": "⛏️ ເຂດຖ້ຳສາຍແຮ່\nຕ້ອງໃຊ້ Pickaxe ຂຸດແຮ່ເຫຼັກ",
+              "color": "#cbd5e1",
+              "stroke": "#1e293b"
+            },
+            {
+              "kind": "npc",
+              "id": "npc-thong",
+              "name": "ລຸງທອງ (ນັກຂຸດຄົ້ນ)",
+              "role": "npc-thong",
+              "x": 360,
+              "dialogueId": "uncle_thong",
+              "label": "💬 [E] ລົມກັບລຸງທອງ ນັກຂຸດຄົ້ນ"
+            },
+            {
+              "kind": "node",
+              "node": "stone-rock",
+              "x": 400
+            },
+            {
+              "kind": "node",
+              "node": "iron-vein",
+              "x": 560
+            },
+            {
+              "kind": "node",
+              "node": "iron-vein",
+              "x": 1000
+            },
+            {
+              "kind": "enemy",
+              "enemy": "rock-golem",
+              "type": "slime-armored",
+              "x": 700,
+              "y": 580,
+              "patrolDistance": 140,
+              "speed": 45
+            },
+            {
+              "kind": "miniboss",
+              "enemy": "cave-guardian",
+              "type": "slime-armored",
+              "x": 1550,
+              "y": 560,
+              "patrolDistance": 160,
+              "speed": 40,
+              "sign": "⚠️ ຜູ້ພິທັກຖ້ຳ Cave Guardian\n(ປາບເພື່ອຮັບຜລຶກແກ້ວ 💎)"
+            },
+            {
+              "kind": "exit",
+              "x": 1900
+            }
           ]
         }
       ]
     },
     {
-      "number": 6, "realm": 1, "status": "ready",
-      "name": "ດ່ານ 6: ຖ້ຳແຄບ", "nameEn": "Stage 6: Narrow Cave",
-      "layout": {"generate": {"biome": "cave", "seed": 6, "screens": 2, "pits": 1}},
-      "lessons": ["6-1"],
+      "number": 6,
+      "realm": 1,
+      "status": "ready",
+      "name": "ດ່ານ 6: ຖ້ຳແຄບ",
+      "nameEn": "Stage 6: Narrow Cave",
+      "layout": {
+        "generate": {
+          "biome": "cave",
+          "seed": 6,
+          "screens": 2,
+          "pits": 1
+        }
+      },
+      "lessons": [
+        "6-1"
+      ],
       "zones": [
         {
-          "id": "a", "name": "ຖ້ຳແຄບ",
+          "id": "a",
+          "name": "ຖ້ຳແຄບ",
           "contents": [
-            {"kind": "waypoint", "x": 120, "name": "ຈຸດວາບປອດໄພ ດ່ານ 6", "label": "🌀 ຈຸດວາບປອດໄພ ດ່ານ 6"},
-            {"kind": "sign", "x": 260, "text": "⛏️ ຖ້ຳແຄບ", "color": "#cbd5e1", "stroke": "#1e293b"},
-            {"kind": "spawn-pool", "nodes": ["stone-rock", "iron-vein"], "count": 4, "enemies": ["rock-golem"], "enemyCount": 2, "enemyType": "slime-armored", "patrolDistance": 120, "speed": 45},
-            {"kind": "exit"}
+            {
+              "kind": "waypoint",
+              "x": 120,
+              "name": "ຈຸດວາບປອດໄພ ດ່ານ 6",
+              "label": "🌀 ຈຸດວາບປອດໄພ ດ່ານ 6"
+            },
+            {
+              "kind": "sign",
+              "x": 260,
+              "text": "⛏️ ຖ້ຳແຄບ",
+              "color": "#cbd5e1",
+              "stroke": "#1e293b"
+            },
+            {
+              "kind": "spawn-pool",
+              "nodes": [
+                "stone-rock",
+                "iron-vein"
+              ],
+              "count": 4,
+              "enemies": [
+                "rock-golem"
+              ],
+              "enemyCount": 2,
+              "enemyType": "slime-armored",
+              "patrolDistance": 120,
+              "speed": 45
+            },
+            {
+              "kind": "exit"
+            }
           ]
         }
       ]
     },
     {
-      "number": 7, "realm": 1, "status": "ready",
-      "name": "ດ່ານ 7: ຖ້ຳເລິກ", "nameEn": "Stage 7: Deep Cave",
-      "layout": {"generate": {"biome": "cave", "seed": 7, "screens": 3, "pits": 1}},
-      "lessons": ["7-1"],
+      "number": 7,
+      "realm": 1,
+      "status": "ready",
+      "name": "ດ່ານ 7: ຖ້ຳເລິກ",
+      "nameEn": "Stage 7: Deep Cave",
+      "layout": {
+        "generate": {
+          "biome": "cave",
+          "seed": 7,
+          "screens": 3,
+          "pits": 1
+        }
+      },
+      "lessons": [
+        "7-1"
+      ],
       "zones": [
         {
-          "id": "a", "name": "ຖ້ຳເລິກ",
+          "id": "a",
+          "name": "ຖ້ຳເລິກ",
           "contents": [
-            {"kind": "waypoint", "x": 120, "name": "ຈຸດວາບປອດໄພ ດ່ານ 7", "label": "🌀 ຈຸດວາບປອດໄພ ດ່ານ 7"},
-            {"kind": "sign", "x": 260, "text": "⛏️ ຖ້ຳເລິກ", "color": "#cbd5e1", "stroke": "#1e293b"},
-            {"kind": "spawn-pool", "nodes": ["stone-rock", "iron-vein"], "count": 5, "enemies": ["rock-golem"], "enemyCount": 2, "enemyType": "slime-armored", "patrolDistance": 120, "speed": 45},
-            {"kind": "exit"}
+            {
+              "kind": "waypoint",
+              "x": 120,
+              "name": "ຈຸດວາບປອດໄພ ດ່ານ 7",
+              "label": "🌀 ຈຸດວາບປອດໄພ ດ່ານ 7"
+            },
+            {
+              "kind": "sign",
+              "x": 260,
+              "text": "⛏️ ຖ້ຳເລິກ",
+              "color": "#cbd5e1",
+              "stroke": "#1e293b"
+            },
+            {
+              "kind": "spawn-pool",
+              "nodes": [
+                "stone-rock",
+                "iron-vein"
+              ],
+              "count": 5,
+              "enemies": [
+                "rock-golem"
+              ],
+              "enemyCount": 2,
+              "enemyType": "slime-armored",
+              "patrolDistance": 120,
+              "speed": 45
+            },
+            {
+              "kind": "exit"
+            }
           ]
         }
       ]
     },
     {
-      "number": 8, "realm": 1, "status": "ready",
-      "name": "ດ່ານ 8: ສາຍແຮ່", "nameEn": "Stage 8: Ore Seam",
-      "layout": {"generate": {"biome": "cave", "seed": 8, "screens": 3, "pits": 2}},
-      "lessons": ["8-1"],
+      "number": 8,
+      "realm": 1,
+      "status": "ready",
+      "name": "ດ່ານ 8: ສາຍແຮ່",
+      "nameEn": "Stage 8: Ore Seam",
+      "layout": {
+        "generate": {
+          "biome": "cave",
+          "seed": 8,
+          "screens": 3,
+          "pits": 2
+        }
+      },
+      "lessons": [
+        "8-1"
+      ],
       "zones": [
         {
-          "id": "a", "name": "ສາຍແຮ່",
+          "id": "a",
+          "name": "ສາຍແຮ່",
           "contents": [
-            {"kind": "waypoint", "x": 120, "name": "ຈຸດວາບປອດໄພ ດ່ານ 8", "label": "🌀 ຈຸດວາບປອດໄພ ດ່ານ 8"},
-            {"kind": "sign", "x": 260, "text": "⛏️ ສາຍແຮ່", "color": "#cbd5e1", "stroke": "#1e293b"},
-            {"kind": "spawn-pool", "nodes": ["stone-rock", "iron-vein"], "count": 6, "enemies": ["rock-golem"], "enemyCount": 3, "enemyType": "slime-armored", "patrolDistance": 120, "speed": 45},
-            {"kind": "exit"}
+            {
+              "kind": "waypoint",
+              "x": 120,
+              "name": "ຈຸດວາບປອດໄພ ດ່ານ 8",
+              "label": "🌀 ຈຸດວາບປອດໄພ ດ່ານ 8"
+            },
+            {
+              "kind": "sign",
+              "x": 260,
+              "text": "⛏️ ສາຍແຮ່",
+              "color": "#cbd5e1",
+              "stroke": "#1e293b"
+            },
+            {
+              "kind": "spawn-pool",
+              "nodes": [
+                "stone-rock",
+                "iron-vein"
+              ],
+              "count": 6,
+              "enemies": [
+                "rock-golem"
+              ],
+              "enemyCount": 3,
+              "enemyType": "slime-armored",
+              "patrolDistance": 120,
+              "speed": 45
+            },
+            {
+              "kind": "exit"
+            }
           ]
         }
       ]
     },
     {
-      "number": 9, "realm": 1, "status": "ready",
-      "name": "ດ່ານ 9: ໜ້າປະຕູໃຫຍ່", "nameEn": "Stage 9: Before the Gate",
-      "layout": {"generate": {"biome": "cave", "seed": 9, "screens": 3, "pits": 2}},
-      "lessons": ["9-1"],
+      "number": 9,
+      "realm": 1,
+      "status": "ready",
+      "name": "ດ່ານ 9: ໜ້າປະຕູໃຫຍ່",
+      "nameEn": "Stage 9: Before the Gate",
+      "layout": {
+        "generate": {
+          "biome": "cave",
+          "seed": 9,
+          "screens": 3,
+          "pits": 2
+        }
+      },
+      "lessons": [
+        "9-1"
+      ],
       "zones": [
         {
-          "id": "a", "name": "ໜ້າປະຕູໃຫຍ່",
+          "id": "a",
+          "name": "ໜ້າປະຕູໃຫຍ່",
           "contents": [
-            {"kind": "waypoint", "x": 120, "name": "ຈຸດວາບປອດໄພ ດ່ານ 9", "label": "🌀 ຈຸດວາບປອດໄພ ດ່ານ 9"},
-            {"kind": "sign", "x": 260, "text": "⛏️ ໜ້າປະຕູໃຫຍ່", "color": "#cbd5e1", "stroke": "#1e293b"},
-            {"kind": "spawn-pool", "nodes": ["stone-rock", "iron-vein"], "count": 6, "enemies": ["rock-golem"], "enemyCount": 4, "enemyType": "slime-armored", "patrolDistance": 120, "speed": 45},
-            {"kind": "exit"}
+            {
+              "kind": "waypoint",
+              "x": 120,
+              "name": "ຈຸດວາບປອດໄພ ດ່ານ 9",
+              "label": "🌀 ຈຸດວາບປອດໄພ ດ່ານ 9"
+            },
+            {
+              "kind": "sign",
+              "x": 260,
+              "text": "⛏️ ໜ້າປະຕູໃຫຍ່",
+              "color": "#cbd5e1",
+              "stroke": "#1e293b"
+            },
+            {
+              "kind": "spawn-pool",
+              "nodes": [
+                "stone-rock",
+                "iron-vein"
+              ],
+              "count": 6,
+              "enemies": [
+                "rock-golem"
+              ],
+              "enemyCount": 4,
+              "enemyType": "slime-armored",
+              "patrolDistance": 120,
+              "speed": 45
+            },
+            {
+              "kind": "exit"
+            }
           ]
         }
       ]
     },
     {
-      "number": 10, "realm": 1, "status": "ready",
-      "name": "ດ່ານ 10: ປະຕູໃຫຍ່ ແລະ ລານບອສ", "nameEn": "Stage 10: Broken Gate & Boss Arena",
+      "number": 10,
+      "realm": 1,
+      "status": "ready",
+      "name": "ດ່ານ 10: ປະຕູໃຫຍ່ ແລະ ລານບອສ",
+      "nameEn": "Stage 10: Broken Gate & Boss Arena",
       "layout": "assets/levels/stage-010.json",
-      "lessons": ["10-1"],
+      "lessons": [
+        "10-1"
+      ],
       "zones": [
         {
-          "id": "gate", "name": "ປະຕູໃຫຍ່ທີ່ຫັກພັງ (Broken Gate)",
+          "id": "gate",
+          "name": "ປະຕູໃຫຍ່ທີ່ຫັກພັງ (Broken Gate)",
           "contents": [
-            {"kind": "waypoint", "x": 120, "name": "ຈຸດວາບປອດໄພ ດ່ານ 10", "label": "🌀 ຈຸດວາບປອດໄພ ດ່ານ 10"},
-            {"kind": "node", "node": "iron-vein", "x": 350},
-            {"kind": "node", "node": "stone-rock", "x": 520},
-            {"kind": "enemy", "enemy": "rock-golem", "type": "slime-armored", "x": 450, "y": 580, "patrolDistance": 140, "speed": 45},
-            {"kind": "waypoint", "x": 800, "name": "ຈຸດວາບປອດໄພ ໜ້າປະຕູໃຫຍ່ (Broken Gate)", "label": "🌀 ຈຸດວາບປອດໄພ ໜ້າປະຕູໃຫຍ່ (Broken Gate)"},
-            {"kind": "gate", "id": "gate-ch1", "x": 900, "requiredTool": "hammer", "requiredItem": "repair-kit", "requiresQuiz": true, "quizBookId": "book-ch1"}
+            {
+              "kind": "waypoint",
+              "x": 120,
+              "name": "ຈຸດວາບປອດໄພ ດ່ານ 10",
+              "label": "🌀 ຈຸດວາບປອດໄພ ດ່ານ 10"
+            },
+            {
+              "kind": "npc",
+              "id": "npc-dr-cyber",
+              "name": "ດຣ. ໄຊເບີ (ວິສະວະກອນ)",
+              "role": "npc-dr-cyber",
+              "x": 280,
+              "dialogueId": "dr_cyber",
+              "label": "💬 [E] ລົມກັບ ດຣ. ໄຊເບີ"
+            },
+            {
+              "kind": "node",
+              "node": "iron-vein",
+              "x": 350
+            },
+            {
+              "kind": "node",
+              "node": "stone-rock",
+              "x": 520
+            },
+            {
+              "kind": "enemy",
+              "enemy": "rock-golem",
+              "type": "slime-armored",
+              "x": 450,
+              "y": 580,
+              "patrolDistance": 140,
+              "speed": 45
+            },
+            {
+              "kind": "waypoint",
+              "x": 800,
+              "name": "ຈຸດວາບປອດໄພ ໜ້າປະຕູໃຫຍ່ (Broken Gate)",
+              "label": "🌀 ຈຸດວາບປອດໄພ ໜ້າປະຕູໃຫຍ່ (Broken Gate)"
+            },
+            {
+              "kind": "gate",
+              "id": "gate-ch1",
+              "x": 900,
+              "requiredTool": "hammer",
+              "requiredItem": "repair-kit",
+              "requiresQuiz": true,
+              "quizBookId": "book-ch1"
+            }
           ]
         },
         {
-          "id": "boss", "name": "ລານປະລອງບອສໃຫຍ່ (Boss Arena)",
+          "id": "boss",
+          "name": "ລານປະລອງບອສໃຫຍ່ (Boss Arena)",
           "contents": [
-            {"kind": "boss", "enemy": "stage-ch1-boss", "x": 1700, "y": 400, "banner": "👑 ຈອມມານຮາດແວບູຮານ (Hardware Overlord) 👑\n(ຫຼົບກະແສໄຟຟ້າ & ໂຈມຕີປິດສາກດ້ວຍຄວາມຮູ້!)"}
+            {
+              "kind": "boss",
+              "enemy": "stage-ch1-boss",
+              "x": 1700,
+              "y": 400,
+              "banner": "👑 ຈອມມານຮາດແວບູຮານ (Hardware Overlord) 👑\n(ຫຼົບກະແສໄຟຟ້າ & ໂຈມຕີປິດສາກດ້ວຍຄວາມຮູ້!)"
+            }
           ]
         }
       ]
@@ -244,8 +712,14 @@
               "overrides": {
                 "strikes": 3,
                 "drops": [
-                    { "itemId": "crystal", "count": 2 },
-                    { "itemId": "blue-ore", "count": 3 }
+                  {
+                    "itemId": "crystal",
+                    "count": 2
+                  },
+                  {
+                    "itemId": "blue-ore",
+                    "count": 3
+                  }
                 ]
               }
             },
@@ -314,8 +788,14 @@
               "overrides": {
                 "strikes": 3,
                 "drops": [
-                    { "itemId": "crystal", "count": 2 },
-                    { "itemId": "blue-ore", "count": 4 }
+                  {
+                    "itemId": "crystal",
+                    "count": 2
+                  },
+                  {
+                    "itemId": "blue-ore",
+                    "count": 4
+                  }
                 ]
               }
             },
@@ -383,8 +863,14 @@
               "overrides": {
                 "strikes": 3,
                 "drops": [
-                    { "itemId": "crystal", "count": 2 },
-                    { "itemId": "cave-mushroom", "count": 4 }
+                  {
+                    "itemId": "crystal",
+                    "count": 2
+                  },
+                  {
+                    "itemId": "cave-mushroom",
+                    "count": 4
+                  }
                 ]
               }
             },
@@ -452,8 +938,14 @@
               "overrides": {
                 "strikes": 3,
                 "drops": [
-                    { "itemId": "crystal", "count": 3 },
-                    { "itemId": "blue-ore", "count": 3 }
+                  {
+                    "itemId": "crystal",
+                    "count": 3
+                  },
+                  {
+                    "itemId": "blue-ore",
+                    "count": 3
+                  }
                 ]
               }
             },
@@ -593,8 +1085,14 @@
               "overrides": {
                 "strikes": 3,
                 "drops": [
-                    { "itemId": "crystal", "count": 3 },
-                    { "itemId": "blue-ore", "count": 5 }
+                  {
+                    "itemId": "crystal",
+                    "count": 3
+                  },
+                  {
+                    "itemId": "blue-ore",
+                    "count": 5
+                  }
                 ]
               }
             },
@@ -663,8 +1161,14 @@
               "overrides": {
                 "strikes": 3,
                 "drops": [
-                    { "itemId": "crystal", "count": 3 },
-                    { "itemId": "cave-mushroom", "count": 6 }
+                  {
+                    "itemId": "crystal",
+                    "count": 3
+                  },
+                  {
+                    "itemId": "cave-mushroom",
+                    "count": 6
+                  }
                 ]
               }
             },
@@ -734,8 +1238,14 @@
               "overrides": {
                 "strikes": 3,
                 "drops": [
-                    { "itemId": "crystal", "count": 4 },
-                    { "itemId": "blue-ore", "count": 5 }
+                  {
+                    "itemId": "crystal",
+                    "count": 4
+                  },
+                  {
+                    "itemId": "blue-ore",
+                    "count": 5
+                  }
                 ]
               }
             },
@@ -805,8 +1315,14 @@
               "overrides": {
                 "strikes": 3,
                 "drops": [
-                    { "itemId": "crystal", "count": 4 },
-                    { "itemId": "blue-ore", "count": 6 }
+                  {
+                    "itemId": "crystal",
+                    "count": 4
+                  },
+                  {
+                    "itemId": "blue-ore",
+                    "count": 6
+                  }
                 ]
               }
             },
@@ -888,7 +1404,7 @@
       "nameEn": "Stage 21: Desert Edge",
       "layout": {
         "generate": {
-          "biome": "forest",
+          "biome": "desert",
           "seed": 21,
           "screens": 2
         }
@@ -944,7 +1460,7 @@
       "nameEn": "Stage 22: Windy Dunes",
       "layout": {
         "generate": {
-          "biome": "forest",
+          "biome": "desert",
           "seed": 22,
           "screens": 3,
           "pits": 1
@@ -1001,7 +1517,7 @@
       "nameEn": "Stage 23: Cactus Oasis",
       "layout": {
         "generate": {
-          "biome": "forest",
+          "biome": "desert",
           "seed": 23,
           "screens": 3,
           "pits": 1
@@ -1186,7 +1702,7 @@
       "nameEn": "Stage 26: Process Bazaar",
       "layout": {
         "generate": {
-          "biome": "forest",
+          "biome": "desert",
           "seed": 26,
           "screens": 4,
           "pits": 2
@@ -1301,7 +1817,7 @@
       "nameEn": "Stage 28: Driver Canyon",
       "layout": {
         "generate": {
-          "biome": "cave",
+          "biome": "desert",
           "seed": 28,
           "screens": 4,
           "pits": 2
@@ -1471,75 +1987,355 @@
         }
       ]
     },
-    { "number": 31, "realm": 4, "status": "placeholder" },
-    { "number": 32, "realm": 4, "status": "placeholder" },
-    { "number": 33, "realm": 4, "status": "placeholder" },
-    { "number": 34, "realm": 4, "status": "placeholder" },
-    { "number": 35, "realm": 4, "status": "placeholder" },
-    { "number": 36, "realm": 4, "status": "placeholder" },
-    { "number": 37, "realm": 4, "status": "placeholder" },
-    { "number": 38, "realm": 4, "status": "placeholder" },
-    { "number": 39, "realm": 4, "status": "placeholder" },
-    { "number": 40, "realm": 4, "status": "placeholder" },
-    { "number": 41, "realm": 5, "status": "placeholder" },
-    { "number": 42, "realm": 5, "status": "placeholder" },
-    { "number": 43, "realm": 5, "status": "placeholder" },
-    { "number": 44, "realm": 5, "status": "placeholder" },
-    { "number": 45, "realm": 5, "status": "placeholder" },
-    { "number": 46, "realm": 5, "status": "placeholder" },
-    { "number": 47, "realm": 5, "status": "placeholder" },
-    { "number": 48, "realm": 5, "status": "placeholder" },
-    { "number": 49, "realm": 5, "status": "placeholder" },
-    { "number": 50, "realm": 5, "status": "placeholder" },
-    { "number": 51, "realm": 6, "status": "placeholder" },
-    { "number": 52, "realm": 6, "status": "placeholder" },
-    { "number": 53, "realm": 6, "status": "placeholder" },
-    { "number": 54, "realm": 6, "status": "placeholder" },
-    { "number": 55, "realm": 6, "status": "placeholder" },
-    { "number": 56, "realm": 6, "status": "placeholder" },
-    { "number": 57, "realm": 6, "status": "placeholder" },
-    { "number": 58, "realm": 6, "status": "placeholder" },
-    { "number": 59, "realm": 6, "status": "placeholder" },
-    { "number": 60, "realm": 6, "status": "placeholder" },
-    { "number": 61, "realm": 7, "status": "placeholder" },
-    { "number": 62, "realm": 7, "status": "placeholder" },
-    { "number": 63, "realm": 7, "status": "placeholder" },
-    { "number": 64, "realm": 7, "status": "placeholder" },
-    { "number": 65, "realm": 7, "status": "placeholder" },
-    { "number": 66, "realm": 7, "status": "placeholder" },
-    { "number": 67, "realm": 7, "status": "placeholder" },
-    { "number": 68, "realm": 7, "status": "placeholder" },
-    { "number": 69, "realm": 7, "status": "placeholder" },
-    { "number": 70, "realm": 7, "status": "placeholder" },
-    { "number": 71, "realm": 8, "status": "placeholder" },
-    { "number": 72, "realm": 8, "status": "placeholder" },
-    { "number": 73, "realm": 8, "status": "placeholder" },
-    { "number": 74, "realm": 8, "status": "placeholder" },
-    { "number": 75, "realm": 8, "status": "placeholder" },
-    { "number": 76, "realm": 8, "status": "placeholder" },
-    { "number": 77, "realm": 8, "status": "placeholder" },
-    { "number": 78, "realm": 8, "status": "placeholder" },
-    { "number": 79, "realm": 8, "status": "placeholder" },
-    { "number": 80, "realm": 8, "status": "placeholder" },
-    { "number": 81, "realm": 9, "status": "placeholder" },
-    { "number": 82, "realm": 9, "status": "placeholder" },
-    { "number": 83, "realm": 9, "status": "placeholder" },
-    { "number": 84, "realm": 9, "status": "placeholder" },
-    { "number": 85, "realm": 9, "status": "placeholder" },
-    { "number": 86, "realm": 9, "status": "placeholder" },
-    { "number": 87, "realm": 9, "status": "placeholder" },
-    { "number": 88, "realm": 9, "status": "placeholder" },
-    { "number": 89, "realm": 9, "status": "placeholder" },
-    { "number": 90, "realm": 9, "status": "placeholder" },
-    { "number": 91, "realm": 10, "status": "placeholder" },
-    { "number": 92, "realm": 10, "status": "placeholder" },
-    { "number": 93, "realm": 10, "status": "placeholder" },
-    { "number": 94, "realm": 10, "status": "placeholder" },
-    { "number": 95, "realm": 10, "status": "placeholder" },
-    { "number": 96, "realm": 10, "status": "placeholder" },
-    { "number": 97, "realm": 10, "status": "placeholder" },
-    { "number": 98, "realm": 10, "status": "placeholder" },
-    { "number": 99, "realm": 10, "status": "placeholder" },
-    { "number": 100, "realm": 10, "status": "placeholder" }
+    {
+      "number": 31,
+      "realm": 4,
+      "status": "placeholder"
+    },
+    {
+      "number": 32,
+      "realm": 4,
+      "status": "placeholder"
+    },
+    {
+      "number": 33,
+      "realm": 4,
+      "status": "placeholder"
+    },
+    {
+      "number": 34,
+      "realm": 4,
+      "status": "placeholder"
+    },
+    {
+      "number": 35,
+      "realm": 4,
+      "status": "placeholder"
+    },
+    {
+      "number": 36,
+      "realm": 4,
+      "status": "placeholder"
+    },
+    {
+      "number": 37,
+      "realm": 4,
+      "status": "placeholder"
+    },
+    {
+      "number": 38,
+      "realm": 4,
+      "status": "placeholder"
+    },
+    {
+      "number": 39,
+      "realm": 4,
+      "status": "placeholder"
+    },
+    {
+      "number": 40,
+      "realm": 4,
+      "status": "placeholder"
+    },
+    {
+      "number": 41,
+      "realm": 5,
+      "status": "placeholder"
+    },
+    {
+      "number": 42,
+      "realm": 5,
+      "status": "placeholder"
+    },
+    {
+      "number": 43,
+      "realm": 5,
+      "status": "placeholder"
+    },
+    {
+      "number": 44,
+      "realm": 5,
+      "status": "placeholder"
+    },
+    {
+      "number": 45,
+      "realm": 5,
+      "status": "placeholder"
+    },
+    {
+      "number": 46,
+      "realm": 5,
+      "status": "placeholder"
+    },
+    {
+      "number": 47,
+      "realm": 5,
+      "status": "placeholder"
+    },
+    {
+      "number": 48,
+      "realm": 5,
+      "status": "placeholder"
+    },
+    {
+      "number": 49,
+      "realm": 5,
+      "status": "placeholder"
+    },
+    {
+      "number": 50,
+      "realm": 5,
+      "status": "placeholder"
+    },
+    {
+      "number": 51,
+      "realm": 6,
+      "status": "placeholder"
+    },
+    {
+      "number": 52,
+      "realm": 6,
+      "status": "placeholder"
+    },
+    {
+      "number": 53,
+      "realm": 6,
+      "status": "placeholder"
+    },
+    {
+      "number": 54,
+      "realm": 6,
+      "status": "placeholder"
+    },
+    {
+      "number": 55,
+      "realm": 6,
+      "status": "placeholder"
+    },
+    {
+      "number": 56,
+      "realm": 6,
+      "status": "placeholder"
+    },
+    {
+      "number": 57,
+      "realm": 6,
+      "status": "placeholder"
+    },
+    {
+      "number": 58,
+      "realm": 6,
+      "status": "placeholder"
+    },
+    {
+      "number": 59,
+      "realm": 6,
+      "status": "placeholder"
+    },
+    {
+      "number": 60,
+      "realm": 6,
+      "status": "placeholder"
+    },
+    {
+      "number": 61,
+      "realm": 7,
+      "status": "placeholder"
+    },
+    {
+      "number": 62,
+      "realm": 7,
+      "status": "placeholder"
+    },
+    {
+      "number": 63,
+      "realm": 7,
+      "status": "placeholder"
+    },
+    {
+      "number": 64,
+      "realm": 7,
+      "status": "placeholder"
+    },
+    {
+      "number": 65,
+      "realm": 7,
+      "status": "placeholder"
+    },
+    {
+      "number": 66,
+      "realm": 7,
+      "status": "placeholder"
+    },
+    {
+      "number": 67,
+      "realm": 7,
+      "status": "placeholder"
+    },
+    {
+      "number": 68,
+      "realm": 7,
+      "status": "placeholder"
+    },
+    {
+      "number": 69,
+      "realm": 7,
+      "status": "placeholder"
+    },
+    {
+      "number": 70,
+      "realm": 7,
+      "status": "placeholder"
+    },
+    {
+      "number": 71,
+      "realm": 8,
+      "status": "placeholder"
+    },
+    {
+      "number": 72,
+      "realm": 8,
+      "status": "placeholder"
+    },
+    {
+      "number": 73,
+      "realm": 8,
+      "status": "placeholder"
+    },
+    {
+      "number": 74,
+      "realm": 8,
+      "status": "placeholder"
+    },
+    {
+      "number": 75,
+      "realm": 8,
+      "status": "placeholder"
+    },
+    {
+      "number": 76,
+      "realm": 8,
+      "status": "placeholder"
+    },
+    {
+      "number": 77,
+      "realm": 8,
+      "status": "placeholder"
+    },
+    {
+      "number": 78,
+      "realm": 8,
+      "status": "placeholder"
+    },
+    {
+      "number": 79,
+      "realm": 8,
+      "status": "placeholder"
+    },
+    {
+      "number": 80,
+      "realm": 8,
+      "status": "placeholder"
+    },
+    {
+      "number": 81,
+      "realm": 9,
+      "status": "placeholder"
+    },
+    {
+      "number": 82,
+      "realm": 9,
+      "status": "placeholder"
+    },
+    {
+      "number": 83,
+      "realm": 9,
+      "status": "placeholder"
+    },
+    {
+      "number": 84,
+      "realm": 9,
+      "status": "placeholder"
+    },
+    {
+      "number": 85,
+      "realm": 9,
+      "status": "placeholder"
+    },
+    {
+      "number": 86,
+      "realm": 9,
+      "status": "placeholder"
+    },
+    {
+      "number": 87,
+      "realm": 9,
+      "status": "placeholder"
+    },
+    {
+      "number": 88,
+      "realm": 9,
+      "status": "placeholder"
+    },
+    {
+      "number": 89,
+      "realm": 9,
+      "status": "placeholder"
+    },
+    {
+      "number": 90,
+      "realm": 9,
+      "status": "placeholder"
+    },
+    {
+      "number": 91,
+      "realm": 10,
+      "status": "placeholder"
+    },
+    {
+      "number": 92,
+      "realm": 10,
+      "status": "placeholder"
+    },
+    {
+      "number": 93,
+      "realm": 10,
+      "status": "placeholder"
+    },
+    {
+      "number": 94,
+      "realm": 10,
+      "status": "placeholder"
+    },
+    {
+      "number": 95,
+      "realm": 10,
+      "status": "placeholder"
+    },
+    {
+      "number": 96,
+      "realm": 10,
+      "status": "placeholder"
+    },
+    {
+      "number": 97,
+      "realm": 10,
+      "status": "placeholder"
+    },
+    {
+      "number": 98,
+      "realm": 10,
+      "status": "placeholder"
+    },
+    {
+      "number": 99,
+      "realm": 10,
+      "status": "placeholder"
+    },
+    {
+      "number": 100,
+      "realm": 10,
+      "status": "placeholder"
+    }
   ]
 }

@@ -24,9 +24,10 @@ test.describe('Portal shards open the next Realm', () => {
     });
     const count = (id: string) => page.evaluate((item: string) => (window as any).__entities.backpack.getItemCount(item) as number, id);
 
-    // The Forge (x = 1140): the recipe is there, taught by the book
-    expect(await bot.goTo(1135, { tolerance: 25, fight: false, timeoutMs: 40000 })).toBe('arrived');
+    // The Smithy (x = 3100), Weapons tab: the recipe is there, taught by the book
+    expect(await bot.goTo(3100, { tolerance: 25, fight: false, timeoutMs: 40000 })).toBe('arrived');
     await page.keyboard.press('KeyE');
+    await page.getByTestId('smithy-tab-weapons').click();
     const card = page.locator('div', { hasText: 'ກ້ອນປະຕູມິຕິສີຂຽວ' }).filter({ has: page.getByRole('button', { name: /ເລີ່ມຫຼອມ/ }) }).last();
     await expect(card).toBeVisible();
     await card.getByRole('button', { name: /ເລີ່ມຫຼອມ/ }).click();
@@ -42,7 +43,7 @@ test.describe('Portal shards open the next Realm', () => {
     await page.keyboard.press('Escape');
 
     // The World Gate (x = 1420): Realm 2 is closed and says what it needs; the block is ready to place
-    expect(await bot.goTo(1415, { tolerance: 25, fight: false, timeoutMs: 40000 })).toBe('arrived');
+    expect(await bot.goTo(3600, { tolerance: 25, fight: false, timeoutMs: 40000 })).toBe('arrived');
     await page.keyboard.press('KeyE');
     await expect(page.getByTestId('portal-gate')).toBeVisible();
     await expect(page.getByTestId('realm-row-2')).toHaveAttribute('data-open', 'false');

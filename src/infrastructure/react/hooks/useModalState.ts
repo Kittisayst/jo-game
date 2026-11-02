@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import type { GateRequirements } from '../../../application/RepairBrokenGateUseCase';
 import type { QuestionData } from '../../../domain/entities/Quiz';
 import type { TextbookModalMode } from '../components/TextbookModal';
+import type { SmithyTab } from '../components/SmithyModal';
 
 /** The question waiting for an answer at the end of a Stage. */
 export interface StageQuestionState
@@ -23,8 +24,9 @@ export function useModalState ()
     const [activeReaderPageNumber, setActiveReaderPageNumber] = useState<number | undefined>(undefined);
     const [isAcademyOpen, setIsAcademyOpen] = useState(false);
     const [activeExamBookId, setActiveExamBookId] = useState('book-ch1');
-    const [isWorkshopOpen, setIsWorkshopOpen] = useState(false);
-    const [isForgeOpen, setIsForgeOpen] = useState(false);
+    const [isSmithyOpen, setIsSmithyOpen] = useState(false);
+    const [smithyTab, setSmithyTab] = useState<SmithyTab>('tools');
+    const [isShopOpen, setIsShopOpen] = useState(false);
     const [isBackpackOpen, setIsBackpackOpen] = useState(false);
     const [isGateRepairOpen, setIsGateRepairOpen] = useState(false);
     const [activeGateId, setActiveGateId] = useState('gate-ch1');
@@ -37,7 +39,9 @@ export function useModalState ()
     const [isStageMapOpen, setIsStageMapOpen] = useState(false);
     const [isGardenOpen, setIsGardenOpen] = useState(false);
     const [isStorageOpen, setIsStorageOpen] = useState(false);
+    const [isQuestBoardOpen, setIsQuestBoardOpen] = useState(false);
     const [isCharacterOpen, setIsCharacterOpen] = useState(false);
+    const [isPetShopOpen, setIsPetShopOpen] = useState(false);
     // Not closed by Esc: the Stage is frozen until the player has answered
     const [stageQuestion, setStageQuestion] = useState<StageQuestionState | null>(null);
 
@@ -45,8 +49,8 @@ export function useModalState ()
     const open = {
         library: isLibraryOpen,
         academy: isAcademyOpen,
-        workshop: isWorkshopOpen,
-        forge: isForgeOpen,
+        smithy: isSmithyOpen,
+        shop: isShopOpen,
         backpack: isBackpackOpen,
         gateRepair: isGateRepairOpen,
         waypoint: isWaypointOpen,
@@ -56,7 +60,9 @@ export function useModalState ()
         stageMap: isStageMapOpen,
         garden: isGardenOpen,
         storage: isStorageOpen,
+        questBoard: isQuestBoardOpen,
         character: isCharacterOpen,
+        petShop: isPetShopOpen,
         stageQuestion: stageQuestion !== null,
     };
     const openRef = useRef(open);
@@ -68,8 +74,8 @@ export function useModalState ()
         const now = openRef.current;
         if (now.library) { setIsLibraryOpen(false); return true; }
         if (now.academy) { setIsAcademyOpen(false); return true; }
-        if (now.workshop) { setIsWorkshopOpen(false); return true; }
-        if (now.forge) { setIsForgeOpen(false); return true; }
+        if (now.smithy) { setIsSmithyOpen(false); return true; }
+        if (now.shop) { setIsShopOpen(false); return true; }
         if (now.backpack) { setIsBackpackOpen(false); return true; }
         if (now.gateRepair) { setIsGateRepairOpen(false); return true; }
         if (now.waypoint) { setIsWaypointOpen(false); return true; }
@@ -79,7 +85,9 @@ export function useModalState ()
         if (now.stageMap) { setIsStageMapOpen(false); return true; }
         if (now.garden) { setIsGardenOpen(false); return true; }
         if (now.storage) { setIsStorageOpen(false); return true; }
+        if (now.questBoard) { setIsQuestBoardOpen(false); return true; }
         if (now.character) { setIsCharacterOpen(false); return true; }
+        if (now.petShop) { setIsPetShopOpen(false); return true; }
         return false;
     };
 
@@ -92,8 +100,9 @@ export function useModalState ()
         activeReaderPageNumber, setActiveReaderPageNumber,
         isAcademyOpen, setIsAcademyOpen,
         activeExamBookId, setActiveExamBookId,
-        isWorkshopOpen, setIsWorkshopOpen,
-        isForgeOpen, setIsForgeOpen,
+        isSmithyOpen, setIsSmithyOpen,
+        smithyTab, setSmithyTab,
+        isShopOpen, setIsShopOpen,
         isBackpackOpen, setIsBackpackOpen,
         isGateRepairOpen, setIsGateRepairOpen,
         activeGateId, setActiveGateId,
@@ -106,7 +115,9 @@ export function useModalState ()
         isStageMapOpen, setIsStageMapOpen,
         isGardenOpen, setIsGardenOpen,
         isStorageOpen, setIsStorageOpen,
+        isQuestBoardOpen, setIsQuestBoardOpen,
         isCharacterOpen, setIsCharacterOpen,
+        isPetShopOpen, setIsPetShopOpen,
         stageQuestion, setStageQuestion,
         closeTopModal,
         isAnyModalOpen,

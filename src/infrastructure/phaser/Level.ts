@@ -1,11 +1,4 @@
-/**
- * Infrastructure-owned layout data for one playable level — pure spatial data,
- * loaded from JSON rather than hand-written as code. See "Level" in CONTEXT.md
- * and docs/adr/0003-level-data-as-loaded-json.md.
- *
- * Nothing here is verified against this shape at runtime — a malformed level
- * JSON file will fail in whatever way reading a missing/wrong-typed field fails.
- */
+import type { EnemyType } from '../../domain/entities/Enemy';
 
 export interface SpikeSpawnData
 {
@@ -22,6 +15,17 @@ export interface MovingPlatformSpawnData
     speed?: number;
 }
 
+export interface LevelEnemySpawnData
+{
+    enemyId: string;
+    type?: EnemyType;
+    x: number;
+    y: number;
+    patrolDistance?: number;
+    speed?: number;
+    scale?: number;
+}
+
 export interface Level
 {
     worldWidth: number;
@@ -33,10 +37,9 @@ export interface Level
     /** Gaps in the ground (ເຫວ): the hero who falls in dies. `x` is the left edge. Not in the first Stage or a boss arena. */
     pits?: { x: number; width: number }[];
     movingPlatforms?: MovingPlatformSpawnData[];
+    enemies?: LevelEnemySpawnData[];
     /** Which backdrop and ground the level has: the village, a forest, or a cave. */
-    scenery?: 'village' | 'forest' | 'cave';
+    scenery?: 'village' | 'forest' | 'cave' | 'desert';
     /** Where the boss arena starts, when a cave level ends in one (the backdrop and ground change from here). */
     arenaFromX?: number;
 }
-
-

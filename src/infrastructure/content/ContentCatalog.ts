@@ -25,6 +25,8 @@ import type { ProgressionTuning } from '../../domain/entities/HeroLevel';
 import { parseTutorial, TutorialStepDefinition } from './TutorialCatalog';
 import { parseRepairs } from './RepairCatalog';
 import { parseGardenExpansions } from './GardenCatalog';
+import { parseShop } from './ShopCatalog';
+import type { ShopCatalog } from '../../application/ShopUseCases';
 import type { ExpansionCosts } from '../../application/GardenUseCases';
 import type { RepairRecipe } from '../../application/RepairItemUseCase';
 import { isLessonNumber } from '../../domain/entities/StageNumber';
@@ -68,6 +70,8 @@ export interface GameContent
     repairs: RepairRecipe[];
     /** What each Garden Plot after the sixth costs (Materials, never Credit). */
     gardenExpansions: ExpansionCosts;
+    /** What Grandma Chanthy sells (Materials, never Credit). */
+    shop: ShopCatalog;
     /** How weapons and tools look in the hero's hand, by item id. */
     heldArt: Record<string, HeldArt>;
     /** The rows of the player skin sheets (animations) and where the hand is in each frame. */
@@ -401,7 +405,7 @@ async function fetchJson (file: string): Promise<unknown>
 /** Fetches and validates all game data. Call once before the app starts. */
 export async function loadGameContent (): Promise<GameContent>
 {
-    const [items, books, questions, recipes, enemies, realms, nodes, stages, tutorial, repairs, garden, playerAnimations, skills, progression, worldTime] = await Promise.all([
+    const [items, books, questions, recipes, enemies, realms, nodes, stages, tutorial, repairs, garden, shop, playerAnimations, skills, progression, worldTime] = await Promise.all([
         fetchJson('items.json'),
         fetchJson('books.json'),
         fetchJson('questions.json'),
@@ -413,6 +417,7 @@ export async function loadGameContent (): Promise<GameContent>
         fetchJson('tutorial.json'),
         fetchJson('repairs.json'),
         fetchJson('garden.json'),
+        fetchJson('shop.json'),
         fetchJson('player-animations.json'),
         fetchJson('skills.json'),
         fetchJson('progression.json'),
@@ -442,6 +447,7 @@ export async function loadGameContent (): Promise<GameContent>
         tutorial: parseTutorial(tutorial),
         repairs: parseRepairs(repairs),
         gardenExpansions: parseGardenExpansions(garden),
+        shop: parseShop(shop),
         heldArt: parseHeldArt(items),
         playerAnimations: parsePlayerAnimations(playerAnimations),
         skills: parseSkills(skills),

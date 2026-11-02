@@ -7,7 +7,7 @@ import { fallIntoPitUseCase } from '../../../application/FallIntoPitUseCase';
 import { groundSpans, isNearPit } from '../../content/LevelPits';
 import { tickWorldTimeUseCase, WORLD_PHASE_CHANGED_EVENT, type WorldPhaseChangedPayload } from '../../../application/TickWorldTimeUseCase';
 import { EventBus } from '../../EventBus';
-import { Input, Scene } from 'phaser';
+import { Input, Math as PhaserMath, Scene } from 'phaser';
 import { Player } from '../objects/Player';
 import { Enemy } from '../objects/Enemy';
 import { Spike } from '../objects/Spike';
@@ -35,7 +35,8 @@ import {
 import { buildStageScenery, BrokenGate, ResourceNodeView, WaypointView } from '../scenery/StageBuilder';
 import { buildVillageScenery, InteractiveBuilding, VILLAGE_LANTERN_FLAME_HEIGHT, VILLAGE_LANTERN_XS } from '../scenery/VillageBuilder';
 import { buildGarden, GardenView } from '../scenery/GardenBuilder';
-import { GARDEN_LEVEL_KEY, isHomeLevel } from '../levelCatalog';
+import { buildCottageInterior } from '../scenery/CottageBuilder';
+import { COTTAGE_LEVEL_KEY, GARDEN_LEVEL_KEY, isHomeLevel } from '../levelCatalog';
 import { dashUseCase } from '../../../application/DashUseCase';
 import {
     createGround,
@@ -105,6 +106,7 @@ export class Game extends Scene
     private hasMovedAway = false;
     /** Walking past this x clears a Stage that has no boss (see `exit` in stages.json). */
     private stageExitX?: number;
+    private lastProgressPercent = -1;
     health: Health;
     currentLevelKey = 'village';
     currentSkinId = 'cyber-blue';
@@ -123,8 +125,10 @@ export class Game extends Scene
     private nightCreatures: Enemy[] = [];
     /** The hero is asleep at the Bed (the screen fades, the clock jumps to the morning). */
     private isSleeping = false;
-    /** The smiths in front of the Workshop and the Forge (village only). */
+    /** The smith in front of the Smithy (village only). */
     private craftingWorkers: CraftingWorker[] = [];
+    private companionPet?: Phaser.GameObjects.Sprite;
+    private companionPetSoundTimer = 0;
 
     constructor ()
     {
@@ -156,6 +160,7 @@ export class Game extends Scene
         this.craftingWorkers = [];
         this.stage = undefined;
         this.stageExitX = undefined;
+        this.lastProgressPercent = -1;
         this.bossBgmStarted = false;
     }
 
@@ -201,8 +206,16 @@ export class Game extends Scene
         }
 
         const isVillage = this.level.scenery === 'village' || this.currentLevelKey === 'village';
+        const isCottage = this.currentLevelKey === COTTAGE_LEVEL_KEY;
         const isGarden = this.currentLevelKey === GARDEN_LEVEL_KEY;
-        const backdropKey = isVillage ? 'bg-village' : (this.level.scenery === 'cave' ? 'bg-cavern' : 'bg-plains');
+        const isDungeon = this.currentLevelKey === 'dungeon';
+        const backdropKey = isVillage
+            ? 'bg-village'
+            : (this.level.scenery === 'cave' || isDungeon
+                ? 'bg-cavern'
+                : (this.level.scenery === 'desert'
+                    ? 'bg-desert'
+                    : 'bg-plains'));
         this.bossBgmStarted = false;
         this.skyBackdrop = createSky(this, this.level, backdropKey);
 
@@ -216,31 +229,189 @@ export class Game extends Scene
 
         if (isVillage)
         {
-            this.interactiveBuildings = buildVillageScenery(
-                this,
-                GROUND_Y,
-                Boolean(entities.forgeUnlocked || entities.books['book-ch1']?.examPassed)
-            );
+            this.interactiveBuildings = buildVillageScenery(this, GROUND_Y);
             const baseY = WORLD_HEIGHT - GROUND_HEIGHT - 24;
-            const elder = new NPC(this, 460, baseY + GROUND_SINK, 'npc-elder', '💬 [E] ລົມກັບຫົວໜ້າໝູ່ບ້ານ');
+            const elder = new NPC(this, 760, baseY + GROUND_SINK, 'npc-elder', '💬 [E] ລົມກັບຫົວໜ້າໝູ່ບ້ານ', 60);
             elder.onInteract = () => EventBus.emit('start-dialogue', 'village_elder');
 
-            // Mina runs the Skin shop at the little market between the Forge and the World Gate
-            const mina = new NPC(this, 1290, baseY + GROUND_SINK, 'npc-mina', '🛍️ [E] ລົມກັບ Mina (ຮ້ານຊຸດ)');
+            // Mina runs the Skin shop at the village center market (x = 3340)
+            const mina = new NPC(this, 3340, baseY + GROUND_SINK, 'npc-mina', '🛍️ [E] ລົມກັບ Mina (ຮ້ານຊຸດ)', 50);
             mina.onInteract = () => EventBus.emit('start-dialogue', 'skin_shop');
 
-            this.villagers = [elder, mina];
+            // Hunter Bounmy stands at x = 3850 beside the World Gate
+            const bounmy = new NPC(this, 3850, baseY + GROUND_SINK, 'npc-bounmy', '🏹 [E] ລົມກັບນາຍພານບຸນມີ', 70);
+            bounmy.onInteract = () => EventBus.emit('start-dialogue', 'hunter_bounmy');
+
+            const vanh = new NPC(this, 1780, baseY + GROUND_SINK, 'npc-scholar', '📜 [E] ລົມກັບອາຈານ ວັນ', 60);
+            vanh.onInteract = () => EventBus.emit('start-dialogue', 'master_vanh');
+
+            const chanthy = new NPC(this, 2480, baseY + GROUND_SINK, 'npc-chanthy', '🌿 [E] ລົມກັບແມ່ເຖົ້າ ຈັນທີ', 50);
+            chanthy.onInteract = () => EventBus.emit('start-dialogue', 'grandma_chanthy');
+
+            const kham = new NPC(this, 4500, baseY + GROUND_SINK, 'npc-kham', '⚔️ [E] ລົມກັບນັກດາບ ຄຳ', 70);
+            kham.onInteract = () => EventBus.emit('start-dialogue', 'swordsman_kham');
+
+            const noy = new NPC(this, 6850, baseY + GROUND_SINK, 'npc-noy', '⛩️ [E] ລົມກັບນາງນ້ອຍ (ສານປົກປ້ອງ)', 50);
+            noy.onInteract = () => EventBus.emit('start-dialogue', 'shrine_noy');
+
+            this.villagers = [elder, vanh, chanthy, mina, bounmy, kham, noy];
 
             // Whoever builds something stands in front of its building, with the time left over the head
             this.craftingWorkers = [
-                new CraftingWorker(this, 'workshop', 810, GROUND_Y),
-                new CraftingWorker(this, 'forge', 1215, GROUND_Y),
+                new CraftingWorker(this, 3180, GROUND_Y),
             ];
+        }
+        else if (isCottage)
+        {
+            this.interactiveBuildings = buildCottageInterior(this, GROUND_Y);
         }
         else if (isGarden)
         {
             this.gardenView = buildGarden(this, GROUND_Y, change => EventBus.emit('garden-changed', change));
             this.interactiveBuildings = this.gardenView.buildings;
+        }
+        else if (isDungeon)
+        {
+            const baseY = WORLD_HEIGHT - GROUND_HEIGHT - 24;
+            const somchay = new NPC(this, 650, baseY + GROUND_SINK, 'npc-somchay', '💬 [E] ລົມກັບນັກບູຮານຄະດີ ສົມຊາຍ');
+            somchay.onInteract = () => EventBus.emit('start-dialogue', 'archaeologist_somchay');
+            this.villagers = [somchay];
+
+            // Campfire visual at x = 620
+            const campG = this.add.graphics();
+            campG.fillStyle(0x78350f, 1);
+            campG.fillRect(614, GROUND_Y - 8, 12, 8);
+            campG.fillStyle(0xf97316, 1);
+            campG.fillTriangle(612, GROUND_Y - 6, 628, GROUND_Y - 6, 620, GROUND_Y - 24);
+            campG.fillStyle(0xfef08a, 0.9);
+            campG.fillTriangle(615, GROUND_Y - 6, 625, GROUND_Y - 6, 620, GROUND_Y - 18);
+
+            // Exit arch visual at x = 80
+            const exitG = this.add.graphics();
+            exitG.fillStyle(0x334155, 1);
+            exitG.fillRoundedRect(60, GROUND_Y - 56, 40, 56, 6);
+            exitG.fillStyle(0x020617, 1);
+            exitG.fillRoundedRect(68, GROUND_Y - 48, 24, 48, 4);
+
+            // Chest visual at x = 1450
+            const chestG = this.add.graphics();
+            chestG.fillStyle(0x92400e, 1);
+            chestG.fillRoundedRect(1435, GROUND_Y - 28, 30, 28, 4);
+            chestG.fillStyle(0xfbbf24, 1);
+            chestG.fillRect(1435, GROUND_Y - 16, 30, 4);
+            chestG.fillCircle(1450, GROUND_Y - 14, 3);
+
+            // Boss Gate visual at x = 1580
+            const gateG = this.add.graphics();
+            const drawGate = (open: boolean) => {
+                gateG.clear();
+                if (!open) {
+                    gateG.fillStyle(0x1e293b, 1);
+                    gateG.fillRect(1560, GROUND_Y - 96, 40, 96);
+                    gateG.fillStyle(0x64748b, 1);
+                    for (let bx = 1564; bx <= 1596; bx += 8) {
+                        gateG.fillRect(bx, GROUND_Y - 92, 4, 92);
+                    }
+                    gateG.fillRect(1560, GROUND_Y - 70, 40, 6);
+                    gateG.fillRect(1560, GROUND_Y - 26, 40, 6);
+                    gateG.fillStyle(0xfbbf24, 1);
+                    gateG.fillCircle(1580, GROUND_Y - 48, 7);
+                    gateG.fillStyle(0x0f172a, 1);
+                    gateG.fillCircle(1580, GROUND_Y - 48, 3);
+                } else {
+                    gateG.fillStyle(0x0f172a, 0.4);
+                    gateG.fillRect(1560, GROUND_Y - 96, 40, 96);
+                    gateG.fillStyle(0x334155, 1);
+                    gateG.fillRect(1556, GROUND_Y - 96, 8, 96);
+                    gateG.fillRect(1596, GROUND_Y - 96, 8, 96);
+                }
+            };
+            drawGate(false);
+
+            let bossGateOpened = false;
+            const gateWall = this.physics.add.staticGroup();
+            const wallSprite = this.physics.add.staticSprite(1580, GROUND_Y - 48, '');
+            wallSprite.setSize(24, 96);
+            wallSprite.setVisible(false);
+            gateWall.add(wallSprite);
+            this.physics.add.collider(this.player, gateWall);
+
+            let chestOpened = false;
+            this.interactiveBuildings = [
+                {
+                    x: 80,
+                    label: '🚪 [E] ກັບຄືນສູ່ໝູ່ບ້ານ (Return to Village)',
+                    action: () => EventBus.emit('change-level', 'village'),
+                },
+                {
+                    x: 1450,
+                    get label () {
+                        return chestOpened
+                            ? '📦 [E] ຫີບສົມບັດບູຮານ (ເປີດແລ້ວ)'
+                            : '🗝️ [E] ເປີດຫີບສົມບັດບູຮານ (Dungeon Chest)';
+                    },
+                    action: () => {
+                        if (chestOpened) return;
+                        chestOpened = true;
+                        entities.wallet.earn(100);
+                        entities.backpack.addItem('bone-shard', 2);
+                        entities.backpack.addItem('spider-silk', 2);
+                        entities.backpack.addItem('bat-wing', 2);
+                        entities.backpack.addItem('herb-potion', 1);
+                        soundManager.playChestOpen();
+                        const toast = this.add.text(1450, GROUND_Y - 70, '✨ ເປີດຫີບສົມບັດບູຮານ! +100 Coins, +ວັດຖຸດິບ', {
+                            fontFamily: '"Noto Sans Lao", sans-serif',
+                            fontSize: '13px',
+                            color: '#fef08a',
+                            stroke: '#0f172a',
+                            strokeThickness: 3,
+                        }).setOrigin(0.5, 0.5).setDepth(20);
+                        this.tweens.add({
+                            targets: toast,
+                            y: GROUND_Y - 110,
+                            alpha: 0,
+                            duration: 1800,
+                            onComplete: () => toast.destroy(),
+                        });
+                    },
+                },
+                {
+                    x: 1550,
+                    get label () {
+                        return bossGateOpened
+                            ? '🕸️ ປະຕູຮັງພະຍາແມງມຸມ (ເປີດແລ້ວ)'
+                            : (entities.backpack.getItemCount('dungeon-key') >= 1
+                                ? '🗝️ [E] ໃຊ້ກະແຈໄຂປະຕູຮັງພະຍາແມງມຸມ'
+                                : '🔒 ປະຕູຮັງພະຍາແມງມຸມ (ຕ້ອງໃຊ້ກະແຈຄຸກໃຕ້ດິນ)');
+                    },
+                    action: () => {
+                        if (bossGateOpened) return;
+                        if (entities.backpack.getItemCount('dungeon-key') < 1) {
+                            showLootNotification(
+                                this,
+                                1580,
+                                GROUND_Y - 60,
+                                '🔒 ປະຕູຮັງພະຍາແມງມຸມຖືກລັອກ! ຕ້ອງໃຊ້ກະແຈຄຸກໃຕ້ດິນ',
+                                '#ef4444'
+                            );
+                            soundManager.playClink();
+                            return;
+                        }
+                        bossGateOpened = true;
+                        gateWall.clear(true, true);
+                        drawGate(true);
+                        soundManager.playChestOpen();
+                        this.cameras.main.shake(160, 0.007);
+                        showLootNotification(
+                            this,
+                            1580,
+                            GROUND_Y - 60,
+                            '🔓 ໄຂປະຕູຮັງພະຍາແມງມຸມສຳເລັດ! ກຽມພ້ອມສູ້ຮົບ!',
+                            '#22c55e'
+                        );
+                    },
+                },
+            ];
         }
         else if (this.stage)
         {
@@ -251,6 +422,7 @@ export class Game extends Scene
             this.resourceNodes = built.resourceNodes;
             this.waypoints = built.waypoints;
             this.brokenGate = built.brokenGate;
+            this.villagers = built.npcs;
         }
 
         // Saplings grow in real time, also while the hero stands next to one: look twice a second
@@ -302,6 +474,11 @@ export class Game extends Scene
         }
         this.physics.add.collider(this.player, this.movingPlatforms);
 
+        // Companion pet follower
+        this.setupCompanionPet();
+        const onPetChanged = () => this.setupCompanionPet();
+        EventBus.on('pet-changed', onPetChanged);
+
         // Colliders for enemies
         this.physics.add.collider(this.enemies, this.ground);
         this.physics.add.collider(this.enemies, this.platforms);
@@ -318,12 +495,12 @@ export class Game extends Scene
             this.combat.onPlayerTouchesEnemy(playerObj as Player, enemyObj as Enemy);
         });
 
-        // Spawn Boss if the stage has one
-        const bossSpawn = this.stage ? getStageBossSpawn(this.stage) : undefined;
+        // Spawn Boss if the stage has one or if in Dungeon
+        const bossSpawn = this.stage ? getStageBossSpawn(this.stage) : (isDungeon ? { enemyId: 'dungeon-spider-queen', x: 1950, y: 520 } : undefined);
         if (bossSpawn)
         {
             const bossDefinition = this.getEnemyDefinition(bossSpawn.enemyId);
-            this.boss = new Boss(this, bossSpawn.x, bossSpawn.y, bossDefinition?.maxHp ?? 5);
+            this.boss = new Boss(this, bossSpawn.x, bossSpawn.y, bossDefinition?.maxHp ?? 5, bossSpawn.enemyId);
             this.boss.xp = bossDefinition?.xp ?? 0;
             this.boss.awaitFinisher = true;
             this.combat.bindBoss(this.boss, () =>
@@ -348,7 +525,9 @@ export class Game extends Scene
 
         const destroyOnHit = (proj: unknown) =>
         {
-            (proj as Phaser.Physics.Arcade.Sprite).destroy();
+            const sprite = proj as Phaser.Physics.Arcade.Sprite;
+            if (sprite.texture?.key === 'boss-seismic-wave') return;
+            sprite.destroy();
         };
         this.physics.add.collider(this.enemyProjectiles, this.ground, destroyOnHit);
         this.physics.add.collider(this.enemyProjectiles, this.platforms, destroyOnHit);
@@ -403,7 +582,7 @@ export class Game extends Scene
         const onQuizFinisherPassed = () =>
         {
             this.boss?.playDefeatTween();
-            const bossSpawn = this.stage ? getStageBossSpawn(this.stage) : undefined;
+            const bossSpawn = this.stage ? getStageBossSpawn(this.stage) : (this.currentLevelKey === 'dungeon' ? { enemyId: 'dungeon-spider-queen', x: 1950, y: 520 } : undefined);
             const bossDrops = bossSpawn ? this.getEnemyDefinition(bossSpawn.enemyId)?.drops ?? [] : [];
             const reward = awardBossRewardUseCase(entities.backpack, bossDrops);
             // What did not fit is kept for later (story Materials) instead of being lost
@@ -423,10 +602,23 @@ export class Game extends Scene
             this.particleManager.emitCelebration(this.player.x, this.player.y);
             this.cameras.main.shake(450, 0.018);
             this.cameras.main.flash(200, 255, 255, 255, true);
-            this.time.delayedCall(1500, () =>
+            if (this.currentLevelKey === 'dungeon')
             {
-                this.handleStageCleared();
-            });
+                showLootNotification(
+                    this,
+                    this.player.x,
+                    this.player.y - 70,
+                    '👑 ປາບພະຍາແມງມຸມສຳເລັດ! ໄດ້ຮັບໄຊຊະນະເໜືອຄຸກໃຕ້ດິນ!',
+                    '#22c55e'
+                );
+            }
+            else
+            {
+                this.time.delayedCall(1500, () =>
+                {
+                    this.handleStageCleared();
+                });
+            }
         };
 
         const onQuizFinisherFailed = () =>
@@ -464,8 +656,23 @@ export class Game extends Scene
         EventBus.on('quiz-finisher-failed', onQuizFinisherFailed);
         EventBus.on('gate-repaired', onGateRepaired);
 
+        const onGiveDungeonKey = () =>
+        {
+            if (entities.backpack.getItemCount('dungeon-key') === 0)
+            {
+                entities.backpack.addItem('dungeon-key', 1);
+                EventBus.emit('backpack-changed');
+                soundManager.playReward();
+                if (this.player)
+                {
+                    showLootNotification(this, this.player.x, this.player.y - 40, '🗝️ ໄດ້ຮັບ: ກະແຈຄຸກໃຕ້ດິນ (Dungeon Key)!', '#fbbf24');
+                }
+            }
+        };
+        EventBus.on('give-dungeon-key', onGiveDungeonKey);
+
         // Village hub gets warm pastoral-cyber theme; Stages start with adventure and crossfade to boss in Zone C
-        soundManager.startBgm(isVillage || isGarden ? 'village' : (bossSpawn && !this.stage ? 'boss' : 'adventure'));
+        soundManager.startBgm(isVillage || isGarden || isCottage ? 'village' : (bossSpawn && !this.stage ? 'boss' : 'adventure'));
 
         const onSkinChanged = (payload: SkinChangedPayload) =>
         {
@@ -564,6 +771,13 @@ export class Game extends Scene
             EventBus.removeListener('quiz-finisher-passed', onQuizFinisherPassed);
             EventBus.removeListener('quiz-finisher-failed', onQuizFinisherFailed);
             EventBus.removeListener('gate-repaired', onGateRepaired);
+            EventBus.removeListener('give-dungeon-key', onGiveDungeonKey);
+            EventBus.removeListener('pet-changed', onPetChanged);
+            if (this.companionPet)
+            {
+                this.companionPet.destroy();
+                this.companionPet = undefined;
+            }
             soundManager.stopBgm();
             this.boss = undefined;
             this.villagers = [];
@@ -574,6 +788,10 @@ export class Game extends Scene
         });
 
         entities.attackCooldown.reset();
+        if (import.meta.env.DEV)
+        {
+            (window as unknown as { __phaserGameScene?: Game }).__phaserGameScene = this;
+        }
         EventBus.emit('current-scene-ready', this);
     }
 
@@ -617,7 +835,7 @@ export class Game extends Scene
 
         for (const npc of this.villagers)
         {
-            if (npc.active) npc.updateProximity(this.player.x, this.player.y);
+            if (npc.active) npc.updateProximity(this.player.x, this.player.y, delta);
         }
 
         this.interaction.update();
@@ -626,6 +844,18 @@ export class Game extends Scene
         {
             this.hasMovedAway = true;
             notifyTutorial('moved');
+        }
+
+        if (!isHomeLevel(this.currentLevelKey) && this.stageExitX !== undefined)
+        {
+            const startX = this.level?.spawn?.x ?? 120;
+            const fraction = (this.player.x - startX) / Math.max(1, this.stageExitX - startX);
+            const percent = Math.min(100, Math.max(0, Math.round(fraction * 100)));
+            if (percent !== this.lastProgressPercent)
+            {
+                this.lastProgressPercent = percent;
+                EventBus.emit('stage-progress-updated', { percent });
+            }
         }
 
         if (this.stageExitX !== undefined && this.player.x >= this.stageExitX)
@@ -639,6 +869,39 @@ export class Game extends Scene
         const isUp = Boolean(this.cursors.up.isDown || this.wasdKeys?.up?.isDown || this.wasdKeys?.space?.isDown || this.touchControls.up);
 
         this.heldItem.setContext(isHomeLevel(this.currentLevelKey), entities.equipment.equippedWeaponId);
+        if (this.companionPet && this.companionPet.active && this.player)
+        {
+            const followOffset = (this.player.facingDir || 1) * -34;
+            const targetX = this.player.x + followOffset;
+            const targetY = this.player.y + 4;
+            const dx = targetX - this.companionPet.x;
+            if (Math.abs(dx) > 12)
+            {
+                this.companionPet.x += Math.sign(dx) * Math.min(Math.abs(dx), delta * 0.22);
+                this.companionPet.setFlipX(dx < 0);
+            }
+            this.companionPet.y = PhaserMath.Linear(this.companionPet.y, targetY, 0.2);
+
+            this.companionPetSoundTimer += delta;
+            if (this.companionPetSoundTimer > 25000)
+            {
+                this.companionPetSoundTimer = 0;
+                const pet = entities.petManager.activePet;
+                if (pet?.soundType === 'dog') soundManager.playPetDog();
+                else if (pet?.soundType === 'chicken') soundManager.playChickenCluck();
+
+                const heart = this.add.text(this.companionPet.x, this.companionPet.y - 24, '❤️', { fontSize: '14px' });
+                heart.setDepth(15);
+                this.tweens.add({
+                    targets: heart,
+                    y: this.companionPet.y - 44,
+                    alpha: 0,
+                    duration: 800,
+                    onComplete: () => heart.destroy(),
+                });
+            }
+        }
+
         this.player.update({
             left: { isDown: isLeft },
             right: { isDown: isRight },
@@ -719,6 +982,49 @@ export class Game extends Scene
         player.dash(dir, result.tuning);
         soundManager.playJump();
         notifyTutorial('dashed');
+    }
+
+    private setupCompanionPet (): void
+    {
+        if (this.companionPet)
+        {
+            this.companionPet.destroy();
+            this.companionPet = undefined;
+        }
+
+        const activePet = entities.petManager.activePet;
+        if (!activePet || !this.player || !this.textures.exists(activePet.spriteKey)) return;
+
+        this.companionPet = this.add.sprite(this.player.x - 30, this.player.y, activePet.spriteKey, 0);
+        this.companionPet.setOrigin(0.5, 1);
+        this.companionPet.setDepth(9.8);
+
+        if (activePet.soundType === 'dog')
+        {
+            if (!this.anims.exists('pet-dog-idle'))
+            {
+                this.anims.create({
+                    key: 'pet-dog-idle',
+                    frames: this.anims.generateFrameNumbers('pet-dog', { start: 0, end: 3 }),
+                    frameRate: 4,
+                    repeat: -1,
+                });
+            }
+            this.companionPet.play('pet-dog-idle');
+        }
+        else if (activePet.soundType === 'chicken')
+        {
+            if (!this.anims.exists('pet-chicken-peck'))
+            {
+                this.anims.create({
+                    key: 'pet-chicken-peck',
+                    frames: this.anims.generateFrameNumbers('pet-chicken', { start: 0, end: 3 }),
+                    frameRate: 4,
+                    repeat: -1,
+                });
+            }
+            this.companionPet.play('pet-chicken-peck');
+        }
     }
 
     private growPlants (): void
@@ -881,7 +1187,11 @@ export class Game extends Scene
     {
         const enemies = this.physics.add.group();
 
-        for (const spawn of this.stage ? getStageEnemySpawns(this.stage) : [])
+        const spawns = this.stage
+            ? getStageEnemySpawns(this.stage)
+            : (this.level.enemies ?? []);
+
+        for (const spawn of spawns)
         {
             const enemy = new Enemy(
                 this,

@@ -15,6 +15,8 @@ import {
     SETTINGS_CHANGED_EVENT,
     SettingsChangedPayload,
 } from '../../application/UpdateSettingsUseCase';
+import { POTION_DRUNK_EVENT } from '../../application/DrinkPotionUseCase';
+import { QUEST_CLAIMED_EVENT } from '../../application/QuestUseCases';
 import { EventBus } from '../EventBus';
 
 // Village Hub melody (Warm pastoral-cyber C major pentatonic)
@@ -200,6 +202,8 @@ export class SoundManager
             this.setMusicMuted(musicMuted);
         });
         EventBus.on('dialogue-open-state', (isActive: boolean) => this.setDucked(isActive));
+        DomainEvents.on(POTION_DRUNK_EVENT, () => this.playPotionDrink());
+        DomainEvents.on(QUEST_CLAIMED_EVENT, () => this.playQuestClaim());
     }
 
     // --- BGM Engine ---
@@ -1135,6 +1139,346 @@ export class SoundManager
         this.connectOutput(crunchGain);
         crunch.start(now);
         crunch.stop(now + 0.07);
+    }
+
+    /**
+     * Potion Drinking Sound: bubbling liquid glug with a refreshing sparkle chime
+     */
+    playPotionDrink (): void
+    {
+        if (this._isMuted) return;
+        this.initContext();
+        if (!this.ctx) return;
+
+        const now = this.ctx.currentTime;
+
+        // Two cute liquid bubble glugs
+        [
+            { startFreq: 220, endFreq: 340, time: now, dur: 0.055 },
+            { startFreq: 290, endFreq: 460, time: now + 0.065, dur: 0.065 },
+        ].forEach(bubble =>
+        {
+            if (!this.ctx) return;
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(bubble.startFreq, bubble.time);
+            osc.frequency.exponentialRampToValueAtTime(bubble.endFreq, bubble.time + bubble.dur);
+
+            gain.gain.setValueAtTime(0.18, bubble.time);
+            gain.gain.exponentialRampToValueAtTime(0.001, bubble.time + bubble.dur);
+
+            osc.connect(gain);
+            this.connectOutput(gain);
+
+            osc.start(bubble.time);
+            osc.stop(bubble.time + bubble.dur);
+        });
+
+        // Refreshing high sparkle chime
+        const chimeStart = now + 0.13;
+        const chime = this.ctx.createOscillator();
+        const chimeGain = this.ctx.createGain();
+        chime.type = 'triangle';
+        chime.frequency.setValueAtTime(880, chimeStart);
+        chime.frequency.exponentialRampToValueAtTime(1318.51, chimeStart + 0.18);
+
+        chimeGain.gain.setValueAtTime(0.14, chimeStart);
+        chimeGain.gain.exponentialRampToValueAtTime(0.001, chimeStart + 0.22);
+
+        chime.connect(chimeGain);
+        this.connectOutput(chimeGain);
+        chime.start(chimeStart);
+        chime.stop(chimeStart + 0.22);
+    }
+
+    /**
+     * Quest Claim Fanfare: triumphant golden rising fanfare
+     */
+    playQuestClaim (): void
+    {
+        if (this._isMuted) return;
+        this.initContext();
+        if (!this.ctx) return;
+
+        const now = this.ctx.currentTime;
+        const notes = [523.25, 659.25, 783.99, 987.77, 1046.50, 1318.51];
+        const step = 0.07;
+
+        notes.forEach((freq, idx) =>
+        {
+            if (!this.ctx) return;
+            const startTime = now + idx * step;
+            const isLast = idx === notes.length - 1;
+            const duration = isLast ? 0.45 : 0.14;
+
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+
+            osc.type = isLast ? 'triangle' : 'sine';
+            osc.frequency.setValueAtTime(freq, startTime);
+            if (isLast)
+            {
+                osc.frequency.exponentialRampToValueAtTime(freq * 1.02, startTime + duration);
+            }
+
+            gain.gain.setValueAtTime(isLast ? 0.22 : 0.16, startTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+
+            osc.connect(gain);
+            this.connectOutput(gain);
+
+            osc.start(startTime);
+            osc.stop(startTime + duration);
+        });
+    }
+
+    /**
+     * UI Button Click Sound: crisp tactile select blip
+     */
+    playButtonClick (): void
+    {
+        if (this._isMuted) return;
+        this.initContext();
+        if (!this.ctx) return;
+
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(540, now);
+        osc.frequency.exponentialRampToValueAtTime(780, now + 0.035);
+
+        gain.gain.setValueAtTime(0.12, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.035);
+
+        osc.connect(gain);
+        this.connectOutput(gain);
+
+        osc.start(now);
+        osc.stop(now + 0.035);
+    }
+
+    /**
+     * Cave Bat wing flap whoosh sound
+     */
+    playBatFlap (): void
+    {
+        if (this._isMuted) return;
+        this.initContext();
+        if (!this.ctx) return;
+
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(220, now);
+        osc.frequency.exponentialRampToValueAtTime(55, now + 0.09);
+
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.09);
+
+        osc.connect(gain);
+        this.connectOutput(gain);
+
+        osc.start(now);
+        osc.stop(now + 0.09);
+    }
+
+    /**
+     * Dungeon Spider hiss / skitter sound
+     */
+    playSpiderHiss (): void
+    {
+        if (this._isMuted) return;
+        this.initContext();
+        if (!this.ctx) return;
+
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(980, now);
+        osc.frequency.exponentialRampToValueAtTime(420, now + 0.12);
+
+        gain.gain.setValueAtTime(0.18, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+
+        osc.connect(gain);
+        this.connectOutput(gain);
+
+        osc.start(now);
+        osc.stop(now + 0.12);
+    }
+
+    /**
+     * Dungeon Skeleton bone clank / rattle strike sound
+     */
+    playBoneClank (): void
+    {
+        if (this._isMuted) return;
+        this.initContext();
+        if (!this.ctx) return;
+
+        const now = this.ctx.currentTime;
+        const freqs = [420, 680, 890];
+        freqs.forEach(freq => {
+            if (!this.ctx) return;
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(freq, now);
+            osc.frequency.exponentialRampToValueAtTime(freq * 0.7, now + 0.08);
+
+            gain.gain.setValueAtTime(0.15, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+
+            osc.connect(gain);
+            this.connectOutput(gain);
+
+            osc.start(now);
+            osc.stop(now + 0.08);
+        });
+    }
+
+    /**
+     * Dungeon Spider web shot projectile sound
+     */
+    playWebShot (): void
+    {
+        if (this._isMuted) return;
+        this.initContext();
+        if (!this.ctx) return;
+
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(520, now);
+        osc.frequency.exponentialRampToValueAtTime(180, now + 0.11);
+
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.11);
+
+        osc.connect(gain);
+        this.connectOutput(gain);
+
+        osc.start(now);
+        osc.stop(now + 0.11);
+    }
+
+    /**
+     * Dungeon Treasure Chest opening creak & shimmer sound
+     */
+    playChestOpen (): void
+    {
+        if (this._isMuted) return;
+        this.initContext();
+        if (!this.ctx) return;
+
+        const now = this.ctx.currentTime;
+        // Chime sequence
+        const notes = [
+            { f: 587.33, t: 0.0, d: 0.12 },
+            { f: 880.00, t: 0.08, d: 0.14 },
+            { f: 1174.66, t: 0.16, d: 0.25 },
+        ];
+        notes.forEach(n => {
+            if (!this.ctx) return;
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(n.f, now + n.t);
+
+            gain.gain.setValueAtTime(0.18, now + n.t);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + n.t + n.d);
+
+            osc.connect(gain);
+            this.connectOutput(gain);
+
+            osc.start(now + n.t);
+            osc.stop(now + n.t + n.d);
+        });
+    }
+
+    /**
+     * Reward celebration chime
+     */
+    playReward (): void
+    {
+        this.playChestOpen();
+    }
+
+    /**
+     * Cute puppy yip / tail wag reaction
+     */
+    playPetDog (): void
+    {
+        if (this._isMuted || !this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(440, now);
+        osc.frequency.exponentialRampToValueAtTime(780, now + 0.08);
+        osc.frequency.exponentialRampToValueAtTime(660, now + 0.16);
+        gain.gain.setValueAtTime(0.18, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.22);
+        osc.connect(gain);
+        if (this.masterGain) gain.connect(this.masterGain);
+        osc.start(now);
+        osc.stop(now + 0.22);
+    }
+
+    /**
+     * Friendly village chicken cluck
+     */
+    playChickenCluck (): void
+    {
+        if (this._isMuted || !this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(600, now);
+        osc.frequency.setValueAtTime(450, now + 0.04);
+        osc.frequency.setValueAtTime(550, now + 0.08);
+        gain.gain.setValueAtTime(0.14, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.14);
+        osc.connect(gain);
+        if (this.masterGain) gain.connect(this.masterGain);
+        osc.start(now);
+        osc.stop(now + 0.14);
+    }
+
+    /**
+     * Serene crystalline wind chime at the shrine
+     */
+    playWindChime (): void
+    {
+        if (this._isMuted || !this.ctx) return;
+        const now = this.ctx.currentTime;
+        [1046.50, 1318.51, 1567.98].forEach((freq, idx) =>
+        {
+            if (!this.ctx) return;
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, now + idx * 0.06);
+            gain.gain.setValueAtTime(0.08, now + idx * 0.06);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.06 + 0.6);
+            osc.connect(gain);
+            if (this.masterGain) gain.connect(this.masterGain);
+            osc.start(now + idx * 0.06);
+            osc.stop(now + idx * 0.06 + 0.6);
+        });
     }
 }
 

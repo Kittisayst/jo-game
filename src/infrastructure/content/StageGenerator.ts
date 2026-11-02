@@ -11,8 +11,8 @@
 import type { Level } from '../phaser/Level';
 import { isNearPit, PIT_END_MARGIN, PIT_START_MARGIN, PIT_WIDTHS, type Pit } from './LevelPits';
 
-export type Biome = 'forest' | 'cave';
-export const BIOMES: readonly Biome[] = ['forest', 'cave'];
+export type Biome = 'forest' | 'cave' | 'desert';
+export const BIOMES: readonly Biome[] = ['forest', 'cave', 'desert'];
 
 export interface GenerateSpec
 {
@@ -82,6 +82,7 @@ interface BiomeTuning
 const TUNING: Record<Biome, BiomeTuning> = {
     forest: { longStair: 0.25, groundMin: 260, groundMax: 420, spikesPerScreen: 0.5 },
     cave: { longStair: 0.5, groundMin: 200, groundMax: 340, spikesPerScreen: 1 },
+    desert: { longStair: 0.35, groundMin: 240, groundMax: 380, spikesPerScreen: 0.75 },
 };
 
 /** A small deterministic random number generator (mulberry32). */

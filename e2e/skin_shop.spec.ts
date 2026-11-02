@@ -15,7 +15,7 @@ async function savedState (page: Page)
 async function talkToMina (page: Page)
 {
   const bot = new Bot(page, false);
-  expect(await bot.goTo(1250, { fight: false, tolerance: 20 })).toBe('arrived');
+  expect(await bot.goTo(3340, { fight: false, tolerance: 20 })).toBe('arrived');
   await bot.interact();
   return bot;
 }

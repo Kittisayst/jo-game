@@ -3,6 +3,7 @@ import { collectEnemyDropsUseCase } from '../../../application/CollectEnemyDrops
 import { cycleEquippedWeaponUseCase } from '../../../application/CycleEquippedWeaponUseCase';
 import { performAttackUseCase } from '../../../application/PerformAttackUseCase';
 import { grantXpUseCase } from '../../../application/GrantXpUseCase';
+import { recordQuestProgressUseCase } from '../../../application/QuestUseCases';
 import { autoSaveGame } from '../../saveSnapshot';
 import { getGameContent } from '../../content/ContentCatalog';
 import { playerTakeDamageUseCase } from '../../../application/PlayerTakeDamageUseCase';
@@ -20,6 +21,11 @@ import { stashStoryOverflowUseCase } from '../../../application/PendingRewardsUs
 
 /** Most enemies the Boss can have alive at once when it summons minions. */
 const MAX_ENEMIES_FOR_SUMMON = 3;
+
+export const PROJECTILE_PACKET_LASER = 'boss-packet-laser';
+export const PROJECTILE_EMP_PULSE = 'boss-emp-pulse';
+export const PROJECTILE_SEISMIC_WAVE = 'boss-seismic-wave';
+export const PROJECTILE_DEBRIS = 'boss-falling-debris';
 
 /**
  * Everything that hurts or is hurt in the scene: the hero's sword attacks, contact
@@ -47,7 +53,8 @@ export class CombatController
         if (!attack) return;
 
         const { weaponId, damage, range } = attack;
-        scene.player.triggerSlashVfx(weaponId);
+        const upgradeLevel = entities.equipment.getUpgradeLevel(weaponId);
+        scene.player.triggerSlashVfx(weaponId, upgradeLevel);
         soundManager.playSlash();
         this.resolveMeleeAttack(damage, range);
     }
@@ -170,15 +177,72 @@ export class CombatController
         });
     }
 
-    /** Hooks the Boss's own events (landing shake, minions, phase changes) up to scene effects. */
+    private static ensureBossProjectileTextures (scene: Phaser.Scene): void
+    {
+        if (!scene.textures.exists(PROJECTILE_PACKET_LASER))
+        {
+            const g = scene.make.graphics({ x: 0, y: 0 });
+            g.fillStyle(0x06b6d4, 0.4);
+            g.fillRoundedRect(0, 0, 20, 10, 4);
+            g.fillStyle(0x38bdf8, 0.9);
+            g.fillRoundedRect(2, 1, 16, 8, 3);
+            g.fillStyle(0xffffff, 1);
+            g.fillRoundedRect(5, 3, 10, 4, 2);
+            g.generateTexture(PROJECTILE_PACKET_LASER, 20, 10);
+            g.destroy();
+        }
+
+        if (!scene.textures.exists(PROJECTILE_EMP_PULSE))
+        {
+            const g = scene.make.graphics({ x: 0, y: 0 });
+            g.fillStyle(0x0284c7, 0.4);
+            g.fillRoundedRect(0, 0, 16, 28, 6);
+            g.fillStyle(0x38bdf8, 0.85);
+            g.fillRoundedRect(2, 2, 12, 24, 4);
+            g.fillStyle(0xffffff, 1);
+            g.fillRect(6, 4, 4, 20);
+            g.generateTexture(PROJECTILE_EMP_PULSE, 16, 28);
+            g.destroy();
+        }
+
+        if (!scene.textures.exists(PROJECTILE_SEISMIC_WAVE))
+        {
+            const g = scene.make.graphics({ x: 0, y: 0 });
+            g.fillStyle(0x78350f, 1);
+            g.fillTriangle(0, 24, 13, 0, 26, 24);
+            g.fillStyle(0xb45309, 1);
+            g.fillTriangle(4, 24, 13, 4, 22, 24);
+            g.fillStyle(0xfde047, 1);
+            g.fillTriangle(9, 24, 13, 8, 17, 24);
+            g.generateTexture(PROJECTILE_SEISMIC_WAVE, 26, 24);
+            g.destroy();
+        }
+
+        if (!scene.textures.exists(PROJECTILE_DEBRIS))
+        {
+            const g = scene.make.graphics({ x: 0, y: 0 });
+            g.fillStyle(0x92400e, 1);
+            g.fillRoundedRect(0, 0, 22, 22, 3);
+            g.fillStyle(0x78350f, 1);
+            g.fillRoundedRect(3, 3, 16, 16, 2);
+            g.fillStyle(0xf59e0b, 1);
+            g.fillRect(5, 5, 5, 5);
+            g.fillRect(12, 12, 6, 6);
+            g.generateTexture(PROJECTILE_DEBRIS, 22, 22);
+            g.destroy();
+        }
+    }
+
+    /** Hooks the Boss's own events (landing shake, minions, phase changes, unique attacks) up to scene effects. */
     bindBoss (boss: Boss, onDefeated: () => void): void
     {
         const { scene } = this;
+        CombatController.ensureBossProjectileTextures(scene);
 
         boss.onLanding = (x, y) =>
         {
             scene.particleManager.emitLandingDust(x, y);
-            scene.cameras.main.shake(140, 0.007);
+            scene.cameras.main.shake(160, 0.008);
         };
         boss.onDefeated = onDefeated;
         boss.onSummonMinion = (x, y) =>
@@ -198,15 +262,95 @@ export class CombatController
             if (newPhase === 2)
             {
                 scene.particleManager.emitSpikeHit(boss.x, boss.y);
+                scene.cameras.main.shake(250, 0.012);
             }
             else if (newPhase === 3)
             {
                 scene.particleManager.emitCelebration(boss.x, boss.y);
+                scene.cameras.main.shake(360, 0.016);
             }
+        };
+
+        boss.onPacketBurst = (x, y, dir) =>
+        {
+            for (const vy of [-25, 0, 25])
+            {
+                const laser = scene.physics.add.sprite(x, y, PROJECTILE_PACKET_LASER);
+                scene.enemyProjectiles.add(laser);
+                const body = laser.body as Phaser.Physics.Arcade.Body;
+                if (body)
+                {
+                    body.setAllowGravity(false);
+                    body.setVelocity(dir * 320, vy);
+                }
+            }
+            soundManager.playSpit();
+            scene.cameras.main.shake(80, 0.003);
+        };
+
+        boss.onEmpShockwave = (x, y) =>
+        {
+            for (const dirX of [-1, 1])
+            {
+                const pulse = scene.physics.add.sprite(x + dirX * 24, y, PROJECTILE_EMP_PULSE);
+                scene.enemyProjectiles.add(pulse);
+                const body = pulse.body as Phaser.Physics.Arcade.Body;
+                if (body)
+                {
+                    body.setAllowGravity(false);
+                    body.setVelocity(dirX * 210, 0);
+                }
+            }
+            soundManager.playDroneBuzz();
+            scene.cameras.main.shake(150, 0.007);
+        };
+
+        boss.onGroundStomp = (x, y, dir) =>
+        {
+            const wave = scene.physics.add.sprite(x + dir * 32, y - 18, PROJECTILE_SEISMIC_WAVE);
+            scene.enemyProjectiles.add(wave);
+            const body = wave.body as Phaser.Physics.Arcade.Body;
+            if (body)
+            {
+                body.setAllowGravity(false);
+                body.setVelocity(dir * 240, 0);
+            }
+            scene.particleManager.emitLandingDust(x, y);
+            soundManager.playStomp();
+            scene.cameras.main.shake(220, 0.011);
+            scene.time.delayedCall(2000, () =>
+            {
+                if (wave.active) wave.destroy();
+            });
+        };
+
+        boss.onDebrisDrop = (targetX) =>
+        {
+            const floorY = 624;
+            const warning = scene.add.circle(targetX, floorY, 18, 0xef4444, 0.45).setDepth(4);
+            scene.tweens.add({
+                targets: warning,
+                alpha: 0.85,
+                scale: 1.35,
+                duration: 350,
+                yoyo: true,
+                onComplete: () =>
+                {
+                    warning.destroy();
+                    if (!boss.active || boss.entity.isDefeated) return;
+                    const debris = scene.physics.add.sprite(targetX, 200, PROJECTILE_DEBRIS);
+                    scene.enemyProjectiles.add(debris);
+                    const body = debris.body as Phaser.Physics.Arcade.Body;
+                    if (body)
+                    {
+                        body.setAllowGravity(false);
+                        body.setVelocity(0, 390);
+                    }
+                },
+            });
         };
     }
 
-    /** Freezes physics for a few milliseconds so a hit feels heavy. */
     triggerHitStop (durationMs = 50): void
     {
         const { scene } = this;
@@ -244,7 +388,9 @@ export class CombatController
         const fell = boss.takeDamage(damage);
         showDamageNumber(scene, boss.x, boss.y, damage);
         scene.particleManager.emitStompBurst(boss.x, boss.y);
-        if (fell) this.awardXp(boss.xp, boss.x, boss.y);
+        scene.cameras.main.shake(140, 0.006);
+        this.triggerHitStop(55);
+        if (fell) { this.awardXp(boss.xp, boss.x, boss.y); recordQuestProgressUseCase(entities.questBoard, 'defeat', boss.bossId, 1); }
     }
 
     /** XP for a monster that fell, whichever way it fell (sword or skill): a number, and a banner on a new level. */
@@ -330,6 +476,7 @@ export class CombatController
     {
         soundManager.playStomp();
         notifyTutorial('enemy-defeated');
+        recordQuestProgressUseCase(entities.questBoard, 'defeat', enemy.entity.type, 1);
 
         // Materials from the enemy's drop table go straight into the backpack
         const drops = collectEnemyDropsUseCase(enemy.entity, entities.backpack);

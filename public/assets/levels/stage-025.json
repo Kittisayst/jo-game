@@ -1,6 +1,6 @@
 {
   "worldWidth": 2200,
-  "scenery": "cave",
+  "scenery": "desert",
   "spawn": {
     "x": 80,
     "y": 556

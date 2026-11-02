@@ -43,6 +43,24 @@ describe('SaveData Domain Entity & Migration', () =>
         expect(saveFromString.wallet.balance).toBe(20);
     });
 
+    it('keeps the quest board and drops bad quest entries', () =>
+    {
+        const kept = migrateSaveSnapshot({
+            ...createDefaultSaveSnapshot('slot_1'),
+            quests: { quests: [
+                { id: 'q1', progress: 2.7, accepted: true, completed: false, claimed: false },
+                { id: 'q2', progress: -4, completed: true, claimed: true },
+                { id: 7, progress: 1 },
+                null,
+            ] },
+        }, 'slot_1');
+        expect(kept.quests).toEqual({ quests: [
+            { id: 'q1', progress: 2, accepted: true, completed: false, claimed: false },
+            { id: 'q2', progress: 0, completed: true, claimed: true },
+        ] });
+        expect(migrateSaveSnapshot({ ...createDefaultSaveSnapshot('slot_1'), quests: 'x' }, 'slot_1').quests).toEqual({ quests: [] });
+    });
+
     it('starts older platformer saves fresh but keeps the settings', () =>
     {
         const legacy = {

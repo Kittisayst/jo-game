@@ -38,8 +38,8 @@ test.describe('Knowledge Quest — Buy-to-Read Textbook & Chapter 1 Loop E2E', (
     await page.keyboard.press('Escape');
     await expect(page.locator('text=ທ່ານຍັງບໍ່ມີປຶ້ມຕຳລາຮຽນໃນຄອບຄອງ')).not.toBeVisible();
 
-    // 4. Walk from spawn (x=120) to Village Library building (x=320) and press E
-    await walkRightTo(page, 'KeyD', 290);
+    // 4. Walk from spawn (x=120) to Village Library building (x=1050) and press E
+    await walkRightTo(page, 'KeyD', 1030);
     await page.waitForTimeout(150);
     await page.keyboard.press('KeyE');
 
@@ -80,7 +80,7 @@ test.describe('Knowledge Quest — Buy-to-Read Textbook & Chapter 1 Loop E2E', (
     await expect(libraryStoreHeader).not.toBeVisible();
 
     // Walk far enough to stand at the Academy (x=600), past the elder NPC (x=460) who would otherwise take the E key
-    await walkRightTo(page, 'KeyD', 580);
+    await walkRightTo(page, 'KeyD', 1680);
     await page.waitForTimeout(150);
     await page.keyboard.press('KeyE');
 

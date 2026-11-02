@@ -37,8 +37,8 @@ test.describe('Build time at the Workshop', () => {
     });
     const axesBefore = await count(page, 'axe-t1');
 
-    // The Workshop stands at x = 880
-    expect(await bot.goTo(875, { tolerance: 25, fight: false, timeoutMs: 40000 })).toBe('arrived');
+    // The Smithy stands at x = 3100 (the Workshop tools are its first tab)
+    expect(await bot.goTo(3100, { tolerance: 25, fight: false, timeoutMs: 40000 })).toBe('arrived');
     await page.keyboard.press('KeyE');
     const axeCard = page.locator('div', { hasText: 'Wood Axe T1' }).filter({ has: page.getByRole('button', { name: /ເລີ່ມສ້າງ/ }) }).last();
     await expect(axeCard).toBeVisible();

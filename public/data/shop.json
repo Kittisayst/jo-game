@@ -1,0 +1,24 @@
+{
+  "stock": {
+    "seeds": [
+      { "itemId": "herb-seed",   "price": [{ "itemId": "herb", "count": 3 }] },
+      { "itemId": "fiber-seed",  "price": [{ "itemId": "fiber", "count": 3 }] },
+      { "itemId": "cactus-seed", "price": [{ "itemId": "cactus-pulp", "count": 3 }] }
+    ],
+    "potions": [
+      { "itemId": "herb-potion", "price": [{ "itemId": "herb", "count": 4 }] }
+    ],
+    "supplies": [
+      { "itemId": "repair-kit", "price": [{ "itemId": "iron-ore", "count": 2 }, { "itemId": "wood", "count": 2 }] }
+    ]
+  },
+  "daily": {
+    "count": 2,
+    "pool": [
+      { "itemId": "strength-potion",    "dailyLimit": 2, "price": [{ "itemId": "herb", "count": 4 }, { "itemId": "iron-ore", "count": 2 }] },
+      { "itemId": "armor-potion",       "dailyLimit": 2, "price": [{ "itemId": "iron-ore", "count": 3 }, { "itemId": "herb", "count": 2 }] },
+      { "itemId": "speed-potion",       "dailyLimit": 2, "price": [{ "itemId": "herb", "count": 3 }, { "itemId": "fiber", "count": 3 }] },
+      { "itemId": "feather-fall-potion", "dailyLimit": 2, "price": [{ "itemId": "fiber", "count": 4 }, { "itemId": "herb", "count": 2 }] }
+    ]
+  }
+}

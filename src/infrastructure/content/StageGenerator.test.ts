@@ -47,7 +47,7 @@ describe('generateLevel', () =>
 
     it('refuses an unknown biome, a fractional seed and a Stage that is too wide or narrow', () =>
     {
-        expect(() => generateLevel({ biome: 'desert' as never, seed: 1, screens: 2 })).toThrow(/biome/);
+        expect(() => generateLevel({ biome: 'volcano' as never, seed: 1, screens: 2 })).toThrow(/biome/);
         expect(() => generateLevel({ biome: 'forest', seed: 1.5, screens: 2 })).toThrow(/seed/);
         expect(() => generateLevel({ biome: 'forest', seed: 1, screens: 1 })).toThrow(/screens/);
         expect(() => generateLevel({ biome: 'forest', seed: 1, screens: 9 })).toThrow(/screens/);

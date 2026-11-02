@@ -15,6 +15,7 @@ pal({
   b: "#0369a1", B: "#0284c7",                                // cyber blue
   v: "#3b0764", p: "#6d28d9", P: "#a855f7", c: "#a5f3fc",    // crystal
   n: "#38bdf8", g: "#ec4899",
+  C: "#9a3412", u: "#ea580c", U: "#f97316", e: "#fdba74",    // copper
 })
 
 const OPTS = { w: 30, h: 30, outline8: "k" }
@@ -55,6 +56,23 @@ sprite("crystal-sword", OPTS,
   handle(22, 28, "v", "p"),
   rect(14, 28, 2, 1, "n"))
 
+sprite("blue-sword", OPTS,
+  px(14, 1, "x"),
+  rect(14, 2, 2, 1, "c"),
+  rect(13, 3, 4, 16, "b"),
+  rect(13, 3, 2, 16, "B"),
+  rect(13, 3, 1, 15, "n"),
+  rect(15, 5, 1, 12, "c"),
+  rect(10, 19, 10, 2, "b"),
+  rect(10, 19, 10, 1, "n"),
+  rect(14, 19, 2, 2, "a"),
+  handle(22, 28, "s", "S"),
+  rect(14, 28, 2, 1, "n"))
+
+slimSword("copper-sword", { edge: "e", light: "U", dark: "u", guard: "C", guardLight: "u", grip: "W", gripLight: "w", pommel: "e" })
+
+// --- Tier 1 Tools ---
+
 sprite("axe-t1", OPTS,
   handle(4, 29, "o", "O"),
   rect(16, 4, 2, 7, "S"),
@@ -84,4 +102,66 @@ sprite("hammer-t1", OPTS,
   rect(13, 2, 4, 7, "a"),
   rect(13, 2, 4, 1, "y"))
 
-sheet("held-items", ["*-sword", "*-t1"], { pad: 1 })
+// --- Tier 2 Tools (Realm 2 Blue Ore) ---
+
+sprite("axe-t2", OPTS,
+  handle(4, 29, "s", "S"),
+  rect(16, 4, 2, 7, "b"),
+  rect(18, 3, 5, 9, "B"),
+  rect(18, 3, 5, 1, "n"),
+  rect(23, 2, 1, 11, "c"),
+  rect(18, 11, 4, 1, "b"))
+
+sprite("pickaxe-t2", OPTS,
+  handle(7, 29, "s", "S"),
+  rect(12, 2, 6, 4, "b"),
+  rect(12, 2, 6, 1, "B"),
+  rect(5, 3, 7, 2, "B"),
+  rect(18, 3, 7, 2, "B"),
+  rect(5, 3, 7, 1, "c"),
+  rect(18, 3, 7, 1, "n"),
+  rect(3, 5, 3, 1, "B"),
+  rect(24, 5, 3, 1, "B"),
+  px(3, 6, "c"),
+  px(26, 6, "c"))
+
+sprite("hammer-t2", OPTS,
+  handle(11, 29, "s", "S"),
+  rect(9, 2, 12, 7, "b"),
+  rect(9, 2, 12, 2, "B"),
+  rect(9, 2, 1, 7, "c"),
+  rect(13, 2, 4, 7, "n"),
+  rect(13, 2, 4, 1, "x"))
+
+// --- Tier 3 Tools (Realm 3 Copper) ---
+
+sprite("axe-t3", OPTS,
+  handle(4, 29, "W", "w"),
+  rect(16, 4, 2, 7, "C"),
+  rect(18, 3, 6, 9, "u"),
+  rect(18, 3, 6, 1, "U"),
+  rect(24, 2, 1, 11, "e"),
+  rect(18, 11, 5, 1, "C"))
+
+sprite("pickaxe-t3", OPTS,
+  handle(7, 29, "W", "w"),
+  rect(12, 2, 6, 4, "C"),
+  rect(12, 2, 6, 1, "u"),
+  rect(5, 3, 7, 2, "u"),
+  rect(18, 3, 7, 2, "u"),
+  rect(5, 3, 7, 1, "e"),
+  rect(18, 3, 7, 1, "U"),
+  rect(3, 5, 3, 1, "u"),
+  rect(24, 5, 3, 1, "u"),
+  px(3, 6, "e"),
+  px(26, 6, "e"))
+
+sprite("hammer-t3", OPTS,
+  handle(11, 29, "W", "w"),
+  rect(9, 2, 12, 7, "C"),
+  rect(9, 2, 12, 2, "u"),
+  rect(9, 2, 1, 7, "e"),
+  rect(13, 2, 4, 7, "U"),
+  rect(13, 2, 4, 1, "e"))
+
+sheet("held-items", ["*-sword", "*-t1", "*-t2", "*-t3"], { pad: 1 })

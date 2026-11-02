@@ -10,6 +10,7 @@ import stages from '../../public/data/stages.json';
 import tutorial from '../../public/data/tutorial.json';
 import repairs from '../../public/data/repairs.json';
 import garden from '../../public/data/garden.json';
+import shop from '../../public/data/shop.json';
 import skills from '../../public/data/skills.json';
 import progression from '../../public/data/progression.json';
 import { HeroLevel, xpShareForStage, type ProgressionTuning } from './entities/HeroLevel';
@@ -275,6 +276,25 @@ describe('content data integrity', () =>
             for (const drop of seed.plant!.harvest) expect(itemIds.has(drop.itemId), `${seed.id} gives ${drop.itemId}`).toBe(true);
         }
         for (const cost of garden.expansions) for (const ing of cost) expect(itemIds.has(ing.itemId), `a Plot costs ${ing.itemId}`).toBe(true);
+    });
+
+    it('has a Shop that sells real items for Materials only (never Credit, never a story item)', () =>
+    {
+        const byId = new Map((items as { id: string; category: string; story?: boolean }[]).map(i => [i.id, i]));
+        const entries = [...Object.values(shop.stock).flat(), ...shop.daily.pool] as { itemId: string; price: { itemId: string; count: number }[] }[];
+        expect(entries.length).toBeGreaterThan(5);
+        for (const entry of entries)
+        {
+            expect(byId.has(entry.itemId), `the Shop sells ${entry.itemId}`).toBe(true);
+            for (const ing of entry.price)
+            {
+                const item = byId.get(ing.itemId);
+                expect(item?.category, `${entry.itemId} costs ${ing.itemId}, a Material`).toBe('material');
+                expect(item?.story, `${ing.itemId} is not a story item`).toBeFalsy();
+            }
+        }
+        // A Seed from the Shop is a Seed that can be planted
+        for (const entry of shop.stock.seeds) expect((items as { id: string; plant?: unknown }[]).find(i => i.id === entry.itemId)?.plant, entry.itemId).toBeTruthy();
     });
 
     describe('lessons', () =>

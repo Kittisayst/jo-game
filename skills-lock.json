@@ -97,6 +97,12 @@
       "skillPath": "skills/genres/platformer/SKILL.md",
       "computedHash": "3484cf19c71ee64f49aa9e8be6f9f74274ed25f2f3f8faf53cedeb461d2122b5"
     },
+    "playwright-cli": {
+      "source": "microsoft/playwright-cli",
+      "sourceType": "github",
+      "skillPath": "skills/playwright-cli/SKILL.md",
+      "computedHash": "d4983e06b5daae441e48604b4b813a0c38784f3d87ea58f8391d2b5ffeb803fd"
+    },
     "procedural-gen": {
       "source": "gamedev-skills/awesome-gamedev-agent-skills",
       "sourceType": "github",

@@ -1,0 +1,33 @@
+{
+  "worldWidth": 2200,
+  "scenery": "cave",
+  "arenaFromX": 1600,
+  "spawn": {
+    "x": 100,
+    "y": 556
+  },
+  "platforms": [
+    { "x": 350, "y": 480 },
+    { "x": 550, "y": 420 },
+    { "x": 800, "y": 450 },
+    { "x": 1050, "y": 400 },
+    { "x": 1300, "y": 460 },
+    { "x": 1780, "y": 480 },
+    { "x": 1950, "y": 420 },
+    { "x": 2100, "y": 460 }
+  ],
+  "spikes": [
+    { "x": 480, "y": 624 },
+    { "x": 950, "y": 624 }
+  ],
+  "enemies": [
+    { "enemyId": "cave-bat", "type": "bat", "x": 400, "y": 380, "patrolDistance": 180, "speed": 85 },
+    { "enemyId": "cave-bat", "type": "bat", "x": 900, "y": 350, "patrolDistance": 200, "speed": 85 },
+    { "enemyId": "dungeon-spider", "type": "spider", "x": 600, "y": 580, "patrolDistance": 140, "speed": 90 },
+    { "enemyId": "dungeon-spider", "type": "spider", "x": 1100, "y": 580, "patrolDistance": 150, "speed": 90 },
+    { "enemyId": "dungeon-skeleton", "type": "skeleton", "x": 850, "y": 580, "patrolDistance": 100, "speed": 45 },
+    { "enemyId": "dungeon-skeleton", "type": "skeleton", "x": 1350, "y": 580, "patrolDistance": 120, "speed": 45 }
+  ],
+  "movingPlatforms": []
+}
+

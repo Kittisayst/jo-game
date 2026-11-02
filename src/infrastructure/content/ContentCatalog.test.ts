@@ -319,7 +319,7 @@ describe('validator errors', () =>
             {
                 const badBiome = copy(stages) as unknown as Loose2;
                 badBiome.stages[2].layout = { generate: { biome: 'lava', seed: 3, screens: 2 } };
-                expect(() => parse(badBiome)).toThrow(/stages\[2\]\.layout\.generate\.biome must be one of forest, cave/);
+                expect(() => parse(badBiome)).toThrow(/stages\[2\]\.layout\.generate\.biome must be one of forest, cave, desert/);
 
                 const crowded = copy(stages) as unknown as Loose2;
                 const pool = crowded.stages[2].zones[0].contents.find(c => c.kind === 'spawn-pool')!;
@@ -573,12 +573,14 @@ describe('validator errors', () =>
                     'axe-t1', 'pickaxe-t1', 'iron-sword', 'crystal-sword', 'iron-helmet', 'iron-chestplate', 'iron-boots',
                     'axe-t2', 'pickaxe-t2', 'blue-sword', 'blue-helmet', 'blue-chestplate', 'blue-boots',
                     'axe-t3', 'pickaxe-t3', 'copper-sword', 'copper-helmet', 'copper-chestplate', 'copper-boots',
+                    'bone-sword', 'shadow-silk-robe', 'venom-bone-blade',
                 ]);
-                expect(parsed.filter(r => r.building === 'workshop').map(r => r.itemId)).toEqual(['axe-t1', 'pickaxe-t1', 'axe-t2', 'pickaxe-t2', 'axe-t3', 'pickaxe-t3']);
+                expect(parsed.filter(r => r.building === 'workshop').map(r => r.itemId)).toEqual(['axe-t1', 'pickaxe-t1', 'axe-t2', 'pickaxe-t2', 'axe-t3', 'pickaxe-t3', 'shadow-silk-robe']);
                 expect(parsed.filter(r => r.building === 'forge').map(r => r.itemId)).toEqual([
                     'iron-sword', 'crystal-sword', 'iron-helmet', 'iron-chestplate', 'iron-boots',
                     'blue-sword', 'blue-helmet', 'blue-chestplate', 'blue-boots',
                     'copper-sword', 'copper-helmet', 'copper-chestplate', 'copper-boots',
+                    'bone-sword', 'venom-bone-blade',
                 ]);
                 expect(parsed.every(r => r.ingredients.length > 0)).toBe(true);
 

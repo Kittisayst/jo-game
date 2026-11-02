@@ -1,6 +1,6 @@
 @font-face {
     font-family: 'Noto Sans Lao';
-    src: url('/fonts/noto-sans-lao/static/NotoSansLao-Regular.ttf') format('truetype');
+    src: url('fonts/noto-sans-lao/static/NotoSansLao-Regular.ttf') format('truetype');
     font-weight: 400;
     font-style: normal;
     font-display: swap;
@@ -8,7 +8,7 @@
 
 @font-face {
     font-family: 'Noto Sans Lao';
-    src: url('/fonts/noto-sans-lao/static/NotoSansLao-Medium.ttf') format('truetype');
+    src: url('fonts/noto-sans-lao/static/NotoSansLao-Medium.ttf') format('truetype');
     font-weight: 500;
     font-style: normal;
     font-display: swap;
@@ -16,7 +16,7 @@
 
 @font-face {
     font-family: 'Noto Sans Lao';
-    src: url('/fonts/noto-sans-lao/static/NotoSansLao-SemiBold.ttf') format('truetype');
+    src: url('fonts/noto-sans-lao/static/NotoSansLao-SemiBold.ttf') format('truetype');
     font-weight: 600;
     font-style: normal;
     font-display: swap;
@@ -24,7 +24,7 @@
 
 @font-face {
     font-family: 'Noto Sans Lao';
-    src: url('/fonts/noto-sans-lao/static/NotoSansLao-Bold.ttf') format('truetype');
+    src: url('fonts/noto-sans-lao/static/NotoSansLao-Bold.ttf') format('truetype');
     font-weight: 700;
     font-style: normal;
     font-display: swap;
@@ -32,7 +32,7 @@
 
 @font-face {
     font-family: 'Noto Sans Lao';
-    src: url('/fonts/noto-sans-lao/static/NotoSansLao-ExtraBold.ttf') format('truetype');
+    src: url('fonts/noto-sans-lao/static/NotoSansLao-ExtraBold.ttf') format('truetype');
     font-weight: 800;
     font-style: normal;
     font-display: swap;
@@ -40,7 +40,7 @@
 
 @font-face {
     font-family: 'Noto Sans Lao';
-    src: url('/fonts/noto-sans-lao/NotoSansLao-VariableFont_wdth,wght.ttf') format('truetype-variations');
+    src: url('fonts/noto-sans-lao/NotoSansLao-VariableFont_wdth,wght.ttf') format('truetype-variations');
     font-weight: 100 900;
     font-style: normal;
     font-display: swap;
@@ -3321,6 +3321,7 @@ button,
 .p-4 { padding: 1rem !important; }
 .p-5 { padding: 1.25rem !important; }
 .p-6 { padding: 1.5rem !important; }
+.p-8 { padding: 2rem !important; }
 .p-12 { padding: 3rem !important; }
 .px-1 { padding-left: 0.25rem !important; padding-right: 0.25rem !important; }
 .px-1\.5 { padding-left: 0.375rem !important; padding-right: 0.375rem !important; }
@@ -3362,6 +3363,7 @@ button,
 .list-disc { list-style-type: disc !important; }
 .list-inside { list-style-position: inside !important; }
 .whitespace-pre-line { white-space: pre-line !important; }
+.whitespace-nowrap { white-space: nowrap !important; }
 
 /* Borders & Radius */
 .border { border-width: 1px !important; border-style: solid !important; }
@@ -5377,4 +5379,112 @@ button,
 .hud-hotbar {
     align-items: center;
     pointer-events: auto;
+}
+
+
+/* Potion Buff Timer HUD */
+.hud-notices .effect-badge {
+    border-radius: 6px;
+    font-weight: 600;
+    animation: buffPulse 1.8s infinite ease-in-out;
+}
+
+.hud-notices .effect-strength {
+    background: rgba(185, 28, 28, 0.45);
+    border: 1px solid #ef4444;
+    color: #fca5a5;
+    box-shadow: 0 0 10px rgba(239, 68, 68, 0.35);
+}
+
+.hud-notices .effect-speed {
+    background: rgba(14, 116, 144, 0.45);
+    border: 1px solid #38bdf8;
+    color: #7dd3fc;
+    box-shadow: 0 0 10px rgba(56, 189, 248, 0.35);
+}
+
+@keyframes buffPulse {
+    0%, 100% {
+        transform: scale(1);
+        filter: brightness(1);
+    }
+    50% {
+        transform: scale(1.04);
+        filter: brightness(1.2);
+    }
+}
+
+/* Quest Claimable HUD Notice */
+.hud-notices .quest-claimable-badge {
+    background: rgba(161, 98, 7, 0.45);
+    border: 1px solid #facc15;
+    color: #fef08a;
+    box-shadow: 0 0 12px rgba(250, 204, 21, 0.3);
+    animation: questGlow 2s infinite ease-in-out;
+}
+
+@keyframes questGlow {
+    0%, 100% {
+        box-shadow: 0 0 8px rgba(250, 204, 21, 0.2);
+    }
+    50% {
+        box-shadow: 0 0 16px rgba(250, 204, 21, 0.5);
+    }
+}
+
+
+.modal-backdrop {
+    position: fixed;
+    inset: 0;
+}
+
+.modal-container {
+    position: relative;
+}
+
+.quest-board-modal {
+    display: flex;
+}
+
+.pet-shop-modal {
+    display: flex;
+}
+
+.quest-tracker-hud {
+    display: flex;
+}
+
+/* Mini-Progress Bar in Stage */
+.stage-progress-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(15, 23, 42, 0.75);
+    border: 1px solid rgba(56, 189, 248, 0.5);
+    border-radius: 6px;
+    padding: 3px 8px;
+    color: #38bdf8;
+    box-shadow: 0 0 8px rgba(56, 189, 248, 0.2);
+}
+
+.stage-progress-track {
+    width: 60px;
+    height: 6px;
+    background: rgba(30, 41, 59, 0.85);
+    border: 1px solid rgba(71, 85, 105, 0.6);
+    border-radius: 3px;
+    overflow: hidden;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.stage-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #0ea5e9, #38bdf8);
+    transition: width 0.2s ease-out;
+    box-shadow: 0 0 6px rgba(56, 189, 248, 0.6);
+}
+
+.badge-target {
+    font-size: 11px;
 }

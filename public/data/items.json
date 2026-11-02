@@ -104,7 +104,11 @@
     "durability": 60,
     "icon": "🪓",
     "iconImage": "assets/items/axe-t1.png",
-    "held": { "image": "assets/held/axe-t1.png", "gripX": 16, "gripY": 26 }
+    "held": {
+      "image": "assets/held/axe-t1.png",
+      "gripX": 16,
+      "gripY": 26
+    }
   },
   {
     "id": "pickaxe-t1",
@@ -118,7 +122,11 @@
     "durability": 60,
     "icon": "⛏️",
     "iconImage": "assets/items/pickaxe-t1.png",
-    "held": { "image": "assets/held/pickaxe-t1.png", "gripX": 16, "gripY": 26 }
+    "held": {
+      "image": "assets/held/pickaxe-t1.png",
+      "gripX": 16,
+      "gripY": 26
+    }
   },
   {
     "id": "hammer-t1",
@@ -131,7 +139,11 @@
     "maxStack": 1,
     "icon": "🔨",
     "iconImage": "assets/items/hammer-t1.png",
-    "held": { "image": "assets/held/hammer-t1.png", "gripX": 16, "gripY": 26 }
+    "held": {
+      "image": "assets/held/hammer-t1.png",
+      "gripX": 16,
+      "gripY": 26
+    }
   },
   {
     "id": "wooden-sword",
@@ -145,7 +157,11 @@
     "maxStack": 1,
     "icon": "🗡️",
     "iconImage": "assets/items/wooden-sword.png",
-    "held": { "image": "assets/held/wooden-sword.png", "gripX": 16, "gripY": 26 }
+    "held": {
+      "image": "assets/held/wooden-sword.png",
+      "gripX": 16,
+      "gripY": 26
+    }
   },
   {
     "id": "iron-sword",
@@ -160,7 +176,11 @@
     "durability": 80,
     "icon": "⚔️",
     "iconImage": "assets/items/iron-sword.png",
-    "held": { "image": "assets/held/iron-sword.png", "gripX": 16, "gripY": 26 }
+    "held": {
+      "image": "assets/held/iron-sword.png",
+      "gripX": 16,
+      "gripY": 26
+    }
   },
   {
     "id": "crystal-sword",
@@ -175,7 +195,11 @@
     "durability": 120,
     "icon": "✨",
     "iconImage": "assets/items/crystal-sword.png",
-    "held": { "image": "assets/held/crystal-sword.png", "gripX": 16, "gripY": 26 }
+    "held": {
+      "image": "assets/held/crystal-sword.png",
+      "gripX": 16,
+      "gripY": 26
+    }
   },
   {
     "id": "iron-helmet",
@@ -480,7 +504,15 @@
     "description": "ເມັດຈາກຕົ້ນສະໝຸນໄພໃນດ່ານ ໃຊ້ປູກເປັນສະໝຸນໄພໄດ້ (ເສຍເຄິ່ງໜຶ່ງເມື່ອຕາຍ)",
     "category": "material",
     "maxStack": 99,
-    "plant": { "minutes": 10, "harvest": [{ "itemId": "herb", "count": 4 }] },
+    "plant": {
+      "minutes": 10,
+      "harvest": [
+        {
+          "itemId": "herb",
+          "count": 4
+        }
+      ]
+    },
     "icon": "🌱",
     "iconImage": "assets/items/herb-seed.png"
   },
@@ -491,7 +523,15 @@
     "description": "ເມັດຈາກຫຍ້າເສັ້ນໃຍໃນດ່ານ ໃຊ້ປູກເປັນເສັ້ນໃຍໄດ້ (ເສຍເຄິ່ງໜຶ່ງເມື່ອຕາຍ)",
     "category": "material",
     "maxStack": 99,
-    "plant": { "minutes": 10, "harvest": [{ "itemId": "fiber", "count": 4 }] },
+    "plant": {
+      "minutes": 10,
+      "harvest": [
+        {
+          "itemId": "fiber",
+          "count": 4
+        }
+      ]
+    },
     "icon": "🌱",
     "iconImage": "assets/items/fiber-seed.png"
   },
@@ -502,7 +542,15 @@
     "description": "ກ້າໄມ້ທີ່ໄດ້ຈາກການຕັດຕົ້ນໄມ້ ໃຊ້ປູກເປັນຕົ້ນໄມ້ໄດ້ (ເສຍເຄິ່ງໜຶ່ງເມື່ອຕາຍ)",
     "category": "material",
     "maxStack": 99,
-    "plant": { "minutes": 20, "harvest": [{ "itemId": "wood", "count": 6 }] },
+    "plant": {
+      "minutes": 20,
+      "harvest": [
+        {
+          "itemId": "wood",
+          "count": 6
+        }
+      ]
+    },
     "icon": "🌳",
     "iconImage": "assets/items/oak-sapling.png"
   },
@@ -558,6 +606,7 @@
     "icon": "🪓",
     "iconImage": "assets/items/axe-t2.png",
     "held": {
+      "image": "assets/held/axe-t2.png",
       "gripX": 16,
       "gripY": 26
     }
@@ -575,6 +624,7 @@
     "icon": "⛏️",
     "iconImage": "assets/items/pickaxe-t2.png",
     "held": {
+      "image": "assets/held/pickaxe-t2.png",
       "gripX": 16,
       "gripY": 26
     }
@@ -591,6 +641,7 @@
     "icon": "🔨",
     "iconImage": "assets/items/hammer-t2.png",
     "held": {
+      "image": "assets/held/hammer-t2.png",
       "gripX": 16,
       "gripY": 26
     }
@@ -609,6 +660,7 @@
     "icon": "🗡️",
     "iconImage": "assets/items/blue-sword.png",
     "held": {
+      "image": "assets/held/blue-sword.png",
       "gripX": 16,
       "gripY": 26
     }
@@ -705,6 +757,7 @@
     "icon": "🪓",
     "iconImage": "assets/items/axe-t3.png",
     "held": {
+      "image": "assets/held/axe-t3.png",
       "gripX": 16,
       "gripY": 26
     }
@@ -722,6 +775,7 @@
     "icon": "⛏️",
     "iconImage": "assets/items/pickaxe-t3.png",
     "held": {
+      "image": "assets/held/pickaxe-t3.png",
       "gripX": 16,
       "gripY": 26
     }
@@ -738,6 +792,7 @@
     "icon": "🔨",
     "iconImage": "assets/items/hammer-t3.png",
     "held": {
+      "image": "assets/held/hammer-t3.png",
       "gripX": 16,
       "gripY": 26
     }
@@ -756,6 +811,7 @@
     "icon": "🗡️",
     "iconImage": "assets/items/copper-sword.png",
     "held": {
+      "image": "assets/held/copper-sword.png",
       "gripX": 16,
       "gripY": 26
     }
@@ -809,5 +865,108 @@
     "maxStack": 99,
     "icon": "🌙",
     "iconImage": "assets/items/moon-dust.png"
+  },
+  {
+    "id": "bat-wing",
+    "name": "ປີກເຈຍຖ້ຳ",
+    "nameEn": "Cave Bat Wing",
+    "description": "ປີກບາງໆຂອງເຈຍຖ້ຳ ໃຊ້ສຳລັບປຸງຢາເພີ່ມຄວາມໄວ",
+    "category": "material",
+    "maxStack": 30,
+    "icon": "🦇",
+    "iconImage": "assets/items/bat-wing.png"
+  },
+  {
+    "id": "spider-silk",
+    "name": "ໃຍແມງມຸມພິດ",
+    "nameEn": "Venomous Spider Silk",
+    "description": "ເສັ້ນໃຍພິເສດທີ່ມີຄວາມໜຽວແໜ້ນສູງ ໃຊ້ສຳລັບຖັກເກາະ",
+    "category": "material",
+    "maxStack": 30,
+    "icon": "🕸️",
+    "iconImage": "assets/items/spider-silk.png"
+  },
+  {
+    "id": "bone-shard",
+    "name": "ເສດກະດູກບູຮານ",
+    "nameEn": "Ancient Bone Shard",
+    "description": "ຊິ້ນສ່ວນກະດູກແຂງແກ່ນ ຈາກໂຄງກະດູກນັກຮົບ",
+    "category": "material",
+    "maxStack": 30,
+    "icon": "🦴",
+    "iconImage": "assets/items/bone-shard.png"
+  },
+  {
+    "id": "bone-sword",
+    "name": "ດາບກະດູກບູຮານ",
+    "nameEn": "Ancient Bone Sword",
+    "description": "ດາບທີ່ສ້າງຈາກກະດູກແຂງແກ່ນ ພະລັງໂຈມຕີ ATK 18",
+    "category": "weapon",
+    "maxStack": 1,
+    "baseDamage": 18,
+    "durability": 100,
+    "icon": "🗡️",
+    "iconImage": "assets/items/bone-sword.png",
+    "held": {
+      "image": "assets/held/bone-sword.png",
+      "gripX": 16,
+      "gripY": 26
+    }
+  },
+  {
+    "id": "dungeon-key",
+    "name": "ກະແຈຄຸກໃຕ້ດິນບູຮານ",
+    "nameEn": "Ancient Dungeon Key",
+    "description": "ກະແຈຫີນບູຮານສຳລັບໄຂປະຕູສູ່ຫ້ອງຣາຊິນີແມງມຸມ",
+    "category": "material",
+    "icon": "🗝️",
+    "iconImage": "assets/items/dungeon-key.png",
+    "maxStack": 1,
+    "creditValue": 50
+  },
+  {
+    "id": "shadow-silk-robe",
+    "name": "ເສື້ອຄຸມເງົາມືດ",
+    "nameEn": "Shadow Silk Robe",
+    "description": "ເສື້ອຄຸມທີ່ຖັກທໍຈາກໃຍແມງມຸມຄຸກ ເພີ່ມຄວາມວ່ອງໄວ ແລະ ປ້ອງກັນ",
+    "category": "armor",
+    "icon": "🥋",
+    "iconImage": "assets/items/shadow-silk-robe.png",
+    "slot": "body",
+    "durability": 120,
+    "maxStack": 1,
+    "creditValue": 60,
+    "armorHearts": 2
+  },
+  {
+    "id": "feather-fall-potion",
+    "name": "ຢາຂົນນົກເບົາຕົວ",
+    "nameEn": "Feather Fall Potion",
+    "description": "ຢາສະກັດຈາກປີກເຈຍຖ້ຳ ຊ່ວຍຟື້ນຟູ 2 ຫົວໃຈ ແລະ ເຮັດໃຫ້ຮ່າງກາຍເບົາສະບາຍ",
+    "category": "consumable",
+    "icon": "🧪",
+    "iconImage": "assets/items/feather-fall-potion.png",
+    "effect": "speed",
+    "maxStack": 20,
+    "creditValue": 25,
+    "durationSec": 60
+  },
+  {
+    "id": "venom-bone-blade",
+    "name": "ດາບກະດູກອາບພິດ",
+    "nameEn": "Venom Bone Blade",
+    "description": "ດາບກະດູກບູຮານທີ່ເຄືອບດ້ວຍພິດແມງມຸມ ໂຈມຕີຮຸນແຮງ ແລະ ວ່ອງໄວ",
+    "category": "weapon",
+    "icon": "🗡️",
+    "iconImage": "assets/items/venom-bone-blade.png",
+    "held": {
+      "image": "assets/held/venom-bone-blade.png",
+      "gripX": 16,
+      "gripY": 26
+    },
+    "attack": 26,
+    "durability": 120,
+    "maxStack": 1,
+    "creditValue": 80
   }
 ]

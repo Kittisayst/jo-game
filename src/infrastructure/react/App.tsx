@@ -43,8 +43,8 @@ import { WEAPON_CONFIGS } from '../../domain/entities/EquipmentState';
 import { cycleEquippedWeaponUseCase } from '../../application/CycleEquippedWeaponUseCase';
 import { TextbookModal } from './components/TextbookModal';
 import { AcademyModal } from './components/AcademyModal';
-import { WorkshopModal } from './components/WorkshopModal';
-import { ForgeModal } from './components/ForgeModal';
+import { SmithyModal } from './components/SmithyModal';
+import { ShopModal } from './components/ShopModal';
 import { BackpackModal } from './components/BackpackModal';
 import { GateRepairModal } from './components/GateRepairModal';
 import { WaypointModal } from './components/WaypointModal';
@@ -56,8 +56,17 @@ import { readHeroLevel } from './heroLevelView';
 import { readWorldTime } from './worldTimeView';
 import { syncHearts } from '../heroStats';
 import { syncMovement, syncSkills } from '../skills';
-import { GARDEN_LEVEL_KEY, isHomeLevel } from '../phaser/levelCatalog';
+import { isSpecialLevel } from '../phaser/levelCatalog';
 import { StorageModal } from './components/StorageModal';
+import { QuestBoardModal } from './components/QuestBoardModal';
+import { QuestTrackerHud } from './components/QuestTrackerHud';
+import { PetShopModal } from './components/PetShopModal';
+import { DomainEvents } from '../../domain/DomainEvents';
+import { recordQuestProgressUseCase, QUEST_COMPLETED_EVENT, type QuestCompletedPayload } from '../../application/QuestUseCases';
+import { RESOURCE_HARVESTED_EVENT, type ResourceHarvestedPayload } from '../../application/HarvestResourceNodeUseCase';
+import { POTION_DRUNK_EVENT, type PotionDrunkPayload } from '../../application/DrinkPotionUseCase';
+import { RECIPE_CRAFTED_EVENT } from '../../application/CraftRecipeUseCase';
+import { CRAFT_COLLECTED_EVENT } from '../../application/CraftingJobUseCases';
 import { CharacterModal } from './components/CharacterModal';
 import { answerStageQuestionUseCase, pickStageQuestion } from '../../application/AnswerStageQuestionUseCase';
 import { returnToVillageUseCase } from '../../application/ReturnToVillageUseCase';
@@ -137,8 +146,9 @@ function App ()
         activeReaderPageNumber, setActiveReaderPageNumber,
         isAcademyOpen, setIsAcademyOpen,
         activeExamBookId, setActiveExamBookId,
-        isWorkshopOpen, setIsWorkshopOpen,
-        isForgeOpen, setIsForgeOpen,
+        isSmithyOpen, setIsSmithyOpen,
+        smithyTab, setSmithyTab,
+        isShopOpen, setIsShopOpen,
         isBackpackOpen, setIsBackpackOpen,
         isGateRepairOpen, setIsGateRepairOpen,
         activeGateId, setActiveGateId,
@@ -152,7 +162,9 @@ function App ()
         stageQuestion, setStageQuestion,
         isGardenOpen, setIsGardenOpen,
         isStorageOpen, setIsStorageOpen,
+        isQuestBoardOpen, setIsQuestBoardOpen,
         isCharacterOpen, setIsCharacterOpen,
+        isPetShopOpen, setIsPetShopOpen,
     } = modals;
 
     // Bumped when books or the backpack change, so memoised values that read them recompute
@@ -160,11 +172,15 @@ function App ()
     const [backpackRevision, setBackpackRevision] = useState(0);
     // Bumped when a tutorial step is finished or skipped, so the hint on the HUD is read again
     const [, setTutorialRevision] = useState(0);
+    const [stageProgress, setStageProgress] = useState<{ percent: number } | null>(null);
 
     useEffect(() =>
     {
         // Ensure legacy local storage keys are migrated into active save slot on startup
         saveManager.load();
+        const onProgress = ({ percent }: { percent: number }) => setStageProgress({ percent });
+        EventBus.on('stage-progress-updated', onProgress);
+        return () => { EventBus.off('stage-progress-updated', onProgress); };
     }, []);
 
     const handleCycleWeapon = () =>
@@ -274,10 +290,10 @@ function App ()
     {
         // A Stage that is not built yet (grey on the map) has no level to load
         const stage = getStageDefinition(getGameContent().stages, stageKey);
-        if (!isHomeLevel(stageKey) && (!stage || !isStageReady(stage))) return;
+        if (!isSpecialLevel(stageKey) && (!stage || !isStageReady(stage))) return;
 
-        // The village and the Garden are always open; only a Stage has to be unlocked
-        const success = stageKey === GARDEN_LEVEL_KEY || selectStageUseCase(stageProgression, stageKey);
+        // The village, Garden and Dungeon are always open; only a Stage has to be unlocked
+        const success = isSpecialLevel(stageKey) || selectStageUseCase(stageProgression, stageKey);
         if (!success) return;
 
         resumeGameUseCase(pauseState);
@@ -289,6 +305,7 @@ function App ()
         setHealth(entities.health.max);
         setCurrentLevel(stageKey);
         setBossHp(null);
+        setStageProgress(isSpecialLevel(stageKey) ? null : { percent: 0 });
 
         writeString(ACTIVE_SESSION_STORAGE_KEY, stageKey);
 
@@ -376,6 +393,7 @@ function App ()
 
         setCurrentLevel(target);
         setBossHp(null);
+        setStageProgress(isSpecialLevel(target) ? null : { percent: 0 });
 
         phaserRef.current?.scene?.scene.restart({
             levelKey: target,
@@ -459,7 +477,7 @@ function App ()
         if (!itemId) return;
 
         const result = drinkPotionUseCase(entities.itemCatalog.get(itemId), entities.backpack, entities.health, entities.effects);
-        if (result.success) soundManager.playPowerUp(); else soundManager.playHurt();
+        if (result.success) soundManager.playPotionDrink(); else soundManager.playHurt();
         // A Potion that is used up (or gone) empties the slot
         if (entities.backpack.getItemCount(itemId) === 0) entities.quickSlotItemId = null;
         setBackpackRevision(r => r + 1);
@@ -487,6 +505,54 @@ function App ()
     {
         syncHearts();
         if (syncSkills().length + syncMovement().length > 0) autoSaveGame();
+    }, []);
+
+
+    useEffect(() =>
+    {
+        const onHarvest = (payload: ResourceHarvestedPayload) =>
+        {
+            if (payload?.drops)
+            {
+                for (const drop of payload.drops)
+                {
+                    recordQuestProgressUseCase(entities.questBoard, 'gather', drop.itemId, drop.count);
+                }
+            }
+        };
+
+        const onPotionDrunk = (payload: PotionDrunkPayload) =>
+        {
+            recordQuestProgressUseCase(entities.questBoard, 'drink_potion', payload.effect, 1);
+        };
+
+        const onCrafted = () =>
+        {
+            recordQuestProgressUseCase(entities.questBoard, 'craft', undefined, 1);
+        };
+
+        const onQuestCompleted = (payload: QuestCompletedPayload) =>
+        {
+            setVillageWelcomeToast(`📜 ພາລະກິດສຳເລັດ: ${payload.title}! (ໄປຮັບລາງວັນທີ່ໝູ່ບ້ານ)`);
+            soundManager.playPowerUp();
+            setBackpackRevision(r => r + 1);
+            autoSaveGame();
+        };
+
+        DomainEvents.on(RESOURCE_HARVESTED_EVENT, onHarvest);
+        DomainEvents.on(POTION_DRUNK_EVENT, onPotionDrunk);
+        DomainEvents.on(RECIPE_CRAFTED_EVENT, onCrafted);
+        DomainEvents.on(CRAFT_COLLECTED_EVENT, onCrafted);
+        DomainEvents.on(QUEST_COMPLETED_EVENT, onQuestCompleted);
+
+        return () =>
+        {
+            DomainEvents.off(RESOURCE_HARVESTED_EVENT, onHarvest);
+            DomainEvents.off(POTION_DRUNK_EVENT, onPotionDrunk);
+            DomainEvents.off(RECIPE_CRAFTED_EVENT, onCrafted);
+            DomainEvents.off(CRAFT_COLLECTED_EVENT, onCrafted);
+            DomainEvents.off(QUEST_COMPLETED_EVENT, onQuestCompleted);
+        };
     }, []);
 
     // The clock of the day counts down on the HUD: one redraw a second
@@ -578,7 +644,10 @@ function App ()
     };
 
     useGameEvents({
-        onStageCleared: payload => clearStage(payload.stageId),
+        onStageCleared: payload => {
+            clearStage(payload.stageId);
+            recordQuestProgressUseCase(entities.questBoard, 'clear_stage', undefined, 1);
+        },
         onItemWornOrRepaired: () => setBackpackRevision(r => r + 1),
         onTutorialChanged: payload =>
         {
@@ -646,6 +715,8 @@ function App ()
             autoSaveGame();
         },
         onOpenStorage: () => setIsStorageOpen(true),
+        onOpenQuestBoard: () => setIsQuestBoardOpen(true),
+        onOpenPetShop: () => setIsPetShopOpen(true),
         onWeaponChanged: weaponId =>
         {
             setEquippedWeaponId(weaponId);
@@ -664,8 +735,27 @@ function App ()
             if (bookId) setActiveExamBookId(bookId);
             setIsAcademyOpen(true);
         },
-        onOpenWorkshop: () => setIsWorkshopOpen(true),
-        onOpenForge: () => setIsForgeOpen(true),
+        onOpenSmithy: tab =>
+        {
+            if (tab) setSmithyTab(tab);
+            setIsSmithyOpen(true);
+        },
+        onOpenWorkshop: () =>
+        {
+            setSmithyTab('tools');
+            setIsSmithyOpen(true);
+        },
+        onOpenForge: () =>
+        {
+            setSmithyTab('weapons');
+            setIsSmithyOpen(true);
+        },
+        onOpenShop: () =>
+        {
+            // The choice that opened the shop ends the talk with Grandma Chanthy
+            closeDialogue();
+            setIsShopOpen(true);
+        },
         onOpenBackpack: () => setIsBackpackOpen(true),
         onOpenGateRepair: (gateId, requirements) =>
         {
@@ -748,6 +838,7 @@ function App ()
                     armor={entities.health.armor}
                     pendingRewardsCount={entities.pendingRewards.total}
                     gardenReadyCount={entities.garden.readyCount(clock.now(), growMinutesOf(entities.itemCatalog))}
+                    questClaimableCount={entities.questBoard.claimableCount}
                     craftingJob={entities.crafting.job}
                     skillSlots={readSkillSlots()}
                     heroLevel={readHeroLevel()}
@@ -755,6 +846,7 @@ function App ()
                     onOpenCharacter={() => setIsCharacterOpen(true)}
                     onUseSkill={slot => EventBus.emit('virtual-skill', { slot })}
                     activeEffects={entities.effects.active}
+                    stageProgress={stageProgress}
                     quickSlot={quickSlotDef
                         ? {
                             id: quickSlotDef.id,
@@ -916,21 +1008,24 @@ function App ()
                 }}
             />
 
-            <WorkshopModal
-                isOpen={isWorkshopOpen}
+            <SmithyModal
+                isOpen={isSmithyOpen}
+                tab={smithyTab}
+                onTabChange={setSmithyTab}
                 onClose={() =>
                 {
-                    setIsWorkshopOpen(false);
+                    setIsSmithyOpen(false);
                     setBackpackRevision(r => r + 1);
                 }}
             />
 
-            <ForgeModal
-                isOpen={isForgeOpen}
+            <ShopModal
+                isOpen={isShopOpen}
                 onClose={() =>
                 {
-                    setIsForgeOpen(false);
+                    setIsShopOpen(false);
                     setBackpackRevision(r => r + 1);
+                    autoSaveGame();
                 }}
             />
 
@@ -1024,6 +1119,18 @@ function App ()
                     setBackpackRevision(r => r + 1);
                     autoSaveGame();
                 }}
+            />
+
+            <QuestTrackerHud visible={!isMainMenuOpen && !isSettingsOpen} />
+
+            <PetShopModal
+                isOpen={isPetShopOpen}
+                onClose={() => setIsPetShopOpen(false)}
+            />
+
+            <QuestBoardModal
+                isOpen={isQuestBoardOpen}
+                onClose={() => setIsQuestBoardOpen(false)}
             />
 
             <StorageModal

@@ -13,7 +13,10 @@ export default async function globalSetup (config: FullConfig): Promise<void>
     const page = await browser.newPage();
     page.setDefaultTimeout(90000);
     await page.goto(baseURL, { timeout: 90000 });
-    await page.getByRole('button', { name: /ເຂົ້າເກມ/i }).click();
+    const playBtn = page.locator('#btn-play-game');
+    // The menu can still be loading when the page opens: wait for the button instead of checking once
+    await playBtn.waitFor({ timeout: 60000 });
+    await playBtn.click();
     await page.locator('.game-hud').waitFor({ timeout: 60000 });
   } finally {
     await browser.close();

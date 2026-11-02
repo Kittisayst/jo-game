@@ -10,6 +10,9 @@ import type { WorldTimeSnapshot } from './WorldTime';
 import type { NightHuntsSnapshot } from './NightHunts';
 import type { PendingReward } from './PendingRewards';
 import { TutorialSnapshot } from './TutorialProgress';
+import type { QuestSnapshot } from './Quest';
+import type { PetSnapshot } from './Pet';
+import type { ShopPurchasesSnapshot } from './ShopPurchases';
 import { SettingsData, StageProgressionData } from '../ports';
 import { BookProgressSnapshot } from './Book';
 import { BackpackSlotSnapshot } from './Backpack';
@@ -80,6 +83,11 @@ export interface SaveGameSnapshot
     quickSlotItemId: string | null;
     /** Hints of the first Stage that were done, and whether the player skipped them. Missing in older saves. */
     tutorial: TutorialSnapshot;
+    /** Completed/claimed quest board tasks. Missing in older saves. */
+    quests?: QuestSnapshot;
+    pets?: PetSnapshot;
+    /** What the Shop sold today. Missing in older saves. */
+    shop?: ShopPurchasesSnapshot;
 }
 
 export function createDefaultSaveSnapshot (slotId = 'slot_1'): SaveGameSnapshot
@@ -146,6 +154,9 @@ export function createDefaultSaveSnapshot (slotId = 'slot_1'): SaveGameSnapshot
         worldTime: null,
         nightHunts: { nightId: -1, stages: [] },
         storage: [],
+        quests: { quests: [] },
+        pets: { ownedPetIds: [], activePetId: null },
+        shop: { dayCount: 0, bought: {} },
     };
 }
 
@@ -437,5 +448,53 @@ export function migrateSaveSnapshot (raw: unknown, fallbackSlotId = 'slot_1'): S
         worldTime,
         nightHunts,
         storage,
+        pets: data.pets && typeof data.pets === 'object' ? {
+            ownedPetIds: Array.isArray((data.pets as Record<string, unknown>).ownedPetIds)
+                ? ((data.pets as Record<string, unknown>).ownedPetIds as unknown[]).filter((id): id is string => typeof id === 'string')
+                : [],
+            activePetId: typeof (data.pets as Record<string, unknown>).activePetId === 'string'
+                ? ((data.pets as Record<string, unknown>).activePetId as string)
+                : null,
+        } : { ownedPetIds: [], activePetId: null },
+        quests: sanitizeQuests(data.quests),
+        shop: sanitizeShop(data.shop),
     };
+}
+
+function sanitizeShop (raw: unknown): ShopPurchasesSnapshot
+{
+    const empty: ShopPurchasesSnapshot = { dayCount: 0, bought: {} };
+    if (!raw || typeof raw !== 'object') return empty;
+    const r = raw as Record<string, unknown>;
+    const dayCount = typeof r.dayCount === 'number' && Number.isInteger(r.dayCount) && r.dayCount >= 0 ? r.dayCount : 0;
+    const bought: Record<string, number> = {};
+    if (r.bought && typeof r.bought === 'object')
+    {
+        for (const [id, n] of Object.entries(r.bought as Record<string, unknown>))
+        {
+            if (typeof n === 'number' && Number.isInteger(n) && n > 0) bought[id] = n;
+        }
+    }
+    return { dayCount, bought };
+}
+
+function sanitizeQuests (raw: unknown): QuestSnapshot
+{
+    const list = raw && typeof raw === 'object' ? (raw as Record<string, unknown>).quests : undefined;
+    if (!Array.isArray(list)) return { quests: [] };
+    const quests: QuestSnapshot['quests'] = [];
+    for (const entry of list)
+    {
+        if (!entry || typeof entry !== 'object') continue;
+        const q = entry as Record<string, unknown>;
+        if (typeof q.id !== 'string') continue;
+        quests.push({
+            id: q.id,
+            progress: typeof q.progress === 'number' && Number.isFinite(q.progress) ? Math.max(0, Math.floor(q.progress)) : 0,
+            ...(typeof q.accepted === 'boolean' ? { accepted: q.accepted } : {}),
+            completed: q.completed === true,
+            claimed: q.claimed === true,
+        });
+    }
+    return { quests };
 }

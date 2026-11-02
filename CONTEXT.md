@@ -123,7 +123,7 @@ An enemy held still for a few seconds by a Skill (such as Ping): it cannot patro
 A quick burst sideways (Shift, or the touch button) that the hero has from the start. For its first moments nothing can hurt the hero: this is the **dodge**. It has a cooldown. The **air dash** (a Dash in the air, once per jump) is a **movement ability** the hero gets by beating the Boss of Stage 10; the double jump is a later one (Stage 30).
 
 **Crafting job**:
-What the Workshop or the Forge is making: one recipe with a build time, one at a time. The Materials and Credit are taken when it starts, the time counts Game time (only while the game is being played), and the result is collected by hand when it is done. A recipe with no build time is made at once.
+What the Smithy is making (a Workshop or a Forge recipe): one recipe with a build time, one at a time. The Materials and Credit are taken when it starts, the time counts Game time (only while the game is being played), and the result is collected by hand when it is done. A recipe with no build time is made at once.
 
 **Storage chest**:
 A chest in the Village Hub holding 40 items. What is in it is never lost on death.
@@ -183,7 +183,7 @@ A purchasable Book of short pages for one Realm. Passing its exam unlocks the Re
 _Avoid_: lesson, course
 
 **Village Hub**:
-The safe place between Stages with no enemies; the player walks to buildings (Library, Academy, Workshop, Forge, World Gate), the Garden door and the Storage chest and returns here to heal and save.
+The safe place between Stages with no enemies; the player walks to buildings (Library, Academy, Smithy, World Gate), the Garden door and the Storage chest and returns here to heal and save.
 
 **Skin**:
 A cosmetic look for the player character, bought once with Credit and kept forever. The free default is always owned. Skins change nothing about gameplay. Buying and changing a Skin both happen only at the Skin shop in the Village Hub, never from a menu.
@@ -210,5 +210,13 @@ The game's JSON data (items, textbooks, questions, recipes, enemies, stages) loa
 _Avoid_: data loader, assets (assets are images and sounds)
 
 **Skin shop**:
-The only shop in the game, run by the NPC Mina in the Village Hub. It sells Skins for Credit and nothing else (no items, no Materials), so Credit still comes only from learning. Talking to Mina is the only way to open it.
+The shop of the NPC Mina in the Village Hub. It sells Skins for Credit and nothing else (no items, no Materials), so Credit still comes only from learning. Talking to Mina is the only way to open it.
 _Avoid_: store, merchant, coin shop (the old coin shop is gone)
+
+**Smithy**:
+The one building where the Workshop and the Forge are joined: one door, one window with the tabs Tools & Potions (Workshop recipes), Weapons & Armor (Forge recipes, locked until the Textbook 1 exam), Upgrade and Repair. Workshop and Forge remain the names of the two kinds of recipe.
+_Avoid_: separate Workshop and Forge buildings
+
+**Shop** (Grandma Chanthy):
+Where Materials are bartered for Seeds, plain Potions, repair kits and a daily pair of stronger Potions. It takes Materials only: Credit is never asked for and never paid out (see ADR 0008).
+_Avoid_: store, merchant, coin shop (the Skin shop of Mina is the other shop, and sells for Credit)

@@ -108,6 +108,17 @@ PLAYTHROUGH=1 npx playwright test e2e/playthrough.spec.ts
 - ສຽງ/sprite/animation ແທນຮູບຮ່າງງ່າຍໆທີ່ແຕ້ມດ້ວຍໂຄດ.
 - Cave Guardian ຍັງບໍ່ມີ 2 ທ່າໂຈມຕີ.
 
+## Deploy (GitHub Pages)
+
+ທຸກ push ເຂົ້າ `main` ຈະ build ແລະ deploy ອັດຕະໂນມັດດ້ວຍ [.github/workflows/deploy.yml](.github/workflows/deploy.yml) (ກວດ `tsc`, `lint`, `test` ກ່ອນ ແລ້ວ `npm run build-nolog`) ໄປທີ່ https://kittisayst.github.io/jo-game/. ຄັ້ງທຳອິດຕ້ອງເປີດ Settings → Pages → Source: **GitHub Actions** ໃນ repository. CI ໃຊ້ `build-nolog` ສະເໝີ. ເບິ່ງ build ຢູ່ເຄື່ອງກ່ອນ deploy:
+
+```bash
+npm run build-nolog
+npx vite preview --config vite/config.prod.mjs --base /jo-game/   # http://localhost:4173/jo-game/
+```
+
+ໄຟລ໌ໃນ `public/` (ເຊັ່ນ `style.css`) ຕ້ອງໃຊ້ path ແບບ relative (`url('fonts/...')`), ເພາະ Vite ບໍ່ແກ້ path ໃນໄຟລ໌ເຫຼົ່ານັ້ນ ແລະ path ແບບ `/fonts/...` ຈະພັງເມື່ອເກມຢູ່ໃຕ້ `/jo-game/`.
+
 ## ກ່ຽວກັບ log.js
 
 ໂປຣເຈັກເລີ່ມຈາກ [template ຂອງ Phaser](https://github.com/phaserjs/template-react-ts) ທີ່ມີ `log.js` ສົ່ງຂໍ້ມູນນິລະນາມ 3 ຢ່າງ (ຊື່ template, dev/prod, ເວີຊັນ Phaser) ໄປທີ່ `gryzor.co` ເມື່ອໃຊ້ `npm run dev` ຫຼື `npm run build`. ບໍ່ມີຂໍ້ມູນສ່ວນຕົວ. ຖ້າບໍ່ຢາກສົ່ງ ໃຫ້ໃຊ້ `npm run dev-nolog` / `npm run build-nolog` ຫຼືລຶບ `log.js` ແລະການເອີ້ນໃນ `package.json`.

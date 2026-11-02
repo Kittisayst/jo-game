@@ -4,11 +4,35 @@ import { damageBossUseCase } from '../../../application/DamageBossUseCase';
 import { GROUND_SINK } from '../physicsConstants';
 
 const TEXTURE_KEY = 'boss-hardware-overlord';
+const BOSS_TEXTURE_MAP: Record<string, string> = {
+    'stage-ch1-boss': 'boss-hardware-overlord',
+    'stage-ch2-boss': 'boss-network-core',
+    'stage-ch3-boss': 'boss-kernel-titan',
+    'dungeon-spider-queen': 'boss-spider-queen',
+};
 const WIDTH = 96;
 const HEIGHT = 80;
 
-export type BossAction = 'jump_slam' | 'roll_dash' | 'summon';
-export type BossFsmState = 'idle' | 'telegraph' | 'jump_slam' | 'roll_dash' | 'summon' | 'recover';
+export type BossAction =
+    | 'jump_slam'
+    | 'roll_dash'
+    | 'summon'
+    | 'packet_burst'
+    | 'emp_shockwave'
+    | 'ground_stomp'
+    | 'debris_drop';
+
+export type BossFsmState =
+    | 'idle'
+    | 'telegraph'
+    | 'jump_slam'
+    | 'roll_dash'
+    | 'summon'
+    | 'packet_burst'
+    | 'emp_shockwave'
+    | 'ground_stomp'
+    | 'debris_drop'
+    | 'recover';
 
 /**
  * Phaser arcade sprite representing the Hardware Overlord Boss.
@@ -17,6 +41,7 @@ export type BossFsmState = 'idle' | 'telegraph' | 'jump_slam' | 'roll_dash' | 's
  */
 export class Boss extends Physics.Arcade.Sprite
 {
+    readonly bossId: string;
     entity: BossEntity;
     isInvulnerable = false;
     private _fsmState: BossFsmState = 'idle';
@@ -31,14 +56,22 @@ export class Boss extends Physics.Arcade.Sprite
     onDefeated?: (x: number, y: number) => void;
     onSummonMinion?: (x: number, y: number) => void;
     onPhaseChanged?: (newPhase: BossPhase) => void;
+    onPacketBurst?: (x: number, y: number, dir: number) => void;
+    onEmpShockwave?: (x: number, y: number) => void;
+    onGroundStomp?: (x: number, y: number, dir: number) => void;
+    onDebrisDrop?: (targetX: number) => void;
     /** XP the hero gets when the Boss falls (set by the scene from `enemies.json`). */
     xp = 0;
 
-    constructor (scene: Scene, x: number, y: number, maxHp = 5)
+    constructor (scene: Scene, x: number, y: number, maxHp = 5, bossId?: string)
     {
-        Boss.ensureTexture(scene);
+        const texKey = (bossId && BOSS_TEXTURE_MAP[bossId] && scene.textures.exists(BOSS_TEXTURE_MAP[bossId]))
+            ? BOSS_TEXTURE_MAP[bossId]
+            : TEXTURE_KEY;
+        Boss.ensureTexture(scene, texKey);
 
-        super(scene, x, y, TEXTURE_KEY);
+        super(scene, x, y, texKey);
+        this.bossId = bossId ?? 'stage-ch1-boss';
 
         this.entity = new BossEntity(maxHp);
         this.previousPhase = this.entity.phase;
@@ -56,15 +89,15 @@ export class Boss extends Physics.Arcade.Sprite
             body.setOffset(10, 14);
         }
 
-        const loadedTex = scene.textures.get(TEXTURE_KEY);
+        const loadedTex = scene.textures.get(texKey);
         if (loadedTex && loadedTex.frameTotal > 4)
         {
-            const animKey = `${TEXTURE_KEY}-idle`;
+            const animKey = `${texKey}-idle`;
             if (!scene.anims.exists(animKey))
             {
                 scene.anims.create({
                     key: animKey,
-                    frames: scene.anims.generateFrameNumbers(TEXTURE_KEY, { start: 0, end: 3 }),
+                    frames: scene.anims.generateFrameNumbers(texKey, { start: 0, end: 3 }),
                     frameRate: 6,
                     repeat: -1,
                 });
@@ -73,9 +106,9 @@ export class Boss extends Physics.Arcade.Sprite
         }
     }
 
-    private static ensureTexture (scene: Scene)
+    private static ensureTexture (scene: Scene, key = TEXTURE_KEY)
     {
-        if (scene.textures.exists(TEXTURE_KEY)) return;
+        if (scene.textures.exists(key)) return;
 
         const graphics = scene.make.graphics({ x: 0, y: 0 });
 
@@ -95,7 +128,7 @@ export class Boss extends Physics.Arcade.Sprite
         graphics.fillRect(54, 30, 14, 6);
         graphics.fillCircle(WIDTH / 2, 52, 9);
 
-        graphics.generateTexture(TEXTURE_KEY, WIDTH, HEIGHT);
+        graphics.generateTexture(key, WIDTH, HEIGHT);
         graphics.destroy();
     }
 
@@ -207,6 +240,42 @@ export class Boss extends Physics.Arcade.Sprite
                 break;
             }
 
+            case 'packet_burst': {
+                if (this.stateTimer >= 220)
+                {
+                    this.onPacketBurst?.(this.x + this.chargeDirection * 35, this.y - 4, this.chargeDirection);
+                    this.transitionTo('recover');
+                }
+                break;
+            }
+
+            case 'emp_shockwave': {
+                if (this.stateTimer >= 260)
+                {
+                    this.onEmpShockwave?.(this.x, this.y + 16);
+                    this.transitionTo('recover');
+                }
+                break;
+            }
+
+            case 'ground_stomp': {
+                if (this.stateTimer >= 260)
+                {
+                    this.onGroundStomp?.(this.x, this.y + HEIGHT / 2, this.chargeDirection);
+                    this.transitionTo('recover');
+                }
+                break;
+            }
+
+            case 'debris_drop': {
+                if (this.stateTimer >= 260)
+                {
+                    this.onDebrisDrop?.(playerX);
+                    this.transitionTo('recover');
+                }
+                break;
+            }
+
             case 'recover': {
                 this.setVelocityX(0);
                 const recoveryDuration = phase === 3 ? 250 : 450;
@@ -223,19 +292,65 @@ export class Boss extends Physics.Arcade.Sprite
     {
         const roll = Math.random();
 
+        if (this.bossId === 'stage-ch2-boss')
+        {
+            // Realm 2 Network Core: lasers, EMP shockwaves, data bursts
+            if (phase === 1)
+            {
+                this.pendingAction = roll < 0.55 ? 'packet_burst' : (roll < 0.80 ? 'jump_slam' : 'summon');
+            }
+            else if (phase === 2)
+            {
+                this.pendingAction = roll < 0.45 ? 'packet_burst' : (roll < 0.80 ? 'emp_shockwave' : 'roll_dash');
+            }
+            else
+            {
+                this.pendingAction = roll < 0.40 ? 'packet_burst' : (roll < 0.75 ? 'emp_shockwave' : 'roll_dash');
+            }
+            return;
+        }
+
+        if (this.bossId === 'stage-ch3-boss')
+        {
+            // Realm 3 Kernel Titan: seismic stomps, falling debris, colossal leaps
+            if (phase === 1)
+            {
+                this.pendingAction = roll < 0.55 ? 'ground_stomp' : (roll < 0.85 ? 'jump_slam' : 'summon');
+            }
+            else if (phase === 2)
+            {
+                this.pendingAction = roll < 0.45 ? 'ground_stomp' : (roll < 0.80 ? 'debris_drop' : 'roll_dash');
+            }
+            else
+            {
+                if (roll < 0.35)
+                {
+                    this.pendingAction = 'jump_slam';
+                    this.doubleSlamPending = true;
+                }
+                else if (roll < 0.70)
+                {
+                    this.pendingAction = 'ground_stomp';
+                }
+                else
+                {
+                    this.pendingAction = 'debris_drop';
+                }
+            }
+            return;
+        }
+
+        // Default: Realm 1 Hardware Overlord
         if (phase === 1)
         {
-            // Phase 1: 75% Jump Slam, 25% Minion Summon
             this.pendingAction = roll < 0.75 ? 'jump_slam' : 'summon';
         }
         else if (phase === 2)
         {
-            // Phase 2: 50% Charge Roll Dash, 50% Heavy Jump Slam
             this.pendingAction = roll < 0.5 ? 'roll_dash' : 'jump_slam';
         }
         else
         {
-            // Phase 3 (Berserk): 50% Double Slam, 35% Frenzy Charge, 15% Minion Summon
             if (roll < 0.5)
             {
                 this.pendingAction = 'jump_slam';
@@ -298,6 +413,50 @@ export class Boss extends Physics.Arcade.Sprite
                 scaleY: 1.25,
                 scaleX: 0.85,
                 duration: 150,
+                yoyo: true,
+            });
+        }
+        else if (this.pendingAction === 'packet_burst')
+        {
+            this.transitionTo('packet_burst');
+            this.scene.tweens.add({
+                targets: this,
+                scaleX: 1.2,
+                scaleY: 0.85,
+                duration: 110,
+                yoyo: true,
+            });
+        }
+        else if (this.pendingAction === 'emp_shockwave')
+        {
+            this.transitionTo('emp_shockwave');
+            this.scene.tweens.add({
+                targets: this,
+                scaleX: 1.15,
+                scaleY: 1.15,
+                duration: 130,
+                yoyo: true,
+            });
+        }
+        else if (this.pendingAction === 'ground_stomp')
+        {
+            this.transitionTo('ground_stomp');
+            this.scene.tweens.add({
+                targets: this,
+                scaleY: 1.3,
+                scaleX: 0.8,
+                duration: 130,
+                yoyo: true,
+            });
+        }
+        else if (this.pendingAction === 'debris_drop')
+        {
+            this.transitionTo('debris_drop');
+            this.scene.tweens.add({
+                targets: this,
+                scaleX: 1.25,
+                scaleY: 1.1,
+                duration: 130,
                 yoyo: true,
             });
         }

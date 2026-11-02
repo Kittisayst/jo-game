@@ -28,11 +28,15 @@ export interface GameEventHandlers
     onOpenGarden?: (plotIndex?: number) => void;
     onGardenChanged?: (change: 'planted' | 'harvested' | 'expanded') => void;
     onOpenStorage?: () => void;
+    onOpenQuestBoard?: () => void;
+    onOpenPetShop?: () => void;
     onWeaponChanged?: (weaponId: string) => void;
     onOpenLibrary?: (bookId?: string) => void;
     onOpenAcademy?: (bookId?: string) => void;
+    onOpenSmithy?: (tab?: 'tools' | 'weapons' | 'upgrade' | 'repair') => void;
     onOpenWorkshop?: () => void;
     onOpenForge?: () => void;
+    onOpenShop?: () => void;
     onOpenBackpack?: () => void;
     onOpenGateRepair?: (gateId?: string, requirements?: GateRequirements) => void;
     onOpenWaypoint?: (name?: string) => void;
@@ -61,9 +65,13 @@ const EVENT_BUS_EVENTS: [string, keyof GameEventHandlers][] = [
     ['open-garden', 'onOpenGarden'],
     ['garden-changed', 'onGardenChanged'],
     ['open-storage', 'onOpenStorage'],
+    ['open-quest-board', 'onOpenQuestBoard'],
+    ['open-pet-shop', 'onOpenPetShop'],
     ['weapon-changed', 'onWeaponChanged'],
     ['open-library', 'onOpenLibrary'],
     ['open-academy', 'onOpenAcademy'],
+    ['open-smithy', 'onOpenSmithy'],
+    ['open-shop', 'onOpenShop'],
     ['open-workshop', 'onOpenWorkshop'],
     ['open-forge', 'onOpenForge'],
     ['open-backpack', 'onOpenBackpack'],

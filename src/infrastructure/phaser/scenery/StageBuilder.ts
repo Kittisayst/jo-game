@@ -1,3 +1,6 @@
+import { EventBus } from '../../EventBus';
+import { GROUND_SINK } from '../physicsConstants';
+import { NPC } from '../objects/NPC';
 import type { GateRequirements } from '../../../application/RepairBrokenGateUseCase';
 import { PlantRegrowth } from '../../../domain/entities/PlantRegrowth';
 import { ResourceNode } from '../../../domain/entities/ResourceNode';
@@ -235,6 +238,7 @@ export interface BuiltStage {
     resourceNodes: ResourceNodeView[];
     waypoints: WaypointView[];
     brokenGate?: BrokenGate;
+    npcs: NPC[];
 }
 
 /** A marker at the walk-out edge of a Stage without a Boss. */
@@ -263,9 +267,23 @@ export function buildStageScenery(
     /** The plants' records and the time now: a plant harvested too recently is built as a Sapling. */
     plants?: { regrowth: PlantRegrowth; now: number }
 ): BuiltStage {
-    const built: BuiltStage = { resourceNodes: [], waypoints: [] };
+    const built: BuiltStage = { resourceNodes: [], waypoints: [], npcs: [] };
 
     for (const zone of stage.zones) {
+        if (zone.npcs) {
+            for (const npcDef of zone.npcs) {
+                const npc = new NPC(
+                    scene,
+                    npcDef.x,
+                    npcDef.y ?? (baseY + GROUND_SINK),
+                    npcDef.role,
+                    npcDef.label ?? `💬 [E] ລົມກັບ ${npcDef.name}`
+                );
+                npc.onInteract = () => EventBus.emit('start-dialogue', npcDef.dialogueId);
+                built.npcs.push(npc);
+            }
+        }
+
         for (const waypoint of zone.waypoints) {
             built.waypoints.push(addWaypoint(scene, waypoint, baseY));
         }

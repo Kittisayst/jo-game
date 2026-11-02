@@ -59,6 +59,8 @@ export interface HudProps
     activeEffects?: { effect: 'strength' | 'speed'; remainingSeconds: number }[];
     /** How many Garden Plots are ready to harvest. */
     gardenReadyCount?: number;
+    /** Quests finished and waiting for reward claim. */
+    questClaimableCount?: number;
     /** What the Workshop/Forge is making, or null. */
     craftingJob?: { resultItemId: string; remainingMs: number } | null;
     /** Story Materials waiting for a free Backpack slot. */
@@ -74,6 +76,7 @@ export interface HudProps
     worldTime?: WorldTimeView;
     onOpenCharacter?: () => void;
     onUseSkill?: (slot: number) => void;
+    stageProgress?: { percent: number } | null;
 }
 
 export function Hud ({
@@ -98,6 +101,7 @@ export function Hud ({
     armor = 0,
     pendingRewardsCount = 0,
     gardenReadyCount = 0,
+    questClaimableCount = 0,
     craftingJob = null,
     activeEffects = [],
     quickSlot = null,
@@ -107,12 +111,13 @@ export function Hud ({
     worldTime,
     onOpenCharacter,
     onUseSkill,
+    stageProgress = null,
 }: HudProps)
 {
     const levelLabel = hudLabelOf(currentLevel);
     const touch = isTouchLayout();
     // The notices row exists only while there is something to say: a build, ripe plants, waiting rewards, a Potion, a hint
-    const hasNotices = Boolean(craftingJob) || gardenReadyCount > 0 || pendingRewardsCount > 0 || activeEffects.length > 0 || Boolean(tutorialText) || Boolean(objective);
+    const hasNotices = Boolean(craftingJob) || gardenReadyCount > 0 || pendingRewardsCount > 0 || activeEffects.length > 0 || questClaimableCount > 0 || Boolean(tutorialText) || Boolean(objective);
 
     return (
         <>
@@ -124,6 +129,24 @@ export function Hud ({
                             <span className="badge-icon">🚩</span>
                             <span className="badge-label">{levelLabel}</span>
                         </div>
+
+                        {stageProgress && (
+                            <div
+                                className="hud-badge stage-progress-badge"
+                                data-testid="stage-progress"
+                                title={`ໄລຍະທາງໃນດ່ານ: ${stageProgress.percent}%`}
+                            >
+                                <span className="badge-icon">🏃</span>
+                                <span className="badge-label">{stageProgress.percent}%</span>
+                                <div className="stage-progress-track" aria-hidden="true">
+                                    <div
+                                        className="stage-progress-fill"
+                                        style={{ width: `${stageProgress.percent}%` }}
+                                    />
+                                </div>
+                                <span className="badge-target">🌀</span>
+                            </div>
+                        )}
 
                         <div className="hud-badge health-badge" data-testid="health-hearts" data-current={health} data-max={maxHealth}>
                             <span className="badge-icon">
@@ -193,6 +216,17 @@ export function Hud ({
                                 >
                                     <span className="badge-icon">📦</span>
                                     <span className="badge-label">ລໍຮັບ {pendingRewardsCount} (ກະເປົາເຕັມ)</span>
+                                </div>
+                            )}
+
+                            {(questClaimableCount ?? 0) > 0 && (
+                                <div
+                                    className="hud-badge quest-claimable-badge"
+                                    data-testid="quest-claimable"
+                                    title="ມີພາລະກິດສຳເລັດແລ້ວ: ໄປຮັບລາງວັນທີ່ກະດານພາລະກິດໃນໝູ່ບ້ານ"
+                                >
+                                    <span className="badge-icon">📜</span>
+                                    <span className="badge-label">ຮັບລາງວັນພາລະກິດ {questClaimableCount}</span>
                                 </div>
                             )}
 
@@ -362,7 +396,7 @@ export function Hud ({
                 <div className="boss-hud-container">
                     <div className="boss-hud-header">
                         <span className="boss-title">
-                            {currentLevel === 'stage-010' ? '⚡ ຈອມມານຮາດແວບູຮານ (Hardware Overlord)' : '👑 BOSS'}
+                            {currentLevel === 'stage-010' ? '⚡ ຈອມມານຮາດແວບູຮານ (Hardware Overlord)' : currentLevel === 'dungeon' ? '🕷️ ພະຍາແມງມຸມ (Spider Queen)' : '👑 BOSS'}
                         </span>
                         <span className="boss-hp-number">{bossHp} / {bossMaxHp} HP</span>
                     </div>
