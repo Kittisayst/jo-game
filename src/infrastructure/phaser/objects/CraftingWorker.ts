@@ -1,6 +1,5 @@
 import { Math as PhaserMath } from 'phaser';
 import type { CraftingJob } from '../../../domain/entities/CraftingQueue';
-import { getGameContent } from '../../content/ContentCatalog';
 
 const FONT = '"Noto Sans Lao", sans-serif';
 const FRAME = 48;
@@ -15,17 +14,10 @@ const formatTime = (ms: number): string =>
     return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`;
 };
 
-/** Which building a job belongs to, from its recipe in `recipes.json`. */
-export function buildingOfJob (job: CraftingJob): 'workshop' | 'forge' | undefined
-{
-    const recipe = getGameContent().recipes.find(r => r.id === job.recipeId);
-    return recipe?.building;
-}
-
 /**
- * The smith who works in front of the Workshop or the Forge while something is being made there: he hammers at
+ * The smith who works in front of the Smithy while something is being made (in the Workshop or the Forge): he hammers at
  * an anvil (sparks on every strike) with a bar and the time left over his head, and cheers when the job is
- * done. He is not there when nothing is being made at his building.
+ * done. He is not there when nothing is being made.
  */
 export class CraftingWorker
 {
@@ -35,7 +27,7 @@ export class CraftingWorker
     private readonly label: Phaser.GameObjects.Text;
     private state: 'away' | 'building' | 'ready' = 'away';
 
-    constructor (private readonly scene: Phaser.Scene, readonly building: 'workshop' | 'forge', private readonly x: number, private readonly baseY: number)
+    constructor (private readonly scene: Phaser.Scene, private readonly x: number, private readonly baseY: number)
     {
         if (!scene.anims.exists('smith-hammer'))
         {
@@ -59,7 +51,7 @@ export class CraftingWorker
     /** Called every frame with the job in progress (or null). */
     update (job: CraftingJob | null): void
     {
-        const mine = job !== null && buildingOfJob(job) === this.building;
+        const mine = job !== null;
         if (!mine || !job)
         {
             if (this.state !== 'away') this.leave();

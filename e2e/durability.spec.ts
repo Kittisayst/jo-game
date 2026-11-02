@@ -77,20 +77,21 @@ test.describe('Weapons wear out and are repaired at the Forge', () => {
     await expect(page.getByTestId('broken-badge')).toBeVisible();
     await page.keyboard.press('Escape');
 
-    // Home to the Forge (x = 1140): the Repair tab costs Materials, not Credit
+    // Home to the Smithy (x = 3100): the Repair tab costs Materials, not Credit
     const credit = await page.evaluate(() => (window as any).__entities.wallet.balance);
     await page.evaluate(async () => {
       const { EventBus } = await import('/src/infrastructure/EventBus.ts');
       EventBus.emit('change-level', 'village');
     });
     await expect.poll(async () => (await bot.state()).scene, { timeout: 20000 }).toBe('village');
-    expect(await bot.goTo(1135, { tolerance: 25, fight: false, timeoutMs: 40000 })).toBe('arrived');
+    expect(await bot.goTo(3100, { tolerance: 25, fight: false, timeoutMs: 40000 })).toBe('arrived');
     await page.keyboard.press('KeyE');
 
-    await page.getByTestId('forge-repair-tab').click();
-    // The Forge mends swords (tools are mended at the Workshop)
-    await expect(page.getByTestId('repair-row')).toHaveCount(1);
-    await page.getByTestId('repair-button').click();
+    await page.getByTestId('smithy-tab-repair').click();
+    // The weapons section mends swords (tools are mended in the section above it)
+    const swords = page.getByTestId('forge-repairs');
+    await expect(swords.getByTestId('repair-row')).toHaveCount(1);
+    await swords.getByTestId('repair-button').click();
 
     expect(await sword(page)).toMatchObject({ current: 80, state: 'ok' });
     expect(await page.evaluate(() => (window as any).__entities.backpack.getItemCount('iron-ore'))).toBe(0);
@@ -118,9 +119,10 @@ test.describe('Weapons wear out and are repaired at the Forge', () => {
     expect(await axe()).toMatchObject({ current: 1, max: 60, state: 'low' });
     const credit = await page.evaluate(() => (window as any).__entities.wallet.balance);
 
-    // The Workshop stands at x = 880
-    expect(await bot.goTo(875, { tolerance: 25, fight: false, timeoutMs: 40000 })).toBe('arrived');
+    // The Smithy stands at x = 3100
+    expect(await bot.goTo(3100, { tolerance: 25, fight: false, timeoutMs: 40000 })).toBe('arrived');
     await page.keyboard.press('KeyE');
+    await page.getByTestId('smithy-tab-repair').click();
 
     const repairs = page.getByTestId('workshop-repairs');
     await expect(repairs.getByTestId('repair-row')).toHaveCount(1); // only the axe is carried

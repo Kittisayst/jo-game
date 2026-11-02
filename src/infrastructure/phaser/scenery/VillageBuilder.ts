@@ -11,7 +11,8 @@ export interface InteractiveBuilding
 }
 
 const FONT = '"Noto Sans Lao", sans-serif';
-export const FORGE_X = 3100;
+/** The Smithy (Workshop and Forge in one building). */
+export const SMITHY_X = 3100;
 /** Where the lanterns along the path stand across the 7,000px village span. */
 export const VILLAGE_LANTERN_XS = [200, 520, 880, 1380, 2050, 2750, 3250, 3500, 3750, 4200, 4850, 5500, 6100, 6650];
 /** How high above the ground a lantern's flame is. */
@@ -21,18 +22,17 @@ export const FRONT_CHEST_X = 240;
 export const SIDE_GARDEN_DOOR_X = 480;
 export const QUEST_BOARD_X = 620;
 export const WORLD_GATE_X = 3600;
-const FORGE_OPEN_LABEL = '⚔️ [E] ເຂົ້າໂຮງຕີເຫຼັກ (Forge)';
 
 /**
  * Draws the Expanded Village Hub (7,000px):
  * - Hero Cottage as Building #1 (x = 360) with outdoor chest (x = 240) and side garden door (x = 480)
  * - Quest Board (x = 620) next to cottage
- * - Doubled distance between Library (1050), Academy (1700), Workshop (2400), Forge (3100)
+ * - Doubled distance between Library (1050), Academy (1700), Smithy (3100), with Grandma Chanthy and her shop at x = 2480
  * - Animated World Gate Portal right in the village center (x = 3600)
  * - Dungeon Entrance removed from village
  * - Wandering pets (Lucky & Clucky) and lively scenery across 7,000px
  */
-export function buildVillageScenery (scene: Phaser.Scene, baseY: number, forgeOpen: boolean): InteractiveBuilding[]
+export function buildVillageScenery (scene: Phaser.Scene, baseY: number): InteractiveBuilding[]
 {
     const buildings = [
         {
@@ -58,26 +58,15 @@ export function buildVillageScenery (scene: Phaser.Scene, baseY: number, forgeOp
             sub: 'ສອບເສັງ & ຝຶກຝົນ',
         },
         {
-            x: 2400,
-            textureKey: 'building-workshop',
-            width: 160,
-            height: 176,
-            roofColor: 0x10b981,
-            bodyColor: 0x1e293b,
-            icon: '🔨',
-            name: 'ໂຮງຊ່າງ (Workshop)',
-            sub: 'ສ້າງເຄື່ອງມື',
-        },
-        {
-            x: FORGE_X,
-            textureKey: forgeOpen ? 'building-forge-open' : 'building-forge-locked',
+            x: SMITHY_X,
+            textureKey: 'building-forge-open',
             width: 168,
             height: 192,
-            roofColor: forgeOpen ? 0xf97316 : 0x475569,
+            roofColor: 0xf97316,
             bodyColor: 0x1e293b,
-            icon: forgeOpen ? '⚔️' : '🔒',
-            name: forgeOpen ? 'ໂຮງຕີເຫຼັກ (Forge)' : 'ໂຮງຕີເຫຼັກ (ລັອກ)',
-            sub: forgeOpen ? 'ອັບເກຣດອາວຸດ' : 'ສອບຜ່ານບົດທີ 1 ກ່ອນ',
+            icon: '⚒️',
+            name: 'ໂຮງຊ່າງ (Smithy)',
+            sub: 'ເຄື່ອງມື · ອາວຸດ · ສ້ອມແປງ',
         },
     ];
 
@@ -100,15 +89,12 @@ export function buildVillageScenery (scene: Phaser.Scene, baseY: number, forgeOp
         }
     }
 
-    // Main village buildings (Library, Academy, Workshop, Forge)
-    let forgeImage: Phaser.GameObjects.Image | undefined;
-    let forgeSign: Phaser.GameObjects.Text | undefined;
+    // Main village buildings (Library, Academy, Smithy)
     for (const b of buildings)
     {
-        let image: Phaser.GameObjects.Image | undefined;
         if (scene.textures.exists(b.textureKey))
         {
-            image = scene.add.image(b.x, baseY + 2, b.textureKey).setOrigin(0.5, 1).setDepth(1.5);
+            scene.add.image(b.x, baseY + 2, b.textureKey).setOrigin(0.5, 1).setDepth(1.5);
         }
         else
         {
@@ -131,11 +117,6 @@ export function buildVillageScenery (scene: Phaser.Scene, baseY: number, forgeOp
         sign.setOrigin(0.5, 0.5);
         sign.setDepth(2.5);
 
-        if (b.x === FORGE_X)
-        {
-            forgeImage = image;
-            forgeSign = sign;
-        }
     }
 
     // Mina's Skin Boutique Stall at x = 3350 (Center Market)
@@ -244,23 +225,11 @@ export function buildVillageScenery (scene: Phaser.Scene, baseY: number, forgeOp
         ease: 'Sine.easeInOut',
     });
 
-    const forge: InteractiveBuilding = {
-        x: FORGE_X,
-        label: forgeOpen ? FORGE_OPEN_LABEL : '🔒 [E] ໂຮງຕີເຫຼັກ (ຕ້ອງສອບເສັງບົດທີ 1 ຜ່ານກ່ອນ)',
-        action: () => EventBus.emit('open-forge'),
+    const smithy: InteractiveBuilding = {
+        x: SMITHY_X,
+        label: '⚒️ [E] ເຂົ້າໂຮງຊ່າງ (Smithy: ເຄື່ອງມື · ອາວຸດ · ສ້ອມແປງ)',
+        action: () => EventBus.emit('open-smithy'),
     };
-
-    if (!forgeOpen)
-    {
-        const unlockForge = (): void =>
-        {
-            forge.label = FORGE_OPEN_LABEL;
-            if (forgeImage?.active && scene.textures.exists('building-forge-open')) forgeImage.setTexture('building-forge-open');
-            forgeSign?.setText('⚔️ ໂຮງຕີເຫຼັກ (Forge)\n(ອັບເກຣດອາວຸດ)');
-        };
-        EventBus.once('book-exam-passed', unlockForge);
-        scene.events.once('shutdown', () => EventBus.off('book-exam-passed', unlockForge));
-    }
 
     return [
         {
@@ -291,8 +260,7 @@ export function buildVillageScenery (scene: Phaser.Scene, baseY: number, forgeOp
         },
         { x: 1050, label: '📚 [E] ເຂົ້າຫໍສະໝຸດ (Library)', action: () => EventBus.emit('open-library') },
         { x: 1700, label: '🏛️ [E] ເຂົ້າສະຖາບັນ (Academy)', action: () => EventBus.emit('open-academy') },
-        { x: 2400, label: '🔨 [E] ເຂົ້າໂຮງຊ່າງ (Workshop)', action: () => EventBus.emit('open-workshop') },
-        forge,
+        smithy,
         pets.dogInteractive,
         pets.chickenInteractive,
         { x: 3520, label: '🐾 [E] ຮ້ານສັດລ້ຽງ (Pet Companion Stall)', action: () => EventBus.emit('open-pet-shop') },
@@ -775,8 +743,7 @@ function addVillageAmbienceEffects (scene: Phaser.Scene, baseY: number): void
     // 1. Chimney Smoke Puffs
     const CHIMNEYS = [
         { x: COTTAGE_X - 48, y: baseY - 162 }, // Hero Cottage
-        { x: 2400 - 40, y: baseY - 180 },      // Workshop
-        { x: FORGE_X + 38, y: baseY - 194 },   // Forge
+        { x: SMITHY_X + 38, y: baseY - 194 },  // Smithy
     ];
 
     for (const ch of CHIMNEYS)

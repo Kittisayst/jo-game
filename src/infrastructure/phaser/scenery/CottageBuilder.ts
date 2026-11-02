@@ -88,32 +88,49 @@ export function buildCottageInterior (scene: Phaser.Scene, baseY: number): Inter
     fp.fillStyle(0x78350f, 1);
     fp.fillRect(fireX - 18, baseY - 16, 36, 12);
 
-    // Animated Fire
+    // Animated Fire inside Hearth
     const fireG = scene.add.graphics().setDepth(1.5);
-    const updateFire = () => {
-        fireG.clear();
-        fireG.fillStyle(0xf97316, 1);
-        fireG.fillTriangle(fireX - 14, baseY - 14, fireX + 14, baseY - 14, fireX, baseY - 42);
-        fireG.fillStyle(0xfef08a, 0.9);
-        fireG.fillTriangle(fireX - 8, baseY - 14, fireX + 8, baseY - 14, fireX, baseY - 34);
-    };
-    updateFire();
+    fireG.setPosition(fireX, baseY - 14);
+    fireG.fillStyle(0xf97316, 1);
+    fireG.fillTriangle(-14, 0, 14, 0, 0, -28);
+    fireG.fillStyle(0xfef08a, 0.95);
+    fireG.fillTriangle(-8, 0, 8, 0, 0, -20);
+    fireG.fillStyle(0xffffff, 0.9);
+    fireG.fillTriangle(-3, 0, 3, 0, 0, -12);
+
     scene.tweens.add({
         targets: fireG,
-        scaleY: 1.15,
+        scaleY: 1.18,
         scaleX: 0.92,
         yoyo: true,
-        duration: 250,
+        duration: 240,
         repeat: -1,
         ease: 'Sine.easeInOut',
     });
 
+    // Floating embers rising into chimney
+    for (let i = 0; i < 3; i++)
+    {
+        const spark = scene.add.circle(fireX + (i - 1) * 8, baseY - 24, 2, 0xfde047, 0.9).setDepth(1.6);
+        scene.tweens.add({
+            targets: spark,
+            x: fireX + (i === 1 ? -6 : 6),
+            y: baseY - 62,
+            alpha: 0,
+            scale: 0.3,
+            duration: 900 + i * 250,
+            repeat: -1,
+            delay: i * 320,
+            ease: 'Sine.easeIn',
+        });
+    }
+
     // Warm glow from fireplace
-    const fireLight = scene.add.circle(fireX, baseY - 30, 90, 0xf97316, 0.18).setDepth(1.1);
+    const fireLight = scene.add.circle(fireX, baseY - 30, 85, 0xf97316, 0.18).setDepth(1.1);
     scene.tweens.add({
         targets: fireLight,
-        radius: 105,
-        alpha: 0.25,
+        scale: 1.15,
+        alpha: 0.26,
         yoyo: true,
         duration: 400,
         repeat: -1,

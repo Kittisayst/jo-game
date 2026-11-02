@@ -125,7 +125,7 @@ export class Game extends Scene
     private nightCreatures: Enemy[] = [];
     /** The hero is asleep at the Bed (the screen fades, the clock jumps to the morning). */
     private isSleeping = false;
-    /** The smiths in front of the Workshop and the Forge (village only). */
+    /** The smith in front of the Smithy (village only). */
     private craftingWorkers: CraftingWorker[] = [];
     private companionPet?: Phaser.GameObjects.Sprite;
     private companionPetSoundTimer = 0;
@@ -229,11 +229,7 @@ export class Game extends Scene
 
         if (isVillage)
         {
-            this.interactiveBuildings = buildVillageScenery(
-                this,
-                GROUND_Y,
-                Boolean(entities.forgeUnlocked || entities.books['book-ch1']?.examPassed)
-            );
+            this.interactiveBuildings = buildVillageScenery(this, GROUND_Y);
             const baseY = WORLD_HEIGHT - GROUND_HEIGHT - 24;
             const elder = new NPC(this, 760, baseY + GROUND_SINK, 'npc-elder', '💬 [E] ລົມກັບຫົວໜ້າໝູ່ບ້ານ', 60);
             elder.onInteract = () => EventBus.emit('start-dialogue', 'village_elder');
@@ -262,8 +258,7 @@ export class Game extends Scene
 
             // Whoever builds something stands in front of its building, with the time left over the head
             this.craftingWorkers = [
-                new CraftingWorker(this, 'workshop', 2360, GROUND_Y),
-                new CraftingWorker(this, 'forge', 3180, GROUND_Y),
+                new CraftingWorker(this, 3180, GROUND_Y),
             ];
         }
         else if (isCottage)

@@ -112,8 +112,8 @@ test.describe('Quest Board and Buff Timer HUD', () =>
         await claimBtn.first().click();
         await page.waitForTimeout(600);
 
-        // Verify button changed to "ຮັບແລ້ວ"
-        const claimedBadge = page.locator('text=ຮັບແລ້ວ');
+        // Verify button changed to "ສຳເລັດແລ້ວ"
+        const claimedBadge = page.locator('text=ສຳເລັດແລ້ວ');
         await expect(claimedBadge.first()).toBeVisible();
 
         await page.screenshot({

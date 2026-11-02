@@ -43,8 +43,8 @@ import { WEAPON_CONFIGS } from '../../domain/entities/EquipmentState';
 import { cycleEquippedWeaponUseCase } from '../../application/CycleEquippedWeaponUseCase';
 import { TextbookModal } from './components/TextbookModal';
 import { AcademyModal } from './components/AcademyModal';
-import { WorkshopModal } from './components/WorkshopModal';
-import { ForgeModal } from './components/ForgeModal';
+import { SmithyModal } from './components/SmithyModal';
+import { ShopModal } from './components/ShopModal';
 import { BackpackModal } from './components/BackpackModal';
 import { GateRepairModal } from './components/GateRepairModal';
 import { WaypointModal } from './components/WaypointModal';
@@ -146,8 +146,9 @@ function App ()
         activeReaderPageNumber, setActiveReaderPageNumber,
         isAcademyOpen, setIsAcademyOpen,
         activeExamBookId, setActiveExamBookId,
-        isWorkshopOpen, setIsWorkshopOpen,
-        isForgeOpen, setIsForgeOpen,
+        isSmithyOpen, setIsSmithyOpen,
+        smithyTab, setSmithyTab,
+        isShopOpen, setIsShopOpen,
         isBackpackOpen, setIsBackpackOpen,
         isGateRepairOpen, setIsGateRepairOpen,
         activeGateId, setActiveGateId,
@@ -734,8 +735,27 @@ function App ()
             if (bookId) setActiveExamBookId(bookId);
             setIsAcademyOpen(true);
         },
-        onOpenWorkshop: () => setIsWorkshopOpen(true),
-        onOpenForge: () => setIsForgeOpen(true),
+        onOpenSmithy: tab =>
+        {
+            if (tab) setSmithyTab(tab);
+            setIsSmithyOpen(true);
+        },
+        onOpenWorkshop: () =>
+        {
+            setSmithyTab('tools');
+            setIsSmithyOpen(true);
+        },
+        onOpenForge: () =>
+        {
+            setSmithyTab('weapons');
+            setIsSmithyOpen(true);
+        },
+        onOpenShop: () =>
+        {
+            // The choice that opened the shop ends the talk with Grandma Chanthy
+            closeDialogue();
+            setIsShopOpen(true);
+        },
         onOpenBackpack: () => setIsBackpackOpen(true),
         onOpenGateRepair: (gateId, requirements) =>
         {
@@ -988,21 +1008,24 @@ function App ()
                 }}
             />
 
-            <WorkshopModal
-                isOpen={isWorkshopOpen}
+            <SmithyModal
+                isOpen={isSmithyOpen}
+                tab={smithyTab}
+                onTabChange={setSmithyTab}
                 onClose={() =>
                 {
-                    setIsWorkshopOpen(false);
+                    setIsSmithyOpen(false);
                     setBackpackRevision(r => r + 1);
                 }}
             />
 
-            <ForgeModal
-                isOpen={isForgeOpen}
+            <ShopModal
+                isOpen={isShopOpen}
                 onClose={() =>
                 {
-                    setIsForgeOpen(false);
+                    setIsShopOpen(false);
                     setBackpackRevision(r => r + 1);
+                    autoSaveGame();
                 }}
             />
 

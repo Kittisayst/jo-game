@@ -12,6 +12,7 @@ import type { PendingReward } from './PendingRewards';
 import { TutorialSnapshot } from './TutorialProgress';
 import type { QuestSnapshot } from './Quest';
 import type { PetSnapshot } from './Pet';
+import type { ShopPurchasesSnapshot } from './ShopPurchases';
 import { SettingsData, StageProgressionData } from '../ports';
 import { BookProgressSnapshot } from './Book';
 import { BackpackSlotSnapshot } from './Backpack';
@@ -85,6 +86,8 @@ export interface SaveGameSnapshot
     /** Completed/claimed quest board tasks. Missing in older saves. */
     quests?: QuestSnapshot;
     pets?: PetSnapshot;
+    /** What the Shop sold today. Missing in older saves. */
+    shop?: ShopPurchasesSnapshot;
 }
 
 export function createDefaultSaveSnapshot (slotId = 'slot_1'): SaveGameSnapshot
@@ -153,6 +156,7 @@ export function createDefaultSaveSnapshot (slotId = 'slot_1'): SaveGameSnapshot
         storage: [],
         quests: { quests: [] },
         pets: { ownedPetIds: [], activePetId: null },
+        shop: { dayCount: 0, bought: {} },
     };
 }
 
@@ -453,7 +457,25 @@ export function migrateSaveSnapshot (raw: unknown, fallbackSlotId = 'slot_1'): S
                 : null,
         } : { ownedPetIds: [], activePetId: null },
         quests: sanitizeQuests(data.quests),
+        shop: sanitizeShop(data.shop),
     };
+}
+
+function sanitizeShop (raw: unknown): ShopPurchasesSnapshot
+{
+    const empty: ShopPurchasesSnapshot = { dayCount: 0, bought: {} };
+    if (!raw || typeof raw !== 'object') return empty;
+    const r = raw as Record<string, unknown>;
+    const dayCount = typeof r.dayCount === 'number' && Number.isInteger(r.dayCount) && r.dayCount >= 0 ? r.dayCount : 0;
+    const bought: Record<string, number> = {};
+    if (r.bought && typeof r.bought === 'object')
+    {
+        for (const [id, n] of Object.entries(r.bought as Record<string, unknown>))
+        {
+            if (typeof n === 'number' && Number.isInteger(n) && n > 0) bought[id] = n;
+        }
+    }
+    return { dayCount, bought };
 }
 
 function sanitizeQuests (raw: unknown): QuestSnapshot

@@ -30,6 +30,7 @@ import { TutorialProgress } from './TutorialProgress';
 import { Wallet } from './Wallet';
 import { QuestBoard } from './Quest';
 import { PetManager } from './Pet';
+import { ShopPurchases } from './ShopPurchases';
 
 const FIRST_BOOK_ID = 'book-ch1';
 
@@ -80,6 +81,8 @@ export class GameState
     /** The Village Quest Board with daily/bounty tasks. */
     readonly questBoard = new QuestBoard();
     readonly petManager = new PetManager();
+    /** What Grandma Chanthy sold today (daily limits). */
+    readonly shopPurchases = new ShopPurchases();
     /** Timed Potion effects running on the hero (not saved). */
     readonly effects = new ActiveEffects();
     /** The Potion chosen to be drunk with R, or null. */
@@ -152,6 +155,7 @@ export class GameState
             storage: this.storage.toSnapshot(),
             quests: this.questBoard.toSnapshot(),
             pets: this.petManager.toSnapshot(),
+            shop: this.shopPurchases.toSnapshot(),
         };
     }
 
@@ -207,6 +211,7 @@ export class GameState
         this.storage.loadFromSnapshot(snapshot.storage ?? []);
         this.questBoard.loadFrom(snapshot.quests);
         this.petManager.loadFrom(snapshot.pets);
+        this.shopPurchases.loadFrom(snapshot.shop);
         this.effects.clear();
         this.syncArmor();
         this.health.reset();

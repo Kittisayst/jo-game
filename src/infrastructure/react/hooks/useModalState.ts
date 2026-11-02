@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import type { GateRequirements } from '../../../application/RepairBrokenGateUseCase';
 import type { QuestionData } from '../../../domain/entities/Quiz';
 import type { TextbookModalMode } from '../components/TextbookModal';
+import type { SmithyTab } from '../components/SmithyModal';
 
 /** The question waiting for an answer at the end of a Stage. */
 export interface StageQuestionState
@@ -23,8 +24,9 @@ export function useModalState ()
     const [activeReaderPageNumber, setActiveReaderPageNumber] = useState<number | undefined>(undefined);
     const [isAcademyOpen, setIsAcademyOpen] = useState(false);
     const [activeExamBookId, setActiveExamBookId] = useState('book-ch1');
-    const [isWorkshopOpen, setIsWorkshopOpen] = useState(false);
-    const [isForgeOpen, setIsForgeOpen] = useState(false);
+    const [isSmithyOpen, setIsSmithyOpen] = useState(false);
+    const [smithyTab, setSmithyTab] = useState<SmithyTab>('tools');
+    const [isShopOpen, setIsShopOpen] = useState(false);
     const [isBackpackOpen, setIsBackpackOpen] = useState(false);
     const [isGateRepairOpen, setIsGateRepairOpen] = useState(false);
     const [activeGateId, setActiveGateId] = useState('gate-ch1');
@@ -47,8 +49,8 @@ export function useModalState ()
     const open = {
         library: isLibraryOpen,
         academy: isAcademyOpen,
-        workshop: isWorkshopOpen,
-        forge: isForgeOpen,
+        smithy: isSmithyOpen,
+        shop: isShopOpen,
         backpack: isBackpackOpen,
         gateRepair: isGateRepairOpen,
         waypoint: isWaypointOpen,
@@ -72,8 +74,8 @@ export function useModalState ()
         const now = openRef.current;
         if (now.library) { setIsLibraryOpen(false); return true; }
         if (now.academy) { setIsAcademyOpen(false); return true; }
-        if (now.workshop) { setIsWorkshopOpen(false); return true; }
-        if (now.forge) { setIsForgeOpen(false); return true; }
+        if (now.smithy) { setIsSmithyOpen(false); return true; }
+        if (now.shop) { setIsShopOpen(false); return true; }
         if (now.backpack) { setIsBackpackOpen(false); return true; }
         if (now.gateRepair) { setIsGateRepairOpen(false); return true; }
         if (now.waypoint) { setIsWaypointOpen(false); return true; }
@@ -98,8 +100,9 @@ export function useModalState ()
         activeReaderPageNumber, setActiveReaderPageNumber,
         isAcademyOpen, setIsAcademyOpen,
         activeExamBookId, setActiveExamBookId,
-        isWorkshopOpen, setIsWorkshopOpen,
-        isForgeOpen, setIsForgeOpen,
+        isSmithyOpen, setIsSmithyOpen,
+        smithyTab, setSmithyTab,
+        isShopOpen, setIsShopOpen,
         isBackpackOpen, setIsBackpackOpen,
         isGateRepairOpen, setIsGateRepairOpen,
         activeGateId, setActiveGateId,

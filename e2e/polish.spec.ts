@@ -15,7 +15,7 @@ async function startInVillage (page: any): Promise<Bot>
 }
 
 test.describe('Village polish', () => {
-  test('the nearest spot gets the E prompt (the Storage chest, not the Library, between them)', async ({ page }) => {
+  test('the nearest spot gets the E prompt (the Storage chest, not the Cottage door, between them)', async ({ page }) => {
     test.setTimeout(90000);
     await startInVillage(page);
     const prompt = () => page.evaluate(() => {
@@ -23,8 +23,8 @@ test.describe('Village polish', () => {
       const t = scene.children.list.find((o: any) => o.type === 'Text' && o.visible && /^\S*\s?\[E\]/.test(o.text));
       return (t?.text ?? '') as string;
     });
-    // The chest is at x = 235 and the Library at 320; both reach 70 px
-    for (const [x, word] of [[258, 'Storage'], [300, 'Library']] as const) {
+    // The chest is at x = 240 and the Cottage door at 360; both reach 70 px
+    for (const [x, word] of [[270, 'Storage'], [330, 'Cottage']] as const) {
       await page.evaluate((px: number) => {
         const scene = (window as any).__botGame.scene.getScene('Game');
         scene.player.setPosition(px, scene.player.y);
@@ -43,7 +43,7 @@ test.describe('Village polish', () => {
     });
     expect(await lit()).toBe(0);
     await page.evaluate(() => (window as any).__advanceWorldTime(12.5 * 60_000));
-    await expect.poll(lit, { timeout: 3000 }).toBe(5);
+    await expect.poll(lit, { timeout: 3000 }).toBe(14);
     await page.screenshot({ path: SHOT + 'polish_village_night.png' });
     await page.evaluate(() => (window as any).__advanceWorldTime(7 * 60_000));
     await expect.poll(lit, { timeout: 3000 }).toBe(0);

@@ -29,7 +29,7 @@ test.describe('The Garden', () => {
     });
 
     // The Garden door stands right of the Workshop (x = 1010) and leads into the Garden, a place of its own
-    expect(await bot.goTo(1005, { tolerance: 25, fight: false, timeoutMs: 40000 })).toBe('arrived');
+    expect(await bot.goTo(480, { tolerance: 25, fight: false, timeoutMs: 40000 })).toBe('arrived');
     await page.keyboard.press('KeyE');
     await expect.poll(async () => (await bot.state()).scene, { timeout: 20000 }).toBe('garden');
     await expect(page.locator('.level-badge')).toContainText(/ສວນຜັກ/);
@@ -39,8 +39,8 @@ test.describe('The Garden', () => {
       if (e.backpack.getItemCount('herb-seed') < 1) { e.backpack.addItem('herb-seed', 1); e.backpack.addItem('wood', 10); e.backpack.addItem('stone', 5); }
     });
 
-    // The first Plot is at x = 300: E opens the choice of Seed
-    expect(await bot.goTo(300, { tolerance: 25, fight: false, timeoutMs: 30000 })).toBe('arrived');
+    // The first Plot is at x = 350: E opens the choice of Seed
+    expect(await bot.goTo(350, { tolerance: 25, fight: false, timeoutMs: 30000 })).toBe('arrived');
     await page.keyboard.press('KeyE');
     await expect(page.getByTestId('seed-picker')).toBeVisible();
     await page.getByTestId('seed-herb-seed').click();

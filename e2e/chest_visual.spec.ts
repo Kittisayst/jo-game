@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { test, expect } from '@playwright/test';
 
 test('capture new storage chest asset in village and cottage', async ({ page }) => {
@@ -50,5 +51,21 @@ test('capture new storage chest asset in village and cottage', async ({ page }) 
   // Capture cottage indoor chest screenshot
   await page.screenshot({
     path: 'C:/Users/kitti/.gemini/antigravity/brain/e269caa4-7d52-4f9c-966b-6fcc06b43505/cottage_chest_new.png',
+  });
+
+  // Move player to stand right in front of the cozy fireplace at x = 740
+  await page.evaluate(() => {
+    const scene = (window as any).__phaserGameScene;
+    if (scene && scene.player) {
+      scene.player.setPosition(650, 520);
+      scene.cameras.main.scrollX = 100;
+    }
+  });
+
+  await page.waitForTimeout(800);
+
+  // Capture cottage fireplace screenshot
+  await page.screenshot({
+    path: 'C:/Users/kitti/.gemini/antigravity/brain/e269caa4-7d52-4f9c-966b-6fcc06b43505/cottage_fireplace_fixed.png',
   });
 });

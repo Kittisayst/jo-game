@@ -14,9 +14,9 @@ export default async function globalSetup (config: FullConfig): Promise<void>
     page.setDefaultTimeout(90000);
     await page.goto(baseURL, { timeout: 90000 });
     const playBtn = page.locator('#btn-play-game');
-    if (await playBtn.isVisible()) {
-      await playBtn.click();
-    }
+    // The menu can still be loading when the page opens: wait for the button instead of checking once
+    await playBtn.waitFor({ timeout: 60000 });
+    await playBtn.click();
     await page.locator('.game-hud').waitFor({ timeout: 60000 });
   } finally {
     await browser.close();

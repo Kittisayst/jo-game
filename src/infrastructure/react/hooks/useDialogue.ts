@@ -119,6 +119,7 @@ export function useDialogue (onOpenSkinShop: () => void)
             if (action === OPEN_SKIN_SHOP_ACTION) openShopRef.current();
             else if (action === 'enter-dungeon') EventBus.emit('change-level', 'dungeon');
             else if (action === 'open-quest-board') EventBus.emit('open-quest-board');
+            else if (action === 'open-shop') EventBus.emit('open-shop');
             else if (action === 'give-dungeon-key') EventBus.emit('give-dungeon-key');
             else if (action === 'give-scholar-reward')
             {

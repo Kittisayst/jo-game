@@ -58,7 +58,7 @@ test.describe('Dungeon & NPC Extensions (Features 1 to 4)', () => {
       EventBus.emit('open-workshop');
     });
 
-    await expect(page.locator('h2:has-text("ໂຮງຊ່າງຫັດຖະກຳ")')).toBeVisible({ timeout: 6000 });
+    await expect(page.locator('h2:has-text("ໂຮງຊ່າງ")')).toBeVisible({ timeout: 6000 });
     await page.waitForTimeout(500);
     await page.screenshot({ path: path.join(outDir, '8_workshop_crafting_modal.png') });
 
@@ -72,7 +72,7 @@ test.describe('Dungeon & NPC Extensions (Features 1 to 4)', () => {
       EventBus.emit('open-forge');
     });
 
-    await expect(page.locator('h2:has-text("ໂຮງຕີເຫຼັກ")')).toBeVisible({ timeout: 6000 });
+    await expect(page.locator('h2:has-text("Smithy")')).toBeVisible({ timeout: 6000 });
     await page.waitForTimeout(500);
     await page.screenshot({ path: path.join(outDir, '9_forge_crafting_modal.png') });
 

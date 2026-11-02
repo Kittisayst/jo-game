@@ -12,6 +12,11 @@ export const grandmaChanthyDialogue: DialogueGraph = {
             line: 'ໂອ້ ຫຼານ Jo! ມາກິນນ້ຳສະໝູນໄພນຳແມ່ເຖົ້າກ່ອນແມ. ສວນຜັກທາງຂ້າງນີ້ມີພືດຢາດີຫຼາຍຊະນິດເລີຍນະ!',
             choices: [
                 {
+                    text: '🛒 ຂໍເບິ່ງຮ້ານຂອງແມ່ເຖົ້າແດ່ (ແລກວັດຖຸດິບ)',
+                    to: 'open_shop',
+                    action: 'open-shop',
+                },
+                {
                     text: '🌱 ພືດ ແລະ ສະໝູນໄພໃຊ້ເຮັດຫຍັງໄດ້ແດ່?',
                     to: 'herbs_info',
                 },
@@ -29,6 +34,13 @@ export const grandmaChanthyDialogue: DialogueGraph = {
                     to: 'goodbye',
                 },
             ],
+        },
+        open_shop: {
+            id: 'open_shop',
+            speaker: 'ແມ່ເຖົ້າ ຈັນທີ (Grandma Chanthy)',
+            avatar: '🌿',
+            line: 'ເບິ່ງເອົາຕາມໃຈເດີ້ຫຼານ! ແມ່ເຖົ້າບໍ່ເອົາເງິນດອກ, ເອົາພຽງສະໝູນໄພ ແລະ ແຮ່ທີ່ຫຼານເກັບມາແລກກັນ. ມື້ນີ້ມີຂອງພິເສດນຳນະ.',
+            end: true,
         },
         herbs_info: {
             id: 'herbs_info',
