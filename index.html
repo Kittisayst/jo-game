@@ -3,7 +3,13 @@
 <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/png" href="/favicon.png" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#0b0720" />
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Knowledge Quest" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Lao:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -13,6 +19,16 @@
 
 <body>
     <div id="root"></div>
+    <div id="rotate-hint" aria-hidden="true">📱 ຫັນໂທລະສັບນອນ ເພື່ອຫຼິ້ນເກມ</div>
+    <script>
+        // Installed app: look for a new version every time the game is opened or comes back to the front
+        // (a browser may wait a day before it checks by itself). Does nothing where no service worker is registered.
+        if ('serviceWorker' in navigator) {
+            const check = () => navigator.serviceWorker.getRegistration().then(r => r && r.update()).catch(() => {});
+            window.addEventListener('load', () => setTimeout(check, 1500));
+            document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') check(); });
+        }
+    </script>
     <script type="module" src="/src/main.tsx"></script>
 
 </body>

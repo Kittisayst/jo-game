@@ -119,6 +119,16 @@ npx vite preview --config vite/config.prod.mjs --base /jo-game/   # http://local
 
 ໄຟລ໌ໃນ `public/` (ເຊັ່ນ `style.css`) ຕ້ອງໃຊ້ path ແບບ relative (`url('fonts/...')`), ເພາະ Vite ບໍ່ແກ້ path ໃນໄຟລ໌ເຫຼົ່ານັ້ນ ແລະ path ແບບ `/fonts/...` ຈະພັງເມື່ອເກມຢູ່ໃຕ້ `/jo-game/`.
 
+## ຕິດຕັ້ງເປັນແອັບໃນໂທລະສັບ (Add to Home screen)
+
+ເກມເປັນ PWA (ໃຊ້ `vite-plugin-pwa`, ສະເພາະ build production): ເປີດ https://kittisayst.github.io/jo-game/ ແລ້ວ
+
+- **Android (Chrome):** ເມນູ ⋮ → **ຕິດຕັ້ງແອັບ / Install app** (ຫຼື Add to Home screen). ເປີດຈາກໄອຄອນຈະເຕັມຈໍ ແລະເປັນແນວນອນ.
+- **iPhone (Safari):** ປຸ່ມ Share → **Add to Home Screen**. iPhone ບໍ່ເຮັດເຕັມຈໍແທ້ (ເຊື່ອງແຖບ Safari) ແລະ**ລັອກແນວນອນບໍ່ໄດ້** ຕ້ອງຫັນໂທລະສັບເອງ. ເຊບຂອງແອັບທີ່ຕິດຕັ້ງແຍກຈາກ Safari: ຍ້າຍດ້ວຍ export/import ໃນ Settings.
+- ໃນ browser ທຳມະດາ ມີສະວິດ **ເຕັມຈໍ** ໃນ Settings (ບໍ່ມີໃນ iPhone Safari).
+
+ເປີດເກມຄັ້ງໜຶ່ງແລ້ວຫຼິ້ນ **offline** ໄດ້ (ໄຟລ໌ທັງ build ຖືກເກັບໄວ້ປະມານ 5 MB). ເວີຊັນໃໝ່ມາຫຼັງເປີດເກມໃໝ່ 1-2 ຄັ້ງ. ຖ້າເຄື່ອງຄ້າງເວີຊັນເກົ່າ ໃຫ້ລ້າງຂໍ້ມູນເວັບໄຊຂອງ kittisayst.github.io ຫຼືຖອນແອັບແລ້ວຕິດຕັ້ງໃໝ່. ໄອຄອນສ້າງດ້ວຍ `python tools/art/build_pwa_icons.py`.
+
 ## ກ່ຽວກັບ log.js
 
 ໂປຣເຈັກເລີ່ມຈາກ [template ຂອງ Phaser](https://github.com/phaserjs/template-react-ts) ທີ່ມີ `log.js` ສົ່ງຂໍ້ມູນນິລະນາມ 3 ຢ່າງ (ຊື່ template, dev/prod, ເວີຊັນ Phaser) ໄປທີ່ `gryzor.co` ເມື່ອໃຊ້ `npm run dev` ຫຼື `npm run build`. ບໍ່ມີຂໍ້ມູນສ່ວນຕົວ. ຖ້າບໍ່ຢາກສົ່ງ ໃຫ້ໃຊ້ `npm run dev-nolog` / `npm run build-nolog` ຫຼືລຶບ `log.js` ແລະການເອີ້ນໃນ `package.json`.
