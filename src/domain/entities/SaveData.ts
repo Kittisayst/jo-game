@@ -11,6 +11,7 @@ import type { NightHuntsSnapshot } from './NightHunts';
 import type { PendingReward } from './PendingRewards';
 import { TutorialSnapshot } from './TutorialProgress';
 import type { QuestSnapshot } from './Quest';
+import type { PetSnapshot } from './Pet';
 import { SettingsData, StageProgressionData } from '../ports';
 import { BookProgressSnapshot } from './Book';
 import { BackpackSlotSnapshot } from './Backpack';
@@ -83,6 +84,7 @@ export interface SaveGameSnapshot
     tutorial: TutorialSnapshot;
     /** Completed/claimed quest board tasks. Missing in older saves. */
     quests?: QuestSnapshot;
+    pets?: PetSnapshot;
 }
 
 export function createDefaultSaveSnapshot (slotId = 'slot_1'): SaveGameSnapshot
@@ -150,6 +152,7 @@ export function createDefaultSaveSnapshot (slotId = 'slot_1'): SaveGameSnapshot
         nightHunts: { nightId: -1, stages: [] },
         storage: [],
         quests: { quests: [] },
+        pets: { ownedPetIds: [], activePetId: null },
     };
 }
 
@@ -441,5 +444,35 @@ export function migrateSaveSnapshot (raw: unknown, fallbackSlotId = 'slot_1'): S
         worldTime,
         nightHunts,
         storage,
+        pets: data.pets && typeof data.pets === 'object' ? {
+            ownedPetIds: Array.isArray((data.pets as Record<string, unknown>).ownedPetIds)
+                ? ((data.pets as Record<string, unknown>).ownedPetIds as unknown[]).filter((id): id is string => typeof id === 'string')
+                : [],
+            activePetId: typeof (data.pets as Record<string, unknown>).activePetId === 'string'
+                ? ((data.pets as Record<string, unknown>).activePetId as string)
+                : null,
+        } : { ownedPetIds: [], activePetId: null },
+        quests: sanitizeQuests(data.quests),
     };
+}
+
+function sanitizeQuests (raw: unknown): QuestSnapshot
+{
+    const list = raw && typeof raw === 'object' ? (raw as Record<string, unknown>).quests : undefined;
+    if (!Array.isArray(list)) return { quests: [] };
+    const quests: QuestSnapshot['quests'] = [];
+    for (const entry of list)
+    {
+        if (!entry || typeof entry !== 'object') continue;
+        const q = entry as Record<string, unknown>;
+        if (typeof q.id !== 'string') continue;
+        quests.push({
+            id: q.id,
+            progress: typeof q.progress === 'number' && Number.isFinite(q.progress) ? Math.max(0, Math.floor(q.progress)) : 0,
+            ...(typeof q.accepted === 'boolean' ? { accepted: q.accepted } : {}),
+            completed: q.completed === true,
+            claimed: q.claimed === true,
+        });
+    }
+    return { quests };
 }

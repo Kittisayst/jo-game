@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { expect, test } from '@playwright/test';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -68,12 +69,12 @@ test.describe('Village New NPCs Playtest', () => {
     await page.keyboard.press('Escape');
     await page.waitForTimeout(400);
 
-    // 4. Swordsman Kham (x = 1660) at Training Grounds
+    // 4. Swordsman Kham (x = 2080) at Training Grounds
     await page.evaluate(() => {
       const scene = (window as any).__phaserGameScene;
       if (scene && scene.player) {
-        scene.player.setPosition(1660, 520);
-        scene.cameras.main.scrollX = 1520;
+        scene.player.setPosition(2080, 520);
+        scene.cameras.main.scrollX = 1940;
       }
     });
     await page.waitForTimeout(400);
@@ -91,12 +92,12 @@ test.describe('Village New NPCs Playtest', () => {
     await page.keyboard.press('Escape');
     await page.waitForTimeout(400);
 
-    // 5. Shrine Maiden Noy (x = 2310) at Eastern Shrine
+    // 5. Shrine Maiden Noy (x = 3480) at Eastern Shrine
     await page.evaluate(() => {
       const scene = (window as any).__phaserGameScene;
       if (scene && scene.player) {
-        scene.player.setPosition(2310, 520);
-        scene.cameras.main.scrollX = 2170;
+        scene.player.setPosition(3480, 520);
+        scene.cameras.main.scrollX = 3340;
       }
     });
     await page.waitForTimeout(400);

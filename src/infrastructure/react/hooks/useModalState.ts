@@ -39,6 +39,7 @@ export function useModalState ()
     const [isStorageOpen, setIsStorageOpen] = useState(false);
     const [isQuestBoardOpen, setIsQuestBoardOpen] = useState(false);
     const [isCharacterOpen, setIsCharacterOpen] = useState(false);
+    const [isPetShopOpen, setIsPetShopOpen] = useState(false);
     // Not closed by Esc: the Stage is frozen until the player has answered
     const [stageQuestion, setStageQuestion] = useState<StageQuestionState | null>(null);
 
@@ -59,6 +60,7 @@ export function useModalState ()
         storage: isStorageOpen,
         questBoard: isQuestBoardOpen,
         character: isCharacterOpen,
+        petShop: isPetShopOpen,
         stageQuestion: stageQuestion !== null,
     };
     const openRef = useRef(open);
@@ -83,6 +85,7 @@ export function useModalState ()
         if (now.storage) { setIsStorageOpen(false); return true; }
         if (now.questBoard) { setIsQuestBoardOpen(false); return true; }
         if (now.character) { setIsCharacterOpen(false); return true; }
+        if (now.petShop) { setIsPetShopOpen(false); return true; }
         return false;
     };
 
@@ -111,6 +114,7 @@ export function useModalState ()
         isStorageOpen, setIsStorageOpen,
         isQuestBoardOpen, setIsQuestBoardOpen,
         isCharacterOpen, setIsCharacterOpen,
+        isPetShopOpen, setIsPetShopOpen,
         stageQuestion, setStageQuestion,
         closeTopModal,
         isAnyModalOpen,

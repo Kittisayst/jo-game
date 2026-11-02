@@ -29,7 +29,7 @@ function describe (stage: StageDefinition, state: CellState): string
     return `${stage.name} · ▶️ ພ້ອມຫຼິ້ນ`;
 }
 
-/** The map of all 100 Stages, ten rows (Realms) of ten. Stages that are not built yet are grey. */
+/** The map of all 100 Stages, ten rows (Realms) of ten, plus Dungeons. Stages that are not built yet are grey. */
 export function StageMapModal ({
     currentLevel,
     stageProgression,
@@ -78,7 +78,7 @@ export function StageMapModal ({
                         <span className="stage-map-icon">🗺️</span>
                         <div>
                             <h2>ແຜນທີ່ 100 ດ່ານ (World Map)</h2>
-                            <p className="stage-map-subtitle">10 ມິຕິ × 10 ດ່ານ. ເລືອກດ່ານທີ່ເປີດແລ້ວ ເພື່ອເດີນທາງໄປ ຫຼື ຫຼິ້ນຊ້ຳ</p>
+                            <p className="stage-map-subtitle">10 ມິຕິ × 10 ດ່ານ. ເລືອກດ່ານທີ່ເປີດແລ້ວ ຫຼື ຄຸກໃຕ້ດິນ ເພື່ອເດີນທາງໄປຜະຈົນໄພ</p>
                         </div>
                     </div>
                     <button
@@ -130,13 +130,29 @@ export function StageMapModal ({
                 </div>
 
                 <div className="realm-map">
-                    <button
-                        className={`realm-village-btn ${currentLevel === 'village' ? 'is-current' : ''}`}
-                        type="button"
-                        onClick={() => handleSelect('village', 'open')}
-                    >
-                        🏡 ໝູ່ບ້ານ (Village Hub)
-                    </button>
+                    <div style={{ display: 'flex', gap: '10px', marginBottom: '12px' }}>
+                        <button
+                            className={`realm-village-btn ${currentLevel === 'village' ? 'is-current' : ''}`}
+                            type="button"
+                            onClick={() => handleSelect('village', 'open')}
+                            style={{ flex: 1 }}
+                        >
+                            🏡 ໝູ່ບ້ານ (Village Hub)
+                        </button>
+                        <button
+                            className={`realm-village-btn ${currentLevel === 'dungeon' ? 'is-current' : ''}`}
+                            type="button"
+                            onClick={() => handleSelect('dungeon', 'open')}
+                            style={{
+                                flex: 1,
+                                background: '#3b0764',
+                                borderColor: '#a855f7',
+                                color: '#f3e8ff',
+                            }}
+                        >
+                            🏰 ຄຸກໃຕ້ດິນ (Dungeon-001)
+                        </button>
+                    </div>
 
                     {realms.map(realm =>
                     {
@@ -188,9 +204,7 @@ export function StageMapModal ({
                                                 onClick={() => handleSelect(stage.id, state)}
                                             >
                                                 <span className="realm-cell-number">{stage.number}</span>
-                                                <span className="realm-cell-mark">
-                                                    {state === 'locked' ? '🔒' : state === 'cleared' ? '⭐' : mark}
-                                                </span>
+                                                {mark && <span className="realm-cell-mark">{mark}</span>}
                                             </button>
                                         );
                                     })}
@@ -198,10 +212,6 @@ export function StageMapModal ({
                             </section>
                         );
                     })}
-                </div>
-
-                <div className="stage-map-footer">
-                    <span>💡 ຜ່ານແຕ່ລະດ່ານເພື່ອເປີດດ່ານຕໍ່ໄປ. ດ່ານສີເທົາ "ກຳລັງສ້າງ" ຍັງເຂົ້າບໍ່ໄດ້. ⚔️ = Mini-boss (ດ່ານ 5), 👑 = Boss (ດ່ານ 10).</span>
                 </div>
             </div>
         </div>

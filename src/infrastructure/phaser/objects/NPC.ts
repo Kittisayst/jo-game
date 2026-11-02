@@ -1,4 +1,4 @@
-import { Physics, Scene } from 'phaser';
+import { Math as PhaserMath, Physics, Scene } from 'phaser';
 
 const WIDTH = 32;
 const HEIGHT = 48;
@@ -10,14 +10,32 @@ export class NPC extends Physics.Arcade.Sprite
     private isPlayerInRange = false;
     onInteract?: () => void;
 
-    constructor (scene: Scene, x: number, y: number, texture = 'npc-elder', promptText = '💬 [E] ລົມກັນ')
+    readonly homeX: number;
+    wanderRadius: number;
+    wanderSpeed: number;
+    private wanderState: 'idle' | 'walking' = 'idle';
+    private stateTimer = 2000;
+    private targetX: number;
+
+    constructor (scene: Scene, x: number, y: number, texture = 'npc-elder', promptText = '💬 [E] ລົມກັນ', wanderRadius = 60, wanderSpeed = 28)
     {
         NPC.ensureTexture(scene, texture);
 
         super(scene, x, y, texture);
 
+        this.homeX = x;
+        this.targetX = x;
+        this.wanderRadius = wanderRadius;
+        this.wanderSpeed = wanderSpeed;
+        this.stateTimer = PhaserMath.Between(1500, 3500);
+
         scene.add.existing(this);
-        scene.physics.add.existing(this, true); // static arcade body
+        scene.physics.add.existing(this, false);
+        if (this.body)
+        {
+            (this.body as Physics.Arcade.Body).setAllowGravity(false);
+            this.body.immovable = true;
+        }
 
         this.setSize(WIDTH, HEIGHT);
         this.setDepth(9);
@@ -243,7 +261,7 @@ export class NPC extends Physics.Arcade.Sprite
         graphics.destroy();
     }
 
-    updateProximity (playerX: number, playerY: number): void
+    updateProximity (playerX: number, playerY: number, delta = 16): void
     {
         const dist = Math.hypot(this.x - playerX, this.y - playerY);
         const inRange = dist <= PROXIMITY_RANGE;
@@ -258,6 +276,52 @@ export class NPC extends Physics.Arcade.Sprite
                 ease: 'Quad.easeOut',
             });
         }
+
+        if (inRange)
+        {
+            this.setFlipX(playerX < this.x);
+            this.wanderState = 'idle';
+        }
+        else if (this.wanderRadius > 0)
+        {
+            this.stateTimer -= delta;
+            if (this.stateTimer <= 0)
+            {
+                if (this.wanderState === 'walking')
+                {
+                    this.wanderState = 'idle';
+                    this.stateTimer = PhaserMath.Between(2500, 5000);
+                }
+                else
+                {
+                    this.targetX = this.homeX + PhaserMath.Between(-this.wanderRadius, this.wanderRadius);
+                    this.wanderState = 'walking';
+                    this.stateTimer = PhaserMath.Between(3000, 6000);
+                }
+            }
+
+            if (this.wanderState === 'walking')
+            {
+                const diff = this.targetX - this.x;
+                if (Math.abs(diff) < 2)
+                {
+                    this.wanderState = 'idle';
+                    this.stateTimer = PhaserMath.Between(2000, 4500);
+                }
+                else
+                {
+                    const step = Math.sign(diff) * Math.min(Math.abs(diff), this.wanderSpeed * (delta / 1000));
+                    this.setX(this.x + step);
+                    this.setFlipX(diff < 0);
+                    if (this.body)
+                    {
+                        this.body.reset(this.x, this.y);
+                    }
+                }
+            }
+        }
+
+        this.promptContainer.setX(this.x);
     }
 
     triggerInteraction (): void

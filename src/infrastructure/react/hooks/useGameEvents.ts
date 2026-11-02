@@ -29,6 +29,7 @@ export interface GameEventHandlers
     onGardenChanged?: (change: 'planted' | 'harvested' | 'expanded') => void;
     onOpenStorage?: () => void;
     onOpenQuestBoard?: () => void;
+    onOpenPetShop?: () => void;
     onWeaponChanged?: (weaponId: string) => void;
     onOpenLibrary?: (bookId?: string) => void;
     onOpenAcademy?: (bookId?: string) => void;
@@ -63,6 +64,7 @@ const EVENT_BUS_EVENTS: [string, keyof GameEventHandlers][] = [
     ['garden-changed', 'onGardenChanged'],
     ['open-storage', 'onOpenStorage'],
     ['open-quest-board', 'onOpenQuestBoard'],
+    ['open-pet-shop', 'onOpenPetShop'],
     ['weapon-changed', 'onWeaponChanged'],
     ['open-library', 'onOpenLibrary'],
     ['open-academy', 'onOpenAcademy'],

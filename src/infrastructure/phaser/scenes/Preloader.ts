@@ -1,5 +1,5 @@
 import { Scene } from 'phaser';
-import { DUNGEON_LEVEL_KEY, DUNGEON_LEVEL_PATH, GARDEN_LEVEL_KEY, GARDEN_LEVEL_PATH, VILLAGE_LEVEL_KEY, VILLAGE_LEVEL_PATH } from '../levelCatalog';
+import { COTTAGE_LEVEL_KEY, COTTAGE_LEVEL_PATH, DUNGEON_LEVEL_KEY, DUNGEON_LEVEL_PATH, GARDEN_LEVEL_KEY, GARDEN_LEVEL_PATH, VILLAGE_LEVEL_KEY, VILLAGE_LEVEL_PATH } from '../levelCatalog';
 import { isStageReady } from '../stages/StageDefinition';
 import { getGameContent } from '../../content/ContentCatalog';
 import { heldTextureKey } from '../objects/HeldItemSprite';
@@ -33,10 +33,15 @@ const IMAGE_ASSETS: readonly { key: string; path: string }[] = [
     { key: 'village-lantern', path: 'assets/environment/village_lantern.png' },
     { key: 'signpost', path: 'assets/environment/signpost.png' },
     { key: 'quest-board', path: 'assets/environment/quest_board.png' },
+    { key: 'building-cottage', path: 'assets/environment/building_cottage.png' },
+    { key: 'storage-chest', path: 'assets/environment/storage_chest.png' },
 ];
 
 const SPRITESHEET_ASSETS: readonly { key: string; path: string; frameWidth: number; frameHeight: number }[] = [
     // Interactive Environment Sheets
+    { key: 'pet-dog', path: 'assets/environment/pet_dog.png', frameWidth: 24, frameHeight: 20 },
+    { key: 'pet-chicken', path: 'assets/environment/pet_chicken.png', frameWidth: 16, frameHeight: 16 },
+    { key: 'stone-lantern', path: 'assets/environment/stone_lantern.png', frameWidth: 24, frameHeight: 44 },
     { key: 'world-gate', path: 'assets/environment/world_gate.png', frameWidth: 112, frameHeight: 160 },
     { key: 'node-tree', path: 'assets/environment/node_tree.png', frameWidth: 80, frameHeight: 112 },
     { key: 'node-herb', path: 'assets/environment/node_herb.png', frameWidth: 48, frameHeight: 48 },
@@ -57,10 +62,19 @@ const SPRITESHEET_ASSETS: readonly { key: string; path: string; frameWidth: numb
     { key: 'player-skin-cyber-knight', path: 'assets/characters/player-skin-cyber-knight.png', frameWidth: 32, frameHeight: 48 },
     { key: 'player-skin-golden-runner', path: 'assets/characters/player-skin-golden-runner.png', frameWidth: 32, frameHeight: 48 },
 
-    // Village NPCs (4 frames of 32x48)
+    // Village & World NPCs (4 frames of 32x48 each, 48x48 for smith)
     { key: 'npc-elder', path: 'assets/characters/npc_elder.png', frameWidth: 32, frameHeight: 48 },
     { key: 'npc-mina', path: 'assets/characters/npc_mina.png', frameWidth: 32, frameHeight: 48 },
     { key: 'npc-smith', path: 'assets/characters/npc_smith.png', frameWidth: 48, frameHeight: 48 },
+    { key: 'npc-bounmy', path: 'assets/characters/npc_bounmy.png', frameWidth: 32, frameHeight: 48 },
+    { key: 'npc-scholar', path: 'assets/characters/npc_scholar.png', frameWidth: 32, frameHeight: 48 },
+    { key: 'npc-chanthy', path: 'assets/characters/npc_chanthy.png', frameWidth: 32, frameHeight: 48 },
+    { key: 'npc-kham', path: 'assets/characters/npc_kham.png', frameWidth: 32, frameHeight: 48 },
+    { key: 'npc-noy', path: 'assets/characters/npc_noy.png', frameWidth: 32, frameHeight: 48 },
+    { key: 'npc-somchay', path: 'assets/characters/npc_somchay.png', frameWidth: 32, frameHeight: 48 },
+    { key: 'npc-guide-keo', path: 'assets/characters/npc_guide_keo.png', frameWidth: 32, frameHeight: 48 },
+    { key: 'npc-thong', path: 'assets/characters/npc_thong.png', frameWidth: 32, frameHeight: 48 },
+    { key: 'npc-dr-cyber', path: 'assets/characters/npc_dr_cyber.png', frameWidth: 32, frameHeight: 48 },
 
     // Enemies, Mini-Boss & Chapter Boss (4 frames each)
     { key: 'enemy-slime', path: 'assets/characters/enemy_slime.png', frameWidth: 32, frameHeight: 28 },
@@ -100,6 +114,11 @@ export function enqueueGameAssets (scene: Scene): void
     {
         scene.load.json(VILLAGE_LEVEL_KEY, VILLAGE_LEVEL_PATH);
     }
+    if (!scene.cache.json.exists(COTTAGE_LEVEL_KEY))
+    {
+        scene.load.json(COTTAGE_LEVEL_KEY, COTTAGE_LEVEL_PATH);
+    }
+
     if (!scene.cache.json.exists(GARDEN_LEVEL_KEY))
     {
         scene.load.json(GARDEN_LEVEL_KEY, GARDEN_LEVEL_PATH);

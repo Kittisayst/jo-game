@@ -28,7 +28,7 @@ test.describe('Tool upgrades', () => {
     });
     const credit = await page.evaluate(() => (window as any).__entities.wallet.balance);
 
-    expect(await bot.goTo(875, { tolerance: 25, fight: false, timeoutMs: 40000 })).toBe('arrived');
+    expect(await bot.goTo(2400, { tolerance: 25, fight: false, timeoutMs: 40000 })).toBe('arrived');
     await page.keyboard.press('KeyE');
     await page.getByTestId('workshop-tab-upgrade').click();
     await expect(page.getByTestId('tool-axe-t1')).toHaveAttribute('data-level', '0');

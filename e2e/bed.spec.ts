@@ -20,8 +20,10 @@ test.describe('The Bed', () => {
     page.on('pageerror', err => pageErrors.push(err.message));
     const bot = await startInVillage(page);
 
-    // The Bed stands at x = 1535
-    expect(await bot.goTo(1535, { tolerance: 25, fight: false, timeoutMs: 40000 })).toBe('arrived');
+    // The Bed is in the hero's cottage (x = 980)
+    await page.evaluate(() => (window as any).__eventBus.emit('change-level', 'cottage'));
+    await expect.poll(async () => (await bot.state()).scene, { timeout: 20000 }).toBe('cottage');
+    expect(await bot.goTo(980, { tolerance: 25, fight: false, timeoutMs: 40000 })).toBe('arrived');
     const phase = () => page.evaluate(() => (window as any).__entities.worldTime.phase as string);
     expect(await phase()).toBe('day');
     const fractionBefore = await page.evaluate(() => (window as any).__entities.worldTime.dayFraction as number);

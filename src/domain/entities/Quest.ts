@@ -10,6 +10,8 @@ export type QuestType =
     | 'clear_stage'
     | 'daily_practice';
 
+export type QuestCategory = 'story' | 'daily' | 'outside';
+
 export interface QuestRewardItem
 {
     itemId: string;
@@ -28,11 +30,13 @@ export interface QuestData
     title: string;
     description: string;
     icon: string;
+    category: QuestCategory;
     type: QuestType;
     /** Specific target: e.g. 'wood', 'copper-ore', 'slime', 'golem'. If undefined, matches any of that type. */
     target?: string;
     requiredCount: number;
     progress: number;
+    accepted: boolean;
     completed: boolean;
     claimed: boolean;
     reward: QuestReward;
@@ -43,21 +47,25 @@ export interface QuestSnapshot
     quests: {
         id: string;
         progress: number;
+        accepted?: boolean;
         completed: boolean;
         claimed: boolean;
     }[];
 }
 
 export const DEFAULT_QUESTS: readonly QuestData[] = [
+    // --- 1. Story Quests (ເນື້ອເລື່ອງ - auto-accepted) ---
     {
         id: 'quest-wood',
         title: 'ຕັດໄມ້ໃນປ່າ',
         description: 'ເກັບໄມ້ທ່ອນ 5 ອັນຈາກຕົ້ນໄມ້ໃນດ່ານປ່າ',
         icon: '🪵',
+        category: 'story',
         type: 'gather',
         target: 'wood',
         requiredCount: 5,
         progress: 0,
+        accepted: true,
         completed: false,
         claimed: false,
         reward: { credit: 20 },
@@ -67,97 +75,117 @@ export const DEFAULT_QUESTS: readonly QuestData[] = [
         title: 'ຂຸດແຮ່ທອງແດງ',
         description: 'ຂຸດສາຍແຮ່ທອງແດງ 4 ກ້ອນ ເພື່ອນຳມາໃຊ້ສ້າງອາວຸດ',
         icon: '⛏️',
+        category: 'story',
         type: 'gather',
         target: 'copper-ore',
         requiredCount: 4,
         progress: 0,
+        accepted: true,
         completed: false,
         claimed: false,
         reward: { credit: 25, items: [{ itemId: 'herb-potion', count: 1 }] },
-    },
-    {
-        id: 'quest-slime',
-        title: 'ປາບ Slime ວຸ້ນ',
-        description: 'ກຳຈັດມອນສເຕີ Slime 4 ໂຕໃນການຜະຈົນໄພ',
-        icon: '🟢',
-        type: 'defeat',
-        target: 'slime',
-        requiredCount: 4,
-        progress: 0,
-        completed: false,
-        claimed: false,
-        reward: { credit: 25, items: [{ itemId: 'speed-potion', count: 1 }] },
-    },
-    {
-        id: 'quest-golem',
-        title: 'ປາບ Golem ຜູ້ປົກປ້ອງ',
-        description: 'ປາບ Rock Golem, Sand Golem ຫຼື Crystal Golem 3 ໂຕ',
-        icon: '🗿',
-        type: 'defeat',
-        target: 'golem',
-        requiredCount: 3,
-        progress: 0,
-        completed: false,
-        claimed: false,
-        reward: { credit: 30, items: [{ itemId: 'strength-potion', count: 1 }] },
     },
     {
         id: 'quest-craft',
         title: 'ສ້າງເຄື່ອງມື ຫຼື ຢາ',
         description: 'ສ້າງອຸປະກອນ ຫຼື ປຸງຢາທີ່ໂຮງຊ່າງ 1 ຄັ້ງ',
         icon: '🔨',
+        category: 'story',
         type: 'craft',
         requiredCount: 1,
         progress: 0,
+        accepted: true,
         completed: false,
         claimed: false,
         reward: { credit: 20 },
-    },
-    {
-        id: 'quest-potion',
-        title: 'ດື່ມຢາເສີມພະລັງ',
-        description: 'ດື່ມຢາຮັກສາ ຫຼື ຢາເພີ່ມພະລັງ 1 ຄັ້ງ',
-        icon: '🧪',
-        type: 'drink_potion',
-        requiredCount: 1,
-        progress: 0,
-        completed: false,
-        claimed: false,
-        reward: { credit: 15, items: [{ itemId: 'herb-potion', count: 1 }] },
     },
     {
         id: 'quest-stage',
         title: 'ສຳຫຼວດດ່ານຜະຈົນໄພ',
         description: 'ຜ່ານດ່ານຜະຈົນໄພຈົນເຖິງປະຕູທາງອອກ 2 ດ່ານ',
         icon: '🚩',
+        category: 'story',
         type: 'clear_stage',
         requiredCount: 2,
         progress: 0,
+        accepted: true,
         completed: false,
         claimed: false,
         reward: { credit: 35, items: [{ itemId: 'armor-potion', count: 1 }] },
     },
+
+    // --- 2. Daily Quests (ປະຈຳວັນ - ຕ້ອງກົດຮັບ) ---
     {
         id: 'quest-practice',
         title: 'ຝຶກຝົນປັນຍາປະຈຳວັນ',
         description: 'ທົດສອບຄວາມຮູ້ປະຈຳວັນທີ່ສະຖາບັນ 1 ຄັ້ງ',
         icon: '📖',
+        category: 'daily',
         type: 'daily_practice',
         requiredCount: 1,
         progress: 0,
+        accepted: false,
         completed: false,
         claimed: false,
         reward: { credit: 30 },
+    },
+    {
+        id: 'quest-slime',
+        title: 'ປາບ Slime ວຸ້ນປະຈຳວັນ',
+        description: 'ກຳຈັດມອນສເຕີ Slime 4 ໂຕໃນການຜະຈົນໄພ',
+        icon: '🟢',
+        category: 'daily',
+        type: 'defeat',
+        target: 'slime',
+        requiredCount: 4,
+        progress: 0,
+        accepted: false,
+        completed: false,
+        claimed: false,
+        reward: { credit: 25, items: [{ itemId: 'speed-potion', count: 1 }] },
+    },
+    {
+        id: 'quest-potion',
+        title: 'ດື່ມຢາເສີມພະລັງປະຈຳວັນ',
+        description: 'ດື່ມຢາຮັກສາ ຫຼື ຢາເພີ່ມພະລັງ 1 ຄັ້ງ',
+        icon: '🧪',
+        category: 'daily',
+        type: 'drink_potion',
+        requiredCount: 1,
+        progress: 0,
+        accepted: false,
+        completed: false,
+        claimed: false,
+        reward: { credit: 15, items: [{ itemId: 'herb-potion', count: 1 }] },
+    },
+
+    // --- 3. Outside Quests (ພາລະກິດນອກ/ລ່າສັດ - ຕ້ອງກົດຮັບ) ---
+    {
+        id: 'quest-golem',
+        title: 'ປາບ Golem ຜູ້ປົກປ້ອງ',
+        description: 'ປາບ Rock Golem, Sand Golem ຫຼື Crystal Golem 3 ໂຕ',
+        icon: '🗿',
+        category: 'outside',
+        type: 'defeat',
+        target: 'golem',
+        requiredCount: 3,
+        progress: 0,
+        accepted: false,
+        completed: false,
+        claimed: false,
+        reward: { credit: 30, items: [{ itemId: 'strength-potion', count: 1 }] },
     },
     {
         id: 'quest-dungeon-bat',
         title: 'ປາບເຈຍຖ້ຳມະຫັນຕະໄພ',
         description: 'ກຳຈັດເຈຍຖ້ຳ (Cave Bat) 3 ໂຕໃນຄຸກໃຕ້ດິນ',
         icon: '🦇',
+        category: 'outside',
         type: 'defeat',
         target: 'bat',
         requiredCount: 3,
         progress: 0,
+        accepted: false,
         completed: false,
         claimed: false,
         reward: { credit: 20, items: [{ itemId: 'herb-potion', count: 2 }] },
@@ -167,10 +195,12 @@ export const DEFAULT_QUESTS: readonly QuestData[] = [
         title: 'ລ່າແມງມຸມພິດຄຸກມືດ',
         description: 'ກຳຈັດແມງມຸມຄຸກ (Dungeon Spider) 3 ໂຕ',
         icon: '🕷️',
+        category: 'outside',
         type: 'defeat',
         target: 'spider',
         requiredCount: 3,
         progress: 0,
+        accepted: false,
         completed: false,
         claimed: false,
         reward: { credit: 30, items: [{ itemId: 'speed-potion', count: 1 }] },
@@ -180,10 +210,12 @@ export const DEFAULT_QUESTS: readonly QuestData[] = [
         title: 'ປາບນັກຮົບໂຄງກະດູກ',
         description: 'ກຳຈັດໂຄງກະດູກນັກຮົບ (Skeleton Warrior) 2 ໂຕ',
         icon: '💀',
+        category: 'outside',
         type: 'defeat',
         target: 'skeleton',
         requiredCount: 2,
         progress: 0,
+        accepted: false,
         completed: false,
         claimed: false,
         reward: { credit: 40, items: [{ itemId: 'bone-sword', count: 1 }] },
@@ -197,7 +229,10 @@ export class QuestBoard
     constructor (initialQuests?: QuestData[])
     {
         this._quests = initialQuests
-            ? initialQuests.map(q => ({ ...q }))
+            ? initialQuests.map(q => ({
+                ...q,
+                accepted: q.accepted ?? (q.category === 'story'),
+            }))
             : DEFAULT_QUESTS.map(q => ({ ...q }));
     }
 
@@ -211,20 +246,55 @@ export class QuestBoard
         return this._quests.find(q => q.id === id);
     }
 
+    /** Returns all quests belonging to a specific category (story, daily, outside). */
+    getByCategory (category: QuestCategory): readonly QuestData[]
+    {
+        return this._quests.filter(q => q.category === category);
+    }
+
+    /** All currently accepted quests that are still in progress. */
+    get acceptedQuests (): readonly QuestData[]
+    {
+        return this._quests.filter(q => q.accepted && !q.completed);
+    }
+
     /** Number of completed quests that have not yet had their rewards claimed. */
     get claimableCount (): number
     {
-        return this._quests.filter(q => q.completed && !q.claimed).length;
+        return this._quests.filter(q => q.accepted && q.completed && !q.claimed).length;
     }
 
-    /** Number of active quests not yet completed. */
+    /** Number of active (accepted & uncompleted) quests. */
     get activeCount (): number
     {
-        return this._quests.filter(q => !q.completed).length;
+        return this._quests.filter(q => q.accepted && !q.completed).length;
     }
 
     /**
-     * Registers progress for matching quests.
+     * Accepts a daily or outside quest so its progress starts tracking.
+     */
+    acceptQuest (id: string): boolean
+    {
+        const quest = this.get(id);
+        if (!quest || quest.accepted) return false;
+        quest.accepted = true;
+        return true;
+    }
+
+    /**
+     * Abandons an active daily or outside quest, resetting its progress.
+     */
+    abandonQuest (id: string): boolean
+    {
+        const quest = this.get(id);
+        if (!quest || !quest.accepted || quest.category === 'story' || quest.completed) return false;
+        quest.accepted = false;
+        quest.progress = 0;
+        return true;
+    }
+
+    /**
+     * Registers progress for matching quests that have been accepted.
      * Returns true if at least one quest became completed with this progress.
      */
     registerProgress (type: QuestType, target?: string, count = 1): boolean
@@ -234,7 +304,8 @@ export class QuestBoard
 
         for (const quest of this._quests)
         {
-            if (quest.completed || quest.type !== type) continue;
+            // Note 2: Must be accepted first to register progress!
+            if (!quest.accepted || quest.completed || quest.type !== type) continue;
 
             if (quest.target && target)
             {
@@ -307,6 +378,7 @@ export class QuestBoard
             quests: this._quests.map(q => ({
                 id: q.id,
                 progress: q.progress,
+                accepted: q.accepted,
                 completed: q.completed,
                 claimed: q.claimed,
             })),
@@ -323,6 +395,7 @@ export class QuestBoard
             if (quest)
             {
                 quest.progress = typeof saved.progress === 'number' ? saved.progress : 0;
+                quest.accepted = saved.accepted ?? (quest.category === 'story');
                 quest.completed = Boolean(saved.completed);
                 quest.claimed = Boolean(saved.claimed);
             }

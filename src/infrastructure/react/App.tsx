@@ -56,9 +56,11 @@ import { readHeroLevel } from './heroLevelView';
 import { readWorldTime } from './worldTimeView';
 import { syncHearts } from '../heroStats';
 import { syncMovement, syncSkills } from '../skills';
-import { isHomeLevel, isSpecialLevel } from '../phaser/levelCatalog';
+import { isSpecialLevel } from '../phaser/levelCatalog';
 import { StorageModal } from './components/StorageModal';
 import { QuestBoardModal } from './components/QuestBoardModal';
+import { QuestTrackerHud } from './components/QuestTrackerHud';
+import { PetShopModal } from './components/PetShopModal';
 import { DomainEvents } from '../../domain/DomainEvents';
 import { recordQuestProgressUseCase, QUEST_COMPLETED_EVENT, type QuestCompletedPayload } from '../../application/QuestUseCases';
 import { RESOURCE_HARVESTED_EVENT, type ResourceHarvestedPayload } from '../../application/HarvestResourceNodeUseCase';
@@ -161,6 +163,7 @@ function App ()
         isStorageOpen, setIsStorageOpen,
         isQuestBoardOpen, setIsQuestBoardOpen,
         isCharacterOpen, setIsCharacterOpen,
+        isPetShopOpen, setIsPetShopOpen,
     } = modals;
 
     // Bumped when books or the backpack change, so memoised values that read them recompute
@@ -712,6 +715,7 @@ function App ()
         },
         onOpenStorage: () => setIsStorageOpen(true),
         onOpenQuestBoard: () => setIsQuestBoardOpen(true),
+        onOpenPetShop: () => setIsPetShopOpen(true),
         onWeaponChanged: weaponId =>
         {
             setEquippedWeaponId(weaponId);
@@ -1092,6 +1096,13 @@ function App ()
                     setBackpackRevision(r => r + 1);
                     autoSaveGame();
                 }}
+            />
+
+            <QuestTrackerHud visible={!isMainMenuOpen && !isSettingsOpen} />
+
+            <PetShopModal
+                isOpen={isPetShopOpen}
+                onClose={() => setIsPetShopOpen(false)}
             />
 
             <QuestBoardModal

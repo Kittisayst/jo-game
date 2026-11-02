@@ -59,7 +59,7 @@
               "kind": "npc",
               "id": "npc-guide-keo",
               "name": "ແກ້ວ (ນັກສຳຫຼວດຝຶກຫັດ)",
-              "role": "npc-elder",
+              "role": "npc-guide-keo",
               "x": 320,
               "dialogueId": "stage_guide_keo",
               "label": "💬 [E] ລົມກັບນັກສຳຫຼວດແກ້ວ"
@@ -299,7 +299,7 @@
               "kind": "npc",
               "id": "npc-thong",
               "name": "ລຸງທອງ (ນັກຂຸດຄົ້ນ)",
-              "role": "npc-elder",
+              "role": "npc-thong",
               "x": 360,
               "dialogueId": "uncle_thong",
               "label": "💬 [E] ລົມກັບລຸງທອງ ນັກຂຸດຄົ້ນ"
@@ -599,7 +599,7 @@
               "kind": "npc",
               "id": "npc-dr-cyber",
               "name": "ດຣ. ໄຊເບີ (ວິສະວະກອນ)",
-              "role": "npc-elder",
+              "role": "npc-dr-cyber",
               "x": 280,
               "dialogueId": "dr_cyber",
               "label": "💬 [E] ລົມກັບ ດຣ. ໄຊເບີ"

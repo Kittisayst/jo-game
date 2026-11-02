@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { entities } from '../../composition';
 import { soundManager } from '../../audio/SoundManager';
-import { claimQuestRewardUseCase } from '../../../application/QuestUseCases';
+import { claimQuestRewardUseCase, acceptQuestUseCase, abandonQuestUseCase } from '../../../application/QuestUseCases';
 import { autoSaveGame } from '../../saveSnapshot';
 import { ItemIcon } from './ItemIcon';
-import type { QuestData, QuestRewardItem } from '../../../domain/entities/Quest';
+import type { QuestCategory, QuestData, QuestRewardItem } from '../../../domain/entities/Quest';
 
 interface QuestBoardModalProps
 {
@@ -14,17 +14,41 @@ interface QuestBoardModalProps
 
 export const QuestBoardModal: React.FC<QuestBoardModalProps> = ({ isOpen, onClose }) =>
 {
+    const [selectedTab, setSelectedTab] = useState<QuestCategory>('story');
     const [, setRevision] = useState(0);
 
     if (!isOpen) return null;
 
-    const quests = entities.questBoard.quests;
-    const claimableCount = entities.questBoard.claimableCount;
+    const questBoard = entities.questBoard;
+    const quests = questBoard.getByCategory(selectedTab);
+    const claimableCount = questBoard.claimableCount;
+
+    const handleAccept = (questId: string) =>
+    {
+        const success = acceptQuestUseCase(questBoard, questId);
+        if (success)
+        {
+            soundManager.playPowerUp();
+            setRevision(r => r + 1);
+            autoSaveGame();
+        }
+    };
+
+    const handleAbandon = (questId: string) =>
+    {
+        const success = abandonQuestUseCase(questBoard, questId);
+        if (success)
+        {
+            soundManager.playHurt();
+            setRevision(r => r + 1);
+            autoSaveGame();
+        }
+    };
 
     const handleClaim = (questId: string) =>
     {
         const result = claimQuestRewardUseCase(
-            entities.questBoard,
+            questBoard,
             questId,
             entities.wallet,
             entities.backpack,
@@ -38,6 +62,10 @@ export const QuestBoardModal: React.FC<QuestBoardModalProps> = ({ isOpen, onClos
             autoSaveGame();
         }
     };
+
+    const storyClaimable = questBoard.getByCategory('story').filter(q => q.completed && !q.claimed).length;
+    const dailyClaimable = questBoard.getByCategory('daily').filter(q => q.completed && !q.claimed).length;
+    const outsideClaimable = questBoard.getByCategory('outside').filter(q => q.completed && !q.claimed).length;
 
     return (
         <div className="modal-backdrop" onClick={onClose} style={{
@@ -58,14 +86,14 @@ export const QuestBoardModal: React.FC<QuestBoardModalProps> = ({ isOpen, onClos
                     border: '2px solid #38bdf8',
                     borderRadius: '12px',
                     width: '90%',
-                    maxWidth: '680px',
-                    maxHeight: '85vh',
+                    maxWidth: '720px',
+                    maxHeight: '88vh',
                     display: 'flex',
                     flexDirection: 'column',
                     boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 0 15px rgba(56, 189, 248, 0.2)',
                     overflow: 'hidden',
                     color: '#f8fafc',
-                    fontFamily: 'system-ui, -apple-system, sans-serif',
+                    fontFamily: '"Noto Sans Lao", system-ui, sans-serif',
                 }}
             >
                 {/* Header */}
@@ -82,7 +110,7 @@ export const QuestBoardModal: React.FC<QuestBoardModalProps> = ({ isOpen, onClos
                             <span>📜</span> ກະດານພາລະກິດແຫ່ງປັນຍາ (Quest Board)
                         </h2>
                         <p style={{ margin: '4px 0 0', fontSize: '0.85rem', color: '#94a3b8' }}>
-                            ເຮັດພາລະກິດເພື່ອຮັບ Credit ແລະ ນ້ຳຢາເສີມພະລັງ
+                            ຮັບພາລະກິດເພື່ອຮັບ Credit ແລະ ນ້ຳຢາເສີມພະລັງ
                             {claimableCount > 0 && (
                                 <span style={{ marginLeft: '8px', color: '#38bdf8', fontWeight: 'bold' }}>
                                     ✨ ພ້ອມຮັບ {claimableCount} ລາງວັນ!
@@ -92,6 +120,7 @@ export const QuestBoardModal: React.FC<QuestBoardModalProps> = ({ isOpen, onClos
                     </div>
                     <button
                         type="button"
+                        aria-label="Close"
                         onClick={onClose}
                         style={{
                             background: '#334155',
@@ -111,6 +140,90 @@ export const QuestBoardModal: React.FC<QuestBoardModalProps> = ({ isOpen, onClos
                     </button>
                 </div>
 
+                {/* 3 Category Tabs: Story, Daily, Outside */}
+                <div style={{
+                    display: 'flex',
+                    background: '#0f172a',
+                    padding: '0 20px',
+                    borderBottom: '1px solid #334155',
+                    gap: '8px',
+                }}>
+                    <button
+                        type="button"
+                        onClick={() => setSelectedTab('story')}
+                        style={{
+                            background: 'transparent',
+                            border: 'none',
+                            borderBottom: selectedTab === 'story' ? '3px solid #38bdf8' : '3px solid transparent',
+                            color: selectedTab === 'story' ? '#38bdf8' : '#94a3b8',
+                            padding: '12px 14px',
+                            fontWeight: 600,
+                            fontSize: '0.9rem',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                        }}
+                    >
+                        <span>📖 ເນື້ອເລື່ອງ (Story)</span>
+                        {storyClaimable > 0 && (
+                            <span style={{ background: '#eab308', color: '#0f172a', borderRadius: '10px', padding: '1px 6px', fontSize: '0.72rem', fontWeight: 'bold' }}>
+                                {storyClaimable}
+                            </span>
+                        )}
+                    </button>
+
+                    <button
+                        type="button"
+                        onClick={() => setSelectedTab('daily')}
+                        style={{
+                            background: 'transparent',
+                            border: 'none',
+                            borderBottom: selectedTab === 'daily' ? '3px solid #eab308' : '3px solid transparent',
+                            color: selectedTab === 'daily' ? '#fef08a' : '#94a3b8',
+                            padding: '12px 14px',
+                            fontWeight: 600,
+                            fontSize: '0.9rem',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                        }}
+                    >
+                        <span>📅 ປະຈຳວັນ (Daily)</span>
+                        {dailyClaimable > 0 && (
+                            <span style={{ background: '#eab308', color: '#0f172a', borderRadius: '10px', padding: '1px 6px', fontSize: '0.72rem', fontWeight: 'bold' }}>
+                                {dailyClaimable}
+                            </span>
+                        )}
+                    </button>
+
+                    <button
+                        type="button"
+                        onClick={() => setSelectedTab('outside')}
+                        style={{
+                            background: 'transparent',
+                            border: 'none',
+                            borderBottom: selectedTab === 'outside' ? '3px solid #22c55e' : '3px solid transparent',
+                            color: selectedTab === 'outside' ? '#86efac' : '#94a3b8',
+                            padding: '12px 14px',
+                            fontWeight: 600,
+                            fontSize: '0.9rem',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                        }}
+                    >
+                        <span>🌲 ພາລະກິດນອກ (Outside)</span>
+                        {outsideClaimable > 0 && (
+                            <span style={{ background: '#eab308', color: '#0f172a', borderRadius: '10px', padding: '1px 6px', fontSize: '0.72rem', fontWeight: 'bold' }}>
+                                {outsideClaimable}
+                            </span>
+                        )}
+                    </button>
+                </div>
+
                 {/* Quest List */}
                 <div style={{
                     padding: '16px 20px',
@@ -120,176 +233,216 @@ export const QuestBoardModal: React.FC<QuestBoardModalProps> = ({ isOpen, onClos
                     gap: '12px',
                     flex: 1,
                 }}>
-                    {quests.map((quest: QuestData) =>
-                    {
-                        const percent = Math.min(100, Math.round((quest.progress / quest.requiredCount) * 100));
+                    {quests.length === 0 ? (
+                        <p style={{ textAlign: 'center', color: '#94a3b8', padding: '40px 0' }}>
+                            ບໍ່ມີພາລະກິດໃນໝວດນີ້
+                        </p>
+                    ) : (
+                        quests.map((quest: QuestData) =>
+                        {
+                            const percent = Math.min(100, Math.round((quest.progress / quest.requiredCount) * 100));
 
-                        return (
-                            <div
-                                key={quest.id}
-                                style={{
-                                    background: quest.claimed ? '#0f172a80' : '#0f172a',
-                                    border: `1px solid ${quest.completed && !quest.claimed ? '#facc15' : '#334155'}`,
-                                    borderRadius: '8px',
-                                    padding: '14px 16px',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'space-between',
-                                    gap: '16px',
-                                    opacity: quest.claimed ? 0.6 : 1,
-                                    transition: 'all 0.2s ease',
-                                    boxShadow: quest.completed && !quest.claimed ? '0 0 10px rgba(250, 204, 21, 0.15)' : 'none',
-                                }}
-                            >
-                                {/* Left icon & description */}
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flex: 1 }}>
-                                    <div style={{
-                                        fontSize: '1.8rem',
-                                        width: '44px',
-                                        height: '44px',
-                                        background: '#1e293b',
+                            return (
+                                <div
+                                    key={quest.id}
+                                    style={{
+                                        background: quest.claimed ? '#0f172a80' : '#0f172a',
+                                        border: `1px solid ${quest.completed && !quest.claimed ? '#facc15' : quest.accepted ? '#38bdf840' : '#334155'}`,
                                         borderRadius: '8px',
+                                        padding: '14px 16px',
                                         display: 'flex',
                                         alignItems: 'center',
-                                        justifyContent: 'center',
-                                        border: '1px solid #475569',
-                                        flexShrink: 0,
-                                    }}>
-                                        {quest.icon}
-                                    </div>
-                                    <div style={{ flex: 1 }}>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                            <span style={{ fontWeight: 600, fontSize: '0.95rem', color: '#f8fafc' }}>
-                                                {quest.title}
-                                            </span>
-                                            {quest.completed && !quest.claimed && (
-                                                <span style={{
-                                                    fontSize: '0.7rem',
-                                                    background: '#eab30825',
-                                                    color: '#facc15',
-                                                    border: '1px solid #facc15',
-                                                    padding: '1px 6px',
-                                                    borderRadius: '4px',
-                                                    fontWeight: 600,
-                                                }}>
-                                                    ສຳເລັດ!
+                                        justifyContent: 'space-between',
+                                        gap: '16px',
+                                        opacity: quest.claimed ? 0.6 : 1,
+                                        transition: 'all 0.2s ease',
+                                        boxShadow: quest.completed && !quest.claimed ? '0 0 10px rgba(250, 204, 21, 0.15)' : 'none',
+                                    }}
+                                >
+                                    {/* Left icon & description */}
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flex: 1 }}>
+                                        <div style={{
+                                            fontSize: '1.8rem',
+                                            width: '44px',
+                                            height: '44px',
+                                            background: '#1e293b',
+                                            borderRadius: '8px',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            border: '1px solid #475569',
+                                            flexShrink: 0,
+                                        }}>
+                                            {quest.icon}
+                                        </div>
+                                        <div style={{ flex: 1 }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                <span style={{ fontWeight: 600, fontSize: '0.95rem', color: '#f8fafc' }}>
+                                                    {quest.title}
+                                                </span>
+                                                {quest.completed && !quest.claimed && (
+                                                    <span style={{
+                                                        fontSize: '0.7rem',
+                                                        background: '#eab30825',
+                                                        color: '#facc15',
+                                                        border: '1px solid #facc15',
+                                                        padding: '1px 6px',
+                                                        borderRadius: '4px',
+                                                        fontWeight: 600,
+                                                    }}>
+                                                        ສຳເລັດ!
+                                                    </span>
+                                                )}
+                                                {quest.accepted && !quest.completed && (
+                                                    <span style={{
+                                                        fontSize: '0.7rem',
+                                                        background: '#0284c725',
+                                                        color: '#38bdf8',
+                                                        border: '1px solid #38bdf8',
+                                                        padding: '1px 6px',
+                                                        borderRadius: '4px',
+                                                        fontWeight: 600,
+                                                    }}>
+                                                        ກຳລັງເຮັດ
+                                                    </span>
+                                                )}
+                                            </div>
+                                            <p style={{ margin: '2px 0 6px', fontSize: '0.8rem', color: '#94a3b8' }}>
+                                                {quest.description}
+                                            </p>
+
+                                            {/* Progress bar (only if accepted) */}
+                                            {quest.accepted ? (
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                                    <div style={{
+                                                        flex: 1,
+                                                        background: '#1e293b',
+                                                        borderRadius: '4px',
+                                                        height: '6px',
+                                                        overflow: 'hidden',
+                                                    }}>
+                                                        <div style={{
+                                                            background: quest.completed ? '#22c55e' : '#38bdf8',
+                                                            height: '100%',
+                                                            width: `${percent}%`,
+                                                            transition: 'width 0.3s ease',
+                                                        }} />
+                                                    </div>
+                                                    <span style={{ fontSize: '0.75rem', color: '#cbd5e1', fontWeight: 500, minWidth: '40px', textAlign: 'right' }}>
+                                                        {quest.progress}/{quest.requiredCount}
+                                                    </span>
+                                                </div>
+                                            ) : (
+                                                <span style={{ fontSize: '0.75rem', color: '#eab308', fontStyle: 'italic' }}>
+                                                    ⚠️ ຕ້ອງກົດຮັບພາລະກິດກ່ອນ ຈຶ່ງເລີ່ມນັບຄວາມຄືບໜ້າ
                                                 </span>
                                             )}
                                         </div>
-                                        <p style={{ margin: '2px 0 6px', fontSize: '0.8rem', color: '#94a3b8' }}>
-                                            {quest.description}
-                                        </p>
-
-                                        {/* Progress Bar */}
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                            <div style={{
-                                                flex: 1,
-                                                height: '7px',
-                                                background: '#334155',
-                                                borderRadius: '4px',
-                                                overflow: 'hidden',
-                                                maxWidth: '220px',
-                                            }}>
-                                                <div style={{
-                                                    width: `${percent}%`,
-                                                    height: '100%',
-                                                    background: quest.completed ? '#22c55e' : '#38bdf8',
-                                                    borderRadius: '4px',
-                                                    transition: 'width 0.3s ease',
-                                                }} />
-                                            </div>
-                                            <span style={{ fontSize: '0.75rem', color: '#cbd5e1', fontWeight: 500 }}>
-                                                {quest.progress} / {quest.requiredCount}
-                                            </span>
-                                        </div>
                                     </div>
-                                </div>
 
-                                {/* Right: Rewards & Action button */}
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-                                    <div style={{ textAlign: 'right' }}>
-                                        <div style={{ fontSize: '0.75rem', color: '#94a3b8', marginBottom: '2px' }}>
-                                            ລາງວັນ
-                                        </div>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'flex-end' }}>
-                                            <span style={{
-                                                fontSize: '0.85rem',
-                                                color: '#fef08a',
-                                                fontWeight: 600,
-                                                background: '#ca8a0420',
-                                                padding: '2px 6px',
-                                                borderRadius: '4px',
-                                            }}>
-                                                🎓 +{quest.reward.credit}
+                                    {/* Right side: Rewards & Action buttons */}
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flexShrink: 0 }}>
+                                        {/* Rewards Preview */}
+                                        <div style={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '8px',
+                                            background: '#1e293b',
+                                            padding: '4px 10px',
+                                            borderRadius: '6px',
+                                            border: '1px solid #334155',
+                                        }}>
+                                            <span style={{ fontSize: '0.85rem', color: '#fef08a', fontWeight: 'bold' }}>
+                                                🪙 {quest.reward.credit}
                                             </span>
-                                            {quest.reward.items?.map((it: QuestRewardItem) => {
-                                                const def = entities.itemCatalog.get(it.itemId);
+                                            {quest.reward.items?.map((item: QuestRewardItem, i: number) => {
+                                                const itemDef = entities.itemCatalog.get(item.itemId);
                                                 return (
-                                                    <div key={it.itemId} title={`${def?.name ?? it.itemId} x${it.count}`} style={{ display: 'inline-flex' }}>
-                                                        <ItemIcon iconImage={def?.iconImage} icon={def?.icon} size={22} />
+                                                    <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '2px' }} title={`${itemDef?.name ?? item.itemId} x${item.count}`}>
+                                                        <ItemIcon iconImage={itemDef?.iconImage} icon={itemDef?.icon ?? '🎁'} size={18} />
+                                                        <span style={{ fontSize: '0.75rem', color: '#cbd5e1' }}>x{item.count}</span>
                                                     </div>
                                                 );
                                             })}
                                         </div>
-                                    </div>
 
-                                    {/* Claim / Status Button */}
-                                    {quest.claimed ? (
-                                        <button
-                                            disabled
-                                            style={{
-                                                background: '#334155',
-                                                color: '#64748b',
-                                                border: 'none',
-                                                borderRadius: '6px',
-                                                padding: '8px 14px',
-                                                fontSize: '0.85rem',
-                                                cursor: 'default',
-                                            }}
-                                        >
-                                            ✓ ຮັບແລ້ວ
-                                        </button>
-                                    ) : quest.completed ? (
-                                        <button
-                                            type="button"
-                                            onClick={() => handleClaim(quest.id)}
-                                            style={{
-                                                background: 'linear-gradient(135deg, #eab308, #ca8a04)',
-                                                color: '#0f172a',
-                                                fontWeight: 'bold',
-                                                border: 'none',
-                                                borderRadius: '6px',
-                                                padding: '8px 16px',
-                                                fontSize: '0.85rem',
-                                                cursor: 'pointer',
-                                                boxShadow: '0 0 12px rgba(234, 179, 8, 0.4)',
-                                                transition: 'transform 0.1s ease',
-                                            }}
-                                            onMouseDown={e => e.currentTarget.style.transform = 'scale(0.96)'}
-                                            onMouseUp={e => e.currentTarget.style.transform = 'scale(1)'}
-                                        >
-                                            🎁 ຮັບລາງວັນ
-                                        </button>
-                                    ) : (
-                                        <button
-                                            disabled
-                                            style={{
-                                                background: '#1e293b',
-                                                color: '#64748b',
-                                                border: '1px solid #334155',
-                                                borderRadius: '6px',
-                                                padding: '8px 14px',
-                                                fontSize: '0.85rem',
-                                                cursor: 'default',
-                                            }}
-                                        >
-                                            ກຳລັງເຮັດ
-                                        </button>
-                                    )}
+                                        {/* Actions */}
+                                        <div>
+                                            {!quest.accepted ? (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleAccept(quest.id)}
+                                                    style={{
+                                                        background: 'linear-gradient(135deg, #0284c7, #0369a1)',
+                                                        border: 'none',
+                                                        borderRadius: '6px',
+                                                        color: '#ffffff',
+                                                        padding: '6px 14px',
+                                                        fontWeight: 600,
+                                                        fontSize: '0.82rem',
+                                                        cursor: 'pointer',
+                                                    }}
+                                                >
+                                                    📥 ຮັບພາລະກິດ
+                                                </button>
+                                            ) : quest.completed && !quest.claimed ? (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleClaim(quest.id)}
+                                                    style={{
+                                                        background: 'linear-gradient(135deg, #eab308, #ca8a04)',
+                                                        border: 'none',
+                                                        borderRadius: '6px',
+                                                        color: '#0f172a',
+                                                        padding: '6px 14px',
+                                                        fontWeight: 'bold',
+                                                        fontSize: '0.82rem',
+                                                        cursor: 'pointer',
+                                                        boxShadow: '0 0 10px rgba(234, 179, 8, 0.4)',
+                                                    }}
+                                                >
+                                                    ✨ ຮັບລາງວັນ
+                                                </button>
+                                            ) : quest.claimed ? (
+                                                <span style={{
+                                                    fontSize: '0.8rem',
+                                                    color: '#64748b',
+                                                    fontWeight: 600,
+                                                    padding: '4px 8px',
+                                                }}>
+                                                    ✅ ສຳເລັດແລ້ວ
+                                                </span>
+                                            ) : (
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                                    <span style={{ fontSize: '0.8rem', color: '#38bdf8', fontWeight: 500 }}>
+                                                        ⏳ ກຳລັງເຮັດ...
+                                                    </span>
+                                                    {quest.category !== 'story' && (
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => handleAbandon(quest.id)}
+                                                            title="ຍົກເລີກພາລະກິດນີ້"
+                                                            style={{
+                                                                background: '#334155',
+                                                                border: 'none',
+                                                                borderRadius: '4px',
+                                                                color: '#94a3b8',
+                                                                padding: '4px 6px',
+                                                                fontSize: '0.7rem',
+                                                                cursor: 'pointer',
+                                                            }}
+                                                        >
+                                                            ✕
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-                        );
-                    })}
+                            );
+                        })
+                    )}
                 </div>
             </div>
         </div>

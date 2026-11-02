@@ -6,6 +6,7 @@ Pixel art that is drawn by code lives here, so it can be reviewed as a diff and 
 |---|---|---|
 | `held-items.px.js` | `public/assets/held/*.png` (weapons/tools in the hero's hand, T1–T3) | pxl (`.claude/skills/pxl-pixel-art`, vendored from crsolver/claude-pxl, MIT) |
 | `slash-vfx.px.js` | `public/assets/vfx/slash_*.png` (sword slash animation strips, 144×48) | pxl (`.claude/skills/pxl-pixel-art`, vendored from crsolver/claude-pxl, MIT) |
+| `npcs.px.js` + `build_npcs.py` | `public/assets/characters/npc_*.png` (4-frame idle NPC strips, 128×48) | pxl (`.claude/skills/pxl-pixel-art`, vendored from crsolver/claude-pxl, MIT) |
 | `build_player.py` + `player-poses.js` + `source/` | `public/assets/characters/player-skin-*.png` (256×384 sheets) and `public/data/player-animations.json` | pxl + Pillow (`python tools/art/build_player.py`) |
 
 ## Rebuilding the held items
@@ -26,6 +27,16 @@ node .claude/skills/pxl-pixel-art/bin/pxl.js build tools/art/slash-vfx.px.js --o
 cp tools/art/out/anims/slash_*.png public/assets/vfx/
 python .claude/skills/create-game-assets/scripts/asset_report.py public/assets/vfx/slash_*.png --expect-size 144x48 --require-alpha
 ```
+
+## Rebuilding the NPC spritesheets
+
+```bash
+python tools/art/build_npcs.py
+# or directly with pxl:
+node .claude/skills/pxl-pixel-art/bin/pxl.js build tools/art/npcs.px.js --out tools/art/out
+cp tools/art/out/anims/npc_*.png public/assets/characters/
+```
+Output: 9 animated 4-frame NPC idle spritesheets (`128x48`, 32x48 per frame) for Village, Dungeon, and Story Stages.
 
 ## Rebuilding the player sheets
 

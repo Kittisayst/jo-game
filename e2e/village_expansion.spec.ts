@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { expect, test } from '@playwright/test';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -57,60 +58,60 @@ test.describe('Village Expansion & Overlap Fix Playtest', () => {
     await page.waitForTimeout(500);
     await page.screenshot({ path: path.join(outDir, '03_quest_board_at_x510.png') });
 
-    // 3. Teleport into the new Expanded East Wing: Training Dummy at x = 1720
+    // 3. Teleport into the new Expanded East Wing: Training Dummy at x = 2190
     await page.evaluate(() => {
       const scene = (window as any).__phaserGameScene;
       if (scene && scene.player) {
-        scene.player.setPosition(1720, 520);
-        scene.cameras.main.scrollX = 1580;
+        scene.player.setPosition(2190, 520);
+        scene.cameras.main.scrollX = 2050;
         scene.interaction.interact();
       }
     });
     await page.waitForTimeout(800);
     await page.screenshot({ path: path.join(outDir, '04_training_dummy_strike.png') });
 
-    // 4. Village Well at x = 1860
+    // 4. Village Well at x = 2480
     await page.evaluate(() => {
       const scene = (window as any).__phaserGameScene;
       if (scene && scene.player) {
-        scene.player.setPosition(1860, 520);
-        scene.cameras.main.scrollX = 1720;
+        scene.player.setPosition(2480, 520);
+        scene.cameras.main.scrollX = 2340;
         scene.interaction.interact();
       }
     });
     await page.waitForTimeout(800);
     await page.screenshot({ path: path.join(outDir, '05_village_well_healing.png') });
 
-    // 5. History Lore Monument at x = 2000
+    // 5. History Lore Monument at x = 2780
     await page.evaluate(() => {
       const scene = (window as any).__phaserGameScene;
       if (scene && scene.player) {
-        scene.player.setPosition(2000, 520);
-        scene.cameras.main.scrollX = 1860;
+        scene.player.setPosition(2780, 520);
+        scene.cameras.main.scrollX = 2640;
         scene.interaction.interact();
       }
     });
     await page.waitForTimeout(800);
     await page.screenshot({ path: path.join(outDir, '06_history_lore_monument.png') });
 
-    // 6. Scenic Watchtower Platforms at x = 2250 (deck at y = 430)
+    // 6. Grounded Scenic Watchtower at x = 3100
     await page.evaluate(() => {
       const scene = (window as any).__phaserGameScene;
       if (scene && scene.player) {
-        scene.player.setPosition(2250, 420);
-        scene.cameras.main.scrollX = 2050;
+        scene.player.setPosition(3100, 520);
+        scene.cameras.main.scrollX = 2960;
         scene.interaction.interact();
       }
     });
     await page.waitForTimeout(800);
     await page.screenshot({ path: path.join(outDir, '07_watchtower_scenic_deck.png') });
 
-    // 7. Eastern Village Shrine at x = 2360
+    // 7. Eastern Village Shrine at x = 3580
     await page.evaluate(() => {
       const scene = (window as any).__phaserGameScene;
       if (scene && scene.player) {
-        scene.player.setPosition(2360, 520);
-        scene.cameras.main.scrollX = 2160;
+        scene.player.setPosition(3580, 520);
+        scene.cameras.main.scrollX = 3400;
         scene.interaction.interact();
       }
     });

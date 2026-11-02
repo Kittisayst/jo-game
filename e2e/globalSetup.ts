@@ -13,7 +13,10 @@ export default async function globalSetup (config: FullConfig): Promise<void>
     const page = await browser.newPage();
     page.setDefaultTimeout(90000);
     await page.goto(baseURL, { timeout: 90000 });
-    await page.getByRole('button', { name: /ເຂົ້າເກມ/i }).click();
+    const playBtn = page.locator('#btn-play-game');
+    if (await playBtn.isVisible()) {
+      await playBtn.click();
+    }
     await page.locator('.game-hud').waitFor({ timeout: 60000 });
   } finally {
     await browser.close();

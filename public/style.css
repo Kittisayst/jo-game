@@ -5444,6 +5444,14 @@ button,
     display: flex;
 }
 
+.pet-shop-modal {
+    display: flex;
+}
+
+.quest-tracker-hud {
+    display: flex;
+}
+
 /* Mini-Progress Bar in Stage */
 .stage-progress-badge {
     display: inline-flex;

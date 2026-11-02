@@ -29,6 +29,7 @@ import { RealmProgression } from './RealmProgression';
 import { TutorialProgress } from './TutorialProgress';
 import { Wallet } from './Wallet';
 import { QuestBoard } from './Quest';
+import { PetManager } from './Pet';
 
 const FIRST_BOOK_ID = 'book-ch1';
 
@@ -78,6 +79,7 @@ export class GameState
     readonly storage: Backpack;
     /** The Village Quest Board with daily/bounty tasks. */
     readonly questBoard = new QuestBoard();
+    readonly petManager = new PetManager();
     /** Timed Potion effects running on the hero (not saved). */
     readonly effects = new ActiveEffects();
     /** The Potion chosen to be drunk with R, or null. */
@@ -149,6 +151,7 @@ export class GameState
             nightHunts: this.nightHunts.toSnapshot(),
             storage: this.storage.toSnapshot(),
             quests: this.questBoard.toSnapshot(),
+            pets: this.petManager.toSnapshot(),
         };
     }
 
@@ -203,6 +206,7 @@ export class GameState
         this.nightHunts.loadFrom(snapshot.nightHunts);
         this.storage.loadFromSnapshot(snapshot.storage ?? []);
         this.questBoard.loadFrom(snapshot.quests);
+        this.petManager.loadFrom(snapshot.pets);
         this.effects.clear();
         this.syncArmor();
         this.health.reset();

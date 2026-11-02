@@ -7,7 +7,7 @@ import { fallIntoPitUseCase } from '../../../application/FallIntoPitUseCase';
 import { groundSpans, isNearPit } from '../../content/LevelPits';
 import { tickWorldTimeUseCase, WORLD_PHASE_CHANGED_EVENT, type WorldPhaseChangedPayload } from '../../../application/TickWorldTimeUseCase';
 import { EventBus } from '../../EventBus';
-import { Input, Scene } from 'phaser';
+import { Input, Math as PhaserMath, Scene } from 'phaser';
 import { Player } from '../objects/Player';
 import { Enemy } from '../objects/Enemy';
 import { Spike } from '../objects/Spike';
@@ -35,7 +35,8 @@ import {
 import { buildStageScenery, BrokenGate, ResourceNodeView, WaypointView } from '../scenery/StageBuilder';
 import { buildVillageScenery, InteractiveBuilding, VILLAGE_LANTERN_FLAME_HEIGHT, VILLAGE_LANTERN_XS } from '../scenery/VillageBuilder';
 import { buildGarden, GardenView } from '../scenery/GardenBuilder';
-import { GARDEN_LEVEL_KEY, isHomeLevel } from '../levelCatalog';
+import { buildCottageInterior } from '../scenery/CottageBuilder';
+import { COTTAGE_LEVEL_KEY, GARDEN_LEVEL_KEY, isHomeLevel } from '../levelCatalog';
 import { dashUseCase } from '../../../application/DashUseCase';
 import {
     createGround,
@@ -126,6 +127,8 @@ export class Game extends Scene
     private isSleeping = false;
     /** The smiths in front of the Workshop and the Forge (village only). */
     private craftingWorkers: CraftingWorker[] = [];
+    private companionPet?: Phaser.GameObjects.Sprite;
+    private companionPetSoundTimer = 0;
 
     constructor ()
     {
@@ -203,6 +206,7 @@ export class Game extends Scene
         }
 
         const isVillage = this.level.scenery === 'village' || this.currentLevelKey === 'village';
+        const isCottage = this.currentLevelKey === COTTAGE_LEVEL_KEY;
         const isGarden = this.currentLevelKey === GARDEN_LEVEL_KEY;
         const isDungeon = this.currentLevelKey === 'dungeon';
         const backdropKey = isVillage
@@ -231,36 +235,40 @@ export class Game extends Scene
                 Boolean(entities.forgeUnlocked || entities.books['book-ch1']?.examPassed)
             );
             const baseY = WORLD_HEIGHT - GROUND_HEIGHT - 24;
-            const elder = new NPC(this, 410, baseY + GROUND_SINK, 'npc-elder', '💬 [E] ລົມກັບຫົວໜ້າໝູ່ບ້ານ');
+            const elder = new NPC(this, 760, baseY + GROUND_SINK, 'npc-elder', '💬 [E] ລົມກັບຫົວໜ້າໝູ່ບ້ານ', 60);
             elder.onInteract = () => EventBus.emit('start-dialogue', 'village_elder');
 
-            // Mina runs the Skin shop at the little market between the Forge and the World Gate
-            const mina = new NPC(this, 1290, baseY + GROUND_SINK, 'npc-mina', '🛍️ [E] ລົມກັບ Mina (ຮ້ານຊຸດ)');
+            // Mina runs the Skin shop at the village center market (x = 3340)
+            const mina = new NPC(this, 3340, baseY + GROUND_SINK, 'npc-mina', '🛍️ [E] ລົມກັບ Mina (ຮ້ານຊຸດ)', 50);
             mina.onInteract = () => EventBus.emit('start-dialogue', 'skin_shop');
 
-            // Hunter Bounmy stands at x = 1380 near the dungeon entrance
-            const bounmy = new NPC(this, 1380, baseY + GROUND_SINK, 'npc-bounmy', '🏹 [E] ລົມກັບນາຍພານບຸນມີ');
+            // Hunter Bounmy stands at x = 3850 beside the World Gate
+            const bounmy = new NPC(this, 3850, baseY + GROUND_SINK, 'npc-bounmy', '🏹 [E] ລົມກັບນາຍພານບຸນມີ', 70);
             bounmy.onInteract = () => EventBus.emit('start-dialogue', 'hunter_bounmy');
 
-            const vanh = new NPC(this, 680, baseY + GROUND_SINK, 'npc-scholar', '📜 [E] ລົມກັບອາຈານ ວັນ');
+            const vanh = new NPC(this, 1780, baseY + GROUND_SINK, 'npc-scholar', '📜 [E] ລົມກັບອາຈານ ວັນ', 60);
             vanh.onInteract = () => EventBus.emit('start-dialogue', 'master_vanh');
 
-            const chanthy = new NPC(this, 950, baseY + GROUND_SINK, 'npc-chanthy', '🌿 [E] ລົມກັບແມ່ເຖົ້າ ຈັນທີ');
+            const chanthy = new NPC(this, 2480, baseY + GROUND_SINK, 'npc-chanthy', '🌿 [E] ລົມກັບແມ່ເຖົ້າ ຈັນທີ', 50);
             chanthy.onInteract = () => EventBus.emit('start-dialogue', 'grandma_chanthy');
 
-            const kham = new NPC(this, 1660, baseY + GROUND_SINK, 'npc-kham', '⚔️ [E] ລົມກັບນັກດາບ ຄຳ');
+            const kham = new NPC(this, 4500, baseY + GROUND_SINK, 'npc-kham', '⚔️ [E] ລົມກັບນັກດາບ ຄຳ', 70);
             kham.onInteract = () => EventBus.emit('start-dialogue', 'swordsman_kham');
 
-            const noy = new NPC(this, 2310, baseY + GROUND_SINK, 'npc-noy', '⛩️ [E] ລົມກັບນາງນ້ອຍ (ສານປົກປ້ອງ)');
+            const noy = new NPC(this, 6850, baseY + GROUND_SINK, 'npc-noy', '⛩️ [E] ລົມກັບນາງນ້ອຍ (ສານປົກປ້ອງ)', 50);
             noy.onInteract = () => EventBus.emit('start-dialogue', 'shrine_noy');
 
             this.villagers = [elder, vanh, chanthy, mina, bounmy, kham, noy];
 
             // Whoever builds something stands in front of its building, with the time left over the head
             this.craftingWorkers = [
-                new CraftingWorker(this, 'workshop', 810, GROUND_Y),
-                new CraftingWorker(this, 'forge', 1215, GROUND_Y),
+                new CraftingWorker(this, 'workshop', 2360, GROUND_Y),
+                new CraftingWorker(this, 'forge', 3180, GROUND_Y),
             ];
+        }
+        else if (isCottage)
+        {
+            this.interactiveBuildings = buildCottageInterior(this, GROUND_Y);
         }
         else if (isGarden)
         {
@@ -471,6 +479,11 @@ export class Game extends Scene
         }
         this.physics.add.collider(this.player, this.movingPlatforms);
 
+        // Companion pet follower
+        this.setupCompanionPet();
+        const onPetChanged = () => this.setupCompanionPet();
+        EventBus.on('pet-changed', onPetChanged);
+
         // Colliders for enemies
         this.physics.add.collider(this.enemies, this.ground);
         this.physics.add.collider(this.enemies, this.platforms);
@@ -664,7 +677,7 @@ export class Game extends Scene
         EventBus.on('give-dungeon-key', onGiveDungeonKey);
 
         // Village hub gets warm pastoral-cyber theme; Stages start with adventure and crossfade to boss in Zone C
-        soundManager.startBgm(isVillage || isGarden ? 'village' : (bossSpawn && !this.stage ? 'boss' : 'adventure'));
+        soundManager.startBgm(isVillage || isGarden || isCottage ? 'village' : (bossSpawn && !this.stage ? 'boss' : 'adventure'));
 
         const onSkinChanged = (payload: SkinChangedPayload) =>
         {
@@ -764,6 +777,12 @@ export class Game extends Scene
             EventBus.removeListener('quiz-finisher-failed', onQuizFinisherFailed);
             EventBus.removeListener('gate-repaired', onGateRepaired);
             EventBus.removeListener('give-dungeon-key', onGiveDungeonKey);
+            EventBus.removeListener('pet-changed', onPetChanged);
+            if (this.companionPet)
+            {
+                this.companionPet.destroy();
+                this.companionPet = undefined;
+            }
             soundManager.stopBgm();
             this.boss = undefined;
             this.villagers = [];
@@ -821,7 +840,7 @@ export class Game extends Scene
 
         for (const npc of this.villagers)
         {
-            if (npc.active) npc.updateProximity(this.player.x, this.player.y);
+            if (npc.active) npc.updateProximity(this.player.x, this.player.y, delta);
         }
 
         this.interaction.update();
@@ -855,6 +874,39 @@ export class Game extends Scene
         const isUp = Boolean(this.cursors.up.isDown || this.wasdKeys?.up?.isDown || this.wasdKeys?.space?.isDown || this.touchControls.up);
 
         this.heldItem.setContext(isHomeLevel(this.currentLevelKey), entities.equipment.equippedWeaponId);
+        if (this.companionPet && this.companionPet.active && this.player)
+        {
+            const followOffset = (this.player.facingDir || 1) * -34;
+            const targetX = this.player.x + followOffset;
+            const targetY = this.player.y + 4;
+            const dx = targetX - this.companionPet.x;
+            if (Math.abs(dx) > 12)
+            {
+                this.companionPet.x += Math.sign(dx) * Math.min(Math.abs(dx), delta * 0.22);
+                this.companionPet.setFlipX(dx < 0);
+            }
+            this.companionPet.y = PhaserMath.Linear(this.companionPet.y, targetY, 0.2);
+
+            this.companionPetSoundTimer += delta;
+            if (this.companionPetSoundTimer > 25000)
+            {
+                this.companionPetSoundTimer = 0;
+                const pet = entities.petManager.activePet;
+                if (pet?.soundType === 'dog') soundManager.playPetDog();
+                else if (pet?.soundType === 'chicken') soundManager.playChickenCluck();
+
+                const heart = this.add.text(this.companionPet.x, this.companionPet.y - 24, '❤️', { fontSize: '14px' });
+                heart.setDepth(15);
+                this.tweens.add({
+                    targets: heart,
+                    y: this.companionPet.y - 44,
+                    alpha: 0,
+                    duration: 800,
+                    onComplete: () => heart.destroy(),
+                });
+            }
+        }
+
         this.player.update({
             left: { isDown: isLeft },
             right: { isDown: isRight },
@@ -935,6 +987,49 @@ export class Game extends Scene
         player.dash(dir, result.tuning);
         soundManager.playJump();
         notifyTutorial('dashed');
+    }
+
+    private setupCompanionPet (): void
+    {
+        if (this.companionPet)
+        {
+            this.companionPet.destroy();
+            this.companionPet = undefined;
+        }
+
+        const activePet = entities.petManager.activePet;
+        if (!activePet || !this.player || !this.textures.exists(activePet.spriteKey)) return;
+
+        this.companionPet = this.add.sprite(this.player.x - 30, this.player.y, activePet.spriteKey, 0);
+        this.companionPet.setOrigin(0.5, 1);
+        this.companionPet.setDepth(9.8);
+
+        if (activePet.soundType === 'dog')
+        {
+            if (!this.anims.exists('pet-dog-idle'))
+            {
+                this.anims.create({
+                    key: 'pet-dog-idle',
+                    frames: this.anims.generateFrameNumbers('pet-dog', { start: 0, end: 3 }),
+                    frameRate: 4,
+                    repeat: -1,
+                });
+            }
+            this.companionPet.play('pet-dog-idle');
+        }
+        else if (activePet.soundType === 'chicken')
+        {
+            if (!this.anims.exists('pet-chicken-peck'))
+            {
+                this.anims.create({
+                    key: 'pet-chicken-peck',
+                    frames: this.anims.generateFrameNumbers('pet-chicken', { start: 0, end: 3 }),
+                    frameRate: 4,
+                    repeat: -1,
+                });
+            }
+            this.companionPet.play('pet-chicken-peck');
+        }
     }
 
     private growPlants (): void

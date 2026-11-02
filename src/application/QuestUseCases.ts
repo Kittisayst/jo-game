@@ -6,6 +6,7 @@ import { PendingRewards } from '../domain/entities/PendingRewards';
 
 export const QUEST_COMPLETED_EVENT = 'quest-completed';
 export const QUEST_CLAIMED_EVENT = 'quest-claimed';
+export const QUEST_ACCEPTED_EVENT = 'quest-accepted';
 
 export interface QuestCompletedPayload
 {
@@ -17,6 +18,38 @@ export interface QuestClaimedPayload
 {
     questId: string;
     reward: QuestReward;
+}
+
+export interface QuestAcceptedPayload
+{
+    questId: string;
+    title: string;
+}
+
+/**
+ * Accepts a daily or outside quest.
+ */
+export function acceptQuestUseCase (board: QuestBoard, questId: string): boolean
+{
+    const quest = board.get(questId);
+    if (!quest) return false;
+    const success = board.acceptQuest(questId);
+    if (success)
+    {
+        DomainEvents.emit<QuestAcceptedPayload>(QUEST_ACCEPTED_EVENT, {
+            questId,
+            title: quest.title,
+        });
+    }
+    return success;
+}
+
+/**
+ * Abandons an active daily or outside quest.
+ */
+export function abandonQuestUseCase (board: QuestBoard, questId: string): boolean
+{
+    return board.abandonQuest(questId);
 }
 
 /**
@@ -69,4 +102,3 @@ export function claimQuestRewardUseCase (
     }
     return result;
 }
-

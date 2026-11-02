@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { expect, test } from '@playwright/test';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -88,13 +89,13 @@ test.describe('Village Full Photo Tour', () => {
     await page.waitForTimeout(500);
 
     // -------------------------------------------------------------
-    // PHOTO 5 & 6: Swordsman Kham at x = 1660 (Training Grounds)
+    // PHOTO 5 & 6: Swordsman Kham at x = 2080 (Training Grounds)
     // -------------------------------------------------------------
     await page.evaluate(() => {
       const scene = (window as any).__phaserGameScene;
       if (scene && scene.player) {
-        scene.player.setPosition(1630, 520);
-        scene.cameras.main.scrollX = 1460;
+        scene.player.setPosition(2050, 520);
+        scene.cameras.main.scrollX = 1880;
       }
     });
     await page.waitForTimeout(600);
@@ -120,13 +121,13 @@ test.describe('Village Full Photo Tour', () => {
     await page.waitForTimeout(500);
 
     // -------------------------------------------------------------
-    // PHOTO 7 & 8: Shrine Maiden Noy at x = 2310 (Eastern Shrine)
+    // PHOTO 7 & 8: Shrine Maiden Noy at x = 3480 (Eastern Shrine)
     // -------------------------------------------------------------
     await page.evaluate(() => {
       const scene = (window as any).__phaserGameScene;
       if (scene && scene.player) {
-        scene.player.setPosition(2280, 520);
-        scene.cameras.main.scrollX = 2100;
+        scene.player.setPosition(3450, 520);
+        scene.cameras.main.scrollX = 3280;
       }
     });
     await page.waitForTimeout(600);

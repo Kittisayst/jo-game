@@ -1,0 +1,13 @@
+{
+    "worldWidth": 1280,
+    "scenery": "cottage",
+    "spawn": {
+        "x": 220,
+        "y": 556
+    },
+    "platforms": [],
+    "enemies": [],
+    "spikes": [],
+    "movingPlatforms": []
+}
+

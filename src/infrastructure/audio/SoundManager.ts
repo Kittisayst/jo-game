@@ -1415,6 +1415,71 @@ export class SoundManager
     {
         this.playChestOpen();
     }
+
+    /**
+     * Cute puppy yip / tail wag reaction
+     */
+    playPetDog (): void
+    {
+        if (this._isMuted || !this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(440, now);
+        osc.frequency.exponentialRampToValueAtTime(780, now + 0.08);
+        osc.frequency.exponentialRampToValueAtTime(660, now + 0.16);
+        gain.gain.setValueAtTime(0.18, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.22);
+        osc.connect(gain);
+        if (this.masterGain) gain.connect(this.masterGain);
+        osc.start(now);
+        osc.stop(now + 0.22);
+    }
+
+    /**
+     * Friendly village chicken cluck
+     */
+    playChickenCluck (): void
+    {
+        if (this._isMuted || !this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(600, now);
+        osc.frequency.setValueAtTime(450, now + 0.04);
+        osc.frequency.setValueAtTime(550, now + 0.08);
+        gain.gain.setValueAtTime(0.14, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.14);
+        osc.connect(gain);
+        if (this.masterGain) gain.connect(this.masterGain);
+        osc.start(now);
+        osc.stop(now + 0.14);
+    }
+
+    /**
+     * Serene crystalline wind chime at the shrine
+     */
+    playWindChime (): void
+    {
+        if (this._isMuted || !this.ctx) return;
+        const now = this.ctx.currentTime;
+        [1046.50, 1318.51, 1567.98].forEach((freq, idx) =>
+        {
+            if (!this.ctx) return;
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, now + idx * 0.06);
+            gain.gain.setValueAtTime(0.08, now + idx * 0.06);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.06 + 0.6);
+            osc.connect(gain);
+            if (this.masterGain) gain.connect(this.masterGain);
+            osc.start(now + idx * 0.06);
+            osc.stop(now + idx * 0.06 + 0.6);
+        });
+    }
 }
 
 export const soundManager = new SoundManager();

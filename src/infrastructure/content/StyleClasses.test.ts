@@ -26,7 +26,7 @@ const ALLOWED_WITHOUT_STYLE = new Set([
     'choice-text', 'dialogue-avatar', 'export-box', 'import-box', 'lib-overlay', 'lib-tab-icon', 'portal-slot-label',
     'realm-cell-number', 'realm-row-icon', 'title-credit-label',
     // values an expression compares with (`tab === 'exam'`), not classes
-    'all', 'consumable', 'gear', 'material', 'exam', 'practice', 'skills', 'craft', 'repair', 'upgrade', 'village',
+    'all', 'consumable', 'gear', 'material', 'exam', 'practice', 'skills', 'craft', 'repair', 'upgrade', 'village', 'dungeon',
     // Tailwind names with no visible effect here
     'drop-shadow', 'filter', 'py-0.2', 'sm:text-[10px]', 'sm:text-[11px]', 'shadow-cyan-500/30',
 ]);
