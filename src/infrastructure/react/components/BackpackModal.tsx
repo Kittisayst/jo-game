@@ -241,13 +241,13 @@ export const BackpackModal: React.FC<BackpackModalProps> = ({ isOpen, onClose, o
         : 0;
 
     return (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/80 backdrop-blur-md p-3 sm:p-5 animate-fade-in">
-            <div className="relative w-full max-w-4xl rounded-2xl bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 border-2 border-cyan-500/50 shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
+        <div className="gw-overlay fixed inset-0 z-[200] flex items-center justify-center bg-black/80 backdrop-blur-md p-3 sm:p-5 animate-fade-in">
+            <div className="gw-window relative w-full max-w-4xl rounded-2xl bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 border-2 border-cyan-500/50 shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
 
                 {/* Header with Title and Capacity Gauge */}
-                <div className="flex items-center justify-between px-5 py-3.5 border-b border-cyan-500/30 bg-slate-950/80">
+                <div className="gw-header flex items-center justify-between px-5 py-3.5 border-b border-cyan-500/30 bg-slate-950/80">
                     <div className="flex items-center gap-3">
-                        <span className="text-3xl animate-pulse">🎒</span>
+                        <span className="gw-icon text-3xl animate-pulse">🎒</span>
                         <div>
                             <div className="flex items-center gap-2">
                                 <h2 className="text-lg sm:text-xl font-bold text-cyan-300">ກະເປົາເດີນທາງ (Backpack)</h2>
@@ -255,7 +255,7 @@ export const BackpackModal: React.FC<BackpackModalProps> = ({ isOpen, onClose, o
                                     {entities.backpack.usedSlotsCount} / {entities.backpack.maxSlots} ຊ່ອງ
                                 </span>
                             </div>
-                            <div className="w-36 sm:w-48 bg-slate-800 rounded-full h-1.5 mt-1 overflow-hidden border border-slate-700">
+                            <div className="gw-gauge w-36 sm:w-48 bg-slate-800 rounded-full h-1.5 mt-1 overflow-hidden border border-slate-700">
                                 <div
                                     data-testid="backpack-capacity-fill"
                                     style={{
@@ -272,7 +272,7 @@ export const BackpackModal: React.FC<BackpackModalProps> = ({ isOpen, onClose, o
 
                     <button
                         onClick={onClose}
-                        className="rounded-xl p-2 text-slate-400 hover:text-white hover:bg-slate-800/80 transition"
+                        className="gw-close rounded-xl p-2 text-slate-400 hover:text-white hover:bg-slate-800/80 transition"
                         title="ປິດ (Escape)"
                     >
                         ✕
@@ -280,7 +280,7 @@ export const BackpackModal: React.FC<BackpackModalProps> = ({ isOpen, onClose, o
                 </div>
 
                 {/* Filter Toolbar & Sort Actions */}
-                <div className="flex flex-wrap items-center justify-between gap-2 px-5 py-2.5 bg-slate-900/60 border-b border-slate-800 text-xs">
+                <div className="gw-tabs flex flex-wrap items-center justify-between gap-2 px-5 py-2.5 bg-slate-900/60 border-b border-slate-800 text-xs">
                     <div className="flex items-center gap-1.5 overflow-x-auto">
                         <button
                             onClick={() => { setActiveFilter('all'); soundManager.playSelect(); }}
@@ -353,7 +353,7 @@ export const BackpackModal: React.FC<BackpackModalProps> = ({ isOpen, onClose, o
                 </div>
 
                 {/* 2-Pane Body: Left Grid (60%), Right Inspector (40%) */}
-                <div className="grid grid-cols-1 md:grid-cols-12 gap-4 p-4 sm:p-5 overflow-y-auto flex-1">
+                <div className="gw-body gw-pane grid grid-cols-1 md:grid-cols-12 gap-4 p-4 sm:p-5 overflow-y-auto flex-1">
 
                     {/* Left Pane: the worn Armor, then the slots grid (7 Cols on desktop) */}
                     <div className="md:col-span-7 bg-slate-950/40 p-3.5 rounded-2xl border border-slate-800/80 flex flex-col justify-between">
@@ -399,7 +399,7 @@ export const BackpackModal: React.FC<BackpackModalProps> = ({ isOpen, onClose, o
                             })}
                         </div>
 
-                        <div className="grid grid-cols-4 sm:grid-cols-5 gap-2.5">
+                        <div className="gw-slotgrid grid grid-cols-4 sm:grid-cols-5 gap-2.5">
                             {allSlots.map((slot, index) =>
                             {
                                 const itemDef = slot ? getItem(slot.itemId) : null;
@@ -765,7 +765,7 @@ export const BackpackModal: React.FC<BackpackModalProps> = ({ isOpen, onClose, o
                 </div>
 
                 {/* Footer Warning & Credit Counter */}
-                <div className="px-5 py-3 border-t border-slate-700/60 bg-slate-950/90 flex flex-wrap items-center justify-between gap-2 text-xs">
+                <div className="gw-footer px-5 py-3 border-t border-slate-700/60 bg-slate-950/90 flex flex-wrap items-center justify-between gap-2 text-xs">
                     <span className="text-amber-400/90 flex items-center gap-1.5">
                         <span>⚠️</span>
                         <span>ເສຍຊີວິດໃນດ່ານຈະສູນເສຍວັດສະດຸ 50% (ເຄື່ອງມື ແລະ ອາວຸດຈະບໍ່ເສຍຫາຍ)</span>
