@@ -5181,6 +5181,14 @@ button,
     .weapon-hud-badge .badge-label {
         display: none;
     }
+
+    /* The stage, progress, hearts, level and time badges must fit one row: with the bar and the goal flag the
+       row was too wide, the time dropped to a second row and the HUD grew to three rows */
+    /* (two classes: the plain rules of the badge come later in this file) */
+    .stage-progress-badge .stage-progress-track,
+    .stage-progress-badge .badge-target {
+        display: none;
+    }
 }
 
 /* Gradient stops, hover colours and the spacing and motion classes the windows use (all were missing and did nothing) */
