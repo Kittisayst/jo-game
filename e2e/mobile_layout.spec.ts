@@ -163,3 +163,56 @@ test.describe('The play area on a phone held sideways', () => {
     await expect(page.locator('.quest-tracker-card')).toBeVisible();
   });
 });
+
+test.describe('Touch sizes on a phone held sideways', () => {
+  for (const phone of PHONES) {
+    test(`HUD buttons and touch controls are tappable on ${phone.name}`, async ({ browser }) => {
+      test.setTimeout(120000);
+      const ctx = await browser.newContext({ viewport: phone.viewport, isMobile: true, hasTouch: true });
+      const page = await ctx.newPage();
+      await page.goto('/?stage=2');
+      await expect(page.locator('.game-hud')).toBeVisible({ timeout: 30000 });
+      await page.waitForTimeout(2000);
+
+      const r = await page.evaluate(() => {
+        const vis = (e: Element) => { const b = e.getBoundingClientRect(); const s = getComputedStyle(e); return b.width > 0 && b.height > 0 && s.visibility !== 'hidden' && s.display !== 'none'; };
+        const name = (e: Element) => ((e.getAttribute('aria-label') || e.textContent || e.className) as string).toString().trim().slice(0, 14);
+        const small: string[] = [];
+        for (const e of document.querySelectorAll('.game-hud button, .hud-hotbar button, .quest-tracker-hud button, button.virtual-touch-btn')) {
+          if (!vis(e)) continue;
+          const b = e.getBoundingClientRect();
+          if (b.width < 43.5 || b.height < 43.5) small.push(`${name(e)} ${Math.round(b.width)}x${Math.round(b.height)}`);
+        }
+        const tiny: string[] = [];
+        for (const e of document.querySelectorAll('.game-hud *, .virtual-touch-controls *, .quest-tracker-hud *')) {
+          if (!vis(e) || ![...e.childNodes].some(n => n.nodeType === 3 && (n.textContent ?? '').trim())) continue;
+          const fs = parseFloat(getComputedStyle(e).fontSize);
+          if (fs < 11.99) tiny.push(`${name(e)} ${fs}px`);
+        }
+        const size = (sel: string) => { const e = document.querySelector(sel); if (!e) return 0; const b = e.getBoundingClientRect(); return Math.min(b.width, b.height); };
+        const touch = [...document.querySelectorAll('button.virtual-touch-btn')].filter(vis).map(e => { const b = e.getBoundingClientRect(); return { n: name(e), x: b.x, y: b.y, r: b.right, b: b.bottom }; });
+        const overlaps: string[] = [];
+        for (let i = 0; i < touch.length; i++) {
+          if (touch[i].x < 0 || touch[i].r > innerWidth || touch[i].y < 0 || touch[i].b > innerHeight) overlaps.push(`${touch[i].n} outside the screen`);
+          for (let j = i + 1; j < touch.length; j++) {
+            const a = touch[i], c = touch[j];
+            if (a.x < c.r && c.x < a.r && a.y < c.b && c.y < a.b) overlaps.push(`${a.n} / ${c.n}`);
+          }
+        }
+        return { small, tiny, overlaps, attack: size('.virtual-touch-attack'), jump: size('.virtual-touch-jump'), count: touch.length };
+      });
+
+      expect(r.count, 'touch buttons shown').toBeGreaterThanOrEqual(5);
+      expect(r.small, `buttons under 44px on ${phone.name}`).toEqual([]);
+      expect(r.tiny, `text under 12px on ${phone.name}`).toEqual([]);
+      expect(r.overlaps, `touch buttons that overlap or leave the screen on ${phone.name}`).toEqual([]);
+      expect(r.attack, 'attack button').toBeGreaterThanOrEqual(60);
+      expect(r.jump, 'jump button').toBeGreaterThanOrEqual(70);
+
+      // The HUD did not grow to make room for the bigger buttons
+      const left = await page.locator('.hud-cluster-left').boundingBox();
+      expect(left!.height, 'HUD left cluster height').toBeLessThanOrEqual(80);
+      await ctx.close();
+    });
+  }
+});

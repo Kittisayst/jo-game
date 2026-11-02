@@ -5897,3 +5897,48 @@ button,
         display: none !important;
     }
 }
+
+/* ===== Touch sizes on a phone held sideways (M4 of docs/plans/2026-11-02-mobile-ui-improvements.md) =====
+   The attack button was 39 px (no size of its own), the Swap, Dash and skill buttons 39 px, the HUD buttons 33 px and
+   the hint's close button 14x20 px; the labels were 10.9 px. Gameplay buttons get 48 px or more, the attack the
+   most; the HUD buttons are 44 px tall with negative margins where a taller button would make the HUD taller. */
+@media (max-height: 520px) {
+    .virtual-touch-attack {
+        width: 64px;
+        height: 64px;
+    }
+
+    .virtual-touch-cycle,
+    .virtual-touch-dash,
+    .virtual-touch-skill {
+        width: 48px;
+        height: 48px;
+    }
+
+    .virtual-touch-label {
+        font-size: 0.75rem;
+    }
+
+    .hud-cluster-right .hud-badge:is(button, [role="button"]),
+    .backpack-hud-btn,
+    .library-hud-btn,
+    .hud-menu-btn {
+        min-height: var(--tap);
+        min-width: var(--tap);
+        justify-content: center;
+    }
+
+    .hero-level-badge {
+        min-height: var(--tap);
+        margin: -2.5px 0;
+    }
+
+    .tutorial-skip {
+        min-width: var(--tap);
+        min-height: var(--tap);
+        margin: -12px -14px -12px -10px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+}

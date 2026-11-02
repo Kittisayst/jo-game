@@ -1,7 +1,7 @@
 # Mobile UI: smaller, clearer, more room for the game
 
 - **Date:** 2026-11-02
-- **Status:** M1 and M2 done for 10 windows (Smithy, Shop, Backpack, Academy, Library, World Map, Quest Board, Character, Storage + the small dialogs Waypoint, Gate repair, Garden seed picker); M3 done (quest panel starts as a 44 px pill on phones, one-line 3 s welcome toast, HUD in two rows down to 640 px wide); M4 (touch sizes elsewhere, text sizes in the HUD) and M5 (portrait) still planned
+- **Status:** M1 and M2 done for 10 windows (Smithy, Shop, Backpack, Academy, Library, World Map, Quest Board, Character, Storage + the small dialogs Waypoint, Gate repair, Garden seed picker); M3 done (quest panel starts as a 44 px pill on phones, one-line 3 s welcome toast, HUD in two rows down to 640 px wide); M4 done (attack 64 px, Swap/Dash/skill 48 px, HUD buttons and the hint close 44 px, labels 12 px); M5 (portrait overlay) still planned
 - **Project:** jo-game (Knowledge Quest)
 
 ## Goal
