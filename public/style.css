@@ -4759,6 +4759,148 @@ button,
     cursor: default;
 }
 
+/* --- Reader Mode Refinements --- */
+.is-reading-mode {
+    display: flex;
+    flex-direction: column;
+}
+
+.lib-back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font: inherit;
+    cursor: pointer;
+}
+
+.lib-back-btn:hover {
+    background: rgba(245, 158, 11, 0.2);
+}
+
+/* Rotate phone overlay */
+.rotate-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: rgba(10, 15, 30, 0.95);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    padding: 24px;
+    text-align: center;
+    color: #fff;
+    user-select: none;
+}
+
+.rotate-phone {
+    width: 64px;
+    height: 100px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: rotatePhone 2.5s infinite ease-in-out;
+}
+
+.rotate-phone-body {
+    width: 50px;
+    height: 80px;
+    border: 3px solid #38bdf8;
+    border-radius: 10px;
+    position: relative;
+    box-shadow: 0 0 15px rgba(56, 189, 248, 0.4);
+}
+
+.rotate-phone-body::after {
+    content: '';
+    position: absolute;
+    bottom: 4px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #38bdf8;
+}
+
+@keyframes rotatePhone {
+    0%, 20% { transform: rotate(0deg); }
+    50%, 70% { transform: rotate(90deg); }
+    90%, 100% { transform: rotate(0deg); }
+}
+
+.rotate-title {
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: #ffd700;
+    margin-bottom: 8px;
+}
+
+.rotate-text {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: #e2e8f0;
+    max-width: 380px;
+    margin-bottom: 4px;
+}
+
+.rotate-text-en {
+    font-size: 0.85rem;
+    color: #94a3b8;
+    margin-bottom: 20px;
+}
+
+.rotate-continue {
+    min-height: var(--tap, 44px);
+    padding: 10px 20px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #cbd5e1;
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+
+.rotate-continue:hover {
+    background: rgba(255, 255, 255, 0.18);
+    color: #fff;
+}
+
+.gw-reader-title {
+    font-size: 1.5rem;
+    line-height: 1.35;
+    color: #fff;
+}
+
+.gw-reader-illustration {
+    transition: max-height 0.2s ease;
+}
+
+.gw-reader-content {
+    font-size: 1.05rem;
+    line-height: 1.75;
+    letter-spacing: 0.01em;
+    color: #f1f5f9;
+}
+
+.gw-reader-keypoints {
+    border-radius: 12px;
+}
+
+.gw-reader-pagedots {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 6px 0;
+    flex-wrap: wrap;
+}
+
 .lib-tab-count {
     min-width: 1.6em;
     padding: 0 7px;
@@ -5101,6 +5243,70 @@ button,
     .lib-card .outfit-title p {
         display: none;
     }
+
+    /* Mobile reader adjustments */
+    .lib-card.is-reading-mode .outfit-header {
+        flex-wrap: nowrap !important;
+        padding: 6px 12px !important;
+    }
+
+    .lib-card.is-reading-mode .outfit-wallet {
+        display: none !important;
+    }
+
+    .lib-card.is-reading-mode .lib-tabs {
+        display: none !important;
+    }
+
+    .lib-card.is-reading-mode .gw-readerbar {
+        padding: 4px 10px !important;
+        flex-wrap: nowrap !important;
+        gap: 6px !important;
+    }
+
+    .lib-card.is-reading-mode .gw-reader-body {
+        padding: 10px 14px 16px !important;
+        flex: 1 1 0% !important;
+        overflow-y: auto !important;
+    }
+
+    .lib-card.is-reading-mode .gw-reader-title {
+        font-size: 1.18rem !important;
+        padding-left: 8px !important;
+        line-height: 1.35 !important;
+        margin: 4px 0 !important;
+    }
+
+    .lib-card.is-reading-mode .gw-reader-illustration {
+        padding: 4px !important;
+        margin: 6px auto !important;
+        max-width: 100% !important;
+    }
+
+    .lib-card.is-reading-mode .gw-reader-illustration img {
+        max-height: min(160px, 25vh) !important;
+        object-fit: contain;
+        width: auto !important;
+    }
+
+    .lib-card.is-reading-mode .gw-reader-content {
+        padding: 12px 14px !important;
+        font-size: 1.02rem !important;
+        line-height: 1.72 !important;
+        background: rgba(30, 41, 59, 0.65) !important;
+        border-radius: 12px !important;
+        color: #f8fafc !important;
+    }
+
+    .lib-card.is-reading-mode .gw-reader-keypoints {
+        padding: 10px 12px !important;
+    }
+
+    .lib-card.is-reading-mode .gw-readerfoot {
+        padding: 6px 12px max(6px, env(safe-area-inset-bottom)) 12px !important;
+        flex-wrap: nowrap !important;
+        gap: 6px !important;
+    }
 }
 
 /* Landscape phones: a tab bar and a card must fit under the header */
@@ -5131,6 +5337,70 @@ button,
 
     .lib-card .outfit-title p {
         display: none;
+    }
+
+    /* Mobile reader adjustments */
+    .lib-card.is-reading-mode .outfit-header {
+        flex-wrap: nowrap !important;
+        padding: 6px 12px !important;
+    }
+
+    .lib-card.is-reading-mode .outfit-wallet {
+        display: none !important;
+    }
+
+    .lib-card.is-reading-mode .lib-tabs {
+        display: none !important;
+    }
+
+    .lib-card.is-reading-mode .gw-readerbar {
+        padding: 4px 10px !important;
+        flex-wrap: nowrap !important;
+        gap: 6px !important;
+    }
+
+    .lib-card.is-reading-mode .gw-reader-body {
+        padding: 10px 14px 16px !important;
+        flex: 1 1 0% !important;
+        overflow-y: auto !important;
+    }
+
+    .lib-card.is-reading-mode .gw-reader-title {
+        font-size: 1.18rem !important;
+        padding-left: 8px !important;
+        line-height: 1.35 !important;
+        margin: 4px 0 !important;
+    }
+
+    .lib-card.is-reading-mode .gw-reader-illustration {
+        padding: 4px !important;
+        margin: 6px auto !important;
+        max-width: 100% !important;
+    }
+
+    .lib-card.is-reading-mode .gw-reader-illustration img {
+        max-height: min(160px, 25vh) !important;
+        object-fit: contain;
+        width: auto !important;
+    }
+
+    .lib-card.is-reading-mode .gw-reader-content {
+        padding: 12px 14px !important;
+        font-size: 1.02rem !important;
+        line-height: 1.72 !important;
+        background: rgba(30, 41, 59, 0.65) !important;
+        border-radius: 12px !important;
+        color: #f8fafc !important;
+    }
+
+    .lib-card.is-reading-mode .gw-reader-keypoints {
+        padding: 10px 12px !important;
+    }
+
+    .lib-card.is-reading-mode .gw-readerfoot {
+        padding: 6px 12px max(6px, env(safe-area-inset-bottom)) 12px !important;
+        flex-wrap: nowrap !important;
+        gap: 6px !important;
     }
 }
 
@@ -5669,28 +5939,6 @@ button,
     font-size: 11px;
 }
 
-/* A phone held upright: the game is landscape, so ask for the phone to be turned (never blocks the screen) */
-#rotate-hint {
-    display: none;
-    position: fixed;
-    left: 50%;
-    bottom: max(16px, env(safe-area-inset-bottom));
-    transform: translateX(-50%);
-    z-index: 9999;
-    padding: 10px 16px;
-    border-radius: 999px;
-    background: rgba(15, 23, 42, 0.92);
-    border: 1px solid #fbbf24;
-    color: #fde68a;
-    font-size: 0.9rem;
-    font-weight: 700;
-    white-space: nowrap;
-    pointer-events: none;
-}
-
-@media (orientation: portrait) and (pointer: coarse) {
-    #rotate-hint { display: block; }
-}
 
 /* Install the game as an app (title screen, while the browser offers it) */
 .install-banner {
@@ -6386,4 +6634,81 @@ button,
     clip: rect(0, 0, 0, 0);
     white-space: nowrap;
     border: 0;
+}
+
+/* A phone held upright (RotateOverlay): a full-screen message above everything; the game is paused meanwhile */
+.rotate-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 100000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    padding: max(24px, env(safe-area-inset-top)) 24px max(24px, env(safe-area-inset-bottom));
+    background: radial-gradient(circle at 50% 35%, #1e1b4b, #0b0720 70%);
+    color: #f8fafc;
+    text-align: center;
+}
+
+.rotate-phone {
+    width: 72px;
+    height: 72px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: rotate-phone-turn 2.4s ease-in-out infinite;
+}
+
+.rotate-phone-body {
+    width: 34px;
+    height: 60px;
+    border: 4px solid #facc15;
+    border-radius: 8px;
+    box-sizing: border-box;
+    box-shadow: 0 0 16px rgba(250, 204, 21, 0.45);
+}
+
+@keyframes rotate-phone-turn {
+    0%, 20% { transform: rotate(0deg); }
+    55%, 80% { transform: rotate(-90deg); }
+    100% { transform: rotate(0deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .rotate-phone { animation: none; transform: rotate(-90deg); }
+}
+
+.rotate-title {
+    margin: 0;
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: #fde68a;
+}
+
+.rotate-text {
+    margin: 0;
+    max-width: 320px;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    color: #cbd5e1;
+}
+
+.rotate-text-en {
+    margin: 0;
+    font-size: 0.85rem;
+    color: #94a3b8;
+}
+
+.rotate-continue {
+    margin-top: 10px;
+    min-height: 48px;
+    padding: 10px 20px;
+    border-radius: 12px;
+    border: 1px solid rgba(250, 204, 21, 0.6);
+    background: rgba(15, 23, 42, 0.8);
+    color: #fde68a;
+    font-weight: 700;
+    cursor: pointer;
 }

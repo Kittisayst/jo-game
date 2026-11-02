@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { test, expect, Page } from '@playwright/test';
+import { Bot } from './helpers/bot';
 
 /**
  * Windows on a phone held sideways (docs/plans/2026-11-02-mobile-ui-improvements.md, M1/M2): a window fills the
@@ -384,3 +385,64 @@ for (const phone of [...PHONES, { name: 'narrow phone 568x320', viewport: { widt
     await ctx.close();
   });
 }
+
+test.describe('A phone held upright (M5)', () => {
+  test('a full-screen message appears and the game pauses; turning the phone back resumes it', async ({ browser }) => {
+    test.setTimeout(120000);
+    const ctx = await browser.newContext({ viewport: { width: 915, height: 412 }, isMobile: true, hasTouch: true });
+    const page = await ctx.newPage();
+    await page.goto('/');
+    await page.getByText(/ເຂົ້າເກມ \(Play Game\)/).click();
+    await expect(page.locator('.game-hud')).toBeVisible({ timeout: 30000 });
+    await expect(page.getByTestId('rotate-overlay')).toHaveCount(0);
+    const bot = new Bot(page, false);
+    await expect.poll(async () => (await bot.state()).scene, { timeout: 20000 }).toBe('village');
+
+    // Turned upright: the message covers the screen and the game is paused
+    await page.setViewportSize({ width: 412, height: 915 });
+    const overlay = page.getByTestId('rotate-overlay');
+    await expect(overlay).toBeVisible();
+    const box = await overlay.boundingBox();
+    expect(box!.width).toBeGreaterThanOrEqual(411);
+    expect(box!.height).toBeGreaterThanOrEqual(914);
+    await expect(page.locator('.pause-menu-card')).toBeVisible();
+    expect((await bot.state()).isPaused, 'the game scene is paused').toBe(true);
+
+    // Turned back: the message goes and the game runs again (it was this hook that paused it)
+    await page.setViewportSize({ width: 915, height: 412 });
+    await expect(overlay).toHaveCount(0);
+    await expect(page.locator('.pause-menu-card')).toHaveCount(0);
+    await expect.poll(async () => (await bot.state()).isPaused).toBe(false);
+    await ctx.close();
+  });
+
+  test('"keep playing upright" hides the message and the game is not paused again', async ({ browser }) => {
+    test.setTimeout(120000);
+    const ctx = await browser.newContext({ viewport: { width: 915, height: 412 }, isMobile: true, hasTouch: true });
+    const page = await ctx.newPage();
+    await page.goto('/');
+    await page.getByText(/ເຂົ້າເກມ \(Play Game\)/).click();
+    await expect(page.locator('.game-hud')).toBeVisible({ timeout: 30000 });
+    const bot = new Bot(page, false);
+    await expect.poll(async () => (await bot.state()).scene, { timeout: 20000 }).toBe('village');
+    await page.setViewportSize({ width: 412, height: 915 });
+    await expect(page.getByTestId('rotate-overlay')).toBeVisible();
+    await page.getByTestId('rotate-continue').tap();
+    await expect(page.getByTestId('rotate-overlay')).toHaveCount(0);
+    // The game it paused is resumed, and turning the phone again does not bring the message back
+    await expect.poll(async () => (await bot.state()).isPaused).toBe(false);
+    await page.setViewportSize({ width: 915, height: 412 });
+    await page.setViewportSize({ width: 412, height: 915 });
+    await page.waitForTimeout(400);
+    await expect(page.getByTestId('rotate-overlay')).toHaveCount(0);
+    await ctx.close();
+  });
+
+  test('a desktop window that is taller than wide is not blocked', async ({ page }) => {
+    await page.setViewportSize({ width: 600, height: 900 });
+    await page.goto('/');
+    await page.getByText(/ເຂົ້າເກມ \(Play Game\)/).click();
+    await expect(page.locator('.game-hud')).toBeVisible({ timeout: 30000 });
+    await expect(page.getByTestId('rotate-overlay')).toHaveCount(0);
+  });
+});

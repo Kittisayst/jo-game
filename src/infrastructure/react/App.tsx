@@ -60,6 +60,8 @@ import { isSpecialLevel } from '../phaser/levelCatalog';
 import { StorageModal } from './components/StorageModal';
 import { QuestBoardModal } from './components/QuestBoardModal';
 import { QuestTrackerHud } from './components/QuestTrackerHud';
+import { RotateOverlay } from './components/RotateOverlay';
+import { useOrientationPause } from './hooks/useOrientationPause';
 import { PetShopModal } from './components/PetShopModal';
 import { DomainEvents } from '../../domain/DomainEvents';
 import { recordQuestProgressUseCase, QUEST_COMPLETED_EVENT, type QuestCompletedPayload } from '../../application/QuestUseCases';
@@ -496,6 +498,8 @@ function App ()
     };
 
     useDevStageEntry(handleStartGame);
+    // A phone held upright pauses the game (and the message asks for it to be turned); turning back resumes it
+    useOrientationPause({ playing: !isMainMenuOpen, paused: isGamePaused }, handlePauseGame, handleResumeGame);
 
     /** R drinks the Potion in the Quick slot, but only while playing: not on the title, paused or in a window. */
     const drinkQuickSlot = () =>
@@ -1150,6 +1154,8 @@ function App ()
             />
 
             <QuestTrackerHud visible={!isMainMenuOpen && !isSettingsOpen && currentLevel === 'village'} />
+
+            <RotateOverlay />
 
             <PetShopModal
                 isOpen={isPetShopOpen}

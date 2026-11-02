@@ -319,7 +319,7 @@ export const TextbookModal: React.FC<TextbookModalProps> = ({
 
     return (
         <div className="gw-overlay outfit-overlay lib-overlay">
-            <div className="gw-window outfit-card lib-card">
+            <div className={`gw-window outfit-card lib-card ${isReadingActive ? 'is-reading-mode' : ''}`}>
 
                 {/* Header */}
                 <div className="gw-header outfit-header">
@@ -536,6 +536,16 @@ export const TextbookModal: React.FC<TextbookModalProps> = ({
                         {/* Reader Subbar: Back to Shelf (if in Library Store) + Owned Book Tabs */}
                         <div className="gw-readerbar flex flex-wrap items-center justify-between gap-2 px-6 py-2.5 border-b border-slate-700/60 bg-slate-900/60">
                             <div className="flex items-center gap-2 overflow-x-auto">
+                                {isStore && (
+                                    <button
+                                        type="button"
+                                        onClick={() => switchTab('mine')}
+                                        className="lib-back-btn px-3 py-1.5 rounded-lg font-medium text-xs text-amber-300 bg-amber-500/10 border border-amber-500/30 transition flex items-center gap-1"
+                                    >
+                                        <span>⬅️</span>
+                                        <span>ຊັ້ນປຶ້ມ</span>
+                                    </button>
+                                )}
                                 {ownedBooks.map(b =>
                                 {
                                     const bp = ensureBookProgress(b.id);
@@ -592,12 +602,12 @@ export const TextbookModal: React.FC<TextbookModalProps> = ({
                                 )}
                             </div>
 
-                            <h3 className="text-2xl font-bold text-white border-l-4 border-amber-400 pl-3">
+                            <h3 className="gw-reader-title text-2xl font-bold text-white border-l-4 border-amber-400 pl-3">
                                 {activePage.title}
                             </h3>
 
                             {activePage.illustration && (
-                                <div className="rounded-xl overflow-hidden border border-slate-700/80 bg-slate-950/60 p-2 shadow-inner">
+                                <div className="gw-reader-illustration rounded-xl overflow-hidden border border-slate-700/80 bg-slate-950/60 p-2 shadow-inner">
                                     <img
                                         src={activePage.illustration}
                                         alt={activePage.title}
@@ -607,12 +617,12 @@ export const TextbookModal: React.FC<TextbookModalProps> = ({
                                 </div>
                             )}
 
-                            <div className="text-slate-300 leading-relaxed whitespace-pre-line bg-slate-800/50 p-4 rounded-xl border border-slate-700/50">
+                            <div className="gw-reader-content text-slate-300 leading-relaxed whitespace-pre-line bg-slate-800/50 p-4 rounded-xl border border-slate-700/50">
                                 {activePage.content}
                             </div>
 
                             {activePage.keyPoints && activePage.keyPoints.length > 0 && (
-                                <div className="bg-emerald-950/40 border border-emerald-500/40 rounded-xl p-4 space-y-2">
+                                <div className="gw-reader-keypoints bg-emerald-950/40 border border-emerald-500/40 rounded-xl p-4 space-y-2">
                                     <h4 className="text-sm font-bold text-emerald-300 flex items-center gap-2">
                                         <span>💡</span> ຈຸດສຳຄັນທີ່ຕ້ອງຈື່ (Key Takeaways)
                                     </h4>
@@ -625,7 +635,7 @@ export const TextbookModal: React.FC<TextbookModalProps> = ({
                             )}
 
                             {/* Page Dot Indicators */}
-                            <div className="flex items-center justify-center gap-2 pt-2">
+                            <div className="gw-reader-pagedots flex items-center justify-center gap-2 pt-2">
                                 {pages.map((p, idx) =>
                                 {
                                     const read = bookProgress.hasReadPage(p.pageNumber);
