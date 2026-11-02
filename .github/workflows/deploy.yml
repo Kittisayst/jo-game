@@ -30,6 +30,9 @@ jobs:
       # build-nolog: `npm run build` sends an anonymous template usage ping
       - run: npm run build-nolog
       - uses: actions/configure-pages@v5
+        with:
+          # Turns Pages on (GitHub Actions source) the first time; needs a token allowed to do it
+          enablement: true
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
