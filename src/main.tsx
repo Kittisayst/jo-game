@@ -3,6 +3,10 @@ import ReactDOM from 'react-dom/client';
 import App from './infrastructure/react/App.tsx';
 import { entities } from './infrastructure/composition';
 import { installGameContent, loadGameContent } from './infrastructure/content/ContentCatalog';
+import { startListeningForInstall } from './infrastructure/installPrompt';
+
+// Before anything else: the browser can offer to install the game while the data is still loading
+startListeningForInstall();
 
 const root = ReactDOM.createRoot(document.getElementById('root')!);
 

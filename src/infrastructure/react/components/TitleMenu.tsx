@@ -1,4 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { useInstallPrompt } from '../hooks/useInstallPrompt';
+import { readString, STORAGE_PREFIX, writeString } from '../../storage/safeStorage';
+
+const INSTALL_DISMISSED_KEY = `${STORAGE_PREFIX}install_banner_dismissed`;
 
 export interface TitleMenuProps
 {
@@ -189,11 +193,39 @@ export function TitleMenu ({
                 <p className="title-hint" aria-live="polite">{current.hint}</p>
             </main>
 
+            <InstallBanner />
+
             <footer className="title-footer">
                 <span><kbd>↑</kbd><kbd>↓</kbd> ເລືອກ</span>
                 <span><kbd>Enter</kbd> ຢືນຢັນ</span>
                 <span className="title-footer-game">ໃນເກມ: <kbd>A</kbd><kbd>D</kbd> ຍ່າງ · <kbd>Space</kbd> ໂດດ · <kbd>J</kbd> ຟັນ · <kbd>E</kbd> ໂຕ້ຕອບ</span>
             </footer>
+        </div>
+    );
+}
+
+/** "Install the game as an app", shown on the title screen while the browser offers it; ✕ hides it for good (Settings keeps the button). */
+function InstallBanner ()
+{
+    const { available, install } = useInstallPrompt();
+    const [dismissed, setDismissed] = useState(() => readString(INSTALL_DISMISSED_KEY) === '1');
+    if (!available || dismissed) return null;
+
+    return (
+        <div className="install-banner" role="region" aria-label="ຕິດຕັ້ງເກມ" data-testid="install-banner">
+            <img src="icons/icon-192.png" alt="" width={36} height={36} className="pixel-art" />
+            <span className="install-banner-text">ຕິດຕັ້ງເກມເປັນແອັບ: ເປີດຈາກໜ້າຈໍຫຼັກ ເຕັມຈໍ ແລະຫຼິ້ນໄດ້ບໍ່ມີເນັດ</span>
+            <button type="button" className="install-banner-btn" data-testid="install-button" onClick={() => { void install(); }}>
+                📲 ຕິດຕັ້ງ
+            </button>
+            <button
+                type="button"
+                className="install-banner-close"
+                aria-label="ປິດ"
+                onClick={() => { writeString(INSTALL_DISMISSED_KEY, '1'); setDismissed(true); }}
+            >
+                ✕
+            </button>
         </div>
     );
 }

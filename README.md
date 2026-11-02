@@ -125,7 +125,9 @@ npx vite preview --config vite/config.prod.mjs --base /jo-game/   # http://local
 
 - **Android (Chrome):** ເມນູ ⋮ → **ຕິດຕັ້ງແອັບ / Install app** (ຫຼື Add to Home screen). ເປີດຈາກໄອຄອນຈະເຕັມຈໍ ແລະເປັນແນວນອນ.
 - **iPhone (Safari):** ປຸ່ມ Share → **Add to Home Screen**. iPhone ບໍ່ເຮັດເຕັມຈໍແທ້ (ເຊື່ອງແຖບ Safari) ແລະ**ລັອກແນວນອນບໍ່ໄດ້** ຕ້ອງຫັນໂທລະສັບເອງ. ເຊບຂອງແອັບທີ່ຕິດຕັ້ງແຍກຈາກ Safari: ຍ້າຍດ້ວຍ export/import ໃນ Settings.
+- ເມື່ອ browser ພ້ອມໃຫ້ຕິດຕັ້ງ, ໜ້າເມນູເລີ່ມເກມຈະມີແຖບ **📲 ຕິດຕັ້ງ** (ແລະປຸ່ມໃນ Settings).
 - ໃນ browser ທຳມະດາ ມີສະວິດ **ເຕັມຈໍ** ໃນ Settings (ບໍ່ມີໃນ iPhone Safari).
+- ຖ້າເປີດແອັບທີ່ຕິດຕັ້ງແລ້ວຂຶ້ນ "Could not open app": ຖອນແອັບນັ້ນອອກ (ການຕັ້ງຄ່າ → ແອັບ), ລ້າງຂໍ້ມູນເວັບໄຊ ແລ້ວຕິດຕັ້ງໃໝ່.
 
 ເປີດເກມຄັ້ງໜຶ່ງແລ້ວຫຼິ້ນ **offline** ໄດ້ (ໄຟລ໌ທັງ build ຖືກເກັບໄວ້ປະມານ 5 MB). ເວີຊັນໃໝ່ມາຫຼັງເປີດເກມໃໝ່ 1-2 ຄັ້ງ. ຖ້າເຄື່ອງຄ້າງເວີຊັນເກົ່າ ໃຫ້ລ້າງຂໍ້ມູນເວັບໄຊຂອງ kittisayst.github.io ຫຼືຖອນແອັບແລ້ວຕິດຕັ້ງໃໝ່. ໄອຄອນສ້າງດ້ວຍ `python tools/art/build_pwa_icons.py`.
 
