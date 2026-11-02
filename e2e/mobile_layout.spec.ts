@@ -342,3 +342,45 @@ for (const phone of [...PHONES, { name: 'narrow phone 568x320', viewport: { widt
     await ctx.close();
   });
 }
+
+/**
+ * The textbook reader: the lesson is the point of the game. It used to get about 70 px of a 412 px screen (and none
+ * at 320 px) because the header, book row, page info row, title and footer took the rest.
+ */
+for (const phone of [...PHONES, { name: 'narrow phone 568x320', viewport: { width: 568, height: 320 } }]) {
+  test(`the textbook reader leaves room to read on ${phone.name}`, async ({ browser }) => {
+    test.setTimeout(120000);
+    const ctx = await browser.newContext({ viewport: phone.viewport, isMobile: true, hasTouch: true });
+    const page = await ctx.newPage();
+    await page.goto('/');
+    await page.getByText(/ເຂົ້າເກມ \(Play Game\)/).click();
+    await expect(page.locator('.game-hud')).toBeVisible({ timeout: 30000 });
+    await page.waitForTimeout(1200);
+    await page.evaluate(() => (window as any).__entities.books['book-ch1'].unlock());
+    await page.locator('#hud-library-btn').click();
+    await expect(page.locator('.gw-reader-body')).toBeVisible();
+    await page.waitForTimeout(600);
+
+    const r = await page.evaluate(() => {
+      const body = document.querySelector('.gw-reader-body') as HTMLElement;
+      const bb = body.getBoundingClientRect();
+      const foot = document.querySelector('.gw-readerfoot')!.getBoundingClientRect();
+      const small: string[] = [];
+      for (const b of document.querySelectorAll('.gw-window button')) {
+        const x = b.getBoundingClientRect();
+        if (x.width > 0 && x.height < 43.5) small.push(`${(b.textContent ?? '').trim().slice(0, 14)} ${Math.round(x.height)}`);
+      }
+      return { vh: innerHeight, bodyH: bb.height, footBottom: foot.bottom, footH: foot.height, small };
+    });
+    // Most of the screen is the lesson (a scrolling area), the controls stay on the screen
+    expect(r.bodyH / r.vh, 'reading area share of the height').toBeGreaterThanOrEqual(0.42);
+    expect(r.footBottom, 'footer is on the screen').toBeLessThanOrEqual(r.vh + 1);
+    expect(r.small, 'buttons under 44px').toEqual([]);
+
+    // The page can be read: after the timer the confirm button turns the page
+    await expect(page.getByRole('button', { name: /ອ່ານເຂົ້າໃຈແລ້ວ/ })).toBeEnabled({ timeout: 9000 });
+    await page.getByRole('button', { name: /ອ່ານເຂົ້າໃຈແລ້ວ/ }).tap();
+    await expect(page.getByText(/ໜ້າທີ 2 \//)).toBeVisible();
+    await ctx.close();
+  });
+}
