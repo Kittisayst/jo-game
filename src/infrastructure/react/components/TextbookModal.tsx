@@ -534,7 +534,7 @@ export const TextbookModal: React.FC<TextbookModalProps> = ({
                 {tab === 'read' && currentBook && bookProgress?.isUnlocked && activePage && (
                     <>
                         {/* Reader Subbar: Back to Shelf (if in Library Store) + Owned Book Tabs */}
-                        <div className="flex flex-wrap items-center justify-between gap-2 px-6 py-2.5 border-b border-slate-700/60 bg-slate-900/60">
+                        <div className="gw-readerbar flex flex-wrap items-center justify-between gap-2 px-6 py-2.5 border-b border-slate-700/60 bg-slate-900/60">
                             <div className="flex items-center gap-2 overflow-x-auto">
                                 {ownedBooks.map(b =>
                                 {
@@ -569,8 +569,8 @@ export const TextbookModal: React.FC<TextbookModalProps> = ({
                         </div>
 
                         {/* Page Content */}
-                        <div className="p-6 overflow-y-auto flex-1 space-y-4 text-slate-200">
-                            <div className="flex items-center justify-between">
+                        <div className="gw-body gw-reader-body p-6 overflow-y-auto flex-1 space-y-4 text-slate-200">
+                            <div className="gw-readermeta flex items-center justify-between">
                                 <span className="text-xs uppercase tracking-wider text-amber-400 font-bold bg-amber-500/10 px-2.5 py-1 rounded">
                                     ໜ້າທີ {activePage.pageNumber} / {pages.length}
                                 </span>
@@ -655,7 +655,7 @@ export const TextbookModal: React.FC<TextbookModalProps> = ({
                         </div>
 
                         {/* Reader Footer Controls */}
-                        <div className="px-6 py-4 border-t border-slate-700/60 bg-slate-950/80 flex flex-wrap items-center justify-between gap-3">
+                        <div className="gw-readerfoot px-6 py-4 border-t border-slate-700/60 bg-slate-950/80 flex flex-wrap items-center justify-between gap-3">
                             <div className="flex items-center gap-2">
                                 <button
                                     onClick={handlePrevPage}
