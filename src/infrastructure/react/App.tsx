@@ -83,6 +83,8 @@ if (import.meta.env.DEV) (window as unknown as { __eventBus: typeof EventBus }).
 function App ()
 {
     const phaserRef = useRef<IRefPhaserGame | null>(null);
+    /** A start the player asked for while the art was still loading; it runs when the title scene is up. */
+    const pendingStartRef = useRef(false);
     const initialSession = readString(ACTIVE_SESSION_STORAGE_KEY);
     const shouldResumeInGame = initialSession !== null && initialSession !== 'title';
 
@@ -288,6 +290,27 @@ function App ()
 
     const handleStartGame = (stageKey = 'village') =>
     {
+        // The menu can be clicked while the first scene is still loading the art. Starting the Game scene then makes it
+        // queue the same files a second time (the console fills with "Texture key already in use"), so wait for the
+        // title scene and start from there.
+        const preloader = phaserRef.current?.game?.scene.getScene('Preloader');
+        if (preloader && preloader.sys.settings.status < 5)
+        {
+            if (!pendingStartRef.current)
+            {
+                pendingStartRef.current = true;
+                const onSceneReady = (scene: Phaser.Scene) =>
+                {
+                    if (scene.scene.key !== 'Title') return;
+                    EventBus.off('current-scene-ready', onSceneReady);
+                    pendingStartRef.current = false;
+                    startGameRef.current(stageKey);
+                };
+                EventBus.on('current-scene-ready', onSceneReady);
+            }
+            return;
+        }
+
         // A Stage that is not built yet (grey on the map) has no level to load
         const stage = getStageDefinition(getGameContent().stages, stageKey);
         if (!isSpecialLevel(stageKey) && (!stage || !isStageReady(stage))) return;
@@ -340,6 +363,9 @@ function App ()
             }
         }
     };
+
+    const startGameRef = useRef(handleStartGame);
+    startGameRef.current = handleStartGame;
 
     const handleOpenMainMenu = () =>
     {
