@@ -71,6 +71,15 @@ optgroup {
     color: inherit;
 }
 
+html,
+body {
+    height: 100%;
+    /* The game fills the screen and never scrolls: on a phone a finger drag on the game used to scroll the page
+       and push the top of the HUD under the browser bar */
+    overflow: hidden;
+    overscroll-behavior: none;
+}
+
 body {
     margin: 0;
     padding: 0;
@@ -105,6 +114,8 @@ input:focus-visible,
 #app {
     width: 100%;
     height: 100vh;
+    /* 100vh is the tallest the phone screen gets (browser bar hidden); dvh follows what is really visible */
+    height: 100dvh;
     overflow: hidden;
     position: relative;
     display: flex;
