@@ -29,12 +29,12 @@ export const StageQuestionModal: React.FC<StageQuestionModalProps> = ({ stageNum
     };
 
     return (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/85 backdrop-blur-md p-4 animate-fade-in" data-testid="stage-question">
-            <div className="relative w-full max-w-lg rounded-2xl bg-gradient-to-b from-emerald-950 via-slate-900 to-slate-950 border-2 border-emerald-500 shadow-2xl p-6 space-y-5 text-center">
-                <span className="text-5xl">🎓</span>
+        <div className="gw-overlay-sm fixed inset-0 z-[200] flex items-center justify-center bg-black/85 backdrop-blur-md p-4 animate-fade-in" data-testid="stage-question">
+            <div className="gw-dialog gw-compact gw-quiz relative w-full max-w-lg rounded-2xl bg-gradient-to-b from-emerald-950 via-slate-900 to-slate-950 border-2 border-emerald-500 shadow-2xl p-6 space-y-5 text-center">
+                <span className="gw-quiz-icon text-5xl">🎓</span>
                 <div>
                     <h3 className="text-xl font-black text-emerald-300">ຄຳຖາມທ້າຍດ່ານ {stageNumber}</h3>
-                    <p className="text-xs text-slate-400 mt-1">
+                    <p className="gw-subtitle text-xs text-slate-400 mt-1">
                         ຕອບຖືກໄດ້ Credit (ຄັ້ງທຳອິດຂອງດ່ານນີ້). ຕອບຜິດກໍ່ຜ່ານດ່ານໄດ້ ແຕ່ບໍ່ໄດ້ Credit.
                     </p>
                 </div>
@@ -45,7 +45,7 @@ export const StageQuestionModal: React.FC<StageQuestionModalProps> = ({ stageNum
                             {question.question}
                         </div>
 
-                        <div className="space-y-2">
+                        <div className="gw-options space-y-2">
                             {question.options.map((option, index) => (
                                 <button
                                     key={index}
@@ -80,7 +80,7 @@ export const StageQuestionModal: React.FC<StageQuestionModalProps> = ({ stageNum
                     </div>
                 ) : (
                     <div className="space-y-4">
-                        <span className="text-5xl">{result.correct ? '🏆' : '📖'}</span>
+                        <span className="gw-quiz-icon text-5xl">{result.correct ? '🏆' : '📖'}</span>
                         <h4 className={`text-xl font-bold ${result.correct ? 'text-emerald-400' : 'text-rose-400'}`}>
                             {result.correct
                                 ? (result.creditReward > 0 ? `ຕອບຖືກ! +${result.creditReward} 🎓 Credit` : 'ຕອບຖືກ! (ດ່ານນີ້ໄດ້ Credit ໄປແລ້ວ)')

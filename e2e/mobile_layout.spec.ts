@@ -260,3 +260,85 @@ test.describe('The pause menu on a phone held sideways', () => {
     });
   }
 });
+
+/**
+ * The other dialogs. The Quiz finisher and the end-of-Stage question were 592 px tall and cut off at both ends of a
+ * phone screen: the Confirm button could not be pressed, so a Stage could not be finished.
+ */
+const DIALOGS: { name: string; card: string; open: (page: Page) => Promise<void> }[] = [
+  { name: 'Settings', card: '.settings-modal-card', open: async p => { await p.keyboard.press('Escape'); await p.getByRole('button', { name: /ຕັ້ງຄ່າ/ }).first().click(); } },
+  { name: 'Skin shop', card: '.outfit-card', open: async p => { await p.evaluate(() => (window as any).__eventBus.emit('start-dialogue', 'skin_shop')); await p.getByRole('button', { name: /ເບິ່ງຊຸດ/ }).click(); } },
+  { name: 'Pet shop', card: '.pet-shop-modal', open: async p => { await p.evaluate(() => (window as any).__eventBus.emit('open-pet-shop')); } },
+  { name: 'Quiz finisher', card: '[data-testid=quiz-finisher] > div', open: async p => { await p.evaluate(() => (window as any).__eventBus.emit('open-quiz-finisher', { bookId: 'book-ch1' })); } },
+  { name: 'Stage question', card: '[data-testid=stage-question] > div', open: async p => { await p.evaluate(() => (window as any).__eventBus.emit('open-stage-question', { stageId: 'stage-001' })); } },
+];
+
+for (const phone of [...PHONES, { name: 'narrow phone 568x320', viewport: { width: 568, height: 320 } }]) {
+  test(`the other dialogs fit and can be used on ${phone.name}`, async ({ browser }) => {
+    test.setTimeout(240000);
+    const ctx = await browser.newContext({ viewport: phone.viewport, isMobile: true, hasTouch: true });
+    const page = await ctx.newPage();
+    await page.goto('/');
+    await page.getByText(/ເຂົ້າເກມ \(Play Game\)/).click();
+    await expect(page.locator('.game-hud')).toBeVisible({ timeout: 30000 });
+    await page.waitForTimeout(1500);
+
+    for (const d of DIALOGS) {
+      await d.open(page);
+      await expect(page.locator(d.card).first()).toBeVisible();
+      await page.waitForTimeout(600);
+      const r = await page.evaluate((sel: string) => {
+        const card = document.querySelector(sel) as HTMLElement;
+        const cb = card.getBoundingClientRect();
+        const scrollableAncestor = (e: Element) => { let p = e.parentElement; while (p && p !== card.parentElement) { const s = getComputedStyle(p); if (/(auto|scroll)/.test(s.overflowY) && p.scrollHeight > p.clientHeight + 1) return true; p = p.parentElement; } return false; };
+        const unreachable: string[] = []; const small: string[] = []; const tiny: string[] = [];
+        for (const b of card.querySelectorAll('button')) {
+          const x = b.getBoundingClientRect(); if (x.width === 0) continue;
+          const n = ((b.textContent ?? '').trim() || b.getAttribute('aria-label') || b.className).toString().slice(0, 14);
+          // A button outside the screen is only fine when it can be scrolled to
+          if ((x.bottom > innerHeight + 1 || x.top < -1) && !scrollableAncestor(b)) unreachable.push(n);
+          if (x.height < 43.5) small.push(`${n} ${Math.round(x.width)}x${Math.round(x.height)}`);
+        }
+        for (const e of card.querySelectorAll('*')) {
+          if (![...e.childNodes].some(n => n.nodeType === 3 && (n.textContent ?? '').trim())) continue;
+          const x = e.getBoundingClientRect(); const s = getComputedStyle(e);
+          if (x.width > 0 && s.display !== 'none' && parseFloat(s.fontSize) < 11.99) tiny.push(`${(e.textContent ?? '').trim().slice(0, 10)} ${s.fontSize}`);
+        }
+        return { top: cb.top, bottom: cb.bottom, vh: innerHeight, unreachable, small, tiny: [...new Set(tiny)] };
+      }, d.card);
+      const label = `${d.name} on ${phone.name}`;
+      expect(r.top, `${label}: card top is on screen`).toBeGreaterThanOrEqual(-1);
+      expect(r.bottom, `${label}: card bottom is on screen`).toBeLessThanOrEqual(r.vh + 1);
+      expect(r.unreachable, `${label}: buttons that cannot be reached`).toEqual([]);
+      expect(r.small, `${label}: buttons under 44px`).toEqual([]);
+      expect(r.tiny, `${label}: text under 12px`).toEqual([]);
+
+      // Close whatever is open and go on
+      await page.keyboard.press('Escape');
+      await page.waitForTimeout(300);
+      await page.keyboard.press('Escape');
+      await page.waitForTimeout(300);
+      if (await page.locator('.pause-menu-card').count()) await page.keyboard.press('Escape');
+    }
+    await ctx.close();
+  });
+}
+
+for (const phone of [...PHONES, { name: 'narrow phone 568x320', viewport: { width: 568, height: 320 } }]) {
+  test(`the end-of-Stage question can be answered with taps on ${phone.name}`, async ({ browser }) => {
+    test.setTimeout(120000);
+    const ctx = await browser.newContext({ viewport: phone.viewport, isMobile: true, hasTouch: true });
+    const page = await ctx.newPage();
+    await page.goto('/');
+    await page.getByText(/ເຂົ້າເກມ \(Play Game\)/).click();
+    await expect(page.locator('.game-hud')).toBeVisible({ timeout: 30000 });
+    await page.waitForTimeout(1200);
+    await page.evaluate(() => (window as any).__eventBus.emit('open-stage-question', { stageId: 'stage-001' }));
+    await expect(page.getByTestId('stage-question')).toBeVisible();
+    await page.getByTestId('stage-question-option').first().tap();
+    // The Confirm button is reachable (scrolled into view if the card scrolls) and works
+    await page.getByTestId('stage-question-submit').tap();
+    await expect(page.getByTestId('stage-question-continue')).toBeVisible();
+    await ctx.close();
+  });
+}

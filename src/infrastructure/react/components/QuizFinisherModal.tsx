@@ -76,12 +76,12 @@ export const QuizFinisherModal: React.FC<QuizFinisherModalProps> = ({
     };
 
     return (
-        <div data-testid="quiz-finisher" className="fixed inset-0 z-[200] flex items-center justify-center bg-black/85 backdrop-blur-md p-4 animate-fade-in">
-            <div className="relative w-full max-w-lg rounded-2xl bg-gradient-to-b from-purple-950 via-slate-900 to-slate-950 border-2 border-purple-500 shadow-2xl p-6 space-y-5 text-center">
-                <span className="text-5xl animate-pulse">⚡</span>
+        <div data-testid="quiz-finisher" className="gw-overlay-sm fixed inset-0 z-[200] flex items-center justify-center bg-black/85 backdrop-blur-md p-4 animate-fade-in">
+            <div className="gw-dialog gw-compact gw-quiz relative w-full max-w-lg rounded-2xl bg-gradient-to-b from-purple-950 via-slate-900 to-slate-950 border-2 border-purple-500 shadow-2xl p-6 space-y-5 text-center">
+                <span className="gw-quiz-icon text-5xl animate-pulse">⚡</span>
                 <div>
                     <h3 className="text-xl font-black text-purple-300">ທ່າໄມ້ຕາຍປິດສາກ (Knowledge Finisher!)</h3>
-                    <p className="text-xs text-slate-400 mt-1">
+                    <p className="gw-subtitle text-xs text-slate-400 mt-1">
                         ບອສກຳລັງຈະໝົດພະລັງ! ຕອບຄຳຖາມຄວາມຮູ້ໃຫ້ຖືກຕ້ອງເພື່ອປິດສາກການຕໍ່ສູ້!
                     </p>
                 </div>
@@ -92,7 +92,7 @@ export const QuizFinisherModal: React.FC<QuizFinisherModalProps> = ({
                             {question.question}
                         </div>
 
-                        <div className="space-y-2">
+                        <div className="gw-options space-y-2">
                             {question.options.map((opt, idx) =>
                             {
                                 const isChosen = selectedOption === idx;
@@ -127,7 +127,7 @@ export const QuizFinisherModal: React.FC<QuizFinisherModalProps> = ({
                     </div>
                 ) : (
                     <div className="space-y-4">
-                        <span className="text-5xl">{isCorrect ? '🏆' : '⚠️'}</span>
+                        <span className="gw-quiz-icon text-5xl">{isCorrect ? '🏆' : '⚠️'}</span>
                         <h4 className={`text-xl font-bold ${isCorrect ? 'text-emerald-400' : 'text-rose-400'}`}>
                             {isCorrect ? 'ຕອບຖືກຕ້ອງ! ບອສຖືກປາບລົງແລ້ວ!' : 'ຕອບຜິດ! ບອສຟື້ນຟູພະລັງ 15%!'}
                         </h4>
