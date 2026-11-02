@@ -6037,3 +6037,89 @@ button,
     background: rgba(185, 28, 28, 0.55);
     color: #ffffff;
 }
+
+/* ===== The other dialogs on a phone held sideways =====
+   The Quiz finisher and the end-of-Stage question were 592 px tall: cut off at the top and the bottom of a 412 or
+   375 px screen, so the options and the Confirm button could not be reached and the Stage could not be finished. They
+   are now a compact card (no big icon or long note, options in two columns, Confirm kept in view). Settings, the Skin
+   shop and the Pet shop get 44 px buttons and 12 px labels. */
+@media (max-height: 520px) {
+    .gw-quiz {
+        padding: 10px 14px !important;
+        max-width: min(720px, 100%) !important;
+    }
+
+    .gw-quiz > * + * {
+        margin-top: 6px !important;
+    }
+
+    .gw-quiz .gw-quiz-icon {
+        display: none !important;
+    }
+
+    .gw-quiz h3,
+    .gw-quiz h4 {
+        font-size: 1rem !important;
+        line-height: 1.3;
+    }
+
+    .gw-quiz .space-y-4 > * + * {
+        margin-top: 6px !important;
+    }
+
+    .gw-quiz .p-4,
+    .gw-quiz .p-3 {
+        padding: 8px 10px !important;
+    }
+
+    .gw-quiz .gw-options {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 6px;
+    }
+
+    .gw-quiz .gw-options > * + * {
+        margin-top: 0 !important;
+    }
+
+    .gw-quiz .gw-options button {
+        min-height: var(--tap);
+        padding: 6px 10px !important;
+    }
+
+    /* Confirm / Continue stay in view while the options scroll */
+    .gw-quiz button[data-testid$="-submit"],
+    .gw-quiz button[data-testid$="-continue"],
+    .gw-quiz > div > button:last-child {
+        min-height: var(--tap);
+        position: sticky;
+        bottom: 0;
+        z-index: 2;
+    }
+
+    /* Settings */
+    .settings-modal-card button,
+    .settings-switch-btn {
+        min-height: var(--tap);
+    }
+
+    .settings-switch-btn {
+        min-width: var(--tap);
+    }
+
+    .settings-modal-card .slot-tab-status,
+    .settings-modal-card .slot-current-badge {
+        font-size: var(--gw-font-s);
+    }
+
+    /* Skin shop and Pet shop */
+    .outfit-close {
+        width: var(--tap);
+        height: var(--tap);
+    }
+
+    .outfit-card button,
+    .pet-shop-modal button {
+        min-height: var(--tap);
+    }
+}

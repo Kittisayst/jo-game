@@ -125,6 +125,7 @@ export const PetShopModal: React.FC<PetShopModalProps> = ({ isOpen, onClose }) =
                         <button
                             type="button"
                             aria-label="Close"
+                            className="gw-close"
                             onClick={onClose}
                             style={{
                                 background: '#334155',
