@@ -216,3 +216,47 @@ test.describe('Touch sizes on a phone held sideways', () => {
     });
   }
 });
+
+test.describe('The pause menu on a phone held sideways', () => {
+  for (const phone of PHONES) {
+    test(`shows all its buttons without scrolling on ${phone.name}`, async ({ browser }) => {
+      test.setTimeout(120000);
+      const ctx = await browser.newContext({ viewport: phone.viewport, isMobile: true, hasTouch: true });
+      const page = await ctx.newPage();
+      await page.goto('/?stage=2');
+      await expect(page.locator('.game-hud')).toBeVisible({ timeout: 30000 });
+      await page.waitForTimeout(1200);
+      await page.keyboard.press('Escape');
+      await expect(page.locator('.pause-menu-card')).toBeVisible();
+      await page.waitForTimeout(500);
+
+      const r = await page.evaluate(() => {
+        const card = document.querySelector('.pause-menu-card') as HTMLElement;
+        const cb = card.getBoundingClientRect();
+        const buttons = [...card.querySelectorAll('button')].map(b => { const x = b.getBoundingClientRect(); return { n: (b.textContent ?? '').trim().slice(0, 14), top: x.top, bottom: x.bottom, h: x.height, w: x.width }; });
+        const tiny: string[] = [];
+        for (const e of card.querySelectorAll('*')) {
+          if (![...e.childNodes].some(n => n.nodeType === 3 && (n.textContent ?? '').trim())) continue;
+          const b = e.getBoundingClientRect(); const cs = getComputedStyle(e);
+          if (b.width > 0 && cs.display !== 'none' && parseFloat(cs.fontSize) < 11.99) tiny.push(`${(e.textContent ?? '').trim().slice(0, 12)} ${cs.fontSize}`);
+        }
+        return { vh: innerHeight, top: cb.top, bottom: cb.bottom, scroll: card.scrollHeight - card.clientHeight, buttons, tiny };
+      });
+
+      expect(r.top, 'card top').toBeGreaterThanOrEqual(0);
+      expect(r.bottom, 'card bottom').toBeLessThanOrEqual(r.vh);
+      expect(r.scroll, 'card needs no scrolling').toBeLessThanOrEqual(1);
+      expect(r.buttons.length).toBeGreaterThanOrEqual(7); // close, 2 switches, 4 actions
+      for (const b of r.buttons) {
+        expect(b.bottom, `${b.n}: inside the screen`).toBeLessThanOrEqual(r.vh);
+        expect(b.h, `${b.n}: height`).toBeGreaterThanOrEqual(39.5);
+      }
+      expect(r.tiny, 'text under 12px').toEqual([]);
+
+      // The last button works (it was cut off before)
+      await page.locator('.pause-menu-card .menu-action-btn.primary').click();
+      await expect(page.locator('.pause-menu-card')).toHaveCount(0);
+      await ctx.close();
+    });
+  }
+});
