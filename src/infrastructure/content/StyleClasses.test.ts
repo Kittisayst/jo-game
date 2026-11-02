@@ -23,7 +23,7 @@ const css = Object.values(cssFiles).join('\n');
 const ALLOWED_WITHOUT_STYLE = new Set([
     // hooks of the HUD badges and the windows
     'backpack-hud-btn', 'crafting-badge', 'garden-badge', 'health-badge', 'hero-level-badge', 'pending-badge', 'world-time-badge',
-    'choice-text', 'dialogue-avatar', 'export-box', 'import-box', 'lib-overlay', 'lib-tab-icon', 'portal-slot-label',
+    'choice-text', 'dialogue-avatar', 'export-box', 'import-box', 'lib-overlay', 'lib-tab-icon',
     'realm-cell-number', 'realm-row-icon', 'title-credit-label',
     // values an expression compares with (`tab === 'exam'`), not classes
     'all', 'consumable', 'gear', 'material', 'exam', 'practice', 'skills', 'village', 'dungeon',
