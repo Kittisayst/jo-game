@@ -14,16 +14,20 @@ interface QuestTrackerHudProps
 
 export const QuestTrackerHud: React.FC<QuestTrackerHudProps> = ({ visible = true }) =>
 {
+    // The player's choice wins; with none yet, a phone held sideways starts collapsed (the panel covered 13% of the
+    // screen and repeats the Quest Board)
     const [collapsed, setCollapsed] = useState<boolean>(() =>
     {
         try
         {
-            return localStorage.getItem(STORAGE_KEY) === 'true';
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved !== null) return saved === 'true';
         }
         catch
         {
-            return false;
+            // storage blocked: fall through to the default
         }
+        return window.matchMedia('(max-height: 520px)').matches;
     });
 
     const [, setRevision] = useState(0);
@@ -91,6 +95,7 @@ export const QuestTrackerHud: React.FC<QuestTrackerHudProps> = ({ visible = true
                 /* Collapsed View: Compact Floating Button */
                 <button
                     type="button"
+                    className="quest-tracker-pill"
                     onClick={toggleCollapse}
                     title="ກົດເພື່ອເບິ່ງລາຍການພາລະກິດ (Expand Quest Tracker)"
                     style={{
@@ -118,6 +123,7 @@ export const QuestTrackerHud: React.FC<QuestTrackerHudProps> = ({ visible = true
             ) : (
                 /* Expanded View: Transparent Clean Card */
                 <div
+                    className="quest-tracker-card"
                     style={{
                         background: 'rgba(15, 23, 42, 0.88)',
                         border: '1.5px solid #334155',
@@ -156,6 +162,7 @@ export const QuestTrackerHud: React.FC<QuestTrackerHudProps> = ({ visible = true
                         <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                             <button
                                 type="button"
+                                className="quest-tracker-btn"
                                 onClick={handleOpenBoard}
                                 title="ເປີດກະດານພາລະກິດ"
                                 style={{
@@ -171,6 +178,7 @@ export const QuestTrackerHud: React.FC<QuestTrackerHudProps> = ({ visible = true
                             </button>
                             <button
                                 type="button"
+                                className="quest-tracker-btn"
                                 onClick={toggleCollapse}
                                 title="ຫຍໍ້ເກັບໄວ້ (Minimize)"
                                 style={{

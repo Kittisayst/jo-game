@@ -116,7 +116,9 @@ function App ()
     {
         if (villageWelcomeToast)
         {
-            const timer = setTimeout(() => setVillageWelcomeToast(null), 5000);
+            // Shorter on a phone held sideways, where the screen is small
+            const ms = window.matchMedia('(max-height: 520px)').matches ? 3000 : 5000;
+            const timer = setTimeout(() => setVillageWelcomeToast(null), ms);
             return () => clearTimeout(timer);
         }
     }, [villageWelcomeToast]);

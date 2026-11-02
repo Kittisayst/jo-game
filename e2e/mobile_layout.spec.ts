@@ -108,3 +108,58 @@ test('on a desktop the windows keep their own size and header', async ({ page })
   expect(m.window!.w).toBeLessThan(m.vw - 100);
   expect(m.header!.h).toBeGreaterThan(60);
 });
+
+test.describe('The play area on a phone held sideways', () => {
+  for (const phone of PHONES) {
+    test(`HUD in two rows, quest panel collapsed, short one-line toast on ${phone.name}`, async ({ browser }) => {
+      test.setTimeout(120000);
+      const ctx = await browser.newContext({ viewport: phone.viewport, isMobile: true, hasTouch: true });
+      const page = await ctx.newPage();
+      await page.goto('/');
+      await page.getByText(/ເຂົ້າເກມ \(Play Game\)/).click();
+      await expect(page.locator('.game-hud')).toBeVisible({ timeout: 30000 });
+
+      // The welcome toast: one line, narrow, under the HUD, and gone after a few seconds
+      const toast = page.locator('.village-welcome-toast');
+      await expect(toast).toBeVisible();
+      await page.waitForTimeout(600); // after its slide-in
+      const t = await toast.boundingBox();
+      expect(t!.height, 'toast height (one line)').toBeLessThanOrEqual(48);
+      expect(t!.width, 'toast width').toBeLessThanOrEqual(phone.viewport.width * 0.6 + 1);
+      expect(t!.y, 'toast sits under the HUD rows').toBeGreaterThanOrEqual(80);
+      await expect(toast).toHaveCount(0, { timeout: 6000 });
+
+      // The vitals row fits one row: the HUD is two rows at most
+      const left = await page.locator('.hud-cluster-left').boundingBox();
+      expect(left!.height, 'HUD left cluster height').toBeLessThanOrEqual(80);
+
+      // The quest panel starts as a 44 px pill, not a 13% panel
+      const pill = page.locator('.quest-tracker-pill');
+      await expect(pill).toBeVisible();
+      await expect(page.locator('.quest-tracker-card')).toHaveCount(0);
+      const p = await pill.boundingBox();
+      expect(p!.height).toBeGreaterThanOrEqual(43.5);
+      expect(p!.width).toBeGreaterThanOrEqual(43.5);
+
+      // Tapping it opens the list; its buttons are big enough, and ➖ puts it back
+      await pill.click();
+      await expect(page.locator('.quest-tracker-card')).toBeVisible();
+      for (const b of await page.locator('.quest-tracker-btn').all()) {
+        const bb = await b.boundingBox();
+        expect(bb!.height).toBeGreaterThanOrEqual(43.5);
+        expect(bb!.width).toBeGreaterThanOrEqual(43.5);
+      }
+      await page.locator('.quest-tracker-btn').last().click();
+      await expect(page.locator('.quest-tracker-pill')).toBeVisible();
+      await ctx.close();
+    });
+  }
+
+  test('on a desktop the quest panel is open at first', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 720 });
+    await page.goto('/');
+    await page.getByText(/ເຂົ້າເກມ \(Play Game\)/).click();
+    await expect(page.locator('.game-hud')).toBeVisible({ timeout: 30000 });
+    await expect(page.locator('.quest-tracker-card')).toBeVisible();
+  });
+});
