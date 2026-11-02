@@ -1,7 +1,7 @@
 # Make the game an installable PWA (Add to Home screen, full screen, offline)
 
 - **Date:** 2026-11-02
-- **Status:** planned
+- **Status:** done in code (PR open); the check on a real phone (step 8) waits for the owner
 - **Project:** jo-game (Knowledge Quest)
 
 ## Goal
@@ -25,7 +25,7 @@ Decided with the user (2026-11-02): use `vite-plugin-pwa` (a new dev dependency)
 2. **Manifest values:** `name` "ພະຈົນໄພຄວາມຮູ້ - Knowledge Quest", `short_name` "Knowledge Quest", `display: "fullscreen"` with `display_override: ["fullscreen", "standalone"]` (Android; iOS ignores fullscreen and uses standalone from the meta tags), `orientation: "landscape"`, `start_url: "./"`, `scope: "./"` (so it works under `/jo-game/`), `background_color` and `theme_color` from the title menu colour (`#0b0720`, the Title scene background), `lang: "lo"`, icons 192 and 512 (`purpose: "any"`) plus a 512 maskable one.
 3. **Icons:** generate `public/icons/icon-192.png`, `icon-512.png`, `icon-maskable-512.png` and `apple-touch-icon.png` (180×180) from `logo_crest.png` by nearest-neighbour scaling on the dark background, with the maskable one padded to the 80% safe zone. A small script `tools/art/build_pwa_icons.py` (Pillow, like the other art tools) so they can be rebuilt.
 4. **`index.html`:** `<link rel="manifest">` is added by the plugin; add `theme-color`, `apple-touch-icon`, `apple-mobile-web-app-capable`, `apple-mobile-web-app-status-bar-style` (`black-translucent`), `apple-mobile-web-app-title`, and `viewport-fit=cover` in the viewport meta so the safe-area insets start working on notched phones.
-5. **Update behaviour:** `autoUpdate` + `clientsClaim`; the page reloads itself when a new version is ready. Register through the plugin's virtual module (`virtual:pwa-register`) only in production, so dev, Vitest and Playwright do not run a service worker. Typecheck needs `vite-plugin-pwa/client` in `tsconfig` types (or a `.d.ts` reference).
+5. **Update behaviour (as built):** `autoUpdate` + `clientsClaim` + `skipWaiting`, registered with `injectRegister: 'script'` (no source import, so no virtual module in dev/Vitest). The page does **not** reload itself (that could cut a game short); an inline script in `index.html` calls `registration.update()` on load and when the tab comes back, and the new version is used from the next open. Checked: after a data change and one reload plus a few seconds, the new value is served.
 6. **In-game full-screen button:** a browser tab (not installed) cannot hide its bar without a user gesture. Add a small Fullscreen toggle in the Settings window (and the title menu) calling `document.documentElement.requestFullscreen()`, shown only when the page is not already in standalone/fullscreen display mode and the API exists (not on iPhone Safari, where it does not exist; there the answer is "Add to Home screen").
 7. **Landscape:** the manifest locks landscape on Android; on iPhone it cannot be locked, so show a one-line "turn your phone sideways" hint in portrait on touch devices (a CSS media query overlay, no JS), because FIT in portrait makes the game tiny.
 8. **CI:** no workflow change expected (the plugin runs inside `npm run build-nolog`). Add the new dependency to `package-lock.json` (`npm install -D vite-plugin-pwa`), which CI installs with `npm ci`.

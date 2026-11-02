@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { saveManager, SaveSlotId, SlotMetadata } from '../../storage/SaveManager';
+import { canToggleFullscreen, isFullscreen, toggleFullscreen } from '../../fullscreen';
 
 export interface SettingsModalProps
 {
@@ -27,6 +28,16 @@ export function SettingsModal ({
 }: SettingsModalProps)
 {
     const [selectedSlot, setSelectedSlot] = useState<SaveSlotId>(() => saveManager.getActiveSlot());
+    const [fullscreen, setFullscreen] = useState(isFullscreen);
+    const showFullscreen = canToggleFullscreen();
+
+    useEffect(() =>
+    {
+        const onChange = () => setFullscreen(isFullscreen());
+        document.addEventListener('fullscreenchange', onChange);
+        return () => document.removeEventListener('fullscreenchange', onChange);
+    }, []);
+
     const [slotsList, setSlotsList] = useState<SlotMetadata[]>(() => saveManager.listSlots());
     const [isExportImportOpen, setIsExportImportOpen] = useState(false);
     const [importInput, setImportInput] = useState('');
@@ -188,6 +199,25 @@ export function SettingsModal ({
                         </button>
                     </div>
                 </div>
+
+                {showFullscreen && (
+                    <div className="settings-section">
+                        <div className="settings-section-title">🖥️ ໜ້າຈໍ (Display)</div>
+                        <div className="settings-toggle-row">
+                            <span className="settings-row-label">
+                                ເຕັມຈໍ (ເຊື່ອງແຖບ browser)
+                            </span>
+                            <button
+                                className={`settings-switch-btn ${fullscreen ? 'on' : 'off'}`}
+                                data-testid="fullscreen-toggle"
+                                onClick={() => { void toggleFullscreen(); }}
+                                type="button"
+                            >
+                                {fullscreen ? 'ON' : 'OFF'}
+                            </button>
+                        </div>
+                    </div>
+                )}
 
                 {/* Section 2: Save Slots & Data Persistence */}
                 <div className="settings-section">
