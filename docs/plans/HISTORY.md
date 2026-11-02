@@ -13,3 +13,4 @@
 | 2026-11-02 | docs/plans/2026-11-02-forge-merge-and-chanthy-shop.md | planned | ລວມ Workshop+Forge ເປັນໂຮງຊ່າງດຽວ 1 ໜ້າຕ່າງມີແຖບ; ຮ້ານປ້າຈັນທີແບບແລກວັດຖຸດິບ (ເມັດ, ຢາ/ອາຫານ, ຂອງໃຊ້, ສິນຄ້າລາຍວັນ), ບໍ່ແຕະ Credit |
 | 2026-11-02 | docs/plans/2026-11-02-github-pages-deploy.md | in progress | ເອົາເກມຂຶ້ນ GitHub Pages ດ້ວຍ GitHub Actions (build-nolog, ກວດ tsc/lint/test ກ່ອນ), ແກ້ url ຟອນ absolute ໃນ style.css, ກວດ build ໃນ /jo-game/, ເປີດ Pages ໃນ Settings |
 | 2026-11-02 | docs/plans/2026-11-02-pwa-install.md | in progress | ເຮັດເກມເປັນ PWA ດ້ວຍ vite-plugin-pwa: manifest fullscreen/landscape, ໄອຄອນ 192/512/maskable ຈາກ logo_crest, offline precache + autoUpdate, ປຸ່ມເຕັມຈໍໃນ Settings, ຂໍ້ຈຳກັດ iPhone |
+| 2026-11-02 | docs/plans/2026-11-02-mobile-ui-improvements.md | planned | UI ໂທລະສັບ: ໜ້າຕ່າງເປັນ sheet ເຕັມຈໍ (header 44px, tabs ແຖວດຽວ, card ກະທັດຮັດ), panel ພາລະກິດພັບໄວ້, toast ຢູ່ເທິງ, ປຸ່ມ ≥44px, ຕົວໜັງສື ≥12px, HUD ແຖວດຽວໃນຈໍແຄບ, ໜ້າຈໍແນວຕັ້ງບອກໃຫ້ຫັນ; M1–M5 |
