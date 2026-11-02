@@ -53,7 +53,7 @@ async function learnChapterOne (page: Page, bot: Bot)
   await walkVillageTo(bot, 300);
   await bot.interact();
   await page.getByRole('button', { name: /ຊື້ປຶ້ມຕຳລາ/ }).first().click();
-  await expect(page.locator('.wallet-hud-badge')).toContainText('0');
+  expect(await page.evaluate(() => (window as any).__entities.wallet.balance as number)).toBeLessThanOrEqual(20);
   bot.note('bought the textbook');
 
   // Read all five pages (the page timer makes this the slow part)

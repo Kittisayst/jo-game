@@ -17,8 +17,9 @@ test.describe('Knowledge Quest Village HUD & Combat Controls E2E', () => {
     await page.getByRole('button', { name: /ເຂົ້າເກມ/i }).click();
     await expect(page.locator('canvas')).toBeVisible({ timeout: 10000 });
 
-    // 4. HUD shows Credit and the equipped sword (in the bottom bar), but no shop button and no consumable slots
-    await expect(page.locator('.wallet-hud-badge')).toBeVisible();
+    // 4. HUD shows the Backpack button (no Credit badge any more) and the equipped sword, but no shop button and no consumable slots
+    await expect(page.locator('.wallet-hud-badge')).toHaveCount(0);
+    await expect(page.locator('#hud-backpack-btn')).toBeVisible();
     await expect(page.locator('.weapon-hud-badge')).toBeVisible();
     await expect(page.locator('.shop-hud-btn')).toHaveCount(0);
     await expect(page.locator('.hud-hotbar .weapon-hud-badge')).toBeVisible();

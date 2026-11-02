@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { test, expect, Page } from '@playwright/test';
 import { Bot } from './helpers/bot';
 import { getPlayerTexture } from './helpers/gameProbe';
@@ -53,7 +54,7 @@ test.describe('Skin shop (Mina)', () => {
     await shop.locator('[data-skin-id="neon-ninja"]').click();
     await expect(shop.locator('.outfit-tryon')).toBeVisible();
     await expect(shop.locator('.outfit-detail h3')).toContainText('Neon Shinobi');
-    await expect(page.locator('.wallet-hud-badge')).toContainText('20');
+    expect(await page.evaluate(() => (window as any).__entities.wallet.balance as number)).toBe(20);
     expect(await getPlayerTexture(page)).toBe('player-skin-cyber-blue');
 
     // Too poor: the shop says so and buying does nothing

@@ -1149,7 +1149,7 @@ function App ()
                 }}
             />
 
-            <QuestTrackerHud visible={!isMainMenuOpen && !isSettingsOpen} />
+            <QuestTrackerHud visible={!isMainMenuOpen && !isSettingsOpen && currentLevel === 'village'} />
 
             <PetShopModal
                 isOpen={isPetShopOpen}
