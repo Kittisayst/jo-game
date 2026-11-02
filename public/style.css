@@ -5840,3 +5840,60 @@ button,
         font-size: var(--gw-font-s);
     }
 }
+
+/* ===== The play area on a phone held sideways (M3 of docs/plans/2026-11-02-mobile-ui-improvements.md) ===== */
+@media (max-height: 520px) {
+    /* Quest tracker: starts as a 44 px pill (see QuestTrackerHud), sits under the HUD buttons, and its buttons are
+       big enough to hit */
+    .quest-tracker-hud {
+        top: 56px !important;
+        right: max(8px, env(safe-area-inset-right)) !important;
+        max-width: 220px !important;
+    }
+
+    .quest-tracker-pill {
+        min-height: var(--tap);
+        min-width: var(--tap);
+        justify-content: center;
+    }
+
+    .quest-tracker-btn {
+        min-width: var(--tap);
+        min-height: var(--tap);
+        display: inline-flex !important;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem !important;
+    }
+
+    .quest-tracker-card {
+        padding: 6px 8px !important;
+    }
+
+    /* The welcome toast: one line under the HUD, not a box across the middle of the play area */
+    .village-welcome-toast {
+        top: 84px;
+        max-width: min(56vw, 520px);
+        padding: 6px 14px;
+        font-size: 0.85rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+}
+
+/* A narrow phone (667 px and under): the vitals row has to fit the space left of the right-hand buttons, or the time
+   drops to a second row and the HUD grows to three rows */
+@media (max-height: 520px) and (max-width: 760px) {
+    .hud-row {
+        gap: 3px;
+    }
+
+    .hud-row .hud-badge {
+        padding: 3px 6px;
+    }
+
+    .hud-xp-track {
+        display: none !important;
+    }
+}

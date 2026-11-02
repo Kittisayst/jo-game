@@ -171,7 +171,7 @@ export function Hud ({
                             >
                                 <span className="badge-icon">⭐</span>
                                 <span className="badge-value">Lv {heroLevel.level}</span>
-                                <span aria-hidden="true" style={{ display: 'inline-block', width: 44, height: 6, borderRadius: 3, background: 'rgba(148,163,184,0.35)', overflow: 'hidden' }}>
+                                <span aria-hidden="true" className="hud-xp-track" style={{ display: 'inline-block', width: 44, height: 6, borderRadius: 3, background: 'rgba(148,163,184,0.35)', overflow: 'hidden' }}>
                                     <span data-testid="hero-xp-bar" style={{ display: 'block', height: '100%', width: `${Math.round(heroLevel.fraction * 100)}%`, background: '#a5b4fc' }} />
                                 </span>
                             </button>
