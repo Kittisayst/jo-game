@@ -28,7 +28,7 @@ const ALLOWED_WITHOUT_STYLE = new Set([
     // values an expression compares with (`currentLevel === 'village'`), not classes
     'village', 'dungeon',
     // Tailwind names with no visible effect here
-    'drop-shadow', 'filter', 'py-0.2',
+    'drop-shadow', 'py-0.2',
 ]);
 
 /** Returns whether a class is a standard Tailwind CSS utility compiled by @tailwindcss/vite. */

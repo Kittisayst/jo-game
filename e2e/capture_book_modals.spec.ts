@@ -8,9 +8,15 @@ test.describe('Inspect and Capture Book / Adventurer Journal UI Modals', () => {
     test.setTimeout(120000);
 
     const outDir = 'C:/Users/kitti/.gemini/antigravity/brain/0773a79a-59e1-49a2-abe8-2b35941fea76/book_ui';
+    const parentDir = 'C:/Users/kitti/.gemini/antigravity/brain/0773a79a-59e1-49a2-abe8-2b35941fea76';
     if (!fs.existsSync(outDir)) {
       fs.mkdirSync(outDir, { recursive: true });
     }
+
+    const saveSnap = async (name: string) => {
+      await page.screenshot({ path: path.join(outDir, name) });
+      fs.copyFileSync(path.join(outDir, name), path.join(parentDir, name));
+    };
 
     // 1. Open game
     await page.goto('./');
@@ -49,7 +55,7 @@ test.describe('Inspect and Capture Book / Adventurer Journal UI Modals', () => {
     await page.evaluate(() => (window as any).__eventBus.emit('open-smithy', 'tools'));
     await expect(page.locator('.gw-window')).toBeVisible();
     await page.waitForTimeout(600);
-    await page.screenshot({ path: path.join(outDir, '01-book-smithy-tools.png') });
+    await saveSnap('01-book-smithy-tools.png');
     await page.keyboard.press('Escape');
     await page.waitForTimeout(300);
 
@@ -57,7 +63,7 @@ test.describe('Inspect and Capture Book / Adventurer Journal UI Modals', () => {
     await page.evaluate(() => (window as any).__eventBus.emit('open-backpack'));
     await expect(page.locator('.gw-window')).toBeVisible();
     await page.waitForTimeout(600);
-    await page.screenshot({ path: path.join(outDir, '02-book-backpack-inventory.png') });
+    await saveSnap('02-book-backpack-inventory.png');
     await page.keyboard.press('Escape');
     await page.waitForTimeout(300);
 
@@ -65,7 +71,7 @@ test.describe('Inspect and Capture Book / Adventurer Journal UI Modals', () => {
     await page.evaluate(() => (window as any).__eventBus.emit('open-shop'));
     await expect(page.locator('.gw-window')).toBeVisible();
     await page.waitForTimeout(600);
-    await page.screenshot({ path: path.join(outDir, '03-book-shop-ledger.png') });
+    await saveSnap('03-book-shop-ledger.png');
     await page.keyboard.press('Escape');
     await page.waitForTimeout(300);
 
@@ -73,7 +79,7 @@ test.describe('Inspect and Capture Book / Adventurer Journal UI Modals', () => {
     await page.evaluate(() => (window as any).__eventBus.emit('open-quest-board'));
     await expect(page.locator('.gw-window')).toBeVisible();
     await page.waitForTimeout(600);
-    await page.screenshot({ path: path.join(outDir, '04-book-quest-board.png') });
+    await saveSnap('04-book-quest-board.png');
     await page.keyboard.press('Escape');
     await page.waitForTimeout(300);
 
@@ -81,7 +87,7 @@ test.describe('Inspect and Capture Book / Adventurer Journal UI Modals', () => {
     await page.keyboard.press('KeyC');
     await expect(page.locator('.gw-window')).toBeVisible();
     await page.waitForTimeout(600);
-    await page.screenshot({ path: path.join(outDir, '05-book-character-chronicle.png') });
+    await saveSnap('05-book-character-chronicle.png');
     await page.keyboard.press('Escape');
     await page.waitForTimeout(300);
 
@@ -89,7 +95,7 @@ test.describe('Inspect and Capture Book / Adventurer Journal UI Modals', () => {
     await page.evaluate(() => (window as any).__eventBus.emit('open-storage'));
     await expect(page.locator('.gw-window')).toBeVisible();
     await page.waitForTimeout(600);
-    await page.screenshot({ path: path.join(outDir, '08-book-storage-chest.png') });
+    await saveSnap('08-book-storage-chest.png');
     await page.keyboard.press('Escape');
     await page.waitForTimeout(300);
 
@@ -97,7 +103,7 @@ test.describe('Inspect and Capture Book / Adventurer Journal UI Modals', () => {
     await page.evaluate(() => (window as any).__eventBus.emit('open-academy'));
     await expect(page.locator('.gw-window')).toBeVisible();
     await page.waitForTimeout(600);
-    await page.screenshot({ path: path.join(outDir, '09-book-academy-exam.png') });
+    await saveSnap('09-book-academy-exam.png');
     await page.keyboard.press('Escape');
     await page.waitForTimeout(300);
 
@@ -105,7 +111,7 @@ test.describe('Inspect and Capture Book / Adventurer Journal UI Modals', () => {
     await page.locator('#hud-library-btn').click();
     await expect(page.locator('.gw-window')).toBeVisible();
     await page.waitForTimeout(600);
-    await page.screenshot({ path: path.join(outDir, '10-book-textbook-reader.png') });
+    await saveSnap('10-book-textbook-reader.png');
     await page.keyboard.press('Escape');
     await page.waitForTimeout(300);
 
@@ -113,7 +119,7 @@ test.describe('Inspect and Capture Book / Adventurer Journal UI Modals', () => {
     await page.evaluate(() => (window as any).__eventBus.emit('open-stage-map'));
     await expect(page.locator('.gw-window')).toBeVisible();
     await page.waitForTimeout(600);
-    await page.screenshot({ path: path.join(outDir, '11-book-world-atlas-map.png') });
+    await saveSnap('11-book-world-atlas-map.png');
     await page.keyboard.press('Escape');
     await page.waitForTimeout(300);
 
@@ -122,14 +128,14 @@ test.describe('Inspect and Capture Book / Adventurer Journal UI Modals', () => {
     await page.evaluate(() => (window as any).__eventBus.emit('open-backpack'));
     await expect(page.locator('.gw-window')).toBeVisible();
     await page.waitForTimeout(600);
-    await page.screenshot({ path: path.join(outDir, '06-mobile-landscape-backpack.png') });
+    await saveSnap('06-mobile-landscape-backpack.png');
     await page.keyboard.press('Escape');
     await page.waitForTimeout(300);
 
     await page.evaluate(() => (window as any).__eventBus.emit('open-smithy', 'tools'));
     await expect(page.locator('.gw-window')).toBeVisible();
     await page.waitForTimeout(600);
-    await page.screenshot({ path: path.join(outDir, '07-mobile-landscape-smithy.png') });
+    await saveSnap('07-mobile-landscape-smithy.png');
     await page.keyboard.press('Escape');
     await page.waitForTimeout(300);
 

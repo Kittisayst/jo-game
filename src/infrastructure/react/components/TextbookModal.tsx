@@ -308,11 +308,10 @@ export const TextbookModal: React.FC<TextbookModalProps> = ({
                         </button>
                     </div>
                 }
-                footer={
-                    <div className="flex items-center justify-between w-full text-xs text-amber-200/80">
-                        <span>🏛️ ຫໍສະໝຸດແຫ່ງປັນຍາ</span>
-                        <span className="font-bold text-amber-300">🎓 {entities.wallet.balance} Credit</span>
-                    </div>
+                tabExtra={
+                    <span className="font-bold font-mono text-xs text-amber-300 bg-amber-950/70 border border-amber-800/80 px-2.5 py-1 rounded-full flex items-center gap-1">
+                        🎓 {entities.wallet.balance} Credit
+                    </span>
                 }
             />
         );
@@ -506,11 +505,10 @@ export const TextbookModal: React.FC<TextbookModalProps> = ({
                         </div>
                     </div>
                 }
-                footer={
-                    <div className="flex items-center justify-between w-full text-xs text-amber-200/80">
-                        <span>📖 ບົດຮຽນ: {activePage.title}</span>
-                        <span className="font-bold text-amber-300">🎓 {entities.wallet.balance} Credit</span>
-                    </div>
+                tabExtra={
+                    <span className="font-bold font-mono text-xs text-amber-300 bg-amber-950/70 border border-amber-800/80 px-2.5 py-1 rounded-full flex items-center gap-1">
+                        🎓 {entities.wallet.balance} Credit
+                    </span>
                 }
             />
         );
@@ -814,11 +812,10 @@ export const TextbookModal: React.FC<TextbookModalProps> = ({
                     </div>
                 )
             }
-            footer={
-                <div className="flex items-center justify-between w-full text-xs text-amber-200/80">
-                    <span>🏛️ ຫໍສະໝຸດແຫ່ງປັນຍາ</span>
-                    <span className="font-bold text-amber-300">🎓 {entities.wallet.balance} Credit</span>
-                </div>
+            tabExtra={
+                <span className="font-bold font-mono text-xs text-amber-300 bg-amber-950/70 border border-amber-800/80 px-2.5 py-1 rounded-full flex items-center gap-1">
+                    🎓 {entities.wallet.balance} Credit
+                </span>
             }
         />
     );

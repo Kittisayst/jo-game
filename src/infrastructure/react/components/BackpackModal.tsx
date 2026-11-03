@@ -349,30 +349,36 @@ export const BackpackModal: React.FC<BackpackModalProps> = ({ isOpen, onClose, o
                 </div>
             </div>
 
-            {/* Quick Actions at bottom of left page */}
-            <div className="flex items-center gap-2 pt-2 border-t border-[#d6c7a7]">
-                {onOpenBooks && (
+            {/* Quick Actions & Death penalty warning at bottom of left page */}
+            <div className="space-y-2 pt-2 border-t border-[#d6c7a7]">
+                <div className="flex items-center gap-2">
+                    {onOpenBooks && (
+                        <button
+                            onClick={() => {
+                                soundManager.playSelect();
+                                onClose();
+                                onOpenBooks();
+                            }}
+                            className="flex-1 py-2 px-3 rounded-xl bg-amber-200/80 hover:bg-amber-300 text-amber-950 font-bold text-xs border border-amber-500/50 transition flex items-center justify-center gap-1.5 shadow-sm active:scale-95"
+                            title="ເປີດຊັ້ນປຶ້ມຕຳລາສ່ວນຕົວ"
+                        >
+                            <span>📚</span>
+                            <span>ຊັ້ນປຶ້ມ ({Object.values(entities.books).filter(b => b.isUnlocked).length})</span>
+                        </button>
+                    )}
                     <button
-                        onClick={() => {
-                            soundManager.playSelect();
-                            onClose();
-                            onOpenBooks();
-                        }}
-                        className="flex-1 py-2 px-3 rounded-xl bg-amber-200/80 hover:bg-amber-300 text-amber-950 font-bold text-xs border border-amber-500/50 transition flex items-center justify-center gap-1.5 shadow-sm active:scale-95"
-                        title="ເປີດຊັ້ນປຶ້ມຕຳລາສ່ວນຕົວ"
+                        onClick={handleSortBackpack}
+                        className="flex-1 py-2 px-3 rounded-xl bg-stone-200 hover:bg-stone-300 text-stone-900 font-bold text-xs border border-stone-400 transition flex items-center justify-center gap-1.5 shadow-sm active:scale-95"
+                        title="ຈັດລຽງໄອເທັມຕາມໝວດໝູ່"
                     >
-                        <span>📚</span>
-                        <span>ຊັ້ນປຶ້ມ ({Object.values(entities.books).filter(b => b.isUnlocked).length})</span>
+                        <span>🔄</span>
+                        <span>ຈັດລຽງ (Sort)</span>
                     </button>
-                )}
-                <button
-                    onClick={handleSortBackpack}
-                    className="flex-1 py-2 px-3 rounded-xl bg-stone-200 hover:bg-stone-300 text-stone-900 font-bold text-xs border border-stone-400 transition flex items-center justify-center gap-1.5 shadow-sm active:scale-95"
-                    title="ຈັດລຽງໄອເທັມຕາມໝວດໝູ່"
-                >
-                    <span>🔄</span>
-                    <span>ຈັດລຽງ (Sort)</span>
-                </button>
+                </div>
+                <div className="p-1.5 rounded-lg bg-amber-900/10 border border-amber-900/20 text-[11px] text-amber-950 flex items-center gap-1.5">
+                    <span>⚠️</span>
+                    <span>ເສຍຊີວິດໃນດ່ານຈະສູນເສຍວັດສະດຸ 50%</span>
+                </div>
             </div>
         </div>
     );
@@ -640,16 +646,10 @@ export const BackpackModal: React.FC<BackpackModalProps> = ({ isOpen, onClose, o
             leftPage={leftPage}
             rightPage={rightPage}
             maxWidth="max-w-5xl"
-            footer={
-                <div className="flex items-center justify-between w-full font-mono text-xs text-[#eedec2]">
-                    <span className="flex items-center gap-1.5">
-                        <span>⚠️</span>
-                        <span>ເສຍຊີວິດໃນດ່ານຈະສູນເສຍວັດສະດຸ 50% (ເຄື່ອງມື ແລະ ອາວຸດຈະບໍ່ເສຍຫາຍ)</span>
-                    </span>
-                    <span className="font-bold text-amber-200">
-                        🎓 ເຄຣດິດ: {entities.wallet.balance}
-                    </span>
-                </div>
+            tabExtra={
+                <span className="font-bold font-mono text-xs text-amber-300 bg-amber-950/70 border border-amber-800/80 px-2.5 py-1 rounded-full flex items-center gap-1">
+                    🎓 {entities.wallet.balance} Credit
+                </span>
             }
         />
     );

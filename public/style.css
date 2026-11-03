@@ -7242,13 +7242,71 @@ button {
 /* Top Ribbon Tabs (Bookmarks) */
 .book-tabs-container {
     display: flex;
-    align-items: flex-end;
-    gap: 6px;
-    padding: 0 24px;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 0 16px;
     background: #170d07;
     border-bottom: 2px solid #854d0e;
+    min-height: 48px;
+    position: relative;
+    z-index: 30;
+}
+
+.book-tabs-list {
+    display: flex;
+    align-items: flex-end;
+    gap: 6px;
     overflow-x: auto;
     scrollbar-width: none;
+    flex: 1 1 auto;
+    min-width: 0;
+    height: 100%;
+    padding-top: 4px;
+}
+
+.book-tabs-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;
+    flex-shrink: 0;
+    z-index: 40;
+    padding-left: 8px;
+}
+
+.book-tab-extra {
+    display: flex;
+    align-items: center;
+}
+
+.book-close-tab-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
+    border-radius: 8px;
+    background: #2e1a12;
+    border: 2px solid #78350f;
+    color: #fef3c7;
+    font-size: 1.2rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.book-close-tab-btn:hover {
+    background: #7f1d1d !important;
+    border-color: #ef4444 !important;
+    color: #ffffff !important;
+    box-shadow: 0 0 10px rgba(239, 68, 68, 0.4);
+}
+
+.book-close-tab-btn:active {
+    transform: scale(0.94);
 }
 
 .book-ribbon-tab {
@@ -7518,16 +7576,26 @@ button {
     .book-window {
         border-radius: 0 !important;
         border-width: 0 !important;
+        height: 100vh !important;
+        max-height: 100vh !important;
     }
 
     .book-tabs-container {
-        padding: 0 12px;
+        padding: 0 8px;
         min-height: 44px;
     }
 
     .book-ribbon-tab {
-        padding: 6px 12px;
+        padding: 6px 10px;
         font-size: 0.8rem;
+    }
+
+    .book-close-tab-btn {
+        width: 44px;
+        height: 44px;
+        min-width: 44px;
+        min-height: 44px;
+        font-size: 1.1rem;
     }
 
     .book-spread {

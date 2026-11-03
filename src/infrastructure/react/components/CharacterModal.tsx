@@ -238,11 +238,10 @@ export const CharacterModal: React.FC<CharacterModalProps> = ({ isOpen, onClose,
             leftPage={leftPage}
             rightPage={rightPage}
             windowTestId="character-modal"
-            footer={
-                <div className="flex items-center justify-between w-full font-mono text-xs text-[#eedec2]">
-                    <span>⭐ Level {heroLevel.level} Adventurer</span>
-                    <span>🎓 ເຄຣດິດ: {entities.wallet.balance}</span>
-                </div>
+            tabExtra={
+                <span className="font-bold font-mono text-xs text-amber-300 bg-amber-950/70 border border-amber-800/80 px-2.5 py-1 rounded-full flex items-center gap-1">
+                    🎓 {entities.wallet.balance} Credit
+                </span>
             }
         />
     );

@@ -21,6 +21,7 @@ export interface BookFrameProps {
     onTabChange?: (tabId: string) => void;
     leftPage: React.ReactNode;
     rightPage: React.ReactNode;
+    tabExtra?: React.ReactNode;
     footer?: React.ReactNode;
     maxWidth?: string;
     className?: string;
@@ -49,13 +50,12 @@ export const BookFrame: React.FC<BookFrameProps> = ({
     onClose,
     title,
     icon = '📖',
-    subtitle,
     tabs,
     activeTab,
     onTabChange,
     leftPage,
     rightPage,
-    footer,
+    tabExtra,
     maxWidth = 'max-w-4xl',
     className = '',
     dataTestId,
@@ -63,6 +63,7 @@ export const BookFrame: React.FC<BookFrameProps> = ({
 }) => {
     useEffect(() => {
         if (!isOpen) return;
+        soundManager.playPageTurn();
         const handleKeyDown = (e: KeyboardEvent) => {
             if (e.key === 'Escape') {
                 e.preventDefault();
@@ -82,7 +83,7 @@ export const BookFrame: React.FC<BookFrameProps> = ({
             data-testid={dataTestId}
         >
             <div
-                className={`gw-window book-window relative w-full ${maxWidth} flex flex-col max-h-[92vh] ${className}`}
+                className={`gw-window book-window relative w-full ${maxWidth} flex flex-col max-h-[96vh] h-[92vh] ${className}`}
                 data-testid={windowTestId || dataTestId}
             >
                 {/* 4 Brass Corners */}
@@ -91,85 +92,76 @@ export const BookFrame: React.FC<BookFrameProps> = ({
                 <BrassCorner className="book-corner-bl" rotate={270} />
                 <BrassCorner className="book-corner-br" rotate={180} />
 
-                {/* Book Header Bar */}
-                <div className="gw-header flex items-center justify-between px-4 sm:px-6 py-2 sm:py-3 bg-[#1e1008] border-b-2 border-[#78350f]">
-                    <div className="flex items-center gap-2.5">
-                        <span className="gw-icon text-2xl sm:text-3xl filter drop-shadow">{icon}</span>
-                        <div>
-                            <h2 className="text-base sm:text-xl font-bold text-amber-200 tracking-wide flex items-center gap-2">
+                {/* Top Bookmark Ribbon Tabs Strip with Close Button on Far-Right */}
+                <div className="gw-tabs book-tabs-container">
+                    <div className="book-tabs-list">
+                        {tabs && tabs.length > 0 ? (
+                            tabs.map(tab => {
+                                const isActive = tab.id === activeTab;
+                                return (
+                                    <button
+                                        key={tab.id}
+                                        type="button"
+                                        role="tab"
+                                        aria-selected={isActive}
+                                        data-testid={tab.testId}
+                                        disabled={tab.disabled}
+                                        onClick={() => {
+                                            if (tab.disabled) return;
+                                            soundManager.playPageTurn();
+                                            onTabChange?.(tab.id);
+                                        }}
+                                        className={`book-ribbon-tab ${isActive ? 'book-ribbon-tab-active' : ''} ${
+                                            tab.disabled ? 'opacity-50 cursor-not-allowed' : ''
+                                        }`}
+                                    >
+                                        {tab.icon && <span>{tab.icon}</span>}
+                                        <span>{tab.label}</span>
+                                        {tab.badge !== undefined && tab.badge !== '' && (
+                                            <span className="text-[11px] px-1.5 py-0.2 rounded-full bg-amber-900/60 text-amber-200 font-mono">
+                                                {tab.badge}
+                                            </span>
+                                        )}
+                                    </button>
+                                );
+                            })
+                        ) : (
+                            <div className="book-ribbon-tab book-ribbon-tab-active cursor-default select-none">
+                                {icon && <span>{icon}</span>}
                                 <span>{title}</span>
-                            </h2>
-                            {subtitle && (
-                                <p className="gw-subtitle text-xs text-amber-100/70">{subtitle}</p>
-                            )}
-                        </div>
+                            </div>
+                        )}
                     </div>
-                    <button
-                        onClick={() => {
-                            soundManager.playSelect();
-                            onClose();
-                        }}
-                        className="gw-close rounded-xl p-2 text-amber-200/70 hover:text-amber-100 hover:bg-amber-950/60 transition"
-                        title="ປິດ (Escape)"
-                    >
-                        ✕
-                    </button>
+
+                    {/* Far-Right: Tab Extra (Credit/Balance) & Close Button */}
+                    <div className="book-tabs-actions">
+                        {tabExtra && <div className="book-tab-extra">{tabExtra}</div>}
+                        <button
+                            type="button"
+                            onClick={() => {
+                                soundManager.playSelect();
+                                onClose();
+                            }}
+                            className="gw-close book-close-tab-btn"
+                            title="ປິດ (Escape)"
+                            aria-label="Close"
+                        >
+                            ✕
+                        </button>
+                    </div>
                 </div>
 
-                {/* Bookmark Ribbon Tabs */}
-                {tabs && tabs.length > 0 && (
-                    <div className="gw-tabs book-tabs-container">
-                        {tabs.map(tab => {
-                            const isActive = tab.id === activeTab;
-                            return (
-                                <button
-                                    key={tab.id}
-                                    type="button"
-                                    role="tab"
-                                    aria-selected={isActive}
-                                    data-testid={tab.testId}
-                                    disabled={tab.disabled}
-                                    onClick={() => {
-                                        if (tab.disabled) return;
-                                        soundManager.playSelect();
-                                        onTabChange?.(tab.id);
-                                    }}
-                                    className={`book-ribbon-tab ${isActive ? 'book-ribbon-tab-active' : ''} ${
-                                        tab.disabled ? 'opacity-50 cursor-not-allowed' : ''
-                                    }`}
-                                >
-                                    {tab.icon && <span>{tab.icon}</span>}
-                                    <span>{tab.label}</span>
-                                    {tab.badge && (
-                                        <span className="text-[11px] px-1.5 py-0.2 rounded-full bg-amber-900/60 text-amber-200 font-mono">
-                                            {tab.badge}
-                                        </span>
-                                    )}
-                                </button>
-                            );
-                        })}
-                    </div>
-                )}
-
-                {/* Dual-Page Parchment Spread */}
+                {/* Dual-Page Parchment Spread (Maximized Content Height) */}
                 <div className="gw-body book-spread flex-1">
-                    <div className="book-page book-page-left">
+                    <div className="book-page book-page-left book-page-turn">
                         {leftPage}
                     </div>
                     <div className="book-spine" />
-                    <div className="book-page book-page-right">
+                    <div className="book-page book-page-right book-page-turn">
                         {rightPage}
                     </div>
                 </div>
-
-                {/* Book Footer */}
-                {footer && (
-                    <div className="gw-footer px-4 sm:px-6 py-2.5 bg-[#1e1008] border-t-2 border-[#78350f] flex items-center justify-between text-xs text-[#d6c7a7]">
-                        {footer}
-                    </div>
-                )}
             </div>
         </div>
     );
 };
-

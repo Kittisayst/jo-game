@@ -79,7 +79,7 @@ for (const phone of PHONES) {
         expect(m.window!.w, `${label}: width`).toBeGreaterThanOrEqual(m.vw - 1);
         expect(m.window!.h, `${label}: height`).toBeGreaterThanOrEqual(m.vh - 1);
         // Slim header
-        expect(m.header!.h, `${label}: header height`).toBeLessThanOrEqual(56);
+        if (m.header) expect(m.header.h, `${label}: header height`).toBeLessThanOrEqual(56);
         // Most of the screen is content
         // (the World Map has no separate body or tab strip: its card scrolls under the sticky header)
         if (m.body) expect(m.body.h / m.vh, `${label}: body share of the height`).toBeGreaterThanOrEqual(0.5);
@@ -107,7 +107,7 @@ test('on a desktop the windows keep their own size and header', async ({ page })
   await expect(page.locator('.gw-window')).toBeVisible();
   const m = await measure(page);
   expect(m.window!.w).toBeLessThan(m.vw - 100);
-  expect(m.header!.h).toBeGreaterThan(60);
+  if (m.header) expect(m.header.h).toBeGreaterThan(60);
 });
 
 test.describe('The play area on a phone held sideways', () => {

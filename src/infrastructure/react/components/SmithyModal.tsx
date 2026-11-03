@@ -182,11 +182,10 @@ export const SmithyModal: React.FC<SmithyModalProps> = ({ isOpen, tab, onTabChan
             onTabChange={t => onTabChange(t as SmithyTab)}
             leftPage={leftPageContent}
             rightPage={rightPageContent}
-            footer={
-                <div className="flex items-center justify-between w-full font-mono text-xs text-[#eedec2]">
-                    <span>🎒 ກະເປົາ: {entities.backpack.usedSlotsCount} / {entities.backpack.maxSlots} ຊ່ອງ · ⚔️ ATK {entities.equipment.currentAttackPower}</span>
-                    <span>🎓 ເຄຣດິດ: {entities.wallet.balance}</span>
-                </div>
+            tabExtra={
+                <span className="font-bold font-mono text-xs text-amber-300 bg-amber-950/70 border border-amber-800/80 px-2.5 py-1 rounded-full flex items-center gap-1">
+                    🎓 {entities.wallet.balance} Credit
+                </span>
             }
         />
     );

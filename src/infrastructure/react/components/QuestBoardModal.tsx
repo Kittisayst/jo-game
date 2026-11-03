@@ -343,11 +343,11 @@ export const QuestBoardModal: React.FC<QuestBoardModalProps> = ({ isOpen, onClos
             leftPage={leftPage}
             rightPage={rightPage}
             className="quest-board-modal"
-            footer={
-                <div className="flex items-center justify-between w-full font-mono text-xs text-[#eedec2]">
-                    <span>✨ ພ້ອມຮັບລາງວັນ: {claimableCount} ລາຍການ</span>
-                    <span>🎓 ເຄຣດິດ: {entities.wallet.balance}</span>
-                </div>
+            tabExtra={
+                <span className="font-bold font-mono text-xs text-amber-300 bg-amber-950/70 border border-amber-800/80 px-2.5 py-1 rounded-full flex items-center gap-1">
+                    {claimableCount > 0 && <span className="text-amber-200">✨{claimableCount} · </span>}
+                    🎓 {entities.wallet.balance} Credit
+                </span>
             }
         />
     );
