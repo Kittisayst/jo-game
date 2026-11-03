@@ -130,7 +130,7 @@ export const CharacterModal: React.FC<CharacterModalProps> = ({ isOpen, onClose,
                     </div>
                     <div className="flex justify-between items-center">
                         <span className="book-text-muted">🛡️ ເກາະປ້ອງກັນ (Armor Hearts):</span>
-                        <span className="font-mono font-bold text-sky-800">+{entities.armorContext.totalHearts}</span>
+                        <span className="font-mono font-bold text-sky-800">+{entities.health.armor}</span>
                     </div>
                     <div className="flex justify-between items-center">
                         <span className="book-text-muted">💨 ຄວາມໄວການເດີນ:</span>

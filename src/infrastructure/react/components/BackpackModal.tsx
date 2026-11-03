@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo, useCallback } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { BackpackSlot } from '../../../domain/entities/Backpack';
 import { entities } from '../../composition';
 import { soundManager } from '../../audio/SoundManager';
@@ -192,10 +192,10 @@ export const BackpackModal: React.FC<BackpackModalProps> = ({ isOpen, onClose, o
 
     const capacityPercentage = Math.round((entities.backpack.usedSlotsCount / entities.backpack.maxSlots) * 100);
 
-    const isCurrentlyEquipped = selectedItemDef && (
+    const isCurrentlyEquipped = Boolean(selectedItemDef && (
         (selectedItemDef.category === 'weapon' && entities.equipment.equippedWeaponId === selectedItemDef.id) ||
         (selectedItemDef.category === 'armor' && selectedItemDef.slot && entities.equipment.getArmor(selectedItemDef.slot)?.itemId === selectedItemDef.id)
-    );
+    ));
 
     const weaponDamage = selectedItemDef && selectedItemDef.category === 'weapon'
         ? entities.equipment.getWeaponDamage(selectedItemDef.id)
@@ -252,7 +252,7 @@ export const BackpackModal: React.FC<BackpackModalProps> = ({ isOpen, onClose, o
                     </div>
                     <div className="flex justify-between items-center">
                         <span className="book-text-muted">🛡️ ຫົວໃຈເກາະປ້ອງກັນ (Armor):</span>
-                        <span className="font-mono font-bold text-sky-800">+{entities.armorContext.totalHearts}</span>
+                        <span className="font-mono font-bold text-sky-800">+{entities.health.armor}</span>
                     </div>
                     <div className="flex justify-between items-center">
                         <span className="book-text-muted">🎓 ເຄຣດິດຄວາມຮູ້ (Credit):</span>
