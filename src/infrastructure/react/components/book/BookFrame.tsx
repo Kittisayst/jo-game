@@ -24,6 +24,8 @@ export interface BookFrameProps {
     footer?: React.ReactNode;
     maxWidth?: string;
     className?: string;
+    dataTestId?: string;
+    windowTestId?: string;
 }
 
 const BrassCorner: React.FC<{ className?: string; rotate?: number }> = ({ className, rotate = 0 }) => (
@@ -56,6 +58,8 @@ export const BookFrame: React.FC<BookFrameProps> = ({
     footer,
     maxWidth = 'max-w-4xl',
     className = '',
+    dataTestId,
+    windowTestId,
 }) => {
     useEffect(() => {
         if (!isOpen) return;
@@ -73,8 +77,14 @@ export const BookFrame: React.FC<BookFrameProps> = ({
     if (!isOpen) return null;
 
     return (
-        <div className="gw-overlay fixed inset-0 z-[200] flex items-center justify-center bg-black/80 backdrop-blur-sm p-2 sm:p-4 animate-fade-in">
-            <div className={`gw-window book-window relative w-full ${maxWidth} flex flex-col max-h-[92vh] ${className}`}>
+        <div
+            className="gw-overlay fixed inset-0 z-[200] flex items-center justify-center bg-black/80 backdrop-blur-sm p-2 sm:p-4 animate-fade-in"
+            data-testid={dataTestId}
+        >
+            <div
+                className={`gw-window book-window relative w-full ${maxWidth} flex flex-col max-h-[92vh] ${className}`}
+                data-testid={windowTestId || dataTestId}
+            >
                 {/* 4 Brass Corners */}
                 <BrassCorner className="book-corner-tl" rotate={0} />
                 <BrassCorner className="book-corner-tr" rotate={90} />
@@ -160,3 +170,4 @@ export const BookFrame: React.FC<BookFrameProps> = ({
         </div>
     );
 };
+
