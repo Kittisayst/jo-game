@@ -1,16 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { entities } from '../../composition';
-import { soundManager } from '../../audio/SoundManager';
 import { CraftingStatus } from './CraftingStatus';
-import { RecipeGrid } from './RecipeGrid';
+import { RecipeListView, RecipeInspectorView } from './RecipeGrid';
 import { RepairList } from './RepairList';
 import { ToolUpgradePanel } from './ToolUpgradePanel';
 import { WeaponUpgradePanel } from './WeaponUpgradePanel';
+import { BookFrame, BookTabItem } from './book/BookFrame';
+import { getGameContent } from '../../content/ContentCatalog';
+import type { RecipeDefinition } from '../../../application/CraftRecipeUseCase';
 
 export type SmithyTab = 'tools' | 'weapons' | 'upgrade' | 'repair';
 
-interface SmithyModalProps
-{
+interface SmithyModalProps {
     isOpen: boolean;
     tab: SmithyTab;
     onTabChange: (tab: SmithyTab) => void;
@@ -27,103 +28,166 @@ const TABS: { id: SmithyTab; icon: string; label: string }[] = [
 /**
  * The Smithy: the Workshop (tools, potions) and the Forge (weapons, armor, Portal blocks) in one building and
  * one window. The Forge side stays locked until the Textbook 1 exam is passed.
+ * Styled as an authentic adventurer's crafting journal (Minecraft Legends open-book style).
  */
-export const SmithyModal: React.FC<SmithyModalProps> = ({ isOpen, tab, onTabChange, onClose }) =>
-{
+export const SmithyModal: React.FC<SmithyModalProps> = ({ isOpen, tab, onTabChange, onClose }) => {
     const [, setRevision] = useState(0);
+
+    const workshopRecipes = useMemo<RecipeDefinition[]>(() => getGameContent().recipes.filter(
+        (r): r is RecipeDefinition => r.building === 'workshop' && 'resultItemId' in r
+    ), []);
+
+    const forgeRecipes = useMemo<RecipeDefinition[]>(() => getGameContent().recipes.filter(
+        (r): r is RecipeDefinition => r.building === 'forge' && 'resultItemId' in r
+    ), []);
+
+    const [selectedWorkshopRecipeId, setSelectedWorkshopRecipeId] = useState<string | null>(workshopRecipes[0]?.id || null);
+    const [selectedForgeRecipeId, setSelectedForgeRecipeId] = useState<string | null>(forgeRecipes[0]?.id || null);
+
     if (!isOpen) return null;
 
     const refresh = () => setRevision(r => r + 1);
     const isForgeUnlocked = entities.forgeUnlocked || entities.books['book-ch1']?.examPassed;
     const forgeLocked = !isForgeUnlocked && tab === 'weapons';
 
-    return (
-        <div className="gw-overlay fixed inset-0 z-[200] flex items-center justify-center bg-black/75 backdrop-blur-sm p-4 animate-fade-in">
-            <div className="gw-window relative w-full max-w-3xl rounded-2xl bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 border-2 border-orange-500/50 shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+    const bookTabs: BookTabItem[] = TABS.map(t => ({
+        id: t.id,
+        label: t.label,
+        icon: t.icon,
+        testId: `smithy-tab-${t.id}`,
+        badge: t.id === 'weapons' && !isForgeUnlocked ? '🔒' : undefined,
+    }));
 
-                <div className="gw-header flex items-center justify-between px-6 py-4 border-b border-orange-500/30 bg-slate-900/80">
-                    <div className="flex items-center gap-3">
-                        <span className="gw-icon text-3xl">⚒️</span>
-                        <div>
-                            <h2 className="text-xl font-bold text-orange-300">ໂຮງຊ່າງ & ໂຮງຕີເຫຼັກ (Smithy)</h2>
-                            <p className="gw-subtitle text-xs text-slate-400">ສ້າງເຄື່ອງມື ຫຼອມອາວຸດ ອັບເກຣດ ແລະ ສ້ອມແປງ ໃນບ່ອນດຽວ</p>
-                        </div>
-                    </div>
-                    <button
-                        onClick={onClose}
-                        className="gw-close rounded-lg p-2 text-slate-400 hover:text-white hover:bg-slate-700/60 transition"
-                    >
-                        ✕
-                    </button>
+    // Choose Left and Right pages based on current tab
+    let leftPageContent: React.ReactNode = null;
+    let rightPageContent: React.ReactNode = null;
+
+    if (tab === 'tools') {
+        const activeRecipe = workshopRecipes.find(r => r.id === (selectedWorkshopRecipeId || workshopRecipes[0]?.id)) || workshopRecipes[0] || null;
+        leftPageContent = (
+            <div className="space-y-3">
+                <CraftingStatus onCollected={refresh} />
+                <RecipeListView
+                    building="workshop"
+                    selectedRecipeId={selectedWorkshopRecipeId || workshopRecipes[0]?.id || null}
+                    onSelectRecipe={setSelectedWorkshopRecipeId}
+                    onChanged={refresh}
+                />
+            </div>
+        );
+        rightPageContent = (
+            <RecipeInspectorView
+                building="workshop"
+                recipe={activeRecipe}
+                onChanged={refresh}
+            />
+        );
+    } else if (tab === 'weapons') {
+        if (forgeLocked) {
+            leftPageContent = (
+                <div className="p-6 text-center space-y-4 my-auto" data-testid="smithy-forge-locked">
+                    <span className="text-6xl">🔒</span>
+                    <h3 className="text-xl font-bold book-heading">ເຕົາຫຼອມຍັງບໍ່ເປີດ</h3>
+                    <p className="book-text text-sm max-w-xs mx-auto">
+                        ຊ່າງຕີເຫຼັກຕ້ອງການນັກຮົບທີ່ມີພື້ນຖານຄວາມຮູ້! ສອບເສັງຜ່ານ <span className="text-[#b45309] font-bold">ບົດທີ 1</span> ທີ່ສະຖາບັນກ່ອນ ຈຶ່ງຈະຫຼອມອາວຸດ ແລະ ອັບເກຣດອາວຸດໄດ້. ເຄື່ອງມື, ການອັບເກຣດເຄື່ອງມື ແລະການສ້ອມແປງໃຊ້ໄດ້ເລີຍ.
+                    </p>
                 </div>
-
-                <div className="gw-tabs flex gap-4 px-6 pt-3 border-b border-slate-700/60 bg-slate-900/40 overflow-x-auto">
-                    {TABS.map(({ id, icon, label }) => (
-                        <button
-                            key={id}
-                            type="button"
-                            data-testid={`smithy-tab-${id}`}
-                            onClick={() => { soundManager.playSelect(); onTabChange(id); }}
-                            className={`pb-2.5 font-bold text-sm transition flex items-center gap-2 border-b-2 whitespace-nowrap ${
-                                tab === id ? 'border-orange-400 text-orange-300' : 'border-transparent text-slate-400 hover:text-slate-200'
-                            }`}
-                        >
-                            <span>{icon}</span>
-                            <span>{label}</span>
-                            {id === 'weapons' && !isForgeUnlocked && <span>🔒</span>}
-                        </button>
-                    ))}
+            );
+            rightPageContent = (
+                <div className="p-6 text-center space-y-4 my-auto">
+                    <span className="text-5xl">📖</span>
+                    <h3 className="text-lg font-bold book-heading">ຕຳລາບົດທີ 1: ພື້ນຖານການຫຼອມ</h3>
+                    <p className="book-text text-sm">
+                        ໄປທີ່ສະຖາບັນ (Academy) ເພື່ອຮຽນຮູ້ ແລະ ເຮັດບົດສອບເສັງ
+                    </p>
                 </div>
-
-                <div className="gw-body p-6 overflow-y-auto flex-1 space-y-4">
+            );
+        } else {
+            const activeRecipe = forgeRecipes.find(r => r.id === (selectedForgeRecipeId || forgeRecipes[0]?.id)) || forgeRecipes[0] || null;
+            leftPageContent = (
+                <div className="space-y-3">
                     <CraftingStatus onCollected={refresh} />
-
-                    {forgeLocked ? (
-                        <div className="p-8 text-center space-y-3" data-testid="smithy-forge-locked">
-                            <span className="text-5xl">🔒</span>
-                            <h3 className="text-xl font-bold text-slate-200">ເຕົາຫຼອມຍັງບໍ່ເປີດ</h3>
-                            <p className="text-slate-400 max-w-md mx-auto text-sm">
-                                ຊ່າງຕີເຫຼັກຕ້ອງການນັກຮົບທີ່ມີພື້ນຖານຄວາມຮູ້! ສອບເສັງຜ່ານ <span className="text-amber-400 font-bold">ບົດທີ 1</span> ທີ່ສະຖາບັນກ່ອນ ຈຶ່ງຈະຫຼອມອາວຸດ ແລະ ອັບເກຣດອາວຸດໄດ້. ເຄື່ອງມື, ການອັບເກຣດເຄື່ອງມື ແລະການສ້ອມແປງໃຊ້ໄດ້ເລີຍ.
-                            </p>
-                        </div>
-                    ) : tab === 'tools' ? (
-                        <RecipeGrid building="workshop" onChanged={refresh} />
-                    ) : tab === 'weapons' ? (
-                        <RecipeGrid building="forge" onChanged={refresh} />
-                    ) : tab === 'upgrade' ? (
-                        <div className="space-y-6">
-                            <section className="space-y-3">
-                                <h3 className="font-bold text-emerald-300 text-base flex items-center gap-2"><span>⬆️</span><span>ອັບເກຣດເຄື່ອງມື (Tools)</span></h3>
-                                <ToolUpgradePanel onChanged={refresh} />
-                            </section>
-                            <section className="space-y-3">
-                                <h3 className="font-bold text-orange-300 text-base flex items-center gap-2"><span>✨</span><span>ອັບເກຣດຂັ້ນອາວຸດ (Weapons +1..+3)</span></h3>
-                                {isForgeUnlocked ? (
-                                    <WeaponUpgradePanel onChanged={refresh} />
-                                ) : (
-                                    <p className="text-sm text-slate-400" data-testid="smithy-forge-locked">🔒 ສອບເສັງບົດທີ 1 ກ່ອນ ຈຶ່ງຈະອັບເກຣດອາວຸດໄດ້</p>
-                                )}
-                            </section>
-                        </div>
-                    ) : (
-                        <div className="space-y-6">
-                            <section className="space-y-3" data-testid="workshop-repairs">
-                                <h3 className="font-bold text-emerald-300 text-base flex items-center gap-2"><span>🛠️</span><span>ສ້ອມແປງເຄື່ອງມື (Tools)</span></h3>
-                                <RepairList building="workshop" />
-                            </section>
-                            <section className="space-y-3" data-testid="forge-repairs">
-                                <h3 className="font-bold text-orange-300 text-base flex items-center gap-2"><span>⚔️</span><span>ສ້ອມແປງອາວຸດ & ເກາະ (Weapons)</span></h3>
-                                <RepairList building="forge" />
-                            </section>
-                        </div>
-                    )}
+                    <RecipeListView
+                        building="forge"
+                        selectedRecipeId={selectedForgeRecipeId || forgeRecipes[0]?.id || null}
+                        onSelectRecipe={setSelectedForgeRecipeId}
+                        onChanged={refresh}
+                    />
                 </div>
+            );
+            rightPageContent = (
+                <RecipeInspectorView
+                    building="forge"
+                    recipe={activeRecipe}
+                    onChanged={refresh}
+                />
+            );
+        }
+    } else if (tab === 'upgrade') {
+        leftPageContent = (
+            <div className="space-y-3">
+                <h3 className="font-bold book-heading text-base flex items-center gap-2">
+                    <span>⬆️</span><span>ອັບເກຣດເຄື່ອງມື (Tools)</span>
+                </h3>
+                <div className="book-filigree-divider" />
+                <ToolUpgradePanel onChanged={refresh} />
+            </div>
+        );
+        rightPageContent = (
+            <div className="space-y-3">
+                <h3 className="font-bold book-heading text-base flex items-center gap-2">
+                    <span>✨</span><span>ອັບເກຣດຂັ້ນອາວຸດ (Weapons +1..+3)</span>
+                </h3>
+                <div className="book-filigree-divider" />
+                {isForgeUnlocked ? (
+                    <WeaponUpgradePanel onChanged={refresh} />
+                ) : (
+                    <div className="p-6 text-center space-y-2 book-text" data-testid="smithy-forge-locked">
+                        <span className="text-3xl">🔒</span>
+                        <p className="text-sm font-bold">ສອບເສັງບົດທີ 1 ກ່ອນ ຈຶ່ງຈະອັບເກຣດອາວຸດໄດ້</p>
+                    </div>
+                )}
+            </div>
+        );
+    } else {
+        leftPageContent = (
+            <div className="space-y-3" data-testid="workshop-repairs">
+                <h3 className="font-bold book-heading text-base flex items-center gap-2">
+                    <span>🛠️</span><span>ສ້ອມແປງເຄື່ອງມື (Tools)</span>
+                </h3>
+                <div className="book-filigree-divider" />
+                <RepairList building="workshop" />
+            </div>
+        );
+        rightPageContent = (
+            <div className="space-y-3" data-testid="forge-repairs">
+                <h3 className="font-bold book-heading text-base flex items-center gap-2">
+                    <span>⚔️</span><span>ສ້ອມແປງອາວຸດ & ເກາະ (Weapons)</span>
+                </h3>
+                <div className="book-filigree-divider" />
+                <RepairList building="forge" />
+            </div>
+        );
+    }
 
-                <div className="gw-footer px-6 py-3 border-t border-slate-700/60 bg-slate-900/80 flex items-center justify-between text-xs text-slate-400">
+    return (
+        <BookFrame
+            isOpen={isOpen}
+            onClose={onClose}
+            title="ໂຮງຊ່າງ & ໂຮງຕີເຫຼັກ (Smithy)"
+            icon="⚒️"
+            subtitle="ສ້າງເຄື່ອງມື ຫຼອມອາວຸດ ອັບເກຣດ ແລະ ສ້ອມແປງ ໃນບ່ອນດຽວ"
+            tabs={bookTabs}
+            activeTab={tab}
+            onTabChange={t => onTabChange(t as SmithyTab)}
+            leftPage={leftPageContent}
+            rightPage={rightPageContent}
+            footer={
+                <div className="flex items-center justify-between w-full font-mono text-xs text-[#eedec2]">
                     <span>🎒 ກະເປົາ: {entities.backpack.usedSlotsCount} / {entities.backpack.maxSlots} ຊ່ອງ · ⚔️ ATK {entities.equipment.currentAttackPower}</span>
                     <span>🎓 ເຄຣດິດ: {entities.wallet.balance}</span>
                 </div>
-            </div>
-        </div>
+            }
+        />
     );
 };

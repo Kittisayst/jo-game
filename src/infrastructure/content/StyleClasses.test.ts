@@ -26,16 +26,16 @@ const ALLOWED_WITHOUT_STYLE = new Set([
     'choice-text', 'dialogue-avatar', 'export-box', 'import-box', 'lib-overlay', 'lib-tab-icon',
     'realm-cell-number', 'realm-row-icon', 'title-credit-label',
     // values an expression compares with (`tab === 'exam'`), not classes
-    'all', 'consumable', 'gear', 'material', 'exam', 'practice', 'skills', 'village', 'dungeon',
+    'exam', 'practice', 'skills', 'village', 'dungeon',
     // Tailwind names with no visible effect here
-    'drop-shadow', 'filter', 'py-0.2', 'sm:text-[10px]', 'sm:text-[11px]', 'shadow-cyan-500/30',
+    'drop-shadow', 'filter', 'py-0.2',
 ]);
 
 /** Returns whether a class is a standard Tailwind CSS utility compiled by @tailwindcss/vite. */
 function isTailwindUtility (cls: string): boolean
 {
     const base = cls.replace(/^(sm|md|lg|xl|2xl|hover|focus|active|disabled|group-hover):/, '');
-    return /^(flex|grid|block|inline|inline-block|inline-flex|hidden|relative|absolute|fixed|sticky|border|rounded|shadow|truncate|transition|filter|transform|uppercase|lowercase|capitalize)$/.test(base) ||
+    return /^(flex|grid|block|inline|inline-block|inline-flex|hidden|relative|absolute|fixed|sticky|border|rounded|shadow|truncate|transition|filter|transform|uppercase|lowercase|capitalize|italic|not-italic)$/.test(base) ||
         /^-?(flex|grid|grid-cols|grid-rows|items|justify|content|self|place|gap|space-[xy]|inset|top|bottom|left|right)-/.test(base) ||
         /^-?(p|px|py|pt|pb|pl|pr|m|mx|my|mt|mb|ml|mr|w|h|min-w|max-w|min-h|max-h)-/.test(base) ||
         /^(text|bg|border|ring|shadow|rounded|opacity|z|duration|ease|scale|rotate|translate|overflow|cursor|select|backdrop)-/.test(base) ||

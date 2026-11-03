@@ -6620,7 +6620,7 @@ button {
     }
 
     .gw-window button {
-        min-height: var(--tap);
+        min-height: var(--tap) !important;
     }
 
     /* Text never under 12 px */
@@ -7210,4 +7210,338 @@ button {
     color: #fde68a;
     font-weight: 700;
     cursor: pointer;
+}
+
+/* ===== Adventurer's Journal / Book Theme UI ===== */
+.book-window {
+    background: linear-gradient(145deg, #2b1810 0%, #1a0e08 100%) !important;
+    border: 3px solid #854d0e !important;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), inset 0 0 0 2px #ca8a04, inset 0 0 15px rgba(0, 0, 0, 0.7) !important;
+    border-radius: 18px !important;
+    overflow: hidden;
+    position: relative;
+}
+
+.book-corner-tl,
+.book-corner-tr,
+.book-corner-bl,
+.book-corner-br {
+    position: absolute;
+    width: 28px;
+    height: 28px;
+    z-index: 30;
+    pointer-events: none;
+    color: #f59e0b;
+}
+
+.book-corner-tl { top: 3px; left: 3px; }
+.book-corner-tr { top: 3px; right: 3px; }
+.book-corner-bl { bottom: 3px; left: 3px; }
+.book-corner-br { bottom: 3px; right: 3px; }
+
+/* Top Ribbon Tabs (Bookmarks) */
+.book-tabs-container {
+    display: flex;
+    align-items: flex-end;
+    gap: 6px;
+    padding: 0 24px;
+    background: #170d07;
+    border-bottom: 2px solid #854d0e;
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+
+.book-ribbon-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px 10px;
+    border-radius: 10px 10px 0 0;
+    background: #2e1a12;
+    border: 2px solid #78350f;
+    border-bottom: none;
+    color: #d6c7a7;
+    font-weight: 700;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-height: 44px;
+    white-space: nowrap;
+    position: relative;
+    top: 2px;
+}
+
+.book-ribbon-tab:hover {
+    background: #42251a;
+    color: #fef3c7;
+    border-color: #b45309;
+}
+
+.book-ribbon-tab-active {
+    background: linear-gradient(180deg, #fbf7ee 0%, #f1e7d0 100%) !important;
+    color: #451a03 !important;
+    border-color: #d97706 !important;
+    border-bottom: 2px solid #f1e7d0 !important;
+    box-shadow: 0 -2px 10px rgba(217, 119, 6, 0.3);
+    z-index: 10;
+    transform: translateY(-2px);
+}
+
+/* Dual-Page Spread Layout */
+.book-spread {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 14px minmax(0, 1fr);
+    background: #e5d7be;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+    position: relative;
+}
+
+/* Center 3D Spine Crease */
+.book-spine {
+    background: linear-gradient(
+        to right,
+        rgba(30, 15, 8, 0.45) 0%,
+        rgba(30, 15, 8, 0.15) 30%,
+        rgba(255, 255, 255, 0.12) 50%,
+        rgba(30, 15, 8, 0.15) 70%,
+        rgba(30, 15, 8, 0.45) 100%
+    );
+    border-left: 1px solid rgba(69, 26, 3, 0.25);
+    border-right: 1px solid rgba(69, 26, 3, 0.25);
+    height: 100%;
+    z-index: 20;
+    position: relative;
+}
+
+.book-spine::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    width: 2px;
+    transform: translateX(-50%);
+    background: repeating-linear-gradient(
+        to bottom,
+        #78350f 0px,
+        #78350f 6px,
+        transparent 6px,
+        transparent 10px
+    );
+    opacity: 0.6;
+}
+
+/* Individual Parchment Pages */
+.book-page {
+    background: linear-gradient(135deg, #faf6ee 0%, #f4ebd6 50%, #eae0c7 100%);
+    padding: 18px 20px;
+    overflow-y: auto;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+.book-page-left {
+    box-shadow: inset -10px 0 15px -8px rgba(69, 26, 3, 0.25);
+}
+
+.book-page-right {
+    box-shadow: inset 10px 0 15px -8px rgba(69, 26, 3, 0.25);
+}
+
+/* Stylized Decorative Elements */
+.book-filigree-divider {
+    height: 12px;
+    background-image: radial-gradient(circle, #78350f 1.5px, transparent 1.5px),
+                      radial-gradient(circle, #b45309 1px, transparent 1px);
+    background-size: 16px 12px, 8px 12px;
+    background-repeat: repeat-x;
+    opacity: 0.45;
+    margin: 8px 0;
+}
+
+.book-heading {
+    color: #451a03;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+}
+
+.book-subheading {
+    color: #78350f;
+    font-weight: 700;
+}
+
+.book-text {
+    color: #292524;
+    line-height: 1.6;
+}
+
+.book-text-muted {
+    color: #6a5749;
+}
+
+/* Wooden / Stone Recessed Slot (UnderMine style) */
+.book-slot {
+    background: linear-gradient(145deg, #1f140e 0%, #2a1c15 100%);
+    border: 2px solid #573c2c;
+    border-radius: 10px;
+    box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.7), 0 1px 2px rgba(255, 255, 255, 0.15);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    position: relative;
+}
+
+.book-slot:hover {
+    border-color: #d97706;
+    transform: translateY(-1px);
+}
+
+.book-slot-selected {
+    border-color: #f59e0b !important;
+    box-shadow: 0 0 12px rgba(245, 158, 11, 0.6), inset 0 0 6px rgba(245, 158, 11, 0.4) !important;
+    background: linear-gradient(145deg, #361f13 0%, #45291a 100%) !important;
+    transform: scale(1.04);
+    z-index: 10;
+}
+
+.book-slot-equipped {
+    border-color: #10b981 !important;
+    box-shadow: 0 0 8px rgba(16, 185, 129, 0.5), inset 0 0 4px rgba(16, 185, 129, 0.3) !important;
+}
+
+/* Parchment Recipe Cards & Panels */
+.book-card {
+    background: rgba(255, 255, 255, 0.55);
+    border: 1.5px solid #d4c5a9;
+    border-radius: 12px;
+    padding: 12px 14px;
+    box-shadow: 0 2px 6px rgba(69, 26, 3, 0.08);
+    transition: all 0.15s ease;
+}
+
+.book-card:hover {
+    border-color: #b45309;
+    background: rgba(255, 255, 255, 0.85);
+    box-shadow: 0 4px 10px rgba(69, 26, 3, 0.12);
+}
+
+.book-card-selected {
+    border-color: #d97706 !important;
+    background: #fffdfa !important;
+    box-shadow: 0 0 0 2px #f59e0b, 0 4px 12px rgba(217, 119, 6, 0.2) !important;
+}
+
+/* Chunky Fantasy Craft Button */
+.book-btn-craft {
+    background: linear-gradient(180deg, #ea580c 0%, #c2410c 100%);
+    border: 2px solid #7c2d12;
+    border-radius: 12px;
+    color: #ffffff;
+    font-weight: 800;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+    box-shadow: 0 4px 0 #7c2d12, 0 6px 12px rgba(0, 0, 0, 0.3);
+    min-height: 46px;
+    padding: 10px 20px;
+    cursor: pointer;
+    transition: all 0.1s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.book-btn-craft:hover:not(:disabled) {
+    background: linear-gradient(180deg, #f97316 0%, #ea580c 100%);
+    box-shadow: 0 4px 0 #7c2d12, 0 8px 16px rgba(234, 88, 12, 0.4);
+}
+
+.book-btn-craft:active:not(:disabled) {
+    transform: translateY(3px);
+    box-shadow: 0 1px 0 #7c2d12, 0 2px 4px rgba(0, 0, 0, 0.4);
+}
+
+.book-btn-craft:disabled {
+    background: #9ca3af;
+    border-color: #6b7280;
+    box-shadow: 0 2px 0 #4b5563;
+    color: #374151;
+    cursor: not-allowed;
+    text-shadow: none;
+    opacity: 0.75;
+}
+
+/* Required Ingredient Checklist Row */
+.book-ingredient-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 10px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.4);
+    border: 1px solid #d4c5a9;
+    font-size: 0.85rem;
+}
+
+.book-ingredient-ok {
+    border-color: #86efac;
+    background: rgba(220, 252, 231, 0.5);
+    color: #14532d;
+}
+
+.book-ingredient-missing {
+    border-color: #fca5a5;
+    background: rgba(254, 226, 226, 0.5);
+    color: #7f1d1d;
+}
+
+.book-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    background: #fef3c7;
+    border: 1px solid #d97706;
+    color: #78350f;
+}
+
+/* Mobile Landscape Overrides (max-height: 520px) */
+@media (max-height: 520px) {
+    .book-window {
+        border-radius: 0 !important;
+        border-width: 0 !important;
+    }
+
+    .book-tabs-container {
+        padding: 0 12px;
+        min-height: 44px;
+    }
+
+    .book-ribbon-tab {
+        padding: 6px 12px;
+        font-size: 0.8rem;
+    }
+
+    .book-spread {
+        grid-template-columns: minmax(0, 1fr) 10px minmax(0, 1fr) !important;
+    }
+
+    .book-page {
+        padding: 10px 12px !important;
+    }
+
+    .book-corner-tl,
+    .book-corner-tr,
+    .book-corner-bl,
+    .book-corner-br {
+        display: none !important;
+    }
 }
