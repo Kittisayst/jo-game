@@ -23,10 +23,10 @@ const css = Object.values(cssFiles).join('\n');
 const ALLOWED_WITHOUT_STYLE = new Set([
     // hooks of the HUD badges and the windows
     'crafting-badge', 'garden-badge', 'health-badge', 'pending-badge', 'world-time-badge',
-    'choice-text', 'dialogue-avatar', 'export-box', 'import-box', 'lib-overlay', 'lib-tab-icon',
+    'choice-text', 'dialogue-avatar', 'export-box', 'import-box',
     'realm-cell-number', 'realm-row-icon', 'title-credit-label',
-    // values an expression compares with (`tab === 'exam'`), not classes
-    'exam', 'practice', 'skills', 'village', 'dungeon',
+    // values an expression compares with (`currentLevel === 'village'`), not classes
+    'village', 'dungeon',
     // Tailwind names with no visible effect here
     'drop-shadow', 'filter', 'py-0.2',
 ]);

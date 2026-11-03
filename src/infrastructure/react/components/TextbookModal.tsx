@@ -10,10 +10,10 @@ import { entities } from '../../composition';
 import { stageIdOf, stageOfLesson } from '../../../domain/entities/StageNumber';
 import { soundManager } from '../../audio/SoundManager';
 import { EventBus } from '../../EventBus';
+import { BookFrame, BookTabItem } from './book/BookFrame';
 
 export type TextbookModalMode = 'library-store' | 'reader';
 
-/** The Library window is split into three parts: books for sale, books already bought, and the reader. */
 type LibraryTab = 'shop' | 'mine' | 'read';
 
 export interface TextbookModalProps {
@@ -30,7 +30,6 @@ export interface TextbookModalProps {
     onGoToExam?: (bookId: string) => void;
 }
 
-/** Says when the lesson belongs to a Stage the player has not cleared yet (it can still be read). */
 function lessonNotReachedNote(lesson: string): string {
     const stageNumber = stageOfLesson(lesson);
     if (stageNumber === null) return '';
@@ -68,16 +67,14 @@ export const TextbookModal: React.FC<TextbookModalProps> = ({
             if (initialBookId) {
                 setSelectedBookId(initialBookId);
             }
-        }
-        else {
+        } else {
             setTab('read');
             const ownedIds = Object.values(entities.books)
                 .filter(bp => bp.isUnlocked)
                 .map(bp => bp.bookId);
             if (initialBookId && entities.books[initialBookId]?.isUnlocked) {
                 setSelectedBookId(initialBookId);
-            }
-            else if (ownedIds.length > 0 && !ownedIds.includes(selectedBookId)) {
+            } else if (ownedIds.length > 0 && !ownedIds.includes(selectedBookId)) {
                 setSelectedBookId(ownedIds[0]);
             }
             const targetBook = books.find(b => b.id === (initialBookId ?? selectedBookId));
@@ -102,7 +99,7 @@ export const TextbookModal: React.FC<TextbookModalProps> = ({
     const booksForSale = books.filter(b => !entities.books[b.id]?.isUnlocked);
     const isReadingActive = tab === 'read';
 
-    const currentBook = ownedBooks.find(b => b.id === selectedBookId) || ownedBooks[0] || null;
+    const currentBook = books.find(b => b.id === selectedBookId) || books[0] || null;
     const bookProgress = currentBook ? ensureBookProgress(currentBook.id) : null;
     const pages = currentBook?.pages || [];
     const activePage = pages[currentPageIndex] || pages[0] || null;
@@ -110,7 +107,7 @@ export const TextbookModal: React.FC<TextbookModalProps> = ({
         bookProgress && activePage && bookProgress.hasReadPage(activePage.pageNumber)
     );
 
-    // 3-second countdown timer for first-time page reading
+    // Countdown timer for first-time page reading
     useEffect(() => {
         if (!isOpen || !isReadingActive || !bookProgress?.isUnlocked || !activePage) {
             setRemainingReadSeconds(0);
@@ -139,20 +136,6 @@ export const TextbookModal: React.FC<TextbookModalProps> = ({
         return () => window.clearInterval(timer);
     }, [isOpen, isReadingActive, currentBook?.id, activePage, isPageAlreadyRead, pageReadTimerSeconds, bookProgress]);
 
-    // Keyboard navigation (Escape to close, Left/Right when reviewing already-read pages)
-    useEffect(() => {
-        if (!isOpen) return;
-
-        const onKeyDown = (e: KeyboardEvent) => {
-            if (e.key === 'Escape') {
-                e.preventDefault();
-                onClose();
-            }
-        };
-        window.addEventListener('keydown', onKeyDown);
-        return () => window.removeEventListener('keydown', onKeyDown);
-    }, [isOpen, onClose]);
-
     if (!isOpen) return null;
 
     const showToast = (msg: string) => {
@@ -177,13 +160,11 @@ export const TextbookModal: React.FC<TextbookModalProps> = ({
             setTab('mine');
             showToast(`🎉 ຊື້ປຶ້ມ "${book.title}" ສຳເລັດ! ຍ້າຍໄປຢູ່ "ປຶ້ມຂອງຂ້ອຍ" ແລ້ວ — ກົດ "ເປີດອ່ານ" ໄດ້ເລີຍ!`);
             setRevision(r => r + 1);
-        }
-        else {
+        } else {
             soundManager.playHurt();
             if (result.reason === 'insufficient_credit') {
                 showToast('❌ Credit ບໍ່ພຽງພໍສຳລັບຊື້ປຶ້ມເຫຼັ້ມນີ້');
-            }
-            else {
+            } else {
                 showToast('🔒 ຍັງບໍ່ຜ່ານເງື່ອນໄຂການປົດລັອກບົດຮຽນນີ້');
             }
         }
@@ -193,15 +174,13 @@ export const TextbookModal: React.FC<TextbookModalProps> = ({
         const bp = ensureBookProgress(bookId);
         if (!bp.isUnlocked) return;
 
-        soundManager.playSelect();
+        soundManager.playPageTurn();
         setSelectedBookId(bookId);
-        // Jump to first unread page if any, else page 0
         const targetBook = books.find(b => b.id === bookId);
         if (targetBook) {
             const firstUnreadIdx = targetBook.pages.findIndex(p => !bp.hasReadPage(p.pageNumber));
             setCurrentPageIndex(firstUnreadIdx >= 0 ? firstUnreadIdx : 0);
-        }
-        else {
+        } else {
             setCurrentPageIndex(0);
         }
         setTab('read');
@@ -209,7 +188,7 @@ export const TextbookModal: React.FC<TextbookModalProps> = ({
 
     const handlePrevPage = () => {
         if (currentPageIndex > 0) {
-            soundManager.playSelect();
+            soundManager.playPageTurn();
             setCurrentPageIndex(p => p - 1);
         }
     };
@@ -225,9 +204,8 @@ export const TextbookModal: React.FC<TextbookModalProps> = ({
                 onPageRead?.(currentBook.id, activePage.pageNumber, res.isFullyRead);
                 setRevision(r => r + 1);
             }
-        }
-        else {
-            soundManager.playSelect();
+        } else {
+            soundManager.playPageTurn();
         }
 
         if (currentPageIndex < pages.length - 1) {
@@ -246,8 +224,7 @@ export const TextbookModal: React.FC<TextbookModalProps> = ({
         onClose();
         if (onGoToExam) {
             onGoToExam(bookId);
-        }
-        else {
+        } else {
             EventBus.emit('open-academy', bookId);
         }
     };
@@ -258,418 +235,235 @@ export const TextbookModal: React.FC<TextbookModalProps> = ({
 
     const isStore = mode === 'library-store';
 
-    const switchTab = (next: LibraryTab) => {
-        if (next === tab) return;
-        soundManager.playSelect();
-        setTab(next);
-    };
-
-    const tabs: { id: LibraryTab; icon: string; label: string; count?: number; disabled?: boolean }[] = [
-        { id: 'shop', icon: '🛒', label: 'ວາງຂາຍ', count: booksForSale.length },
-        { id: 'mine', icon: '🎒', label: 'ປຶ້ມຂອງຂ້ອຍ', count: ownedBooks.length },
-        { id: 'read', icon: '📖', label: 'ອ່ານ', disabled: ownedBooks.length === 0 },
-    ];
+    const ribbonTabs: BookTabItem[] = isStore
+        ? [
+            { id: 'shop', icon: '🛒', label: 'ວາງຂາຍ', badge: booksForSale.length },
+            { id: 'mine', icon: '🎒', label: 'ປຶ້ມຂອງຂ້ອຍ', badge: ownedBooks.length },
+            { id: 'read', icon: '📖', label: 'ອ່ານ', disabled: ownedBooks.length === 0 },
+        ]
+        : [];
 
     const recipeLabel = (id: string) => {
         const item = getGameContent().items.find(i => i.id === id);
         return item ? `${item.icon ?? ''} ${item.name}`.trim() : id;
     };
 
-    return (
-        <div className="gw-overlay outfit-overlay lib-overlay">
-            <div className={`gw-window outfit-card lib-card ${isReadingActive ? 'is-reading-mode' : ''}`}>
+    const windowTitle = isStore
+        ? 'ຫໍສະໝຸດແຫ່ງປັນຍາ (Library Bookstore)'
+        : 'ປຶ້ມຕຳລາສ່ວນຕົວ';
 
-                {/* Header */}
-                <div className="gw-header outfit-header">
-                    <div className="outfit-avatar">{isStore ? '🏛️' : '📚'}</div>
-                    <div className="outfit-title">
-                        <h2>
-                            {isStore
-                                ? 'ຫໍສະໝຸດແຫ່ງປັນຍາ (Library Bookstore)'
-                                : 'ປຶ້ມຕຳລາສ່ວນຕົວ (My Textbooks)'}
-                        </h2>
-                        <p className="gw-subtitle">
-                            {isStore
-                                ? 'ຊື້ປຶ້ມດ້ວຍ Credit · ເກັບໄວ້ໃນຊັ້ນຂອງຂ້ອຍ · ເປີດອ່ານເພື່ອປົດລັອກການສອບເສັງ'
-                                : 'ເປີດອ່ານທົບທວນປຶ້ມຕຳລາທີ່ຊື້ມາແລ້ວໄດ້ທຸກເວລາ'}
+    const windowSubtitle = isStore
+        ? 'ຊື້ປຶ້ມດ້ວຍ Credit · ເກັບໄວ້ໃນຊັ້ນຂອງຂ້ອຍ · ເປີດອ່ານເພື່ອປົດລັອກການສອບເສັງ'
+        : currentBook
+            ? `ບົດທີ ${currentBook.chapter}: ${currentBook.title}`
+            : 'ປຶ້ມຕຳລາຮຽນເພື່ອເພີ່ມພູນຄວາມຮູ້';
+
+    // -------------------------------------------------------------------------
+    // 1. EMPTY READER STATE (0 Books Owned)
+    // -------------------------------------------------------------------------
+    if (tab === 'read' && ownedBooks.length === 0) {
+        return (
+            <BookFrame
+                isOpen={isOpen}
+                onClose={onClose}
+                title={windowTitle}
+                icon="📕"
+                subtitle="ຍັງບໍ່ມີປຶ້ມຕຳລາໃນຄອບຄອງ"
+                tabs={ribbonTabs}
+                activeTab={tab}
+                onTabChange={t => setTab(t as LibraryTab)}
+                maxWidth="max-w-4xl"
+                className="lib-card"
+                leftPage={
+                    <div className="flex flex-col items-center justify-center h-full text-center p-6 space-y-4">
+                        <div className="text-6xl drop-shadow">📕🔒</div>
+                        <h3 className="text-lg sm:text-xl font-bold text-amber-900">
+                            ທ່ານຍັງບໍ່ມີປຶ້ມຕຳລາຮຽນໃນຄອບຄອງ
+                        </h3>
+                        <p className="text-xs sm:text-sm text-amber-800/80 leading-relaxed max-w-xs">
+                            ປຶ້ມຕຳລາທຸກເຫຼັ້ມຕ້ອງຊື້ເອົາກ່ອນຈຶ່ງສາມາດເປີດອ່ານໄດ້!
                         </p>
                     </div>
-                    <div className="outfit-wallet">🎓 {entities.wallet.balance} Credit</div>
-                    <button className="gw-close outfit-close" onClick={onClose} title="ປິດ (Escape)">✕</button>
-                </div>
-
-                {/* The three parts of the Library */}
-                {isStore && (
-                    <div className="gw-tabs lib-tabs" role="tablist">
-                        {tabs.map(t => (
-                            <button
-                                key={t.id}
-                                role="tab"
-                                aria-selected={tab === t.id}
-                                disabled={t.disabled}
-                                onClick={() => switchTab(t.id)}
-                                className={`lib-tab${tab === t.id ? ' is-active' : ''}`}
-                            >
-                                <span className="lib-tab-icon">{t.icon}</span>
-                                <span>{t.label}</span>
-                                {t.count !== undefined && <span className="lib-tab-count">{t.count}</span>}
-                            </button>
-                        ))}
+                }
+                rightPage={
+                    <div className="flex flex-col items-center justify-center h-full text-center p-6 space-y-4">
+                        <div className="p-4 rounded-xl bg-amber-100/60 border border-amber-300 text-xs text-amber-900 leading-relaxed text-left space-y-2">
+                            <p className="font-bold flex items-center gap-1.5 text-amber-950">
+                                <span>🏛️</span> ວິທີການເລີ່ມຕົ້ນ:
+                            </p>
+                            <p>
+                                ຍ່າງໄປທີ່ອາຄານ <strong className="text-amber-900">ຫໍສະໝຸດ (Library)</strong> ໃນໝູ່ບ້ານ
+                                ເພື່ອຊື້ປຶ້ມຕຳລາບົດທີ 1 ດ້ວຍ Credit ເລີ່ມຕົ້ນ.
+                            </p>
+                            <p className="font-semibold text-emerald-800">
+                                🎓 ທຶນປັດຈຸບັນຂອງທ່ານ: {entities.wallet.balance} Credit
+                            </p>
+                        </div>
+                        <button
+                            type="button"
+                            onClick={onClose}
+                            className="min-h-[44px] px-6 py-2.5 rounded-xl bg-amber-800 hover:bg-amber-700 text-amber-100 font-bold text-sm shadow transition"
+                        >
+                            ຮັບຊາບ (ປິດໜ້າຕ່າງ)
+                        </button>
                     </div>
-                )}
+                }
+                footer={
+                    <div className="flex items-center justify-between w-full text-xs text-amber-200/80">
+                        <span>🏛️ ຫໍສະໝຸດແຫ່ງປັນຍາ</span>
+                        <span className="font-bold text-amber-300">🎓 {entities.wallet.balance} Credit</span>
+                    </div>
+                }
+            />
+        );
+    }
 
-                {/* Toast notification */}
-                {toastMessage && <div className="lib-toast">{toastMessage}</div>}
+    // -------------------------------------------------------------------------
+    // 2. ACTIVE READER VIEW (Reading actual textbook pages)
+    // -------------------------------------------------------------------------
+    if (tab === 'read' && currentBook && bookProgress?.isUnlocked && activePage) {
+        return (
+            <BookFrame
+                isOpen={isOpen}
+                onClose={onClose}
+                title={windowTitle}
+                icon="📚"
+                subtitle={windowSubtitle}
+                tabs={ribbonTabs}
+                activeTab={tab}
+                onTabChange={t => setTab(t as LibraryTab)}
+                maxWidth="max-w-5xl"
+                className="lib-card is-reading-mode"
+                leftPage={
+                    <div className="flex flex-col h-full space-y-3 book-page-turn">
+                        {/* Book Title & Chapter Banner */}
+                        <div className="flex items-center justify-between pb-2 border-b border-[#d4c5a9]">
+                            <div>
+                                <span className="text-[11px] font-bold text-amber-800 bg-amber-200/60 px-2 py-0.5 rounded">
+                                    ບົດທີ {currentBook.chapter}
+                                </span>
+                                <h3 className="text-sm sm:text-base font-bold text-amber-950 mt-1">
+                                    {currentBook.title}
+                                </h3>
+                                <p className="text-[11px] text-amber-800/70">{currentBook.titleEn}</p>
+                            </div>
+                            <span className="text-xs font-bold text-emerald-800 bg-emerald-100 px-2 py-1 rounded-full border border-emerald-300">
+                                {readProgress.readCount}/{readProgress.totalPages} ໜ້າ ({readProgress.percentage}%)
+                            </span>
+                        </div>
 
-                {/* ==================== FOR SALE ==================== */}
-                {isStore && tab === 'shop' && (
-                    <div className="gw-body lib-body">
-                        <p className="lib-hint">💡 ຕ້ອງຊື້ປຶ້ມກ່ອນ ຈຶ່ງສາມາດເປີດອ່ານ ແລະ ສອບເສັງໄດ້</p>
+                        {/* Page Numbers Indicator Bar */}
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                            {pages.map((p, idx) => {
+                                const read = bookProgress.hasReadPage(p.pageNumber);
+                                const active = idx === currentPageIndex;
+                                return (
+                                    <button
+                                        key={p.pageNumber}
+                                        type="button"
+                                        onClick={() => {
+                                            soundManager.playPageTurn();
+                                            setCurrentPageIndex(idx);
+                                        }}
+                                        className={`min-h-[44px] min-w-[44px] px-2 py-1 rounded-lg text-xs font-bold border transition flex items-center justify-center gap-0.5 ${active
+                                            ? 'bg-amber-800 text-amber-100 border-amber-950 shadow-inner'
+                                            : read
+                                                ? 'bg-emerald-100 text-emerald-800 border-emerald-300 hover:bg-emerald-200'
+                                                : 'bg-[#ede0c8] text-amber-900 border-[#c49a6c] hover:bg-[#e4d4b8]'
+                                            }`}
+                                        title={p.lesson ? `ບົດ ${p.lesson}${lessonNotReachedNote(p.lesson)}` : `ໜ້າທີ ${p.pageNumber}`}
+                                    >
+                                        <span>{p.lesson ?? p.pageNumber}</span>
+                                        {read && <span className="text-[10px] text-emerald-700">✓</span>}
+                                    </button>
+                                );
+                            })}
+                        </div>
 
-                        {booksForSale.length === 0 && (
-                            <div className="lib-empty">
-                                <div className="lib-empty-icon">🎉</div>
-                                <h3>ທ່ານຊື້ປຶ້ມຄົບທຸກເຫຼັ້ມແລ້ວ</h3>
-                                <p>ປຶ້ມທີ່ຊື້ແລ້ວທັງໝົດຢູ່ໃນແຖບ "ປຶ້ມຂອງຂ້ອຍ"</p>
+                        {/* Illustration (if available) */}
+                        {activePage.illustration && (
+                            <div className="rounded-xl overflow-hidden border border-[#c49a6c] bg-[#ede0c8] p-2 shadow-inner">
+                                <img
+                                    src={activePage.illustration}
+                                    alt={activePage.title}
+                                    className="w-full max-h-48 mx-auto block rounded-lg object-contain"
+                                />
                             </div>
                         )}
 
-                        {booksForSale.map(book => {
-                            const eligibility = checkBookPurchaseEligibility(
-                                book,
-                                entities.books,
-                                entities.wallet,
-                                entities.stageProgression
-                            );
-                            const isLockedByProgression =
-                                eligibility.reason === 'locked_prerequisite_exam' ||
-                                eligibility.reason === 'locked_prerequisite_boss';
-
-                            return (
-                                <article key={book.id} className={`lib-book${isLockedByProgression ? ' is-locked' : ''}`}>
-                                    <div className="lib-cover">{isLockedByProgression ? '🔒' : '📕'}</div>
-                                    <div className="lib-book-main">
-                                        <div className="lib-book-head">
-                                            <span className="lib-chip">ບົດທີ {book.chapter}</span>
-                                            <h3>{book.title}</h3>
-                                            <span className="lib-price">ລາຄາ: {book.price} 🎓 Credit</span>
-                                        </div>
-                                        <p className="lib-meta">{book.titleEn} • {book.pages.length} ໜ້າ</p>
-                                        <p className="lib-desc">{book.description}</p>
-
-                                        {book.unlockedRecipes && book.unlockedRecipes.length > 0 && (
-                                            <p className="lib-rewards">
-                                                🎁 ສູດສ້າງທີ່ຈະໄດ້ຮັບເມື່ອສອບຜ່ານ:{' '}
-                                                <strong>{book.unlockedRecipes.map(recipeLabel).join(', ')}</strong>
-                                            </p>
-                                        )}
-
-                                        {isLockedByProgression && (
-                                            <div className="lib-checklist">
-                                                <div className="lib-checklist-title">
-                                                    🔒 ເງື່ອນໄຂກ່ອນເປີດຂາຍປຶ້ມບົດທີ {book.chapter}:
-                                                </div>
-                                                {book.prerequisiteBookId && (
-                                                    <div className={eligibility.prereqExamPassed ? 'is-done' : ''}>
-                                                        {eligibility.prereqExamPassed ? '✓' : '○'} ສອບເສັງປຶ້ມບົດກ່ອນໜ້າຜ່ານ ({book.prerequisiteBookId})
-                                                    </div>
-                                                )}
-                                                {book.requiredCompletedStageId && (
-                                                    <div className={eligibility.prereqBossDefeated ? 'is-done' : ''}>
-                                                        {eligibility.prereqBossDefeated ? '✓' : '○'} ປາບ Boss ປະຈຳດ່ານບົດກ່ອນໜ້າສຳເລັດ ({book.requiredCompletedStageId})
-                                                    </div>
-                                                )}
-                                            </div>
-                                        )}
-
-                                        <div className="lib-actions">
-                                            {isLockedByProgression ? (
-                                                <button disabled className="lib-btn">🔒 ຍັງບໍ່ປົດລັອກບົດຮຽນນີ້</button>
-                                            ) : (
-                                                <button
-                                                    onClick={() => handlePurchaseBook(book)}
-                                                    disabled={!eligibility.canPurchase}
-                                                    className="lib-btn is-buy"
-                                                >
-                                                    {eligibility.canPurchase
-                                                        ? `🛒 ຊື້ປຶ້ມຕຳລາ (${book.price} 🎓 Credit)`
-                                                        : `Credit ບໍ່ພໍ (ຕ້ອງການ ${book.price} 🎓)`}
-                                                </button>
-                                            )}
-                                        </div>
-                                    </div>
-                                </article>
-                            );
-                        })}
-                    </div>
-                )}
-
-                {/* ==================== MY BOOKS ==================== */}
-                {isStore && tab === 'mine' && (
-                    <div className="gw-body lib-body">
-                        {ownedBooks.length === 0 ? (
-                            <div className="lib-empty">
-                                <div className="lib-empty-icon">📕🔒</div>
-                                <h3>ຊັ້ນປຶ້ມຂອງທ່ານຍັງຫວ່າງ</h3>
-                                <p>ໄປແຖບ "ວາງຂາຍ" ເພື່ອຊື້ປຶ້ມຕຳລາເຫຼັ້ມທຳອິດ</p>
-                                <button className="lib-btn is-buy" onClick={() => switchTab('shop')}>🛒 ໄປເບິ່ງປຶ້ມທີ່ວາງຂາຍ</button>
+                        {/* Key Points */}
+                        {activePage.keyPoints && activePage.keyPoints.length > 0 && (
+                            <div className="bg-emerald-900/10 border border-emerald-600/30 rounded-xl p-3 space-y-1.5 flex-1">
+                                <h4 className="text-xs font-bold text-emerald-900 flex items-center gap-1">
+                                    <span>💡</span> ຈຸດສຳຄັນທີ່ຕ້ອງຈື່ (Key Takeaways)
+                                </h4>
+                                <ul className="list-disc list-inside space-y-1 text-xs text-emerald-950 leading-relaxed">
+                                    {activePage.keyPoints.map((kp, idx) => (
+                                        <li key={idx}>{kp}</li>
+                                    ))}
+                                </ul>
                             </div>
-                        ) : ownedBooks.map(book => {
-                            const bp = ensureBookProgress(book.id);
-                            const prog = bp.getReadProgress(book.pages.length);
-                            return (
-                                <article key={book.id} className="lib-book is-owned">
-                                    <div className="lib-cover">📖</div>
-                                    <div className="lib-book-main">
-                                        <div className="lib-book-head">
-                                            <span className="lib-chip">ບົດທີ {book.chapter}</span>
-                                            <h3>{book.title}</h3>
-                                            {bp.examPassed ? (
-                                                <span className="lib-status is-passed">⭐ ສອບຜ່ານແລ້ວ</span>
-                                            ) : (
-                                                <span className="lib-status">📝 ຍັງບໍ່ໄດ້ສອບຜ່ານ</span>
-                                            )}
-                                        </div>
-                                        <p className="lib-meta">{book.titleEn}</p>
-
-                                        <div className="lib-progress">
-                                            <div className="lib-progress-bar">
-                                                <div className="lib-progress-fill" style={{ width: `${prog.percentage}%` }} />
-                                            </div>
-                                            <span>ອ່ານແລ້ວ {prog.readCount}/{prog.totalPages} ໜ້າ ({prog.percentage}%)</span>
-                                        </div>
-
-                                        <div className="lib-actions">
-                                            <button className="lib-btn is-read" onClick={() => handleOpenBookInReader(book.id)}>
-                                                📖 ເປີດອ່ານຕຳລາ ({prog.readCount}/{prog.totalPages})
-                                            </button>
-                                            {isInVillage && (prog.isComplete ? (
-                                                <button className="lib-btn is-exam" onClick={() => handleTakeExam(book.id)}>
-                                                    📝 ໄປສອບເສັງທີ່ສະຖາບັນ
-                                                </button>
-                                            ) : (
-                                                <span className="lib-note">🔒 ອ່ານໃຫ້ຄົບທຸກໜ້າກ່ອນສອບ</span>
-                                            ))}
-                                        </div>
-                                    </div>
-                                </article>
-                            );
-                        })}
+                        )}
                     </div>
-                )}
-
-                {/* ==================== MODE 2: EMPTY READER STATE (0 BOOKS OWNED) ==================== */}
-                {tab === 'read' && ownedBooks.length === 0 && (
-                    <div className="p-12 overflow-y-auto flex-1 text-center space-y-4 text-slate-200">
-                        <div className="text-6xl">📕🔒</div>
-                        <h3 className="text-xl font-bold text-amber-300">
-                            ທ່ານຍັງບໍ່ມີປຶ້ມຕຳລາຮຽນໃນຄອບຄອງ
-                        </h3>
-                        <p className="text-sm text-slate-300 max-w-md mx-auto leading-relaxed">
-                            ປຶ້ມຕຳລາທຸກເຫຼັ້ມຕ້ອງຊື້ເອົາກ່ອນຈຶ່ງສາມາດເປີດອ່ານໄດ້!
-                            ກະລຸນາຍ່າງໄປທີ່ອາຄານ <strong className="text-amber-300">🏛️ ຫໍສະໝຸດ (Library)</strong> ໃນໝູ່ບ້ານ
-                            ເພື່ອເລືອກຊື້ປຶ້ມຕຳລາບົດທີ 1.
-                        </p>
-                        <div className="pt-2">
-                            <span className="px-4 py-2 rounded-xl bg-slate-800 border border-slate-700 text-xs text-slate-300 font-semibold">
-                                🎓 ທຶນປັດຈຸບັນຂອງທ່ານ: {entities.wallet.balance} Credit (ລາຄາບົດທີ 1: 20 Credit)
-                            </span>
-                        </div>
-                        <div className="pt-4">
-                            <button
-                                onClick={onClose}
-                                className="px-6 py-2.5 rounded-xl bg-slate-700 hover:bg-slate-600 text-white font-bold text-sm transition"
-                            >
-                                ຮັບຊາບ (ປິດໜ້າຕ່າງ)
-                            </button>
-                        </div>
-                    </div>
-                )}
-
-                {/* ==================== ACTIVE BOOK READER VIEW ==================== */}
-                {tab === 'read' && currentBook && bookProgress?.isUnlocked && activePage && (
-                    <>
-                        {/* Reader Subbar: Back to Shelf (if in Library Store) + Owned Book Tabs */}
-                        <div className="gw-readerbar flex flex-wrap items-center justify-between gap-2 px-6 py-2.5 border-b border-slate-700/60 bg-slate-900/60">
-                            <div className="flex items-center gap-2 overflow-x-auto">
-                                {isStore && (
-                                    <button
-                                        type="button"
-                                        onClick={() => switchTab('mine')}
-                                        className="lib-back-btn px-3 py-1.5 rounded-lg font-medium text-xs text-amber-300 bg-amber-500/10 border border-amber-500/30 transition flex items-center gap-1"
-                                    >
-                                        <span>⬅️</span>
-                                        <span>ຊັ້ນປຶ້ມ</span>
-                                    </button>
-                                )}
-                                {ownedBooks.map(b => {
-                                    const bp = ensureBookProgress(b.id);
-                                    const isSelected = b.id === currentBook.id;
-                                    return (
-                                        <button
-                                            key={b.id}
-                                            onClick={() => {
-                                                setSelectedBookId(b.id);
-                                                setCurrentPageIndex(0);
-                                                soundManager.playSelect();
-                                            }}
-                                            className={`px-3 py-1.5 rounded-lg font-medium text-xs transition flex items-center gap-1.5 ${isSelected
-                                                ? 'bg-amber-500/20 text-amber-300 border border-amber-400 font-bold'
-                                                : 'text-slate-400 hover:text-white bg-slate-800/50'
-                                                }`}
-                                        >
-                                            <span>📖</span>
-                                            <span>ບົດທີ {b.chapter}: {b.title}</span>
-                                            {bp.examPassed && <span>⭐</span>}
-                                        </button>
-                                    );
-                                })}
-                            </div>
-
-                            <span className="text-xs font-bold text-emerald-300">
-                                ອ່ານແລ້ວ {readProgress.readCount}/{readProgress.totalPages} ໜ້າ ({readProgress.percentage}%)
-                            </span>
-                        </div>
-
-                        {/* Page Content */}
-                        <div className="gw-body gw-reader-body overflow-y-auto flex-1 space-y-3 text-slate-200">
-                            <div className="gw-readermeta flex items-center justify-between">
-                                <span className="text-xs uppercase tracking-wider text-amber-400 font-bold bg-amber-500/10 px-2.5 py-1 rounded">
+                }
+                rightPage={
+                    <div className="flex flex-col h-full space-y-3 book-page-turn">
+                        {/* Page Reading Scroll Area (.gw-reader-body required for tests!) */}
+                        <div className="gw-reader-body overflow-y-auto flex-1 space-y-3 pr-1 text-amber-950">
+                            <div className="gw-readermeta flex items-center justify-between pb-1 border-b border-[#d4c5a9]">
+                                <span className="text-xs uppercase tracking-wider text-amber-900 font-bold bg-amber-200/60 px-2 py-0.5 rounded">
                                     ໜ້າທີ {activePage.pageNumber} / {pages.length}
                                 </span>
                                 {activePage.lesson && (
-                                    <span className="text-xs font-bold text-sky-300 bg-sky-500/10 px-2.5 py-1 rounded" data-testid="lesson-badge">
+                                    <span className="text-xs font-bold text-sky-800 bg-sky-100 px-2 py-0.5 rounded border border-sky-300" data-testid="lesson-badge">
                                         ບົດ {activePage.lesson}{lessonNotReachedNote(activePage.lesson)}
                                     </span>
                                 )}
                                 {isPageAlreadyRead ? (
-                                    <span className="text-xs text-emerald-400 font-bold flex items-center gap-1">
+                                    <span className="text-xs text-emerald-700 font-bold flex items-center gap-1">
                                         ✓ ອ່ານໜ້ານີ້ແລ້ວ
                                     </span>
                                 ) : (
-                                    <span className="text-xs text-amber-300 font-semibold">
+                                    <span className="text-xs text-amber-800 font-semibold">
                                         {remainingReadSeconds > 0
-                                            ? `⏳ ກະລຸນາອ່ານເນື້ອຫາ (${remainingReadSeconds} ວິນາທີ)...`
-                                            : '✨ ພ້ອມບັນທຶກການອ່ານໜ້ານີ້ແລ້ວ!'}
+                                            ? `⏳ ກະລຸນາອ່ານ (${remainingReadSeconds}s)...`
+                                            : '✨ ພ້ອມບັນທຶກແລ້ວ!'}
                                     </span>
                                 )}
                             </div>
 
-                            <h3 className="gw-reader-title text-2xl font-bold text-white border-l-4 border-amber-400 pl-3">
+                            <h3 className="gw-reader-title text-base sm:text-lg font-bold text-amber-950 border-l-4 border-amber-700 pl-2.5">
                                 {activePage.title}
                             </h3>
 
-                            {/* Responsive Book View: Side-by-Side on Landscape / Tablets, Stacked on Narrow Mobile */}
-                            <div className={`gw-reader-split ${activePage.illustration ? 'has-media' : 'no-media'}`}>
-                                {activePage.illustration && (
-                                    <div className="gw-reader-media-col">
-                                        <div className="gw-reader-illustration rounded-xl overflow-hidden border border-slate-700/80 bg-slate-950/60 p-2 shadow-inner">
-                                            <img
-                                                src={activePage.illustration}
-                                                alt={activePage.title}
-                                                className="w-full mx-auto block rounded-lg object-contain"
-                                                style={{ maxWidth: 576, height: 'auto' }}
-                                            />
-                                        </div>
-
-                                        {activePage.keyPoints && activePage.keyPoints.length > 0 && (
-                                            <div className="gw-reader-keypoints gw-keypoints-desktop bg-emerald-950/40 border border-emerald-500/40 rounded-xl p-3 space-y-1 mt-3">
-                                                <h4 className="text-xs font-bold text-emerald-300 flex items-center gap-1">
-                                                    <span>💡</span> ຈຸດສຳຄັນທີ່ຕ້ອງຈື່ (Key Takeaways)
-                                                </h4>
-                                                <ul className="list-disc list-inside space-y-1 text-xs text-emerald-100">
-                                                    {activePage.keyPoints.map((kp, idx) => (
-                                                        <li key={idx}>{kp}</li>
-                                                    ))}
-                                                </ul>
-                                            </div>
-                                        )}
-                                    </div>
-                                )}
-
-                                <div className="gw-reader-text-col flex-1 space-y-3">
-                                    <div className="gw-reader-content text-slate-100 leading-relaxed whitespace-pre-line bg-slate-800/60 p-4 rounded-xl border border-slate-700/60 shadow-sm text-sm">
-                                        {activePage.content}
-                                    </div>
-
-                                    {(!activePage.illustration) && activePage.keyPoints && activePage.keyPoints.length > 0 && (
-                                        <div className="gw-reader-keypoints bg-emerald-950/40 border border-emerald-500/40 rounded-xl p-4 space-y-2">
-                                            <h4 className="text-sm font-bold text-emerald-300 flex items-center gap-2">
-                                                <span>💡</span> ຈຸດສຳຄັນທີ່ຕ້ອງຈື່ (Key Takeaways)
-                                            </h4>
-                                            <ul className="list-disc list-inside space-y-1 text-sm text-emerald-100">
-                                                {activePage.keyPoints.map((kp, idx) => (
-                                                    <li key={idx}>{kp}</li>
-                                                ))}
-                                            </ul>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-
-                            {/* Mobile-only keypoints fallback when illustration is stacked */}
-                            {activePage.illustration && activePage.keyPoints && activePage.keyPoints.length > 0 && (
-                                <div className="gw-reader-keypoints gw-keypoints-mobile bg-emerald-950/40 border border-emerald-500/40 rounded-xl p-3 space-y-1">
-                                    <h4 className="text-xs font-bold text-emerald-300 flex items-center gap-1">
-                                        <span>💡</span> ຈຸດສຳຄັນທີ່ຕ້ອງຈື່ (Key Takeaways)
-                                    </h4>
-                                    <ul className="list-disc list-inside space-y-1 text-xs text-emerald-100">
-                                        {activePage.keyPoints.map((kp, idx) => (
-                                            <li key={idx}>{kp}</li>
-                                        ))}
-                                    </ul>
-                                </div>
-                            )}
-
-                            {/* Page Dot Indicators */}
-                            <div className="gw-reader-pagedots flex items-center justify-center gap-2 pt-2">
-                                {pages.map((p, idx) => {
-                                    const read = bookProgress.hasReadPage(p.pageNumber);
-                                    const active = idx === currentPageIndex;
-                                    return (
-                                        <button
-                                            key={p.pageNumber}
-                                            onClick={() => {
-                                                soundManager.playSelect();
-                                                setCurrentPageIndex(idx);
-                                            }}
-                                            className={`px-2.5 py-1 rounded-md text-xs font-bold border transition ${active
-                                                ? 'bg-amber-600 text-white border-amber-400'
-                                                : read
-                                                    ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
-                                                    : 'bg-slate-800 text-slate-400 border-slate-700'
-                                                }`}
-                                            title={p.lesson ? `ບົດ ${p.lesson}${lessonNotReachedNote(p.lesson)}` : `ໜ້າທີ ${p.pageNumber}`}
-                                        >
-                                            {p.lesson ?? p.pageNumber} {read ? '✓' : ''}
-                                        </button>
-                                    );
-                                })}
+                            <div className="gw-reader-content text-amber-950 leading-relaxed whitespace-pre-line bg-[#fffdfa]/60 p-3 sm:p-4 rounded-xl border border-[#d4c5a9] text-xs sm:text-sm shadow-sm">
+                                {activePage.content}
                             </div>
                         </div>
 
-                        {/* Reader Footer Controls */}
-                        <div className="gw-readerfoot px-6 py-4 border-t border-slate-700/60 bg-slate-950/80 flex flex-wrap items-center justify-between gap-3">
+                        {/* Reader Footer Controls (.gw-readerfoot required by mobile tests!) */}
+                        <div className="gw-readerfoot pt-3 border-t border-[#d4c5a9] flex flex-wrap items-center justify-between gap-2">
                             <div className="flex items-center gap-2">
                                 <button
+                                    type="button"
                                     onClick={handlePrevPage}
                                     disabled={currentPageIndex === 0}
-                                    className={`px-4 py-2 rounded-lg font-bold text-sm transition ${currentPageIndex > 0
-                                        ? 'bg-slate-700 hover:bg-slate-600 text-white'
-                                        : 'bg-slate-800 text-slate-500'
+                                    className={`min-h-[44px] px-3.5 py-2 rounded-xl font-bold text-xs sm:text-sm transition ${currentPageIndex > 0
+                                        ? 'bg-[#ede0c8] hover:bg-[#e4d4b8] text-amber-900 border border-[#c49a6c]'
+                                        : 'bg-[#e4d4b8]/50 text-amber-900/40 cursor-not-allowed'
                                         }`}
                                 >
                                     ⬅️ ໜ້າກ່ອນ
                                 </button>
 
-                                {/* Primary Read Confirmation / Next Page Button */}
                                 {!isPageAlreadyRead ? (
                                     <button
+                                        type="button"
                                         onClick={handleConfirmReadAndAdvance}
                                         disabled={remainingReadSeconds > 0}
-                                        className={`px-5 py-2 rounded-lg font-bold text-sm transition shadow ${remainingReadSeconds > 0
-                                            ? 'bg-slate-800 text-slate-400 border border-slate-700'
-                                            : 'bg-emerald-600 hover:bg-emerald-500 text-white'
+                                        className={`min-h-[44px] px-4 py-2 rounded-xl font-bold text-xs sm:text-sm transition shadow ${remainingReadSeconds > 0
+                                            ? 'bg-amber-200/50 text-amber-900/50 border border-amber-300 cursor-not-allowed'
+                                            : 'bg-emerald-700 hover:bg-emerald-600 text-white'
                                             }`}
                                     >
                                         {remainingReadSeconds > 0
@@ -680,11 +474,12 @@ export const TextbookModal: React.FC<TextbookModalProps> = ({
                                     </button>
                                 ) : (
                                     <button
+                                        type="button"
                                         onClick={handleConfirmReadAndAdvance}
                                         disabled={currentPageIndex >= pages.length - 1}
-                                        className={`px-4 py-2 rounded-lg font-bold text-sm transition ${currentPageIndex < pages.length - 1
-                                            ? 'bg-slate-700 hover:bg-slate-600 text-white'
-                                            : 'bg-slate-800 text-slate-500'
+                                        className={`min-h-[44px] px-4 py-2 rounded-xl font-bold text-xs sm:text-sm transition ${currentPageIndex < pages.length - 1
+                                            ? 'bg-amber-800 hover:bg-amber-700 text-amber-100'
+                                            : 'bg-amber-200/50 text-amber-900/40 cursor-not-allowed'
                                             }`}
                                     >
                                         ໜ້າຕໍ່ໄປ ➡️
@@ -695,22 +490,336 @@ export const TextbookModal: React.FC<TextbookModalProps> = ({
                             {isInVillage && (
                                 readProgress.isComplete ? (
                                     <button
+                                        type="button"
                                         onClick={() => handleTakeExam(currentBook.id)}
-                                        className="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm shadow-md transition flex items-center gap-2"
+                                        className="min-h-[44px] px-4 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-600 text-white font-bold text-xs sm:text-sm shadow transition flex items-center gap-1.5"
                                     >
                                         <span>📝</span>
                                         <span>ໄປສອບເສັງທີ່ສະຖາບັນ</span>
                                     </button>
                                 ) : (
-                                    <span className="text-xs text-slate-400 font-semibold px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800">
-                                        🔒 ອ່ານໃຫ້ຄົບທຸກໜ້າກ່ອນສອບ ({readProgress.readCount}/{readProgress.totalPages})
+                                    <span className="text-[11px] text-amber-900/70 font-semibold px-2.5 py-1 rounded bg-[#ede0c8] border border-[#c49a6c]">
+                                        🔒 ອ່ານໃຫ້ຄົບທຸກໜ້າ ({readProgress.readCount}/{readProgress.totalPages})
                                     </span>
                                 )
                             )}
                         </div>
-                    </>
-                )}
-            </div>
-        </div>
+                    </div>
+                }
+                footer={
+                    <div className="flex items-center justify-between w-full text-xs text-amber-200/80">
+                        <span>📖 ບົດຮຽນ: {activePage.title}</span>
+                        <span className="font-bold text-amber-300">🎓 {entities.wallet.balance} Credit</span>
+                    </div>
+                }
+            />
+        );
+    }
+
+    // -------------------------------------------------------------------------
+    // 3. BOOKSTORE: FOR SALE (shop) & MY BOOKS (mine)
+    // -------------------------------------------------------------------------
+    const selectedBook = books.find(b => b.id === selectedBookId) || books[0];
+    const selectedProgress = selectedBook ? ensureBookProgress(selectedBook.id) : null;
+    const selectedProgStats = selectedBook && selectedProgress
+        ? selectedProgress.getReadProgress(selectedBook.pages.length)
+        : { readCount: 0, totalPages: 0, percentage: 0, isComplete: false };
+
+    const selectedEligibility = selectedBook
+        ? checkBookPurchaseEligibility(selectedBook, entities.books, entities.wallet, entities.stageProgression)
+        : null;
+
+    const isLockedByProgression = selectedEligibility && (
+        selectedEligibility.reason === 'locked_prerequisite_exam' ||
+        selectedEligibility.reason === 'locked_prerequisite_boss'
+    );
+
+    return (
+        <BookFrame
+            isOpen={isOpen}
+            onClose={onClose}
+            title={windowTitle}
+            icon={isStore ? '🏛️' : '📚'}
+            subtitle={windowSubtitle}
+            tabs={ribbonTabs}
+            activeTab={tab}
+            onTabChange={t => setTab(t as LibraryTab)}
+            maxWidth="max-w-4xl"
+            className="lib-card"
+            leftPage={
+                <div className="space-y-3 book-page-turn">
+                    {toastMessage && (
+                        <div className="p-2 rounded-lg bg-amber-100 border border-amber-400 text-amber-900 text-xs font-semibold">
+                            {toastMessage}
+                        </div>
+                    )}
+
+                    {/* ============ TAB: SHOP (ວາງຂາຍ) ============ */}
+                    {tab === 'shop' && (
+                        <>
+                            <div className="flex items-center justify-between pb-1.5 border-b border-[#d4c5a9]">
+                                <h3 className="font-bold text-amber-950 text-xs sm:text-sm">
+                                    🛒 ປຶ້ມຕຳລາທີ່ວາງຂາຍ ({booksForSale.length})
+                                </h3>
+                                <span className="text-[11px] text-amber-800">💡 ຊື້ເພື່ອປົດລັອກບົດຮຽນ</span>
+                            </div>
+
+                            {booksForSale.length === 0 ? (
+                                <div className="text-center py-8 space-y-2 text-amber-900">
+                                    <div className="text-4xl">🎉</div>
+                                    <h4 className="font-bold text-sm">ທ່ານຊື້ປຶ້ມຄົບທຸກເຫຼັ້ມແລ້ວ</h4>
+                                    <p className="text-xs text-amber-800/80">ປຶ້ມທັງໝົດຢູ່ໃນແຖບ "ປຶ້ມຂອງຂ້ອຍ"</p>
+                                </div>
+                            ) : (
+                                <div className="space-y-2">
+                                    {booksForSale.map(book => {
+                                        const eligibility = checkBookPurchaseEligibility(
+                                            book,
+                                            entities.books,
+                                            entities.wallet,
+                                            entities.stageProgression
+                                        );
+                                        const locked =
+                                            eligibility.reason === 'locked_prerequisite_exam' ||
+                                            eligibility.reason === 'locked_prerequisite_boss';
+                                        const isSelected = book.id === selectedBook?.id;
+
+                                        return (
+                                            <button
+                                                key={book.id}
+                                                type="button"
+                                                onClick={() => {
+                                                    setSelectedBookId(book.id);
+                                                    soundManager.playSelect();
+                                                }}
+                                                className={`min-h-[44px] w-full text-left p-2.5 rounded-xl border transition flex items-center justify-between gap-2 ${isSelected
+                                                    ? 'bg-amber-100/90 border-amber-600 shadow-sm'
+                                                    : 'bg-[#fffdfa]/60 border-[#d4c5a9] hover:bg-amber-50'
+                                                    } ${locked ? 'opacity-70' : ''}`}
+                                            >
+                                                <div className="flex items-center gap-2 min-w-0">
+                                                    <span className="text-2xl">{locked ? '🔒' : '📕'}</span>
+                                                    <div className="min-w-0">
+                                                        <div className="flex items-center gap-1.5">
+                                                            <span className="text-[10px] font-bold text-amber-800 bg-amber-200/60 px-1.5 py-0.2 rounded">
+                                                                ບົດທີ {book.chapter}
+                                                            </span>
+                                                            <h4 className="font-bold text-xs sm:text-sm text-amber-950 truncate">
+                                                                {book.title}
+                                                            </h4>
+                                                        </div>
+                                                        <p className="text-[11px] text-amber-800/70 truncate">{book.titleEn}</p>
+                                                    </div>
+                                                </div>
+                                                <span className="text-xs font-bold text-amber-900 bg-amber-200/70 px-2 py-0.5 rounded-full whitespace-nowrap">
+                                                    {book.price} 🎓
+                                                </span>
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            )}
+                        </>
+                    )}
+
+                    {/* ============ TAB: MINE (ປຶ້ມຂອງຂ້ອຍ) ============ */}
+                    {tab === 'mine' && (
+                        <>
+                            <div className="flex items-center justify-between pb-1.5 border-b border-[#d4c5a9]">
+                                <h3 className="font-bold text-amber-950 text-xs sm:text-sm">
+                                    🎒 ປຶ້ມໃນຄອບຄອງ ({ownedBooks.length})
+                                </h3>
+                                <span className="text-[11px] text-amber-800">ກົດເພື່ອເປີດອ່ານ</span>
+                            </div>
+
+                            {ownedBooks.length === 0 ? (
+                                <div className="text-center py-8 space-y-3 text-amber-900">
+                                    <div className="text-4xl">📕🔒</div>
+                                    <h4 className="font-bold text-sm">ຊັ້ນປຶ້ມຂອງທ່ານຍັງຫວ່າງ</h4>
+                                    <p className="text-xs text-amber-800/80">ໄປແຖບ "ວາງຂາຍ" ເພື່ອຊື້ປຶ້ມເຫຼັ້ມທຳອິດ</p>
+                                    <button
+                                        type="button"
+                                        onClick={() => setTab('shop')}
+                                        className="min-h-[44px] px-4 py-2 rounded-xl bg-amber-800 text-amber-100 font-bold text-xs shadow"
+                                    >
+                                        🛒 ໄປເບິ່ງປຶ້ມທີ່ວາງຂາຍ
+                                    </button>
+                                </div>
+                            ) : (
+                                <div className="space-y-2">
+                                    {ownedBooks.map(book => {
+                                        const bp = ensureBookProgress(book.id);
+                                        const prog = bp.getReadProgress(book.pages.length);
+                                        const isSelected = book.id === selectedBook?.id;
+
+                                        return (
+                                            <button
+                                                key={book.id}
+                                                type="button"
+                                                onClick={() => {
+                                                    setSelectedBookId(book.id);
+                                                    soundManager.playSelect();
+                                                }}
+                                                className={`min-h-[44px] w-full text-left p-2.5 rounded-xl border transition flex items-center justify-between gap-2 ${isSelected
+                                                    ? 'bg-amber-100/90 border-amber-600 shadow-sm'
+                                                    : 'bg-[#fffdfa]/60 border-[#d4c5a9] hover:bg-amber-50'
+                                                    }`}
+                                            >
+                                                <div className="flex items-center gap-2 min-w-0">
+                                                    <span className="text-2xl">📖</span>
+                                                    <div className="min-w-0">
+                                                        <div className="flex items-center gap-1.5">
+                                                            <span className="text-[10px] font-bold text-amber-800 bg-amber-200/60 px-1.5 py-0.2 rounded">
+                                                                ບົດທີ {book.chapter}
+                                                            </span>
+                                                            <h4 className="font-bold text-xs sm:text-sm text-amber-950 truncate">
+                                                                {book.title}
+                                                            </h4>
+                                                        </div>
+                                                        <p className="text-[11px] text-amber-800/70">{book.titleEn}</p>
+                                                        <div className="flex items-center gap-2 mt-1">
+                                                            <div className="w-24 h-1.5 rounded-full bg-amber-200 overflow-hidden">
+                                                                <div className="h-full bg-emerald-600" style={{ width: `${prog.percentage}%` }} />
+                                                            </div>
+                                                            <span className="text-[10px] text-amber-900 font-semibold">{prog.readCount}/{prog.totalPages}</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                {bp.examPassed ? (
+                                                    <span className="text-xs text-amber-600 font-bold">⭐ ຜ່ານແລ້ວ</span>
+                                                ) : (
+                                                    <span className="text-[11px] text-amber-800/70">📝 ຍັງບໍ່ສອບ</span>
+                                                )}
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            )}
+                        </>
+                    )}
+                </div>
+            }
+            rightPage={
+                selectedBook ? (
+                    <div className="flex flex-col h-full space-y-3 book-page-turn text-amber-950">
+                        {/* Selected Book Overview */}
+                        <div className="p-3 rounded-xl bg-[#fffdfa]/70 border border-[#d4c5a9] space-y-2">
+                            <div className="flex items-start gap-3">
+                                <span className="text-3xl p-2 rounded-lg bg-amber-100 border border-amber-300">
+                                    {tab === 'mine' ? '📖' : isLockedByProgression ? '🔒' : '📕'}
+                                </span>
+                                <div>
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-[10px] font-bold text-amber-800 bg-amber-200 px-1.5 py-0.2 rounded">
+                                            ບົດທີ {selectedBook.chapter}
+                                        </span>
+                                        <h3 className="font-bold text-sm sm:text-base text-amber-950">
+                                            {selectedBook.title}
+                                        </h3>
+                                    </div>
+                                    <p className="text-xs text-amber-800/80">{selectedBook.titleEn} • {selectedBook.pages.length} ໜ້າ</p>
+                                </div>
+                            </div>
+
+                            <p className="text-xs text-amber-900 leading-relaxed bg-amber-50/60 p-2.5 rounded-lg border border-amber-200">
+                                {selectedBook.description}
+                            </p>
+
+                            {selectedBook.unlockedRecipes && selectedBook.unlockedRecipes.length > 0 && (
+                                <div className="text-xs text-amber-900 space-y-1">
+                                    <span className="font-bold text-amber-950">🎁 ສູດສ້າງທີ່ຈະໄດ້ຮັບເມື່ອສອບຜ່ານ:</span>
+                                    <p className="font-semibold text-emerald-800">
+                                        {selectedBook.unlockedRecipes.map(recipeLabel).join(', ')}
+                                    </p>
+                                </div>
+                            )}
+
+                            {isLockedByProgression && selectedEligibility && (
+                                <div className="p-2.5 rounded-lg bg-amber-100/70 border border-amber-300 text-xs space-y-1">
+                                    <div className="font-bold text-amber-950">
+                                        🔒 ເງື່ອນໄຂກ່ອນເປີດຂາຍປຶ້ມບົດທີ {selectedBook.chapter}:
+                                    </div>
+                                    {selectedBook.prerequisiteBookId && (
+                                        <div className={selectedEligibility.prereqExamPassed ? 'text-emerald-800 font-semibold' : 'text-amber-900'}>
+                                            {selectedEligibility.prereqExamPassed ? '✓' : '○'} ສອບເສັງປຶ້ມບົດກ່ອນໜ້າຜ່ານ ({selectedBook.prerequisiteBookId})
+                                        </div>
+                                    )}
+                                    {selectedBook.requiredCompletedStageId && (
+                                        <div className={selectedEligibility.prereqBossDefeated ? 'text-emerald-800 font-semibold' : 'text-amber-900'}>
+                                            {selectedEligibility.prereqBossDefeated ? '✓' : '○'} ປາບ Boss ປະຈຳດ່ານບົດກ່ອນໜ້າສຳເລັດ ({selectedBook.requiredCompletedStageId})
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Actions for Shop vs Mine */}
+                        <div className="mt-auto pt-2 space-y-2">
+                            {tab === 'shop' && (
+                                isLockedByProgression ? (
+                                    <button
+                                        type="button"
+                                        disabled
+                                        className="min-h-[44px] w-full py-2.5 rounded-xl bg-amber-200/50 text-amber-900/50 font-bold text-sm border border-amber-300 cursor-not-allowed"
+                                    >
+                                        ຍັງບໍ່ປົດລັອກບົດຮຽນນີ້
+                                    </button>
+                                ) : (
+                                    <button
+                                        type="button"
+                                        onClick={() => handlePurchaseBook(selectedBook)}
+                                        disabled={!selectedEligibility?.canPurchase}
+                                        className="min-h-[44px] book-btn-craft w-full"
+                                    >
+                                        {selectedEligibility?.canPurchase
+                                            ? `ຊື້ປຶ້ມຕຳລາ (${selectedBook.price} 🎓 Credit)`
+                                            : `Credit ບໍ່ພໍ (ຕ້ອງການ ${selectedBook.price} 🎓)`}
+                                    </button>
+                                )
+                            )}
+
+                            {tab === 'mine' && (
+                                <div className="space-y-2">
+                                    <button
+                                        type="button"
+                                        onClick={() => handleOpenBookInReader(selectedBook.id)}
+                                        className="min-h-[44px] book-btn-craft w-full"
+                                    >
+                                        📖 ເປີດອ່ານຕຳລາ ({selectedProgStats.readCount}/{selectedProgStats.totalPages})
+                                    </button>
+
+                                    {isInVillage && (
+                                        selectedProgStats.isComplete ? (
+                                            <button
+                                                type="button"
+                                                onClick={() => handleTakeExam(selectedBook.id)}
+                                                className="min-h-[44px] w-full py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-600 text-white font-bold text-sm shadow transition flex items-center justify-center gap-2"
+                                            >
+                                                <span>📝</span>
+                                                <span>ໄປສອບເສັງທີ່ສະຖາບັນ</span>
+                                            </button>
+                                        ) : (
+                                            <span className="block text-center text-xs text-amber-900/70 font-semibold p-2 rounded-lg bg-[#ede0c8] border border-[#c49a6c]">
+                                                🔒 ອ່ານໃຫ້ຄົບທຸກໜ້າກ່ອນສອບ
+                                            </span>
+                                        )
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                ) : (
+                    <div className="flex items-center justify-center h-full text-center text-amber-900/60">
+                        ເລືອກປຶ້ມເພື່ອເບິ່ງລາຍລະອຽດ
+                    </div>
+                )
+            }
+            footer={
+                <div className="flex items-center justify-between w-full text-xs text-amber-200/80">
+                    <span>🏛️ ຫໍສະໝຸດແຫ່ງປັນຍາ</span>
+                    <span className="font-bold text-amber-300">🎓 {entities.wallet.balance} Credit</span>
+                </div>
+            }
+        />
     );
 };

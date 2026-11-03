@@ -539,6 +539,48 @@ export class SoundManager
     }
 
     /**
+     * Book Page Turn / Paper Rustle Sound Effect
+     */
+    playPageTurn (): void
+    {
+        if (this._isMuted) return;
+        this.initContext();
+        if (!this.ctx) return;
+
+        const now = this.ctx.currentTime;
+        const duration = 0.16;
+        const bufferSize = Math.floor(this.ctx.sampleRate * duration);
+        const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+        const data = buffer.getChannelData(0);
+
+        for (let i = 0; i < bufferSize; i++) {
+            data[i] = (Math.random() * 2 - 1) * Math.sin((i / bufferSize) * Math.PI);
+        }
+
+        const noise = this.ctx.createBufferSource();
+        noise.buffer = buffer;
+
+        const filter = this.ctx.createBiquadFilter();
+        filter.type = 'bandpass';
+        filter.frequency.setValueAtTime(800, now);
+        filter.frequency.exponentialRampToValueAtTime(1800, now + duration * 0.5);
+        filter.frequency.exponentialRampToValueAtTime(600, now + duration);
+        filter.Q.value = 1.8;
+
+        const gain = this.ctx.createGain();
+        gain.gain.setValueAtTime(0.001, now);
+        gain.gain.linearRampToValueAtTime(0.2, now + 0.03);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+
+        noise.connect(filter);
+        filter.connect(gain);
+        this.connectOutput(gain);
+
+        noise.start(now);
+        noise.stop(now + duration);
+    }
+
+    /**
      * Landing Sound: low punchy thud with exponential sweep
      */
     playLand (): void

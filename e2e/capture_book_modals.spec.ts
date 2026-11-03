@@ -21,7 +21,7 @@ test.describe('Inspect and Capture Book / Adventurer Journal UI Modals', () => {
     await expect(page.locator('.game-hud')).toBeVisible({ timeout: 30000 });
     await page.waitForTimeout(1200);
 
-    // Grant items to backpack so slots and ingredients look rich
+    // Grant items and unlock textbooks for rich inspector view
     await page.evaluate(() => {
       const e = (window as any).__entities;
       if (e) {
@@ -35,7 +35,13 @@ test.describe('Inspect and Capture Book / Adventurer Journal UI Modals', () => {
         e.backpack.addItem('iron-helmet', 1);
         e.backpack.addItem('iron-armor', 1);
         e.backpack.addItem('iron-boots', 1);
+        e.storage.addItem('wood', 50);
+        e.storage.addItem('stone', 40);
+        e.storage.addItem('portal-block-green', 1);
         e.wallet.setBalance(150);
+        if (e.books['book-ch1']) {
+          e.books['book-ch1'].unlock();
+        }
       }
     });
 
@@ -79,7 +85,39 @@ test.describe('Inspect and Capture Book / Adventurer Journal UI Modals', () => {
     await page.keyboard.press('Escape');
     await page.waitForTimeout(300);
 
-    // 8. Mobile Landscape Test (915x412)
+    // 8. Inspect Storage Chest (Village Vault Journal)
+    await page.evaluate(() => (window as any).__eventBus.emit('open-storage'));
+    await expect(page.locator('.gw-window')).toBeVisible();
+    await page.waitForTimeout(600);
+    await page.screenshot({ path: path.join(outDir, '08-book-storage-chest.png') });
+    await page.keyboard.press('Escape');
+    await page.waitForTimeout(300);
+
+    // 9. Inspect Academy (Examination Scrolls)
+    await page.evaluate(() => (window as any).__eventBus.emit('open-academy'));
+    await expect(page.locator('.gw-window')).toBeVisible();
+    await page.waitForTimeout(600);
+    await page.screenshot({ path: path.join(outDir, '09-book-academy-exam.png') });
+    await page.keyboard.press('Escape');
+    await page.waitForTimeout(300);
+
+    // 10. Inspect Textbook Reader (Personal Study Journal)
+    await page.locator('#hud-library-btn').click();
+    await expect(page.locator('.gw-window')).toBeVisible();
+    await page.waitForTimeout(600);
+    await page.screenshot({ path: path.join(outDir, '10-book-textbook-reader.png') });
+    await page.keyboard.press('Escape');
+    await page.waitForTimeout(300);
+
+    // 11. Inspect World Stage Map (Fantasy Cartographer Atlas)
+    await page.evaluate(() => (window as any).__eventBus.emit('open-stage-map'));
+    await expect(page.locator('.gw-window')).toBeVisible();
+    await page.waitForTimeout(600);
+    await page.screenshot({ path: path.join(outDir, '11-book-world-atlas-map.png') });
+    await page.keyboard.press('Escape');
+    await page.waitForTimeout(300);
+
+    // 12. Mobile Landscape Test (915x412)
     await page.setViewportSize({ width: 915, height: 412 });
     await page.evaluate(() => (window as any).__eventBus.emit('open-backpack'));
     await expect(page.locator('.gw-window')).toBeVisible();
@@ -95,6 +133,6 @@ test.describe('Inspect and Capture Book / Adventurer Journal UI Modals', () => {
     await page.keyboard.press('Escape');
     await page.waitForTimeout(300);
 
-    console.log('Successfully captured all 7 book modal screenshots to', outDir);
+    console.log('Successfully captured all book modal screenshots to', outDir);
   });
 });

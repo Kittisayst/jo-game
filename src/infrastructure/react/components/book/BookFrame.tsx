@@ -125,6 +125,8 @@ export const BookFrame: React.FC<BookFrameProps> = ({
                                 <button
                                     key={tab.id}
                                     type="button"
+                                    role="tab"
+                                    aria-selected={isActive}
                                     data-testid={tab.testId}
                                     disabled={tab.disabled}
                                     onClick={() => {
