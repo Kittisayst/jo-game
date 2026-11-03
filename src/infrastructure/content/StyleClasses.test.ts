@@ -31,6 +31,17 @@ const ALLOWED_WITHOUT_STYLE = new Set([
     'drop-shadow', 'filter', 'py-0.2', 'sm:text-[10px]', 'sm:text-[11px]', 'shadow-cyan-500/30',
 ]);
 
+/** Returns whether a class is a standard Tailwind CSS utility compiled by @tailwindcss/vite. */
+function isTailwindUtility (cls: string): boolean
+{
+    const base = cls.replace(/^(sm|md|lg|xl|2xl|hover|focus|active|disabled|group-hover):/, '');
+    return /^(flex|grid|block|inline|inline-block|inline-flex|hidden|relative|absolute|fixed|sticky|border|rounded|shadow|truncate|transition|filter|transform|uppercase|lowercase|capitalize)$/.test(base) ||
+        /^-?(flex|grid|grid-cols|grid-rows|items|justify|content|self|place|gap|space-[xy]|inset|top|bottom|left|right)-/.test(base) ||
+        /^-?(p|px|py|pt|pb|pl|pr|m|mx|my|mt|mb|ml|mr|w|h|min-w|max-w|min-h|max-h)-/.test(base) ||
+        /^(text|bg|border|ring|shadow|rounded|opacity|z|duration|ease|scale|rotate|translate|overflow|cursor|select|backdrop)-/.test(base) ||
+        /^(font|leading|tracking|whitespace|list|col|row)-/.test(base);
+}
+
 function definedClasses (): Set<string>
 {
     const defined = new Set<string>();
@@ -113,10 +124,10 @@ describe('classes of the windows', () =>
         {
             for (const cls of classesUsedBy(source))
             {
-                if (!defined.has(cls) && !ALLOWED_WITHOUT_STYLE.has(cls)) problems.push(`${name}: ${cls}`);
+                if (!defined.has(cls) && !isTailwindUtility(cls) && !ALLOWED_WITHOUT_STYLE.has(cls)) problems.push(`${name}: ${cls}`);
             }
         }
-        expect(problems, 'classes that style.css does not define (they do nothing)').toEqual([]);
+        expect(problems, 'classes that neither style.css nor Tailwind define').toEqual([]);
     });
 
     it('lists only names that are still used and still undefined', () =>
