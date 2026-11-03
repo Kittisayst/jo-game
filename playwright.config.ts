@@ -9,8 +9,7 @@ export const launchArgs = process.env.PW_NO_GPU
   ? []
   : ['--use-angle=d3d11', '--enable-gpu', '--ignore-gpu-blocklist'];
 
-const port = Number(process.env.PORT ?? 8088);
-const baseURL = process.env.PW_BASE_URL ?? `http://127.0.0.1:${port}`;
+const baseURL = process.env.PW_BASE_URL ?? 'http://127.0.0.1:8080';
 
 export default defineConfig({
   testDir: './e2e',
