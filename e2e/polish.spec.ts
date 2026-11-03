@@ -62,7 +62,9 @@ test.describe('Village polish', () => {
     expect(await fill.evaluate(el => getComputedStyle(el).backgroundColor)).not.toBe('rgba(0, 0, 0, 0)');
 
     // Head, body and feet in one row, not three tall panels one under the other
+    await page.waitForTimeout(350);
     const ys = await Promise.all(['head', 'body', 'feet'].map(async slot => (await page.getByTestId(`armor-slot-${slot}`).boundingBox())!.y));
+
     expect(new Set(ys.map(Math.round)).size).toBe(1);
   });
 

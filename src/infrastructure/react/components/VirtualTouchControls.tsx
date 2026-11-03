@@ -288,91 +288,97 @@ export const VirtualTouchControls: React.FC<VirtualTouchControlsProps> = ({ visi
                 </button>
             </div>
 
-            {/* Right Action Controls: Attack, Cycle, Dash, Talk, Jump */}
+            {/* Right Action Controls: Ergonomic Cluster with Jump, Attack, Dash, and Skills close together */}
             <div className="virtual-touch-cluster-right">
-                <button
-                    aria-label="ປ່ຽນອາວຸດ (Switch Weapon)"
-                    className={`virtual-touch-btn virtual-touch-cycle ${activeButtons.cycle ? 'is-active' : ''}`}
-                    onPointerDown={handleCycleWeaponTap}
-                    title="Switch Weapon [Q]"
-                    type="button"
-                >
-                    <span className="virtual-touch-icon">🔀</span>
-                    <span className="virtual-touch-label">[Q]</span>
-                </button>
-
-                {skillSlots.map(view => view && (
+                {/* Upper Tier: Switch Weapon [Q], Skills (ປ່ອຍພະລັງ), and Interact [E] */}
+                <div className="virtual-touch-row-upper">
                     <button
-                        aria-label={view.name}
-                        className={`virtual-touch-btn virtual-touch-skill ${view.cooldown > 0 ? 'is-cooling' : ''}`}
-                        data-testid={`touch-skill-${view.key}`}
-                        key={view.slot}
-                        onPointerDown={e => { e.preventDefault(); triggerHaptic(15); EventBus.emit('virtual-skill', { slot: view.slot }); }}
-                        title={`${view.name} [${view.key}]`}
+                        aria-label="ປ່ຽນອາວຸດ (Switch Weapon)"
+                        className={`virtual-touch-btn virtual-touch-cycle ${activeButtons.cycle ? 'is-active' : ''}`}
+                        onPointerDown={handleCycleWeaponTap}
+                        title="Switch Weapon [Q]"
                         type="button"
                     >
-                        <span className="virtual-touch-icon">{view.icon}</span>
-                        <span className="virtual-touch-label">[{view.key}]</span>
+                        <span className="virtual-touch-icon">🔀</span>
+                        <span className="virtual-touch-label">[Q]</span>
                     </button>
-                ))}
 
-                <button
-                    aria-label="ພຸ່ງຫຼົບ (Dash)"
-                    className={`virtual-touch-btn virtual-touch-dash ${activeButtons.dash ? 'is-active' : ''}`}
-                    data-testid="touch-dash"
-                    onPointerDown={handleDashTap}
-                    title="Dash [Shift]"
-                    type="button"
-                >
-                    <span className="virtual-touch-icon">💨</span>
-                    <span className="virtual-touch-label">ພຸ່ງ</span>
-                </button>
+                    {skillSlots.map(view => view && (
+                        <button
+                            aria-label={view.name}
+                            className={`virtual-touch-btn virtual-touch-skill ${view.cooldown > 0 ? 'is-cooling' : ''}`}
+                            data-testid={`touch-skill-${view.key}`}
+                            key={view.slot}
+                            onPointerDown={e => { e.preventDefault(); triggerHaptic(15); EventBus.emit('virtual-skill', { slot: view.slot }); }}
+                            title={`${view.name} [${view.key}]`}
+                            type="button"
+                        >
+                            <span className="virtual-touch-icon">{view.icon}</span>
+                            <span className="virtual-touch-label">[{view.key}]</span>
+                        </button>
+                    ))}
 
-                <button
-                    aria-label="ລົມກັນ ຫຼື ເປີດ (Interact / Talk)"
-                    className={`virtual-touch-btn virtual-touch-interact ${activeButtons.interact ? 'is-active' : ''}`}
-                    onPointerDown={handleInteractTap}
-                    type="button"
-                >
-                    <span className="virtual-touch-icon">💬</span>
-                    <span className="virtual-touch-label">[E]</span>
-                </button>
-
-                <button
-                    aria-label="ໂຈມຕີ (Attack)"
-                    className={`virtual-touch-btn virtual-touch-attack ${activeButtons.attack ? 'is-active' : ''}`}
-                    onPointerDown={handleAttackTap}
-                    title="Attack [J]"
-                    type="button"
-                >
-                    <span className="virtual-touch-icon">⚔️</span>
-                    <span className="virtual-touch-label font-bold">ໂຈມຕີ</span>
-                </button>
-
-                <button
-                    aria-label="ໂດດ (Jump)"
-                    className={`virtual-touch-btn virtual-touch-jump ${activeButtons.jump ? 'is-active' : ''}`}
-                    onPointerCancel={e => handlePointerUp('jump', e)}
-                    onPointerDown={e => handlePointerDown('jump', e)}
-                    onPointerLeave={e => handlePointerUp('jump', e)}
-                    onPointerUp={e => handlePointerUp('jump', e)}
-                    type="button"
-                >
-                    <svg
-                        fill="none"
-                        height="28"
-                        stroke="currentColor"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2.8"
-                        viewBox="0 0 24 24"
-                        width="28"
+                    <button
+                        aria-label="ລົມກັນ ຫຼື ເປີດ (Interact / Talk)"
+                        className={`virtual-touch-btn virtual-touch-interact ${activeButtons.interact ? 'is-active' : ''}`}
+                        onPointerDown={handleInteractTap}
+                        type="button"
                     >
-                        <polyline points="17 11 12 6 7 11" />
-                        <polyline points="17 18 12 13 7 18" />
-                    </svg>
-                    <span className="virtual-touch-label font-bold">ໂດດ</span>
-                </button>
+                        <span className="virtual-touch-icon">💬</span>
+                        <span className="virtual-touch-label">[E]</span>
+                    </button>
+                </div>
+
+                {/* Lower Tier: Core Combat Cluster (Dash ພຸ່ງ, Attack ໂຈມຕີ, Jump ໂດດ) */}
+                <div className="virtual-touch-row-lower">
+                    <button
+                        aria-label="ພຸ່ງຫຼົບ (Dash)"
+                        className={`virtual-touch-btn virtual-touch-dash ${activeButtons.dash ? 'is-active' : ''}`}
+                        data-testid="touch-dash"
+                        onPointerDown={handleDashTap}
+                        title="Dash [Shift]"
+                        type="button"
+                    >
+                        <span className="virtual-touch-icon">💨</span>
+                        <span className="virtual-touch-label font-bold">ພຸ່ງ</span>
+                    </button>
+
+                    <button
+                        aria-label="ໂຈມຕີ (Attack)"
+                        className={`virtual-touch-btn virtual-touch-attack ${activeButtons.attack ? 'is-active' : ''}`}
+                        onPointerDown={handleAttackTap}
+                        title="Attack [J]"
+                        type="button"
+                    >
+                        <span className="virtual-touch-icon">⚔️</span>
+                        <span className="virtual-touch-label font-bold">ໂຈມຕີ</span>
+                    </button>
+
+                    <button
+                        aria-label="ໂດດ (Jump)"
+                        className={`virtual-touch-btn virtual-touch-jump ${activeButtons.jump ? 'is-active' : ''}`}
+                        onPointerCancel={e => handlePointerUp('jump', e)}
+                        onPointerDown={e => handlePointerDown('jump', e)}
+                        onPointerLeave={e => handlePointerUp('jump', e)}
+                        onPointerUp={e => handlePointerUp('jump', e)}
+                        type="button"
+                    >
+                        <svg
+                            fill="none"
+                            height="28"
+                            stroke="currentColor"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2.8"
+                            viewBox="0 0 24 24"
+                            width="28"
+                        >
+                            <polyline points="17 11 12 6 7 11" />
+                            <polyline points="17 18 12 13 7 18" />
+                        </svg>
+                        <span className="virtual-touch-label font-bold">ໂດດ</span>
+                    </button>
+                </div>
             </div>
         </div>
     );

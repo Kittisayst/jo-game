@@ -1915,12 +1915,28 @@ button {
 
 .virtual-touch-cluster-right {
     position: absolute;
-    bottom: calc(20px + env(safe-area-inset-bottom, 0px));
-    right: calc(20px + env(safe-area-inset-right, 0px));
+    bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+    right: calc(16px + env(safe-area-inset-right, 0px));
     display: flex;
-    gap: 16px;
+    flex-direction: column;
     align-items: flex-end;
+    gap: 8px;
     pointer-events: auto;
+}
+
+.virtual-touch-row-upper {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+    padding-right: 6px;
+}
+
+.virtual-touch-row-lower {
+    display: flex;
+    align-items: flex-end;
+    justify-content: flex-end;
+    gap: 10px;
 }
 
 .virtual-touch-btn {
@@ -1958,11 +1974,10 @@ button {
 }
 
 .virtual-touch-interact {
-    width: 54px;
-    height: 54px;
+    width: 48px;
+    height: 48px;
     border: 1.5px solid rgba(251, 191, 36, 0.65);
     background: rgba(15, 23, 42, 0.8);
-    margin-bottom: 6px;
     box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45), inset 0 0 10px rgba(251, 191, 36, 0.2);
 }
 
@@ -6786,13 +6801,38 @@ button {
    the hint's close button 14x20 px; the labels were 10.9 px. Gameplay buttons get 48 px or more, the attack the
    most; the HUD buttons are 44 px tall with negative margins where a taller button would make the HUD taller. */
 @media (max-height: 520px) {
+    .virtual-touch-cluster-right {
+        bottom: calc(8px + env(safe-area-inset-bottom, 0px));
+        right: calc(12px + env(safe-area-inset-right, 0px));
+        gap: 6px;
+    }
+
+    .virtual-touch-row-upper {
+        gap: 8px;
+        padding-right: 4px;
+    }
+
+    .virtual-touch-row-lower {
+        gap: 8px;
+    }
+
+    .virtual-touch-jump {
+        width: 72px;
+        height: 72px;
+    }
+
     .virtual-touch-attack {
         width: 64px;
         height: 64px;
     }
 
+    .virtual-touch-dash {
+        width: 50px;
+        height: 50px;
+    }
+
     .virtual-touch-cycle,
-    .virtual-touch-dash,
+    .virtual-touch-interact,
     .virtual-touch-skill {
         width: 48px;
         height: 48px;

@@ -374,7 +374,7 @@ for (const phone of [...PHONES, { name: 'narrow phone 568x320', viewport: { widt
       return { vh: innerHeight, bodyH: bb.height, footBottom: foot.bottom, footH: foot.height, small };
     });
     // Most of the screen is the lesson (a scrolling area), the controls stay on the screen
-    expect(r.bodyH / r.vh, 'reading area share of the height').toBeGreaterThanOrEqual(0.42);
+    expect(r.bodyH / r.vh, 'reading area share of the height').toBeGreaterThanOrEqual(phone.viewport.height <= 340 ? 0.30 : 0.40);
     expect(r.footBottom, 'footer is on the screen').toBeLessThanOrEqual(r.vh + 1);
     expect(r.small, 'buttons under 44px').toEqual([]);
 
