@@ -5669,28 +5669,6 @@ button,
     font-size: 11px;
 }
 
-/* A phone held upright: the game is landscape, so ask for the phone to be turned (never blocks the screen) */
-#rotate-hint {
-    display: none;
-    position: fixed;
-    left: 50%;
-    bottom: max(16px, env(safe-area-inset-bottom));
-    transform: translateX(-50%);
-    z-index: 9999;
-    padding: 10px 16px;
-    border-radius: 999px;
-    background: rgba(15, 23, 42, 0.92);
-    border: 1px solid #fbbf24;
-    color: #fde68a;
-    font-size: 0.9rem;
-    font-weight: 700;
-    white-space: nowrap;
-    pointer-events: none;
-}
-
-@media (orientation: portrait) and (pointer: coarse) {
-    #rotate-hint { display: block; }
-}
 
 /* Install the game as an app (title screen, while the browser offers it) */
 .install-banner {
@@ -6386,4 +6364,81 @@ button,
     clip: rect(0, 0, 0, 0);
     white-space: nowrap;
     border: 0;
+}
+
+/* A phone held upright (RotateOverlay): a full-screen message above everything; the game is paused meanwhile */
+.rotate-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 100000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    padding: max(24px, env(safe-area-inset-top)) 24px max(24px, env(safe-area-inset-bottom));
+    background: radial-gradient(circle at 50% 35%, #1e1b4b, #0b0720 70%);
+    color: #f8fafc;
+    text-align: center;
+}
+
+.rotate-phone {
+    width: 72px;
+    height: 72px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: rotate-phone-turn 2.4s ease-in-out infinite;
+}
+
+.rotate-phone-body {
+    width: 34px;
+    height: 60px;
+    border: 4px solid #facc15;
+    border-radius: 8px;
+    box-sizing: border-box;
+    box-shadow: 0 0 16px rgba(250, 204, 21, 0.45);
+}
+
+@keyframes rotate-phone-turn {
+    0%, 20% { transform: rotate(0deg); }
+    55%, 80% { transform: rotate(-90deg); }
+    100% { transform: rotate(0deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .rotate-phone { animation: none; transform: rotate(-90deg); }
+}
+
+.rotate-title {
+    margin: 0;
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: #fde68a;
+}
+
+.rotate-text {
+    margin: 0;
+    max-width: 320px;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    color: #cbd5e1;
+}
+
+.rotate-text-en {
+    margin: 0;
+    font-size: 0.85rem;
+    color: #94a3b8;
+}
+
+.rotate-continue {
+    margin-top: 10px;
+    min-height: 48px;
+    padding: 10px 20px;
+    border-radius: 12px;
+    border: 1px solid rgba(250, 204, 21, 0.6);
+    background: rgba(15, 23, 42, 0.8);
+    color: #fde68a;
+    font-weight: 700;
+    cursor: pointer;
 }
