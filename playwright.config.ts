@@ -9,6 +9,9 @@ export const launchArgs = process.env.PW_NO_GPU
   ? []
   : ['--use-angle=d3d11', '--enable-gpu', '--ignore-gpu-blocklist'];
 
+const port = Number(process.env.PORT ?? 8088);
+const baseURL = process.env.PW_BASE_URL ?? `http://127.0.0.1:${port}`;
+
 export default defineConfig({
   testDir: './e2e',
   timeout: 45000,
@@ -16,15 +19,15 @@ export default defineConfig({
   workers: Number(process.env.PW_WORKERS ?? (process.env.PW_NO_GPU ? 1 : 3)),
   globalSetup: './e2e/globalSetup.ts',
   use: {
-    baseURL: 'http://127.0.0.1:8080',
+    baseURL,
     headless: true,
     viewport: { width: 1280, height: 720 },
     screenshot: 'only-on-failure',
     launchOptions: { args: launchArgs },
   },
-  webServer: {
+  webServer: process.env.PW_BASE_URL ? undefined : {
     command: 'node ./node_modules/vite/bin/vite.js --config vite/config.dev.mjs',
-    url: 'http://127.0.0.1:8080',
+    url: baseURL,
     reuseExistingServer: true,
     timeout: 30000,
   },

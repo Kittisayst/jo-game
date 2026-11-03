@@ -7,7 +7,7 @@ import { launchArgs } from '../playwright.config';
  */
 export default async function globalSetup (config: FullConfig): Promise<void>
 {
-  const baseURL = config.projects[0].use.baseURL ?? 'http://127.0.0.1:8080';
+  const baseURL = config.projects[0].use.baseURL ?? 'http://127.0.0.1:8088';
   const browser = await chromium.launch({ args: launchArgs });
   try {
     const page = await browser.newPage();
