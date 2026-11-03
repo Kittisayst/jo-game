@@ -176,14 +176,58 @@ export function Hud ({
                             </button>
 
                             <div
-                                className="hud-vitals-pill health-badge"
+                                className={`hud-vitals-pill health-badge ${health <= 1 ? 'hud-health-low' : ''}`}
                                 data-testid="health-hearts"
                                 data-current={health}
                                 data-max={maxHealth}
                                 title={`ພະລັງຊີວິດ: ${health}/${maxHealth}`}
                             >
-                                <span className="hud-hearts-icons">
-                                    {'❤️'.repeat(Math.max(0, health)) + '🖤'.repeat(Math.max(0, maxHealth - health))}
+                                <span className="hud-hearts-icons" aria-label={`ພະລັງຊີວິດ ${health} ຈາກ ${maxHealth}`}>
+                                    {Array.from({ length: Math.max(1, maxHealth) }).map((_, i) => {
+                                        const isFull = i < health;
+                                        return (
+                                            <span
+                                                key={i}
+                                                className={`hud-heart-wrapper ${isFull ? 'is-full' : 'is-empty'} ${isFull && health <= 1 ? 'pulse-low' : ''}`}
+                                            >
+                                                <svg
+                                                    className="hud-heart-svg"
+                                                    viewBox="0 0 24 24"
+                                                    width="20"
+                                                    height="20"
+                                                    aria-hidden="true"
+                                                >
+                                                    {isFull ? (
+                                                        <>
+                                                            <defs>
+                                                                <linearGradient id={`hudHeartGrad-${i}`} x1="0%" y1="0%" x2="0%" y2="100%">
+                                                                    <stop offset="0%" stopColor="#fb7185" />
+                                                                    <stop offset="40%" stopColor="#e11d48" />
+                                                                    <stop offset="100%" stopColor="#881337" />
+                                                                </linearGradient>
+                                                            </defs>
+                                                            <path
+                                                                d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+                                                                fill={`url(#hudHeartGrad-${i})`}
+                                                                stroke="#4c0519"
+                                                                strokeWidth="1.2"
+                                                                strokeLinejoin="round"
+                                                            />
+                                                            <ellipse cx="8" cy="6.5" rx="2.5" ry="1.5" fill="rgba(255,255,255,0.55)" transform="rotate(-30 8 6.5)" />
+                                                        </>
+                                                    ) : (
+                                                        <path
+                                                            d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+                                                            fill="rgba(15, 23, 42, 0.65)"
+                                                            stroke="rgba(255, 255, 255, 0.28)"
+                                                            strokeWidth="1.2"
+                                                            strokeLinejoin="round"
+                                                        />
+                                                    )}
+                                                </svg>
+                                            </span>
+                                        );
+                                    })}
                                 </span>
 
                                 {armor > 0 && (
@@ -193,7 +237,28 @@ export function Hud ({
                                         data-armor={armor}
                                         title="ຫົວໃຈເກາະ: ເສຍກ່ອນຫົວໃຈປົກກະຕິ ແລະ ຟື້ນເມື່ອກັບໝູ່ບ້ານ"
                                     >
-                                        <span className="badge-icon">{'🛡️'.repeat(Math.min(armor, 10))}</span>
+                                        <span className="badge-icon hud-armor-icons" aria-label={`ຫົວໃຈເກາະ ${armor}`}>
+                                            {Array.from({ length: Math.min(armor, 5) }).map((_, i) => (
+                                                <svg key={i} className="hud-armor-svg" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+                                                    <defs>
+                                                        <linearGradient id={`hudArmorGrad-${i}`} x1="0%" y1="0%" x2="100%" y2="100%">
+                                                            <stop offset="0%" stopColor="#38bdf8" />
+                                                            <stop offset="60%" stopColor="#0284c7" />
+                                                            <stop offset="100%" stopColor="#0369a1" />
+                                                        </linearGradient>
+                                                    </defs>
+                                                    <path
+                                                        d="M12 2L4 5.5v5.8c0 5.2 3.4 10 8 11.2 4.6-1.2 8-6 8-11.2V5.5L12 2z"
+                                                        fill={`url(#hudArmorGrad-${i})`}
+                                                        stroke="#e0f2fe"
+                                                        strokeWidth="1.2"
+                                                        strokeLinejoin="round"
+                                                    />
+                                                    <path d="M12 4v14c2.8-.8 5-4.2 5-8V6.6L12 4z" fill="rgba(255,255,255,0.25)" />
+                                                </svg>
+                                            ))}
+                                            {armor > 5 && <span className="hud-armor-count">+{armor - 5}</span>}
+                                        </span>
                                     </div>
                                 )}
                             </div>

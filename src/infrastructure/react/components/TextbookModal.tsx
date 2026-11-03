@@ -16,8 +16,7 @@ export type TextbookModalMode = 'library-store' | 'reader';
 /** The Library window is split into three parts: books for sale, books already bought, and the reader. */
 type LibraryTab = 'shop' | 'mine' | 'read';
 
-export interface TextbookModalProps
-{
+export interface TextbookModalProps {
     isOpen: boolean;
     mode?: TextbookModalMode;
     isInVillage?: boolean;
@@ -32,8 +31,7 @@ export interface TextbookModalProps
 }
 
 /** Says when the lesson belongs to a Stage the player has not cleared yet (it can still be read). */
-function lessonNotReachedNote (lesson: string): string
-{
+function lessonNotReachedNote(lesson: string): string {
     const stageNumber = stageOfLesson(lesson);
     if (stageNumber === null) return '';
     return entities.stageProgression.isStageCompleted(stageIdOf(stageNumber)) ? '' : ` · ດ່ານ ${stageNumber} ຍັງບໍ່ຜ່ານ`;
@@ -50,8 +48,7 @@ export const TextbookModal: React.FC<TextbookModalProps> = ({
     onBookPurchased,
     onPageRead,
     onGoToExam,
-}) =>
-{
+}) => {
     const [books] = useState<BookDefinition[]>(() => getGameContent().books);
     const [selectedBookId, setSelectedBookId] = useState<string>(initialBookId || 'book-ch1');
     const [currentPageIndex, setCurrentPageIndex] = useState<number>(0);
@@ -61,32 +58,26 @@ export const TextbookModal: React.FC<TextbookModalProps> = ({
     const [, setRevision] = useState(0);
 
     // Reset sub-view whenever modal opens or mode changes
-    useEffect(() =>
-    {
+    useEffect(() => {
         if (!isOpen) return;
         setToastMessage(null);
 
-        if (mode === 'library-store')
-        {
+        if (mode === 'library-store') {
             const hasBookForSale = getGameContent().books.some(b => !entities.books[b.id]?.isUnlocked);
             setTab(hasBookForSale ? 'shop' : 'mine');
-            if (initialBookId)
-            {
+            if (initialBookId) {
                 setSelectedBookId(initialBookId);
             }
         }
-        else
-        {
+        else {
             setTab('read');
             const ownedIds = Object.values(entities.books)
                 .filter(bp => bp.isUnlocked)
                 .map(bp => bp.bookId);
-            if (initialBookId && entities.books[initialBookId]?.isUnlocked)
-            {
+            if (initialBookId && entities.books[initialBookId]?.isUnlocked) {
                 setSelectedBookId(initialBookId);
             }
-            else if (ownedIds.length > 0 && !ownedIds.includes(selectedBookId))
-            {
+            else if (ownedIds.length > 0 && !ownedIds.includes(selectedBookId)) {
                 setSelectedBookId(ownedIds[0]);
             }
             const targetBook = books.find(b => b.id === (initialBookId ?? selectedBookId));
@@ -95,14 +86,12 @@ export const TextbookModal: React.FC<TextbookModalProps> = ({
                 : -1;
             setCurrentPageIndex(pageIndex >= 0 ? pageIndex : 0);
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isOpen, mode, initialBookId, initialPageNumber, books.length]);
 
-    const ensureBookProgress = (bookId: string): BookProgress =>
-    {
+    const ensureBookProgress = (bookId: string): BookProgress => {
         let bp = entities.books[bookId];
-        if (!bp)
-        {
+        if (!bp) {
             bp = new BookProgress(bookId, false);
             entities.books[bookId] = bp;
         }
@@ -122,16 +111,13 @@ export const TextbookModal: React.FC<TextbookModalProps> = ({
     );
 
     // 3-second countdown timer for first-time page reading
-    useEffect(() =>
-    {
-        if (!isOpen || !isReadingActive || !bookProgress?.isUnlocked || !activePage)
-        {
+    useEffect(() => {
+        if (!isOpen || !isReadingActive || !bookProgress?.isUnlocked || !activePage) {
             setRemainingReadSeconds(0);
             return;
         }
 
-        if (bookProgress.hasReadPage(activePage.pageNumber))
-        {
+        if (bookProgress.hasReadPage(activePage.pageNumber)) {
             setRemainingReadSeconds(0);
             return;
         }
@@ -140,12 +126,9 @@ export const TextbookModal: React.FC<TextbookModalProps> = ({
         setRemainingReadSeconds(initialWait);
         if (initialWait <= 0) return;
 
-        const timer = window.setInterval(() =>
-        {
-            setRemainingReadSeconds(prev =>
-            {
-                if (prev <= 1)
-                {
+        const timer = window.setInterval(() => {
+            setRemainingReadSeconds(prev => {
+                if (prev <= 1) {
                     window.clearInterval(timer);
                     return 0;
                 }
@@ -157,14 +140,11 @@ export const TextbookModal: React.FC<TextbookModalProps> = ({
     }, [isOpen, isReadingActive, currentBook?.id, activePage, isPageAlreadyRead, pageReadTimerSeconds, bookProgress]);
 
     // Keyboard navigation (Escape to close, Left/Right when reviewing already-read pages)
-    useEffect(() =>
-    {
+    useEffect(() => {
         if (!isOpen) return;
 
-        const onKeyDown = (e: KeyboardEvent) =>
-        {
-            if (e.key === 'Escape')
-            {
+        const onKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') {
                 e.preventDefault();
                 onClose();
             }
@@ -175,14 +155,12 @@ export const TextbookModal: React.FC<TextbookModalProps> = ({
 
     if (!isOpen) return null;
 
-    const showToast = (msg: string) =>
-    {
+    const showToast = (msg: string) => {
         setToastMessage(msg);
         window.setTimeout(() => setToastMessage(null), 3000);
     };
 
-    const handlePurchaseBook = (book: BookDefinition) =>
-    {
+    const handlePurchaseBook = (book: BookDefinition) => {
         ensureBookProgress(book.id);
         const result = purchaseBookUseCase(
             book,
@@ -191,8 +169,7 @@ export const TextbookModal: React.FC<TextbookModalProps> = ({
             entities.stageProgression
         );
 
-        if (result.success)
-        {
+        if (result.success) {
             soundManager.playBuy();
             onBookPurchased?.(book.id, result.remainingBalance);
             setSelectedBookId(book.id);
@@ -201,22 +178,18 @@ export const TextbookModal: React.FC<TextbookModalProps> = ({
             showToast(`🎉 ຊື້ປຶ້ມ "${book.title}" ສຳເລັດ! ຍ້າຍໄປຢູ່ "ປຶ້ມຂອງຂ້ອຍ" ແລ້ວ — ກົດ "ເປີດອ່ານ" ໄດ້ເລີຍ!`);
             setRevision(r => r + 1);
         }
-        else
-        {
+        else {
             soundManager.playHurt();
-            if (result.reason === 'insufficient_credit')
-            {
+            if (result.reason === 'insufficient_credit') {
                 showToast('❌ Credit ບໍ່ພຽງພໍສຳລັບຊື້ປຶ້ມເຫຼັ້ມນີ້');
             }
-            else
-            {
+            else {
                 showToast('🔒 ຍັງບໍ່ຜ່ານເງື່ອນໄຂການປົດລັອກບົດຮຽນນີ້');
             }
         }
     };
 
-    const handleOpenBookInReader = (bookId: string) =>
-    {
+    const handleOpenBookInReader = (bookId: string) => {
         const bp = ensureBookProgress(bookId);
         if (!bp.isUnlocked) return;
 
@@ -224,70 +197,57 @@ export const TextbookModal: React.FC<TextbookModalProps> = ({
         setSelectedBookId(bookId);
         // Jump to first unread page if any, else page 0
         const targetBook = books.find(b => b.id === bookId);
-        if (targetBook)
-        {
+        if (targetBook) {
             const firstUnreadIdx = targetBook.pages.findIndex(p => !bp.hasReadPage(p.pageNumber));
             setCurrentPageIndex(firstUnreadIdx >= 0 ? firstUnreadIdx : 0);
         }
-        else
-        {
+        else {
             setCurrentPageIndex(0);
         }
         setTab('read');
     };
 
-    const handlePrevPage = () =>
-    {
-        if (currentPageIndex > 0)
-        {
+    const handlePrevPage = () => {
+        if (currentPageIndex > 0) {
             soundManager.playSelect();
             setCurrentPageIndex(p => p - 1);
         }
     };
 
-    const handleConfirmReadAndAdvance = () =>
-    {
+    const handleConfirmReadAndAdvance = () => {
         if (!currentBook || !bookProgress || !activePage) return;
         if (!isPageAlreadyRead && remainingReadSeconds > 0) return;
 
-        if (!isPageAlreadyRead)
-        {
+        if (!isPageAlreadyRead) {
             const res = readBookPageUseCase(bookProgress, activePage.pageNumber, pages.length);
-            if (res.success)
-            {
+            if (res.success) {
                 soundManager.playPowerUp();
                 onPageRead?.(currentBook.id, activePage.pageNumber, res.isFullyRead);
                 setRevision(r => r + 1);
             }
         }
-        else
-        {
+        else {
             soundManager.playSelect();
         }
 
-        if (currentPageIndex < pages.length - 1)
-        {
+        if (currentPageIndex < pages.length - 1) {
             setCurrentPageIndex(p => p + 1);
         }
     };
 
-    const handleTakeExam = (bookId: string) =>
-    {
+    const handleTakeExam = (bookId: string) => {
         const targetBook = books.find(b => b.id === bookId);
         const bp = entities.books[bookId];
-        if (!targetBook || !bp || !bp.canTakeExam(targetBook.pages.length))
-        {
+        if (!targetBook || !bp || !bp.canTakeExam(targetBook.pages.length)) {
             soundManager.playHurt();
             return;
         }
 
         onClose();
-        if (onGoToExam)
-        {
+        if (onGoToExam) {
             onGoToExam(bookId);
         }
-        else
-        {
+        else {
             EventBus.emit('open-academy', bookId);
         }
     };
@@ -298,8 +258,7 @@ export const TextbookModal: React.FC<TextbookModalProps> = ({
 
     const isStore = mode === 'library-store';
 
-    const switchTab = (next: LibraryTab) =>
-    {
+    const switchTab = (next: LibraryTab) => {
         if (next === tab) return;
         soundManager.playSelect();
         setTab(next);
@@ -311,8 +270,7 @@ export const TextbookModal: React.FC<TextbookModalProps> = ({
         { id: 'read', icon: '📖', label: 'ອ່ານ', disabled: ownedBooks.length === 0 },
     ];
 
-    const recipeLabel = (id: string) =>
-    {
+    const recipeLabel = (id: string) => {
         const item = getGameContent().items.find(i => i.id === id);
         return item ? `${item.icon ?? ''} ${item.name}`.trim() : id;
     };
@@ -376,8 +334,7 @@ export const TextbookModal: React.FC<TextbookModalProps> = ({
                             </div>
                         )}
 
-                        {booksForSale.map(book =>
-                        {
+                        {booksForSale.map(book => {
                             const eligibility = checkBookPurchaseEligibility(
                                 book,
                                 entities.books,
@@ -457,8 +414,7 @@ export const TextbookModal: React.FC<TextbookModalProps> = ({
                                 <p>ໄປແຖບ "ວາງຂາຍ" ເພື່ອຊື້ປຶ້ມຕຳລາເຫຼັ້ມທຳອິດ</p>
                                 <button className="lib-btn is-buy" onClick={() => switchTab('shop')}>🛒 ໄປເບິ່ງປຶ້ມທີ່ວາງຂາຍ</button>
                             </div>
-                        ) : ownedBooks.map(book =>
-                        {
+                        ) : ownedBooks.map(book => {
                             const bp = ensureBookProgress(book.id);
                             const prog = bp.getReadProgress(book.pages.length);
                             return (
@@ -546,24 +502,21 @@ export const TextbookModal: React.FC<TextbookModalProps> = ({
                                         <span>ຊັ້ນປຶ້ມ</span>
                                     </button>
                                 )}
-                                {ownedBooks.map(b =>
-                                {
+                                {ownedBooks.map(b => {
                                     const bp = ensureBookProgress(b.id);
                                     const isSelected = b.id === currentBook.id;
                                     return (
                                         <button
                                             key={b.id}
-                                            onClick={() =>
-                                            {
+                                            onClick={() => {
                                                 setSelectedBookId(b.id);
                                                 setCurrentPageIndex(0);
                                                 soundManager.playSelect();
                                             }}
-                                            className={`px-3 py-1.5 rounded-lg font-medium text-xs transition flex items-center gap-1.5 ${
-                                                isSelected
-                                                    ? 'bg-amber-500/20 text-amber-300 border border-amber-400 font-bold'
-                                                    : 'text-slate-400 hover:text-white bg-slate-800/50'
-                                            }`}
+                                            className={`px-3 py-1.5 rounded-lg font-medium text-xs transition flex items-center gap-1.5 ${isSelected
+                                                ? 'bg-amber-500/20 text-amber-300 border border-amber-400 font-bold'
+                                                : 'text-slate-400 hover:text-white bg-slate-800/50'
+                                                }`}
                                         >
                                             <span>📖</span>
                                             <span>ບົດທີ {b.chapter}: {b.title}</span>
@@ -579,7 +532,7 @@ export const TextbookModal: React.FC<TextbookModalProps> = ({
                         </div>
 
                         {/* Page Content */}
-                        <div className="gw-body gw-reader-body p-6 overflow-y-auto flex-1 space-y-4 text-slate-200">
+                        <div className="gw-body gw-reader-body overflow-y-auto flex-1 space-y-3 text-slate-200">
                             <div className="gw-readermeta flex items-center justify-between">
                                 <span className="text-xs uppercase tracking-wider text-amber-400 font-bold bg-amber-500/10 px-2.5 py-1 rounded">
                                     ໜ້າທີ {activePage.pageNumber} / {pages.length}
@@ -606,27 +559,61 @@ export const TextbookModal: React.FC<TextbookModalProps> = ({
                                 {activePage.title}
                             </h3>
 
-                            {activePage.illustration && (
-                                <div className="gw-reader-illustration rounded-xl overflow-hidden border border-slate-700/80 bg-slate-950/60 p-2 shadow-inner">
-                                    <img
-                                        src={activePage.illustration}
-                                        alt={activePage.title}
-                                        className="w-full mx-auto block rounded-lg"
-                                        style={{ maxWidth: 576, height: 'auto' }}
-                                    />
-                                </div>
-                            )}
+                            {/* Responsive Book View: Side-by-Side on Landscape / Tablets, Stacked on Narrow Mobile */}
+                            <div className={`gw-reader-split ${activePage.illustration ? 'has-media' : 'no-media'}`}>
+                                {activePage.illustration && (
+                                    <div className="gw-reader-media-col">
+                                        <div className="gw-reader-illustration rounded-xl overflow-hidden border border-slate-700/80 bg-slate-950/60 p-2 shadow-inner">
+                                            <img
+                                                src={activePage.illustration}
+                                                alt={activePage.title}
+                                                className="w-full mx-auto block rounded-lg object-contain"
+                                                style={{ maxWidth: 576, height: 'auto' }}
+                                            />
+                                        </div>
 
-                            <div className="gw-reader-content text-slate-300 leading-relaxed whitespace-pre-line bg-slate-800/50 p-4 rounded-xl border border-slate-700/50">
-                                {activePage.content}
+                                        {activePage.keyPoints && activePage.keyPoints.length > 0 && (
+                                            <div className="gw-reader-keypoints gw-keypoints-desktop bg-emerald-950/40 border border-emerald-500/40 rounded-xl p-3 space-y-1 mt-3">
+                                                <h4 className="text-xs font-bold text-emerald-300 flex items-center gap-1">
+                                                    <span>💡</span> ຈຸດສຳຄັນທີ່ຕ້ອງຈື່ (Key Takeaways)
+                                                </h4>
+                                                <ul className="list-disc list-inside space-y-1 text-xs text-emerald-100">
+                                                    {activePage.keyPoints.map((kp, idx) => (
+                                                        <li key={idx}>{kp}</li>
+                                                    ))}
+                                                </ul>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+
+                                <div className="gw-reader-text-col flex-1 space-y-3">
+                                    <div className="gw-reader-content text-slate-100 leading-relaxed whitespace-pre-line bg-slate-800/60 p-4 rounded-xl border border-slate-700/60 shadow-sm text-sm">
+                                        {activePage.content}
+                                    </div>
+
+                                    {(!activePage.illustration) && activePage.keyPoints && activePage.keyPoints.length > 0 && (
+                                        <div className="gw-reader-keypoints bg-emerald-950/40 border border-emerald-500/40 rounded-xl p-4 space-y-2">
+                                            <h4 className="text-sm font-bold text-emerald-300 flex items-center gap-2">
+                                                <span>💡</span> ຈຸດສຳຄັນທີ່ຕ້ອງຈື່ (Key Takeaways)
+                                            </h4>
+                                            <ul className="list-disc list-inside space-y-1 text-sm text-emerald-100">
+                                                {activePage.keyPoints.map((kp, idx) => (
+                                                    <li key={idx}>{kp}</li>
+                                                ))}
+                                            </ul>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
 
-                            {activePage.keyPoints && activePage.keyPoints.length > 0 && (
-                                <div className="gw-reader-keypoints bg-emerald-950/40 border border-emerald-500/40 rounded-xl p-4 space-y-2">
-                                    <h4 className="text-sm font-bold text-emerald-300 flex items-center gap-2">
+                            {/* Mobile-only keypoints fallback when illustration is stacked */}
+                            {activePage.illustration && activePage.keyPoints && activePage.keyPoints.length > 0 && (
+                                <div className="gw-reader-keypoints gw-keypoints-mobile bg-emerald-950/40 border border-emerald-500/40 rounded-xl p-3 space-y-1">
+                                    <h4 className="text-xs font-bold text-emerald-300 flex items-center gap-1">
                                         <span>💡</span> ຈຸດສຳຄັນທີ່ຕ້ອງຈື່ (Key Takeaways)
                                     </h4>
-                                    <ul className="list-disc list-inside space-y-1 text-sm text-emerald-100">
+                                    <ul className="list-disc list-inside space-y-1 text-xs text-emerald-100">
                                         {activePage.keyPoints.map((kp, idx) => (
                                             <li key={idx}>{kp}</li>
                                         ))}
@@ -636,25 +623,22 @@ export const TextbookModal: React.FC<TextbookModalProps> = ({
 
                             {/* Page Dot Indicators */}
                             <div className="gw-reader-pagedots flex items-center justify-center gap-2 pt-2">
-                                {pages.map((p, idx) =>
-                                {
+                                {pages.map((p, idx) => {
                                     const read = bookProgress.hasReadPage(p.pageNumber);
                                     const active = idx === currentPageIndex;
                                     return (
                                         <button
                                             key={p.pageNumber}
-                                            onClick={() =>
-                                            {
+                                            onClick={() => {
                                                 soundManager.playSelect();
                                                 setCurrentPageIndex(idx);
                                             }}
-                                            className={`px-2.5 py-1 rounded-md text-xs font-bold border transition ${
-                                                active
-                                                    ? 'bg-amber-600 text-white border-amber-400'
-                                                    : read
-                                                        ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
-                                                        : 'bg-slate-800 text-slate-400 border-slate-700'
-                                            }`}
+                                            className={`px-2.5 py-1 rounded-md text-xs font-bold border transition ${active
+                                                ? 'bg-amber-600 text-white border-amber-400'
+                                                : read
+                                                    ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
+                                                    : 'bg-slate-800 text-slate-400 border-slate-700'
+                                                }`}
                                             title={p.lesson ? `ບົດ ${p.lesson}${lessonNotReachedNote(p.lesson)}` : `ໜ້າທີ ${p.pageNumber}`}
                                         >
                                             {p.lesson ?? p.pageNumber} {read ? '✓' : ''}
@@ -670,11 +654,10 @@ export const TextbookModal: React.FC<TextbookModalProps> = ({
                                 <button
                                     onClick={handlePrevPage}
                                     disabled={currentPageIndex === 0}
-                                    className={`px-4 py-2 rounded-lg font-bold text-sm transition ${
-                                        currentPageIndex > 0
-                                            ? 'bg-slate-700 hover:bg-slate-600 text-white'
-                                            : 'bg-slate-800 text-slate-500'
-                                    }`}
+                                    className={`px-4 py-2 rounded-lg font-bold text-sm transition ${currentPageIndex > 0
+                                        ? 'bg-slate-700 hover:bg-slate-600 text-white'
+                                        : 'bg-slate-800 text-slate-500'
+                                        }`}
                                 >
                                     ⬅️ ໜ້າກ່ອນ
                                 </button>
@@ -684,11 +667,10 @@ export const TextbookModal: React.FC<TextbookModalProps> = ({
                                     <button
                                         onClick={handleConfirmReadAndAdvance}
                                         disabled={remainingReadSeconds > 0}
-                                        className={`px-5 py-2 rounded-lg font-bold text-sm transition shadow ${
-                                            remainingReadSeconds > 0
-                                                ? 'bg-slate-800 text-slate-400 border border-slate-700'
-                                                : 'bg-emerald-600 hover:bg-emerald-500 text-white'
-                                        }`}
+                                        className={`px-5 py-2 rounded-lg font-bold text-sm transition shadow ${remainingReadSeconds > 0
+                                            ? 'bg-slate-800 text-slate-400 border border-slate-700'
+                                            : 'bg-emerald-600 hover:bg-emerald-500 text-white'
+                                            }`}
                                     >
                                         {remainingReadSeconds > 0
                                             ? `⏳ ກຳລັງອ່ານ... (${remainingReadSeconds}s)`
@@ -700,11 +682,10 @@ export const TextbookModal: React.FC<TextbookModalProps> = ({
                                     <button
                                         onClick={handleConfirmReadAndAdvance}
                                         disabled={currentPageIndex >= pages.length - 1}
-                                        className={`px-4 py-2 rounded-lg font-bold text-sm transition ${
-                                            currentPageIndex < pages.length - 1
-                                                ? 'bg-slate-700 hover:bg-slate-600 text-white'
-                                                : 'bg-slate-800 text-slate-500'
-                                        }`}
+                                        className={`px-4 py-2 rounded-lg font-bold text-sm transition ${currentPageIndex < pages.length - 1
+                                            ? 'bg-slate-700 hover:bg-slate-600 text-white'
+                                            : 'bg-slate-800 text-slate-500'
+                                            }`}
                                     >
                                         ໜ້າຕໍ່ໄປ ➡️
                                     </button>
