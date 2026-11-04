@@ -31,7 +31,7 @@ export class Player extends Physics.Arcade.Sprite
     /** An air dash was used since the hero last stood on the ground. */
     airDashUsed = false;
     /** The scene sets this every frame from the unlocked abilities: one extra jump in the air. */
-    canDoubleJump = false;
+    canDoubleJump = true;
     /** The extra jump was used since the hero last stood on the ground (or kicked off a wall). */
     doubleJumpUsed = false;
     /** Walking speed factor: a speed Potion and boots raise it (set by the scene every frame). */

@@ -146,7 +146,7 @@ export function createDefaultSaveSnapshot (slotId = 'slot_1'): SaveGameSnapshot
         plantRegrowth: {},
         garden: { plotCount: 6, plots: [null, null, null, null, null, null] },
         crafting: null,
-        movement: ['dash'],
+        movement: ['dash', 'double-jump'],
         skills: { unlocked: [], equipped: [null, null], ranks: {} },
         toolUpgrades: {},
         heroLevel: { level: 1, xp: 0, unspentPoints: 0 },
@@ -345,7 +345,7 @@ export function migrateSaveSnapshot (raw: unknown, fallbackSlotId = 'slot_1'): S
             }
             : null;
     const movement: MovementAbilityId[] = MOVEMENT_ABILITY_IDS.filter(id =>
-        id === 'dash' || (Array.isArray(data.movement) && data.movement.includes(id)));
+        id === 'dash' || id === 'double-jump' || (Array.isArray(data.movement) && data.movement.includes(id)));
     const rawSkills = asRecord(data.skills);
     const unlockedSkills = Array.isArray(rawSkills.unlocked)
         ? Array.from(new Set(rawSkills.unlocked.filter((id): id is string => typeof id === 'string' && id.length > 0)))

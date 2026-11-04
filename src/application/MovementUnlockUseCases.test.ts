@@ -22,6 +22,6 @@ describe('syncMovementWithProgressUseCase', () =>
     it('gives every ability whose Boss was already beaten (an older save)', () =>
     {
         const abilities = new MovementAbilities();
-        expect(syncMovementWithProgressUseCase(abilities, unlocks, new Set([10, 20, 30]))).toEqual(['air-dash', 'double-jump']);
+        expect(syncMovementWithProgressUseCase(abilities, unlocks, new Set([10, 20, 30]))).toEqual(['air-dash']);
     });
 });

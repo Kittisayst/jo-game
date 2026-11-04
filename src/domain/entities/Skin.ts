@@ -13,10 +13,10 @@ const DEFAULT_SKIN_ID = 'cyber-blue';
 export const AVAILABLE_SKINS: SkinDefinition[] = [
     {
         id: 'cyber-blue',
-        name: 'Cyber Runner',
-        description: 'Classic electric cyan explorer suit',
+        name: 'Adventurer (ນັກພະຈົນໄພ)',
+        description: 'Classic intrepid explorer equipped with trail leather and field gear',
         price: 0,
-        colorHex: '#0284c7',
+        colorHex: '#8a532c',
     },
     {
         id: 'neon-ninja',

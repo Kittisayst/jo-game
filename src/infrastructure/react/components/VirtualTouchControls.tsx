@@ -19,7 +19,6 @@ export const VirtualTouchControls: React.FC<VirtualTouchControlsProps> = ({ visi
         jump: boolean;
         interact: boolean;
         attack: boolean;
-        cycle: boolean;
         dash: boolean;
         throw: boolean;
     }>({
@@ -28,7 +27,6 @@ export const VirtualTouchControls: React.FC<VirtualTouchControlsProps> = ({ visi
         jump: false,
         interact: false,
         attack: false,
-        cycle: false,
         dash: false,
         throw: false,
     });
@@ -69,7 +67,6 @@ export const VirtualTouchControls: React.FC<VirtualTouchControlsProps> = ({ visi
                 jump: false,
                 interact: false,
                 attack: false,
-                cycle: false,
                 dash: false,
                 throw: false,
             });
@@ -89,7 +86,6 @@ export const VirtualTouchControls: React.FC<VirtualTouchControlsProps> = ({ visi
                 jump: false,
                 interact: false,
                 attack: false,
-                cycle: false,
                 dash: false,
                 throw: false,
             });
@@ -217,19 +213,6 @@ export const VirtualTouchControls: React.FC<VirtualTouchControlsProps> = ({ visi
         }, 120);
     };
 
-    const handleCycleWeaponTap = (e: React.PointerEvent<HTMLButtonElement>) =>
-    {
-        e.preventDefault();
-        triggerHaptic(15);
-        setActiveButtons(prev => ({ ...prev, cycle: true }));
-        EventBus.emit('virtual-cycle-weapon');
-
-        setTimeout(() =>
-        {
-            setActiveButtons(prev => ({ ...prev, cycle: false }));
-        }, 120);
-    };
-
     const handleThrowBookTap = (e: React.PointerEvent<HTMLButtonElement>) =>
     {
         e.preventDefault();
@@ -307,29 +290,29 @@ export const VirtualTouchControls: React.FC<VirtualTouchControlsProps> = ({ visi
 
             {/* Right Action Controls: Ergonomic Cluster with Jump, Attack, Dash, and Skills close together */}
             <div className="virtual-touch-cluster-right">
-                {/* Upper Tier: Switch Weapon [Q], Skills (ປ່ອຍພະລັງ), and Interact [E] */}
+                {/* Upper Tier: Interact [E], Dash [ພຸ່ງ], Skills (ປ່ອຍພະລັງ), and Throw Book [📖 ປື້ມ] */}
                 <div className="virtual-touch-row-upper">
                     <button
-                        aria-label="ປ່ຽນອາວຸດ (Switch Weapon)"
-                        className={`virtual-touch-btn virtual-touch-cycle ${activeButtons.cycle ? 'is-active' : ''}`}
-                        onPointerDown={handleCycleWeaponTap}
-                        title="Switch Weapon [Q]"
+                        aria-label="ລົມກັນ ຫຼື ເປີດ (Interact / Talk)"
+                        className={`virtual-touch-btn virtual-touch-interact ${activeButtons.interact ? 'is-active' : ''}`}
+                        onPointerDown={handleInteractTap}
+                        title="Interact [E]"
                         type="button"
                     >
-                        <span className="virtual-touch-icon">🔀</span>
-                        <span className="virtual-touch-label">[Q]</span>
+                        <span className="virtual-touch-icon">💬</span>
+                        <span className="virtual-touch-label">[E]</span>
                     </button>
 
                     <button
-                        aria-label="ປາປື້ມຕຳລາ (Throw Book)"
-                        className={`virtual-touch-btn virtual-touch-book ${activeButtons.throw ? 'is-active' : ''}`}
-                        data-testid="touch-throw-book"
-                        onPointerDown={handleThrowBookTap}
-                        title="Throw Book [U/X]"
+                        aria-label="ພຸ່ງຫຼົບ (Dash)"
+                        className={`virtual-touch-btn virtual-touch-dash ${activeButtons.dash ? 'is-active' : ''}`}
+                        data-testid="touch-dash"
+                        onPointerDown={handleDashTap}
+                        title="Dash [Shift]"
                         type="button"
                     >
-                        <span className="virtual-touch-icon">📖</span>
-                        <span className="virtual-touch-label font-bold">ປື້ມ</span>
+                        <span className="virtual-touch-icon">💨</span>
+                        <span className="virtual-touch-label font-bold">ພຸ່ງ</span>
                     </button>
 
                     {skillSlots.map(view => view && (
@@ -348,30 +331,20 @@ export const VirtualTouchControls: React.FC<VirtualTouchControlsProps> = ({ visi
                     ))}
 
                     <button
-                        aria-label="ລົມກັນ ຫຼື ເປີດ (Interact / Talk)"
-                        className={`virtual-touch-btn virtual-touch-interact ${activeButtons.interact ? 'is-active' : ''}`}
-                        onPointerDown={handleInteractTap}
+                        aria-label="ປາປື້ມຕຳລາ (Throw Book)"
+                        className={`virtual-touch-btn virtual-touch-book ${activeButtons.throw ? 'is-active' : ''}`}
+                        data-testid="touch-throw-book"
+                        onPointerDown={handleThrowBookTap}
+                        title="Throw Book [U/X]"
                         type="button"
                     >
-                        <span className="virtual-touch-icon">💬</span>
-                        <span className="virtual-touch-label">[E]</span>
+                        <span className="virtual-touch-icon">📖</span>
+                        <span className="virtual-touch-label font-bold">ປື້ມ</span>
                     </button>
                 </div>
 
-                {/* Lower Tier: Core Combat Cluster (Dash ພຸ່ງ, Attack ໂຈມຕີ, Jump ໂດດ) */}
+                {/* Lower Tier: Core Combat (Attack ໂຈມຕີ, Jump ໂດດ) */}
                 <div className="virtual-touch-row-lower">
-                    <button
-                        aria-label="ພຸ່ງຫຼົບ (Dash)"
-                        className={`virtual-touch-btn virtual-touch-dash ${activeButtons.dash ? 'is-active' : ''}`}
-                        data-testid="touch-dash"
-                        onPointerDown={handleDashTap}
-                        title="Dash [Shift]"
-                        type="button"
-                    >
-                        <span className="virtual-touch-icon">💨</span>
-                        <span className="virtual-touch-label font-bold">ພຸ່ງ</span>
-                    </button>
-
                     <button
                         aria-label="ໂຈມຕີ (Attack)"
                         className={`virtual-touch-btn virtual-touch-attack ${activeButtons.attack ? 'is-active' : ''}`}

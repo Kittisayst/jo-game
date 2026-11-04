@@ -3,20 +3,21 @@ import { MovementAbilities } from './MovementAbilities';
 
 describe('MovementAbilities', () =>
 {
-    it('has the Dash from the start and nothing else', () =>
+    it('has the Dash and Double Jump from the start', () =>
     {
         const abilities = new MovementAbilities();
         expect(abilities.has('dash')).toBe(true);
+        expect(abilities.has('double-jump')).toBe(true);
         expect(abilities.has('air-dash')).toBe(false);
-        expect(abilities.unlocked).toEqual(['dash']);
+        expect(abilities.unlocked).toEqual(['dash', 'double-jump']);
     });
 
     it('unlocks an ability once', () =>
     {
         const abilities = new MovementAbilities();
-        expect(abilities.unlock('double-jump')).toBe(true);
-        expect(abilities.unlock('double-jump')).toBe(false);
-        expect(abilities.unlocked).toEqual(['dash', 'double-jump']);
+        expect(abilities.unlock('air-dash')).toBe(true);
+        expect(abilities.unlock('air-dash')).toBe(false);
+        expect(abilities.unlocked).toEqual(['dash', 'air-dash', 'double-jump']);
     });
 
     it('counts the Dash cooldown down and never below zero', () =>
@@ -37,9 +38,9 @@ describe('MovementAbilities', () =>
         const abilities = new MovementAbilities();
         abilities.startDashCooldown(800);
         abilities.loadFrom(['air-dash', 'fly', 'air-dash']);
-        expect(abilities.unlocked).toEqual(['dash', 'air-dash']);
+        expect(abilities.unlocked).toEqual(['dash', 'air-dash', 'double-jump']);
         expect(abilities.dashReadyInMs).toBe(0);
         abilities.loadFrom(undefined);
-        expect(abilities.unlocked).toEqual(['dash']);
+        expect(abilities.unlocked).toEqual(['dash', 'double-jump']);
     });
 });

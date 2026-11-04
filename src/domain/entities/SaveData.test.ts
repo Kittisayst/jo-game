@@ -404,7 +404,7 @@ describe('Movement abilities in a save', () =>
 {
     it('always has the Dash, keeps known abilities and drops the rest', () =>
     {
-        expect(migrateSaveSnapshot({ version: CURRENT_SAVE_VERSION }).movement).toEqual(['dash']);
+        expect(migrateSaveSnapshot({ version: CURRENT_SAVE_VERSION }).movement).toEqual(['dash', 'double-jump']);
         expect(migrateSaveSnapshot({ version: CURRENT_SAVE_VERSION, movement: ['double-jump', 'fly', 3] }).movement).toEqual(['dash', 'double-jump']);
     });
 });

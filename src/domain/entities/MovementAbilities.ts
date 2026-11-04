@@ -23,7 +23,7 @@ export interface DashTuning
 
 export class MovementAbilities
 {
-    private readonly _unlocked = new Set<MovementAbilityId>(['dash']);
+    private readonly _unlocked = new Set<MovementAbilityId>(['dash', 'double-jump']);
     private _dashCooldownMs = 0;
 
     has (id: MovementAbilityId): boolean
@@ -71,6 +71,7 @@ export class MovementAbilities
     {
         this._unlocked.clear();
         this._unlocked.add('dash');
+        this._unlocked.add('double-jump');
         for (const id of ids ?? [])
         {
             if ((MOVEMENT_ABILITY_IDS as readonly string[]).includes(id)) this._unlocked.add(id as MovementAbilityId);
