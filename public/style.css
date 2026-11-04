@@ -2904,6 +2904,17 @@ button {
     border-color: rgba(245, 158, 11, 0.5) !important;
 }
 
+.virtual-touch-book {
+    background: rgba(30, 58, 138, 0.45) !important;
+    border-color: rgba(56, 189, 248, 0.6) !important;
+}
+
+.virtual-touch-book:active,
+.virtual-touch-book.is-active {
+    background: rgba(56, 189, 248, 0.5) !important;
+    box-shadow: 0 0 20px rgba(56, 189, 248, 0.8) !important;
+}
+
 /* ==========================================================================
    Mobile Responsive Adjustments (Portrait & Landscape Phone Support)
    ========================================================================== */
@@ -6833,7 +6844,8 @@ button {
 
     .virtual-touch-cycle,
     .virtual-touch-interact,
-    .virtual-touch-skill {
+    .virtual-touch-skill,
+    .virtual-touch-book {
         width: 48px;
         height: 48px;
     }
