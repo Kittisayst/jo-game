@@ -88,6 +88,7 @@ export class Game extends Scene
     spikes: Phaser.Physics.Arcade.StaticGroup;
     enemies: Phaser.Physics.Arcade.Group;
     enemyProjectiles: Phaser.Physics.Arcade.Group;
+    playerProjectiles: Phaser.Physics.Arcade.Group;
     boss?: Boss;
     /** Everyone in the village the hero can talk to (the elder, Mina). */
     villagers: NPC[] = [];
@@ -520,6 +521,10 @@ export class Game extends Scene
             });
         }
 
+        // Player projectiles: magical thrown textbooks
+        this.playerProjectiles = this.physics.add.group();
+        this.combat.bindPlayerProjectiles();
+
         // Enemy spit: breaks on terrain, hurts the hero on contact
         this.enemyProjectiles = this.physics.add.group();
 
@@ -556,6 +561,8 @@ export class Game extends Scene
         const shiftKey = this.input.keyboard?.addKey(Input.Keyboard.KeyCodes.SHIFT);
         const kKey = this.input.keyboard?.addKey('K');
         const lKey = this.input.keyboard?.addKey('L');
+        const uKey = this.input.keyboard?.addKey('U');
+        const xKey = this.input.keyboard?.addKey('X');
 
         jKey?.on('down', () => this.combat.attack());
         zKey?.on('down', () => this.combat.attack());
@@ -564,6 +571,8 @@ export class Game extends Scene
         shiftKey?.on('down', () => this.tryDash());
         kKey?.on('down', () => this.skillController?.use(0));
         lKey?.on('down', () => this.skillController?.use(1));
+        uKey?.on('down', () => this.combat.throwBook());
+        xKey?.on('down', () => this.combat.throwBook());
 
         const onVirtualInput = (inputs: { left?: boolean; right?: boolean; up?: boolean }) =>
         {
@@ -576,6 +585,7 @@ export class Game extends Scene
         const onVirtualAttack = () => this.combat.attack();
         const onVirtualCycleWeapon = () => this.combat.cycleWeapon();
         const onVirtualDash = () => this.tryDash();
+        const onVirtualThrowBook = () => this.combat.throwBook();
         const onVirtualSkill = (payload?: { slot?: number }) => this.skillController?.use(payload?.slot === 1 ? 1 : 0);
         const onTogglePhysicsDebug = () => this.togglePhysicsDebug();
 
@@ -649,6 +659,7 @@ export class Game extends Scene
         EventBus.on('virtual-interact', onVirtualInteract);
         EventBus.on('virtual-attack', onVirtualAttack);
         EventBus.on('virtual-dash', onVirtualDash);
+        EventBus.on('virtual-throw-book', onVirtualThrowBook);
         EventBus.on('virtual-skill', onVirtualSkill);
         EventBus.on('virtual-cycle-weapon', onVirtualCycleWeapon);
         EventBus.on('toggle-physics-debug', onTogglePhysicsDebug);
@@ -765,6 +776,7 @@ export class Game extends Scene
             EventBus.removeListener('virtual-interact', onVirtualInteract);
             EventBus.removeListener('virtual-attack', onVirtualAttack);
             EventBus.removeListener('virtual-dash', onVirtualDash);
+            EventBus.removeListener('virtual-throw-book', onVirtualThrowBook);
             EventBus.removeListener('virtual-skill', onVirtualSkill);
             EventBus.removeListener('virtual-cycle-weapon', onVirtualCycleWeapon);
             EventBus.removeListener('toggle-physics-debug', onTogglePhysicsDebug);
@@ -867,6 +879,7 @@ export class Game extends Scene
         const isLeft = Boolean(this.cursors.left.isDown || this.wasdKeys?.left?.isDown || this.touchControls.left);
         const isRight = Boolean(this.cursors.right.isDown || this.wasdKeys?.right?.isDown || this.touchControls.right);
         const isUp = Boolean(this.cursors.up.isDown || this.wasdKeys?.up?.isDown || this.wasdKeys?.space?.isDown || this.touchControls.up);
+        const isDown = Boolean(this.cursors.down?.isDown || this.wasdKeys?.down?.isDown);
 
         this.heldItem.setContext(isHomeLevel(this.currentLevelKey), entities.equipment.equippedWeaponId);
         if (this.companionPet && this.companionPet.active && this.player)
@@ -906,6 +919,7 @@ export class Game extends Scene
             left: { isDown: isLeft },
             right: { isDown: isRight },
             up: { isDown: isUp },
+            down: { isDown: isDown },
         }, delta);
 
         for (const child of this.enemies.getChildren())

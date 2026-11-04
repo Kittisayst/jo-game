@@ -17,6 +17,7 @@ export interface PlayerInputControls
     left: { isDown: boolean };
     right: { isDown: boolean };
     up: { isDown: boolean };
+    down?: { isDown: boolean };
 }
 
 /** Fastest the hero moves sideways, except during a Dash (limits tunneling through thin walls). */
@@ -37,7 +38,11 @@ export class Player extends Physics.Arcade.Sprite
     speedMultiplier = 1;
     facingDir = 1;
     isWallSliding = false;
+    isLedgeHanging = false;
     private wallJumpLockout = 0;
+    private ledgeSurfaceY = 0;
+    private ledgeDropCooldown = 0;
+    private isClimbingLedge = false;
     private currentSkinId = 'cyber-blue';
     private isKnockedBack = false;
     private wasInAir = false;
@@ -285,6 +290,14 @@ export class Player extends Physics.Arcade.Sprite
     {
         if (this.isInvincible) return;
 
+        if (this.isLedgeHanging || this.isClimbingLedge)
+        {
+            this.isLedgeHanging = false;
+            this.isClimbingLedge = false;
+            const body = this.body as Phaser.Physics.Arcade.Body;
+            if (body) body.allowGravity = true;
+        }
+
         this.isInvincible = true;
         this.isKnockedBack = true;
         this.playAnimation('hurt');
@@ -487,7 +500,77 @@ export class Player extends Physics.Arcade.Sprite
             });
         }
         this.wasInAir = !onGround;
-        if (onGround) { this.airDashUsed = false; this.doubleJumpUsed = false; }
+        if (onGround)
+        {
+            this.airDashUsed = false;
+            this.doubleJumpUsed = false;
+            if (this.isLedgeHanging)
+            {
+                this.isLedgeHanging = false;
+                body.allowGravity = true;
+            }
+        }
+        this.ledgeDropCooldown = Math.max(0, this.ledgeDropCooldown - delta);
+
+        if (this.isLedgeHanging)
+        {
+            this.setVelocity(0, 0);
+            body.allowGravity = false;
+
+            const jumpIsDown = Boolean(controls.up.isDown);
+            const jumpJustPressed = jumpIsDown && !this.wasJumpDown;
+            this.wasJumpDown = jumpIsDown;
+
+            // Climb Up: Press UP or JUMP
+            if (jumpJustPressed || controls.up.isDown)
+            {
+                this.climbUpLedge();
+                return;
+            }
+
+            // Drop Down: Press DOWN
+            if (controls.down?.isDown)
+            {
+                this.isLedgeHanging = false;
+                body.allowGravity = true;
+                this.ledgeDropCooldown = 350;
+                this.setVelocityY(90);
+                return;
+            }
+
+            // Wall Kick Leap Away: Press opposite direction + jump
+            const awayDir = -this.facingDir;
+            const pressingAway = (awayDir === -1 && controls.left.isDown) || (awayDir === 1 && controls.right.isDown);
+            if (pressingAway && jumpJustPressed)
+            {
+                this.isLedgeHanging = false;
+                body.allowGravity = true;
+                this.ledgeDropCooldown = 250;
+                this.setVelocityX(awayDir * 230);
+                this.setVelocityY(-JUMP_SPEED * 0.95);
+                this.facingDir = awayDir;
+                this.setFlipX(awayDir < 0);
+                soundManager.playJump();
+                this.onJump?.(this.x + (this.facingDir * 12), this.y);
+                return;
+            }
+
+            this.playAnimation('wall');
+            return;
+        }
+
+        if (this.isClimbingLedge)
+        {
+            this.setVelocity(0, 0);
+            body.allowGravity = false;
+            return;
+        }
+
+        // Check Ledge Grab when in the air
+        if (!onGround && this.dashMsLeft <= 0 && this.ledgeDropCooldown <= 0)
+        {
+            this.checkLedgeGrab(controls);
+        }
 
         // A Dash steers the hero by itself until it ends (or hits a wall)
         if (this.dashMsLeft > 0)
@@ -720,5 +803,97 @@ export class Player extends Physics.Arcade.Sprite
         {
             this.playAnimation('idle');
         }
+    }
+
+    private checkLedgeGrab (controls: PlayerInputControls): void
+    {
+        const body = this.body as Phaser.Physics.Arcade.Body;
+        if (!body || body.velocity.y < -120 || body.velocity.y > 450) return;
+
+        const sceneAny = this.scene as any;
+        const staticPlatforms = (sceneAny.platforms?.getChildren?.() || []) as Phaser.GameObjects.Sprite[];
+        const movingPlatforms = (sceneAny.movingPlatforms?.getChildren?.() || []) as Phaser.GameObjects.Sprite[];
+        const allPlatforms = [...staticPlatforms, ...movingPlatforms];
+
+        for (const p of allPlatforms)
+        {
+            if (!p.active) continue;
+            const surfaceY = p.y - 14;
+            const dy = (this.y - 14) - surfaceY;
+            if (Math.abs(dy) <= 12)
+            {
+                const halfWidth = 80;
+                const leftEdge = p.x - halfWidth;
+                const rightEdge = p.x + halfWidth;
+
+                // Left Edge (hero on left, facing right into platform)
+                if (this.x >= leftEdge - 18 && this.x <= leftEdge - 2)
+                {
+                    if (controls.right.isDown || this.facingDir === 1)
+                    {
+                        this.grabLedge(leftEdge - 8, surfaceY, 1);
+                        return;
+                    }
+                }
+                // Right Edge (hero on right, facing left into platform)
+                else if (this.x >= rightEdge + 2 && this.x <= rightEdge + 18)
+                {
+                    if (controls.left.isDown || this.facingDir === -1)
+                    {
+                        this.grabLedge(rightEdge + 8, surfaceY, -1);
+                        return;
+                    }
+                }
+            }
+        }
+    }
+
+    private grabLedge (edgeX: number, surfaceY: number, facingDir: number): void
+    {
+        const body = this.body as Phaser.Physics.Arcade.Body;
+        this.isLedgeHanging = true;
+        this.ledgeSurfaceY = surfaceY;
+        this.facingDir = facingDir;
+        this.setFlipX(facingDir < 0);
+        this.setVelocity(0, 0);
+        if (body)
+        {
+            body.allowGravity = false;
+            body.velocity.set(0, 0);
+        }
+        this.x = edgeX;
+        this.y = surfaceY + 16;
+        this.doubleJumpUsed = false;
+        this.airDashUsed = false;
+        this.playAnimation('wall');
+    }
+
+    private climbUpLedge (): void
+    {
+        this.isClimbingLedge = true;
+        this.isLedgeHanging = false;
+        const targetX = this.x + this.facingDir * 18;
+        const targetY = this.ledgeSurfaceY - (44 - GROUND_SINK) / 2;
+
+        this.scene.tweens.add({
+            targets: this,
+            x: targetX,
+            y: targetY,
+            duration: 130,
+            ease: 'Cubic.easeOut',
+            onComplete: () =>
+            {
+                const body = this.body as Phaser.Physics.Arcade.Body;
+                if (body)
+                {
+                    body.allowGravity = true;
+                    body.velocity.set(0, 0);
+                }
+                this.isClimbingLedge = false;
+                this.doubleJumpUsed = false;
+                this.airDashUsed = false;
+                soundManager.playJump();
+            }
+        });
     }
 }

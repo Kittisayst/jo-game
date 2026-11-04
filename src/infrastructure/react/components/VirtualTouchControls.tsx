@@ -21,6 +21,7 @@ export const VirtualTouchControls: React.FC<VirtualTouchControlsProps> = ({ visi
         attack: boolean;
         cycle: boolean;
         dash: boolean;
+        throw: boolean;
     }>({
         left: false,
         right: false,
@@ -29,6 +30,7 @@ export const VirtualTouchControls: React.FC<VirtualTouchControlsProps> = ({ visi
         attack: false,
         cycle: false,
         dash: false,
+        throw: false,
     });
 
     const inputRef = useRef({ left: false, right: false, up: false });
@@ -226,6 +228,19 @@ export const VirtualTouchControls: React.FC<VirtualTouchControlsProps> = ({ visi
         }, 120);
     };
 
+    const handleThrowBookTap = (e: React.PointerEvent<HTMLButtonElement>) =>
+    {
+        e.preventDefault();
+        triggerHaptic(18);
+        setActiveButtons(prev => ({ ...prev, throw: true }));
+        EventBus.emit('virtual-throw-book');
+
+        setTimeout(() =>
+        {
+            setActiveButtons(prev => ({ ...prev, throw: false }));
+        }, 120);
+    };
+
     if (!visible || !isTouchEnvironment)
     {
         return null;
@@ -301,6 +316,18 @@ export const VirtualTouchControls: React.FC<VirtualTouchControlsProps> = ({ visi
                     >
                         <span className="virtual-touch-icon">🔀</span>
                         <span className="virtual-touch-label">[Q]</span>
+                    </button>
+
+                    <button
+                        aria-label="ປາປື້ມຕຳລາ (Throw Book)"
+                        className={`virtual-touch-btn virtual-touch-book ${activeButtons.throw ? 'is-active' : ''}`}
+                        data-testid="touch-throw-book"
+                        onPointerDown={handleThrowBookTap}
+                        title="Throw Book [U/X]"
+                        type="button"
+                    >
+                        <span className="virtual-touch-icon">📖</span>
+                        <span className="virtual-touch-label font-bold">ປື້ມ</span>
                     </button>
 
                     {skillSlots.map(view => view && (

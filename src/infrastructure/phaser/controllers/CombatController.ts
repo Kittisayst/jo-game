@@ -26,6 +26,7 @@ export const PROJECTILE_PACKET_LASER = 'boss-packet-laser';
 export const PROJECTILE_EMP_PULSE = 'boss-emp-pulse';
 export const PROJECTILE_SEISMIC_WAVE = 'boss-seismic-wave';
 export const PROJECTILE_DEBRIS = 'boss-falling-debris';
+export const PROJECTILE_BOOK_KEY = 'projectile-textbook';
 
 /**
  * Everything that hurts or is hurt in the scene: the hero's sword attacks, contact
@@ -36,9 +37,115 @@ export const PROJECTILE_DEBRIS = 'boss-falling-debris';
 export class CombatController
 {
     private hitStopCounter = 0;
+    private lastBookThrowTime = 0;
 
     constructor (private readonly scene: Game)
     {}
+
+    static ensureBookTexture (scene: Phaser.Scene): void
+    {
+        if (scene.textures.exists(PROJECTILE_BOOK_KEY)) return;
+        const g = scene.make.graphics({ x: 0, y: 0 });
+        g.fillStyle(0x1e3a8a, 1);
+        g.fillRoundedRect(2, 2, 18, 18, 3);
+        g.fillStyle(0xfbbf24, 1);
+        g.fillRect(2, 2, 4, 18);
+        g.fillRect(17, 3, 2, 2);
+        g.fillRect(17, 17, 2, 2);
+        g.fillStyle(0xfef08a, 1);
+        g.fillRect(6, 4, 12, 14);
+        g.fillStyle(0xef4444, 1);
+        g.fillRect(10, 14, 3, 6);
+        g.generateTexture(PROJECTILE_BOOK_KEY, 22, 22);
+        g.destroy();
+    }
+
+    /** ປາປື້ມຕຳລາ: Throws a spinning magical textbook at enemies. */
+    throwBook (): void
+    {
+        const { scene } = this;
+        if (scene.isDialogueActive || scene.health.isDead || scene.isStageCleared) return;
+        const now = scene.time.now;
+        if (now - this.lastBookThrowTime < 420) return;
+        this.lastBookThrowTime = now;
+
+        CombatController.ensureBookTexture(scene);
+
+        const dir = scene.player.facingDir || 1;
+        const spawnX = scene.player.x + dir * 18;
+        const spawnY = scene.player.y - 8;
+
+        const book = scene.physics.add.sprite(spawnX, spawnY, PROJECTILE_BOOK_KEY);
+        scene.playerProjectiles.add(book);
+
+        const body = book.body as Phaser.Physics.Arcade.Body;
+        if (body)
+        {
+            body.allowGravity = true;
+            body.gravity.y = 520;
+            book.setVelocity(dir * 380, -110);
+            book.setAngularVelocity(dir * 720);
+        }
+
+        soundManager.playSlash();
+
+        scene.tweens.add({
+            targets: scene.player,
+            scaleX: 1.08,
+            duration: 60,
+            yoyo: true,
+        });
+
+        scene.time.delayedCall(2500, () =>
+        {
+            if (book.active) book.destroy();
+        });
+    }
+
+    bindPlayerProjectiles (): void
+    {
+        const { scene } = this;
+
+        const destroyBook = (proj: unknown) =>
+        {
+            const book = proj as Phaser.Physics.Arcade.Sprite;
+            if (!book.active) return;
+            scene.particleManager.emitSlashHit(book.x, book.y);
+            book.destroy();
+        };
+
+        scene.physics.add.collider(scene.playerProjectiles, scene.ground, destroyBook);
+        scene.physics.add.collider(scene.playerProjectiles, scene.platforms, destroyBook);
+        scene.physics.add.collider(scene.playerProjectiles, scene.movingPlatforms, destroyBook);
+
+        scene.physics.add.overlap(scene.playerProjectiles, scene.enemies, (bookObj, enemyObj) =>
+        {
+            const book = bookObj as Phaser.Physics.Arcade.Sprite;
+            const enemy = enemyObj as Enemy;
+            if (!book.active || !enemy.active || enemy.entity.isDefeated) return;
+
+            const dir = Math.sign(book.body.velocity.x) || 1;
+            book.destroy();
+            scene.particleManager.emitSlashHit(enemy.x, enemy.y);
+            const damage = Math.round(20 * entities.heroStats.attackMultiplier(getGameContent().statsTuning));
+            this.strikeEnemy(enemy, damage, dir);
+        });
+
+        if (scene.boss)
+        {
+            scene.physics.add.overlap(scene.playerProjectiles, scene.boss, (bookObj, bossObj) =>
+            {
+                const book = bookObj as Phaser.Physics.Arcade.Sprite;
+                const boss = bossObj as Boss;
+                if (!book.active || !boss.active || boss.entity.isDefeated || boss.isInvulnerable) return;
+
+                book.destroy();
+                scene.particleManager.emitSlashHit(boss.x, boss.y);
+                const damage = Math.round(20 * entities.heroStats.attackMultiplier(getGameContent().statsTuning));
+                this.strikeBoss(boss, damage);
+            });
+        }
+    }
 
     /** J / Z / the touch attack button. */
     attack (): void
