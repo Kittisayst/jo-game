@@ -110,7 +110,7 @@ export class CombatController
         {
             const book = proj as Phaser.Physics.Arcade.Sprite;
             if (!book.active) return;
-            scene.particleManager.emitSlashHit(book.x, book.y);
+            scene.particleManager.emitStompBurst(book.x, book.y);
             book.destroy();
         };
 
@@ -124,9 +124,9 @@ export class CombatController
             const enemy = enemyObj as Enemy;
             if (!book.active || !enemy.active || enemy.entity.isDefeated) return;
 
-            const dir = Math.sign(book.body.velocity.x) || 1;
+            const dir = (book.body && 'velocity' in book.body) ? (Math.sign(book.body.velocity.x) || 1) : 1;
             book.destroy();
-            scene.particleManager.emitSlashHit(enemy.x, enemy.y);
+            scene.particleManager.emitStompBurst(enemy.x, enemy.y);
             const damage = Math.round(20 * entities.heroStats.attackMultiplier(getGameContent().statsTuning));
             this.strikeEnemy(enemy, damage, dir);
         });
@@ -140,7 +140,7 @@ export class CombatController
                 if (!book.active || !boss.active || boss.entity.isDefeated || boss.isInvulnerable) return;
 
                 book.destroy();
-                scene.particleManager.emitSlashHit(boss.x, boss.y);
+                scene.particleManager.emitStompBurst(boss.x, boss.y);
                 const damage = Math.round(20 * entities.heroStats.attackMultiplier(getGameContent().statsTuning));
                 this.strikeBoss(boss, damage);
             });

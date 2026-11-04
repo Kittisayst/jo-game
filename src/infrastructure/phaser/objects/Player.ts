@@ -810,9 +810,12 @@ export class Player extends Physics.Arcade.Sprite
         const body = this.body as Phaser.Physics.Arcade.Body;
         if (!body || body.velocity.y < -120 || body.velocity.y > 450) return;
 
-        const sceneAny = this.scene as any;
-        const staticPlatforms = (sceneAny.platforms?.getChildren?.() || []) as Phaser.GameObjects.Sprite[];
-        const movingPlatforms = (sceneAny.movingPlatforms?.getChildren?.() || []) as Phaser.GameObjects.Sprite[];
+        const scene = this.scene as Phaser.Scene & {
+            platforms?: Phaser.Physics.Arcade.StaticGroup;
+            movingPlatforms?: Phaser.Physics.Arcade.Group;
+        };
+        const staticPlatforms = (scene.platforms?.getChildren?.() || []) as Phaser.GameObjects.Sprite[];
+        const movingPlatforms = (scene.movingPlatforms?.getChildren?.() || []) as Phaser.GameObjects.Sprite[];
         const allPlatforms = [...staticPlatforms, ...movingPlatforms];
 
         for (const p of allPlatforms)

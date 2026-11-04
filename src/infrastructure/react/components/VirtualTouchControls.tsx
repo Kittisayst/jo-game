@@ -71,6 +71,7 @@ export const VirtualTouchControls: React.FC<VirtualTouchControlsProps> = ({ visi
                 attack: false,
                 cycle: false,
                 dash: false,
+                throw: false,
             });
             emitCurrentInputs();
         }
@@ -90,6 +91,7 @@ export const VirtualTouchControls: React.FC<VirtualTouchControlsProps> = ({ visi
                 attack: false,
                 cycle: false,
                 dash: false,
+                throw: false,
             });
             emitCurrentInputs();
         };
