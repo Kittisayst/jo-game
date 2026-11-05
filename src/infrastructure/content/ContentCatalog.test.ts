@@ -288,7 +288,7 @@ describe('validator errors', () =>
 
                 expect(stage.layout).toBeNull();
                 expect(stage.generated?.level.scenery).toBe('forest');
-                expect(stage.generated?.level.worldWidth).toBe(1600);
+                expect(stage.generated?.level.worldWidth).toBe(2400);
                 expect(stage.zones[0].exit?.x).toBe(stage.generated!.exitX);
                 expect(stage.zones[0].resourceNodes).toHaveLength(6);
                 expect(stage.zones[0].enemySpawns).toHaveLength(3);
