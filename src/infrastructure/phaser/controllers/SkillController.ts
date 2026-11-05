@@ -6,12 +6,11 @@ import { getGameContent } from '../../content/ContentCatalog';
 import { effectAtRank } from '../../content/SkillCatalog';
 import type { AreaEffect, ChainEffect, SkillDefinition, WaveEffect } from '../../content/SkillCatalog';
 import { showLootNotification } from '../effects/FloatingText';
+import { CombatController, PROJECTILE_BOOK_KEY } from './CombatController';
 import type { Boss } from '../objects/Boss';
 import type { Enemy } from '../objects/Enemy';
 import type { Game } from '../scenes/Game';
-import type { CombatController } from './CombatController';
 
-const WAVE_TEXTURE = 'skill-wave';
 
 /**
  * The K and L skill slots: asks `castSkillUseCase` (slot, cooldown) and, when it says yes, makes the skill
@@ -196,14 +195,16 @@ export class SkillController
     {
         const { scene } = this;
         const dir = scene.player.facingDir < 0 ? -1 : 1;
-        this.ensureWaveTexture();
+        CombatController.ensureBookTexture(scene);
 
-        const wave = scene.physics.add.sprite(scene.player.x + dir * 28, scene.player.y - 2, WAVE_TEXTURE);
-        wave.setFlipX(dir < 0).setDepth(12).setAlpha(0.95);
+        // The energy is a spinning textbook (the same picture as the thrown book), a little bigger and glowing
+        const wave = scene.physics.add.sprite(scene.player.x + dir * 28, scene.player.y - 2, PROJECTILE_BOOK_KEY);
+        wave.setScale(1.4).setDepth(12).setTint(0xbfe9ff);
         const body = wave.body as Phaser.Physics.Arcade.Body;
         body.allowGravity = false;
-        body.setSize(26, 44);
+        body.setSize(20, 20);
         wave.setVelocityX(dir * effect.speed);
+        wave.setAngularVelocity(dir * 540);
 
         const attackStat = entities.heroStats.attackMultiplier(getGameContent().statsTuning);
         const damage = Math.max(1, Math.round(entities.equipment.equippedStats.damage * effect.damageMultiplier * entities.effects.damageMultiplier * attackStat));
@@ -241,27 +242,8 @@ export class SkillController
             });
         }
 
-        scene.tweens.add({ targets: wave, scaleY: { from: 0.85, to: 1.15 }, duration: 120, yoyo: true, repeat: -1 });
         scene.time.delayedCall((effect.rangePx / effect.speed) * 1000, stop);
         soundManager.playSlash();
         scene.cameras.main.shake(70, 0.002);
-    }
-
-    /** The wave's picture: a bright crescent drawn once. */
-    private ensureWaveTexture (): void
-    {
-        const { scene } = this;
-        if (scene.textures.exists(WAVE_TEXTURE)) return;
-        const g = scene.make.graphics({ x: 0, y: 0 }, false);
-        g.fillStyle(0x0ea5e9, 0.55);
-        g.fillEllipse(24, 24, 40, 46);
-        g.fillStyle(0x7dd3fc, 0.95);
-        g.fillEllipse(20, 24, 26, 42);
-        g.fillStyle(0x0f172a, 1);
-        g.fillEllipse(10, 24, 24, 48);
-        g.fillStyle(0xe0f2fe, 1);
-        g.fillEllipse(26, 24, 6, 30);
-        g.generateTexture(WAVE_TEXTURE, 48, 48);
-        g.destroy();
     }
 }

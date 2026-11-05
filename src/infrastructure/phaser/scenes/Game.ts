@@ -2,7 +2,7 @@ import { autoSaveGame } from '../../saveSnapshot';
 import { canSleep, sleepUseCase } from '../../../application/SleepUseCase';
 import { nightCreatureCount, nightCreatureIdsFor, scaleNightCreature, stageHasNightCreatures } from '../../../domain/entities/NightCreatures';
 import { DayNightOverlay } from '../effects/DayNightOverlay';
-import { groundPad, viewZoom } from '../../touchLayout';
+import { groundPad, isTouchLayout, TOUCH_SOIL_COLOR, viewZoom } from '../../touchLayout';
 import { fallIntoPitUseCase } from '../../../application/FallIntoPitUseCase';
 import { groundSpans, isNearPit } from '../../content/LevelPits';
 import { tickWorldTimeUseCase, WORLD_PHASE_CHANGED_EVENT, type WorldPhaseChangedPayload } from '../../../application/TickWorldTimeUseCase';
@@ -200,10 +200,11 @@ export class Game extends Scene
         this.camera.setZoom(viewZoom());
         // Soil under every stretch of ground (not under a pit), a little darker with depth
         const upper = Math.round(pad * 0.4);
+        const touchSoil = isTouchLayout();
         for (const [from, to] of groundSpans(this.level.worldWidth, this.level.pits))
         {
-            this.add.rectangle((from + to) / 2, WORLD_HEIGHT + upper / 2, to - from, upper, 0x6b3f1f).setDepth(0.5);
-            this.add.rectangle((from + to) / 2, WORLD_HEIGHT + upper + (pad - upper) / 2, to - from, pad - upper, 0x4a2a14).setDepth(0.5);
+            this.add.rectangle((from + to) / 2, WORLD_HEIGHT + upper / 2, to - from, upper, touchSoil ? TOUCH_SOIL_COLOR : 0x6b3f1f).setDepth(0.5);
+            this.add.rectangle((from + to) / 2, WORLD_HEIGHT + upper + (pad - upper) / 2, to - from, pad - upper, touchSoil ? TOUCH_SOIL_COLOR : 0x4a2a14).setDepth(0.5);
         }
 
         const isVillage = this.level.scenery === 'village' || this.currentLevelKey === 'village';

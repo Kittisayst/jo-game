@@ -11,10 +11,13 @@ export function isTouchLayout (): boolean
 export const TOUCH_ZOOM = 1.75;
 
 /** World pixels of soil shown below the ground on a touch screen: it lifts the hero above the on-screen buttons. */
-export const TOUCH_GROUND_PAD = 300;
+export const TOUCH_GROUND_PAD = 200;
 
 /** The same on a desktop: no zoom, and a lower pad (there are no buttons), so the ground is not the last strip of the window. */
 export const DESKTOP_GROUND_PAD = 60;
+
+/** The soil colour on a touch screen: one flat dark brown, so the strip under the hero is quiet behind the buttons. */
+export const TOUCH_SOIL_COLOR = 0x180901;
 
 /** The camera zoom for this device. */
 export function viewZoom (): number
