@@ -36,6 +36,7 @@ import { parseRealms, RealmDefinition } from './RealmCatalog';
 import { makeValidators } from './validate';
 import { HeldArt, parseHeldArt, parsePlayerAnimations, PlayerAnimations } from './HeldItemArt';
 import { parseSkills, SkillContent } from './SkillCatalog';
+import { parseScenery, SceneryCatalog } from './SceneryCatalog';
 
 export type RecipeEntry = RecipeDefinition | WeaponUpgradeRecipe | ToolUpgradeRecipe;
 
@@ -78,6 +79,8 @@ export interface GameContent
     playerAnimations: PlayerAnimations;
     /** The hero's skills: how the Dash feels. */
     skills: SkillContent;
+    /** How a Stage looks by scenery name: backdrop layers, ground, platforms and decor. */
+    scenery: SceneryCatalog;
 }
 
 const ITEM_CATEGORIES: readonly ItemCategory[] = ['material', 'consumable', 'tool', 'weapon', 'armor'];
@@ -405,7 +408,7 @@ async function fetchJson (file: string): Promise<unknown>
 /** Fetches and validates all game data. Call once before the app starts. */
 export async function loadGameContent (): Promise<GameContent>
 {
-    const [items, books, questions, recipes, enemies, realms, nodes, stages, tutorial, repairs, garden, shop, playerAnimations, skills, progression, worldTime] = await Promise.all([
+    const [items, books, questions, recipes, enemies, realms, nodes, stages, tutorial, repairs, garden, shop, playerAnimations, skills, progression, worldTime, scenery] = await Promise.all([
         fetchJson('items.json'),
         fetchJson('books.json'),
         fetchJson('questions.json'),
@@ -422,6 +425,7 @@ export async function loadGameContent (): Promise<GameContent>
         fetchJson('skills.json'),
         fetchJson('progression.json'),
         fetchJson('world-time.json'),
+        fetchJson('scenery.json'),
     ]);
 
     const parsedNodes = parseNodes(nodes);
@@ -443,6 +447,7 @@ export async function loadGameContent (): Promise<GameContent>
         night,
         statsTuning: parseStatsTuning(progression),
         worldTime: parseWorldTime(worldTime),
+        scenery: parseScenery(scenery),
         stageQuestionCredit: parseStageQuestion(stages).credit,
         tutorial: parseTutorial(tutorial),
         repairs: parseRepairs(repairs),

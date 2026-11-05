@@ -15,3 +15,4 @@
 | 2026-11-02 | docs/plans/2026-11-02-pwa-install.md | in progress | ເຮັດເກມເປັນ PWA ດ້ວຍ vite-plugin-pwa: manifest fullscreen/landscape, ໄອຄອນ 192/512/maskable ຈາກ logo_crest, offline precache + autoUpdate, ປຸ່ມເຕັມຈໍໃນ Settings, ຂໍ້ຈຳກັດ iPhone |
 | 2026-11-02 | docs/plans/2026-11-02-mobile-ui-improvements.md | planned | UI ໂທລະສັບ: ໜ້າຕ່າງເປັນ sheet ເຕັມຈໍ (header 44px, tabs ແຖວດຽວ, card ກະທັດຮັດ), panel ພາລະກິດພັບໄວ້, toast ຢູ່ເທິງ, ປຸ່ມ ≥44px, ຕົວໜັງສື ≥12px, HUD ແຖວດຽວໃນຈໍແຄບ, ໜ້າຈໍແນວຕັ້ງບອກໃຫ້ຫັນ; M1–M5 |
 | 2026-11-05 | docs/plans/2026-11-05-fix-e2e-after-book-ui.md | done | ແກ້ e2e 15 ອັນທີ່ລົ້ມຫຼັງ Book UI/double jump: testid ຊ້ຳໃນ BookFrame, locator ເກົ່າ, Stage 7 ຍ່າງບໍ່ຮອດທາງອອກ, ອັບເດດ CLAUDE.md |
+| 2026-11-05 | docs/plans/2026-11-05-apple-knight-style-stages.md | planned | ປັບດ່ານໃຫ້ແບບ Apple Knight 2: ສາກຫຼາຍຊັ້ນ, ພື້ນຂອບຫຍ້າ+ໜ້າຜາ, decor, ກ້ອນແຂງ/ເສົາຫີນ, ຊອກລັບ+ຫີບ; S1 ເປັນພາບລ້ວນ (ບໍ່ແຕະຟີຊິກ) ເຮັດກ່ອນ |

@@ -39,6 +39,7 @@ import { buildCottageInterior } from '../scenery/CottageBuilder';
 import { COTTAGE_LEVEL_KEY, GARDEN_LEVEL_KEY, isHomeLevel } from '../levelCatalog';
 import { dashUseCase } from '../../../application/DashUseCase';
 import {
+    createDecor,
     createGround,
     createMovingPlatforms,
     createPlatforms,
@@ -47,6 +48,8 @@ import {
     GROUND_HEIGHT,
     GROUND_Y,
     SkyBackdrop,
+    stageDecorAvoid,
+    themeOf,
     WORLD_HEIGHT,
 } from '../scenery/WorldBuilder';
 import { enqueueGameAssets } from './Preloader';
@@ -201,10 +204,11 @@ export class Game extends Scene
         // Soil under every stretch of ground (not under a pit), a little darker with depth
         const upper = Math.round(pad * 0.4);
         const touchSoil = isTouchLayout();
+        const theme = themeOf(this.level);
         for (const [from, to] of groundSpans(this.level.worldWidth, this.level.pits))
         {
-            this.add.rectangle((from + to) / 2, WORLD_HEIGHT + upper / 2, to - from, upper, touchSoil ? TOUCH_SOIL_COLOR : 0x6b3f1f).setDepth(0.5);
-            this.add.rectangle((from + to) / 2, WORLD_HEIGHT + upper + (pad - upper) / 2, to - from, pad - upper, touchSoil ? TOUCH_SOIL_COLOR : 0x4a2a14).setDepth(0.5);
+            this.add.rectangle((from + to) / 2, WORLD_HEIGHT + upper / 2, to - from, upper, touchSoil ? TOUCH_SOIL_COLOR : (theme?.soil.upper ?? 0x6b3f1f)).setDepth(0.5);
+            this.add.rectangle((from + to) / 2, WORLD_HEIGHT + upper + (pad - upper) / 2, to - from, pad - upper, touchSoil ? TOUCH_SOIL_COLOR : (theme?.soil.lower ?? 0x4a2a14)).setDepth(0.5);
         }
 
         const isVillage = this.level.scenery === 'village' || this.currentLevelKey === 'village';
@@ -219,10 +223,11 @@ export class Game extends Scene
                     ? 'bg-desert'
                     : 'bg-plains'));
         this.bossBgmStarted = false;
-        this.skyBackdrop = createSky(this, this.level, backdropKey);
+        this.skyBackdrop = createSky(this, this.level, backdropKey, theme);
 
-        this.ground = createGround(this, this.level, pad);
-        this.platforms = createPlatforms(this, this.level);
+        this.ground = createGround(this, this.level, pad, theme);
+        if (theme) createDecor(this, this.level, theme, this.currentLevelKey, stageDecorAvoid(this.stage, this.level.spawn.x));
+        this.platforms = createPlatforms(this, this.level, theme);
         this.movingPlatforms = createMovingPlatforms(this, this.level);
         this.spikes = createSpikes(this, this.level);
         this.enemies = this.createEnemies();

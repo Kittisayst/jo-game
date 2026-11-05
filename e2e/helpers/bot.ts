@@ -258,7 +258,8 @@ export class Bot
 
         // Jump if something is holding the hero back
         if (Math.abs(s.x - lastX) > 1) { lastX = s.x; lastMovedAt = Date.now(); }
-        else if (Date.now() - lastMovedAt > 500 && s.onGround) { await this.tap('Space', 60); lastMovedAt = Date.now(); }
+        // (a block of raised ground is a full tile high: a full jump, not a tap)
+        else if (Date.now() - lastMovedAt > 500 && s.onGround) { await this.hold('Space', true); await this.page.waitForTimeout(320); await this.hold('Space', false); lastMovedAt = Date.now(); }
 
         await this.page.waitForTimeout(35);
       }

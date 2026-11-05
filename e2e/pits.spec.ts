@@ -30,10 +30,10 @@ test.describe('Pits', () => {
     const info = await page.evaluate(({ pit }) => {
       const scene = (window as any).__botGame.scene.getScene('Game');
       const strips = scene.ground.getChildren().map((g: any) => ({ left: g.x - g.width / 2, right: g.x + g.width / 2 }));
-      return { strips, worldWidth: scene.level.worldWidth as number, pit };
+      return { strips, worldWidth: scene.level.worldWidth as number, blocks: (scene.level.terrain ?? []).length as number, pit };
     }, { pit: pits[0] });
-    // One strip of ground on each side of the pit and none over it
-    expect(info.strips.length).toBe(pits.length + 1);
+    // One strip of ground on each side of the pit and none over it (raised ground adds a solid block each)
+    expect(info.strips.length).toBe(pits.length + 1 + info.blocks);
     expect(info.strips.some((s: any) => s.left < pits[0].x + pits[0].width && s.right > pits[0].x)).toBe(false);
   });
 

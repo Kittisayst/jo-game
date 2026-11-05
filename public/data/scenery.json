@@ -1,0 +1,30 @@
+{
+  "_comment": "Look of a Stage by scenery name (a level's `scenery`, or its own `theme`). Only forest has a theme so far; cave and desert keep the old backdrop until they get one. `scroll` is how much of the camera's movement a backdrop layer follows (0 = fixed, 1 = moves with the world). Decor is scenery only (no collision): a level JSON may list its own `decor`, otherwise it is scattered from the level key / seed.",
+  "themes": {
+    "forest": {
+      "backdrop": [
+        { "key": "scn-forest-sky", "path": "assets/backgrounds/forest_sky.png", "scroll": 0 },
+        { "key": "scn-forest-clouds", "path": "assets/backgrounds/forest_clouds.png", "scroll": 0.04 },
+        { "key": "scn-forest-hills", "path": "assets/backgrounds/forest_hills.png", "scroll": 0.14, "anchor": "ground", "offsetY": 44 },
+        { "key": "scn-forest-trees", "path": "assets/backgrounds/forest_trees.png", "scroll": 0.34, "anchor": "ground", "offsetY": 44 }
+      ],
+      "soil": { "upper": "#5a3c4e", "lower": "#33203a" },
+      "ground": { "key": "ground-tile-forest", "path": "assets/environment/tile_ground_forest.png" },
+      "wall": { "key": "wall-tile-forest", "path": "assets/environment/tile_wall_forest.png" },
+      "platform": { "key": "platform-forest", "path": "assets/environment/platform_forest.png" },
+      "decor": {
+        "perScreen": 6,
+        "items": [
+          { "id": "bush-a", "key": "decor-forest-bush-a", "path": "assets/environment/decor_forest_bush_a.png", "layer": "back", "weight": 3, "offsetY": 2 },
+          { "id": "bush-b", "key": "decor-forest-bush-b", "path": "assets/environment/decor_forest_bush_b.png", "layer": "back", "weight": 3, "offsetY": 2 },
+          { "id": "tree", "key": "decor-forest-tree", "path": "assets/environment/decor_forest_tree.png", "layer": "back", "weight": 2, "offsetY": 4 },
+          { "id": "pillar", "key": "decor-forest-pillar", "path": "assets/environment/decor_forest_pillar.png", "layer": "back", "weight": 1, "offsetY": 1 },
+          { "id": "rock-a", "key": "decor-forest-rock-a", "path": "assets/environment/decor_forest_rock_a.png", "layer": "back", "weight": 2, "offsetY": 2 },
+          { "id": "rock-b", "key": "decor-forest-rock-b", "path": "assets/environment/decor_forest_rock_b.png", "layer": "front", "weight": 2, "offsetY": 2 },
+          { "id": "tuft", "key": "decor-forest-tuft", "path": "assets/environment/decor_forest_tuft.png", "layer": "front", "weight": 4, "offsetY": 0 },
+          { "id": "flowers", "key": "decor-forest-flowers", "path": "assets/environment/decor_forest_flowers.png", "layer": "front", "weight": 2, "offsetY": 0 }
+        ]
+      }
+    }
+  }
+}

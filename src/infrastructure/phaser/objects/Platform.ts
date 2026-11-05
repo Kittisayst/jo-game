@@ -11,10 +11,12 @@ const HEIGHT = 28;
  */
 export class Platform extends Physics.Arcade.Sprite
 {
-    constructor (scene: Scene, x: number, y: number)
+    /** `textureKey` is a themed look (scenery.json); the default board is used when it is not loaded. */
+    constructor (scene: Scene, x: number, y: number, textureKey?: string)
     {
         Platform.ensureTexture(scene);
-        const textureToUse = scene.textures.exists(TEXTURE_KEY) ? TEXTURE_KEY : FALLBACK_KEY;
+        const themed = textureKey !== undefined && scene.textures.exists(textureKey) ? textureKey : undefined;
+        const textureToUse = themed ?? (scene.textures.exists(TEXTURE_KEY) ? TEXTURE_KEY : FALLBACK_KEY);
 
         super(scene, x, y, textureToUse);
 

@@ -10,6 +10,9 @@
 
 import type { Level } from '../phaser/Level';
 import { isNearPit, PIT_END_MARGIN, PIT_START_MARGIN, PIT_WIDTHS, type Pit } from './LevelPits';
+import {
+    ENEMY_TERRAIN_CLEARANCE, isNearTerrain, NODE_TERRAIN_CLEARANCE, placeTerrain, SPIKE_TERRAIN_CLEARANCE, type TerrainBlock,
+} from './LevelTerrain';
 
 export type Biome = 'forest' | 'cave' | 'desert';
 export const BIOMES: readonly Biome[] = ['forest', 'cave', 'desert'];
@@ -24,6 +27,10 @@ export interface GenerateSpec
     secret?: boolean;
     /** How many pits (gaps in the ground that kill) to cut, when they fit (see `placePits`). */
     pits?: number;
+    /** Decor pieces per screen instead of the theme's number (0 = none). Scenery only: the layout is the same. */
+    decor?: number;
+    /** How many pieces of raised ground (hills and mounds, see `placeTerrain`) to add, when they fit. */
+    terrain?: number;
 }
 
 export interface GeneratedLevel
@@ -35,6 +42,8 @@ export interface GeneratedLevel
     secret?: { x: number; surfaceY: number };
     /** The pits that were asked for and fit (`level.pits` too); fewer than asked when the Stage has no room. */
     pits: Pit[];
+    /** The blocks of raised ground that were asked for and fit (`level.terrain` too): a piece is one to three blocks. */
+    terrain: TerrainBlock[];
 }
 
 export const SCREEN_WIDTH = 800;
@@ -200,6 +209,14 @@ export function generateLevel (spec: GenerateSpec): GeneratedLevel
         spikes.splice(0, spikes.length, ...kept);
     }
 
+    // Raised ground is cut after the pits, with a generator of its own, so a Stage without it is laid out as before
+    const terrain = spec.terrain ? placeTerrain(spec.terrain, makeRandom(spec.seed ^ 0x2545f491), platforms, pits, worldWidth) : [];
+    if (terrain.length > 0)
+    {
+        const kept = spikes.filter(s => !isNearTerrain(terrain, s.x, SPIKE_TERRAIN_CLEARANCE));
+        spikes.splice(0, spikes.length, ...kept);
+    }
+
     return {
         level: {
             worldWidth,
@@ -209,9 +226,12 @@ export function generateLevel (spec: GenerateSpec): GeneratedLevel
             ...(secretPlatforms.length > 0 ? { secretPlatforms } : {}),
             spikes,
             ...(pits.length > 0 ? { pits } : {}),
+            ...(terrain.length > 0 ? { terrain } : {}),
+            ...(spec.decor !== undefined ? { decorPerScreen: spec.decor } : {}),
         },
         exitX,
         pits,
+        terrain,
         ...(secretX !== undefined ? { secret: { x: secretX, surfaceY: SECRET_Y - 16 } } : {}),
     };
 }
@@ -297,6 +317,7 @@ export function placePool (generated: GeneratedLevel, pool: PoolSpec, seed: numb
     ], random);
     const spikeXs = (generated.level.spikes ?? []).map(s => s.x);
     const pits = generated.level.pits ?? [];
+    const terrain = generated.level.terrain ?? [];
 
     items.forEach((item, i) =>
     {
@@ -308,6 +329,7 @@ export function placePool (generated: GeneratedLevel, pool: PoolSpec, seed: numb
         {
             if (spikeXs.some(sx => Math.abs(sx - c) < clearance)) continue;
             if (isNearPit(pits, c, item.node ? NODE_PIT_CLEARANCE : ENEMY_PIT_CLEARANCE)) continue;
+            if (isNearTerrain(terrain, c, item.node ? NODE_TERRAIN_CLEARANCE : ENEMY_TERRAIN_CLEARANCE)) continue;
             if (spot === undefined || Math.abs(c - centre) < Math.abs(spot - centre)) spot = c;
         }
         if (spot === undefined) throw new Error(`No spot clear of the spikes for ${item.id} near x=${Math.round(centre)}`);

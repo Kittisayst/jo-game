@@ -145,6 +145,8 @@ describe('pits in stages.json', () =>
     {
         const data = copy();
         const stage3 = data.stages.find(s => s.number === 3)!;
+        // Only the pits are under test: raised ground would fail to fit first
+        delete stage3.layout.generate.terrain;
         stage3.layout.generate.pits = 4;
         expect(() => parse(data)).toThrow(/stages\[2\]\.layout\.generate\.pits must be 4 pits that fit this Stage/);
         stage3.layout.generate.pits = 9;
@@ -160,6 +162,7 @@ describe('pits in stages.json', () =>
         const stage1 = data.stages.find(s => s.number === 1)!;
         // Stage 1 is hand-made: give it a generated layout with a pit to see the rule
         stage1.layout = JSON.parse(JSON.stringify(stage2.layout));
+        delete stage1.layout.generate.terrain;
         stage1.layout.generate.pits = 1;
         expect(() => parse(data)).toThrow(/no pits in the first Stage/);
     });
