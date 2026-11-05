@@ -1,7 +1,7 @@
 # Fix the 15 failing e2e specs after the Book UI, touch controls and double-jump changes
 
 - **Date:** 2026-11-05
-- **Status:** planned
+- **Status:** done (PR open). Stage 7 was the e2e bot, not the level: it never pressed Jump to climb after the new ledge grab (fixed in bot.ts). Full e2e: 157 passed, 1 skipped.
 - **Project:** jo-game (Knowledge Quest)
 
 ## ເປົ້າໝາຍ (Goal)

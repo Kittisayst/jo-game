@@ -31,7 +31,7 @@ test.describe('Playwright UI Audit — Backpack & Village Hub', () => {
     await backpackBtn.click();
 
     // 4. Verify Backpack Modal elements
-    const modalHeader = page.locator('h2:has-text("ກະເປົາເດີນທາງ")');
+    const modalHeader = page.getByTestId('backpack-modal');
     await expect(modalHeader).toBeVisible();
 
     // Verify the 30-slot grid exists

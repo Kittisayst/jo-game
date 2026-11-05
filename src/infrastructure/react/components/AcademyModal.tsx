@@ -186,6 +186,7 @@ export const AcademyModal: React.FC<AcademyModalProps> = ({
     return (
         <BookFrame
             isOpen={isOpen}
+            dataTestId="academy-modal"
             onClose={onClose}
             title="ສະຖາບັນຝຶກຝົນວິຊາການ (Academy)"
             icon="🏛️"

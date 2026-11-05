@@ -194,7 +194,7 @@ test.describe('Features 3 & 4 Verification (SFX, Stage Progress HUD, Garden, For
         await page.waitForTimeout(700);
 
         // Click Upgrade tab
-        const upgradeTabBtn = page.getByRole('button', { name: /ອັບເກຣດ/i });
+        const upgradeTabBtn = page.getByRole('tab', { name: /ອັບເກຣດ/i });
         await expect(upgradeTabBtn).toBeVisible({ timeout: 5000 });
         await upgradeTabBtn.click();
         await page.waitForTimeout(600);

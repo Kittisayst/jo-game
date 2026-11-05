@@ -265,6 +265,7 @@ export const TextbookModal: React.FC<TextbookModalProps> = ({
         return (
             <BookFrame
                 isOpen={isOpen}
+                dataTestId="library-modal"
                 onClose={onClose}
                 title={windowTitle}
                 icon="📕"
@@ -324,6 +325,7 @@ export const TextbookModal: React.FC<TextbookModalProps> = ({
         return (
             <BookFrame
                 isOpen={isOpen}
+                dataTestId="library-modal"
                 onClose={onClose}
                 title={windowTitle}
                 icon="📚"
@@ -535,6 +537,7 @@ export const TextbookModal: React.FC<TextbookModalProps> = ({
     return (
         <BookFrame
             isOpen={isOpen}
+            dataTestId="library-modal"
             onClose={onClose}
             title={windowTitle}
             icon={isStore ? '🏛️' : '📚'}

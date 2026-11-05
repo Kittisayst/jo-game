@@ -40,7 +40,7 @@ test.describe('Keyboard shortcuts', () => {
     await expect.poll(async () => (await readState(page)).weapon).toBe('wooden-sword');
 
     // I opens the backpack, Esc closes that modal first and does not pause
-    const backpackTitle = page.locator('text=(Backpack)').first();
+    const backpackTitle = page.getByTestId('backpack-modal');
     await page.keyboard.press('KeyI');
     await expect(backpackTitle).toBeVisible();
     await page.keyboard.press('Escape');

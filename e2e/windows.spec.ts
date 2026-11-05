@@ -51,12 +51,12 @@ test.describe('Windows show their states', () => {
     expect(await page.getByRole('button', { name: /ປ່ອຍພະລັງ/ }).evaluate(el => getComputedStyle(el).backgroundImage)).toContain('gradient');
     await page.keyboard.press('Escape');
 
-    // The Backpack: the selected slot has a cyan border
+    // The Backpack: the selected slot has an amber border (the Book UI colour)
     await page.keyboard.press('KeyI');
     await page.locator('button', { hasText: 'x5' }).first().click();
     await page.waitForTimeout(400);
     const border = await page.locator('button', { hasText: 'x5' }).first().evaluate(el => getComputedStyle(el).borderTopColor);
-    expect(border).toBe('rgb(34, 211, 238)');
+    expect(border).toBe('rgb(245, 158, 11)');
     expect(pageErrors).toEqual([]);
   });
   test('the village welcome message does not sit over a window or the pause menu', async ({ page }) => {

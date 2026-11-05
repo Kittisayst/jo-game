@@ -46,7 +46,7 @@ test.describe('Knowledge Quest — Buy-to-Read Textbook & Chapter 1 Loop E2E', (
     await page.waitForTimeout(150);
     await page.keyboard.press('KeyE');
 
-    const libraryStoreHeader = page.locator('h2:has-text("ຫໍສະໝຸດແຫ່ງປັນຍາ (Library Bookstore)")');
+    const libraryStoreHeader = page.getByTestId('library-modal');
     await expect(libraryStoreHeader).toBeVisible({ timeout: 5000 });
 
     // The Library has three parts; it opens on "For sale" with both books still unbought
@@ -58,7 +58,7 @@ test.describe('Knowledge Quest — Buy-to-Read Textbook & Chapter 1 Loop E2E', (
     await expect(readTab).toBeDisabled();
 
     // Verify Chapter 2 book is locked behind Chapter 1 Exam + Boss
-    await expect(page.locator('button:has-text("ຍັງບໍ່ປົດລັອກບົດຮຽນນີ້")').first()).toBeVisible();
+    await expect(page.getByRole('button', { name: /🔒 ບົດທີ 2/ })).toBeVisible();
 
     // Purchase Chapter 1 book (20 Credit)
     const buyCh1Btn = page.locator('button:has-text("ຊື້ປຶ້ມຕຳລາ (20 🎓 Credit)")');
@@ -74,8 +74,8 @@ test.describe('Knowledge Quest — Buy-to-Read Textbook & Chapter 1 Loop E2E', (
     await expect(page.locator(`button:has-text("ເປີດອ່ານຕຳລາ (0/${total})")`)).toBeVisible();
     await expect(page.locator('button:has-text("ຊື້ປຶ້ມຕຳລາ")')).toHaveCount(0);
     await shopTab.click();
-    await expect(page.locator('h3:has-text("ພື້ນຖານລະບົບຄອມພິວເຕີ")')).toHaveCount(0);
-    await expect(page.locator('button:has-text("ຍັງບໍ່ປົດລັອກບົດຮຽນນີ້")').first()).toBeVisible();
+    await expect(page.getByRole('button', { name: /ບົດທີ 1 / })).toHaveCount(0);
+    await expect(page.getByRole('button', { name: /🔒 ບົດທີ 2/ })).toBeVisible();
 
     // Close Library Store and walk to Academy (x=600) to verify Exam is still locked before reading all pages
     await page.keyboard.press('Escape');
@@ -86,7 +86,7 @@ test.describe('Knowledge Quest — Buy-to-Read Textbook & Chapter 1 Loop E2E', (
     await page.waitForTimeout(150);
     await page.keyboard.press('KeyE');
 
-    const academyHeader = page.locator('h2:has-text("Academy")');
+    const academyHeader = page.getByTestId('academy-modal');
     await expect(academyHeader).toBeVisible({ timeout: 5000 });
 
     // Start Exam must NOT be visible yet because 0 pages read!
@@ -96,7 +96,7 @@ test.describe('Knowledge Quest — Buy-to-Read Textbook & Chapter 1 Loop E2E', (
 
     // 5. Click shortcut to open Personal Reader and read every page (5s first-read timer per page)
     await continueReadingBtn.click();
-    await expect(page.locator('h2:has-text("ປຶ້ມຕຳລາສ່ວນຕົວ")')).toBeVisible();
+    await expect(page.getByTestId('library-modal')).toBeVisible();
 
     // Each page shows its lesson number (<stage>-<order>) and says when its Stage has not been cleared yet
     await expect(page.getByTestId('lesson-badge')).toContainText('ບົດ 1-1 · ດ່ານ 1 ຍັງບໍ່ຜ່ານ');

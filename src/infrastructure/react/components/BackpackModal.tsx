@@ -636,6 +636,7 @@ export const BackpackModal: React.FC<BackpackModalProps> = ({ isOpen, onClose, o
     return (
         <BookFrame
             isOpen={isOpen}
+            dataTestId="backpack-modal"
             onClose={onClose}
             title="ກະເປົາເດີນທາງ (Backpack)"
             icon="🎒"

@@ -96,7 +96,7 @@ test.describe('Quest Board and Buff Timer HUD', () =>
         await page.waitForTimeout(800);
 
         // Verify modal opened
-        const modalTitle = page.locator('text=ກະດານພາລະກິດແຫ່ງປັນຍາ');
+        const modalTitle = page.getByTestId('quest-board-modal');
         await expect(modalTitle).toBeVisible();
 
         // Check that "ຮັບລາງວັນ" button is present
