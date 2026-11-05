@@ -107,7 +107,8 @@
         "generate": {
           "biome": "forest",
           "seed": 2,
-          "screens": 2
+          "screens": 2,
+          "terrain": 1
         }
       },
       "lessons": [
@@ -164,7 +165,8 @@
           "biome": "forest",
           "seed": 3,
           "screens": 2,
-          "pits": 1
+          "pits": 1,
+          "terrain": 1
         }
       },
       "lessons": [
@@ -221,7 +223,8 @@
           "biome": "forest",
           "seed": 4,
           "screens": 2,
-          "pits": 1
+          "pits": 1,
+          "terrain": 1
         }
       },
       "lessons": [

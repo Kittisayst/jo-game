@@ -2,6 +2,7 @@ import { Scene } from 'phaser';
 import { COTTAGE_LEVEL_KEY, COTTAGE_LEVEL_PATH, DUNGEON_LEVEL_KEY, DUNGEON_LEVEL_PATH, GARDEN_LEVEL_KEY, GARDEN_LEVEL_PATH, VILLAGE_LEVEL_KEY, VILLAGE_LEVEL_PATH } from '../levelCatalog';
 import { isStageReady } from '../stages/StageDefinition';
 import { getGameContent } from '../../content/ContentCatalog';
+import { themeTextures } from '../../content/SceneryCatalog';
 import { heldTextureKey } from '../objects/HeldItemSprite';
 import { ACTIVE_SESSION_STORAGE_KEY, readString, STORAGE_PREFIX } from '../../storage/safeStorage';
 
@@ -148,6 +149,15 @@ export function enqueueGameAssets (scene: Scene): void
         if (!scene.textures.exists(img.key))
         {
             scene.load.image(img.key, img.path);
+        }
+    }
+
+    // The look of each scenery (backdrop layers, ground, platforms, decor) is listed in scenery.json
+    for (const theme of Object.values(getGameContent().scenery))
+    {
+        for (const texture of themeTextures(theme))
+        {
+            if (!scene.textures.exists(texture.key)) scene.load.image(texture.key, texture.path);
         }
     }
 

@@ -7,6 +7,7 @@ Pixel art that is drawn by code lives here, so it can be reviewed as a diff and 
 | `held-items.px.js` | `public/assets/held/*.png` (weapons/tools in the hero's hand, T1–T3) | pxl (`.claude/skills/pxl-pixel-art`, vendored from crsolver/claude-pxl, MIT) |
 | `slash-vfx.px.js` | `public/assets/vfx/slash_*.png` (sword slash animation strips, 144×48) | pxl (`.claude/skills/pxl-pixel-art`, vendored from crsolver/claude-pxl, MIT) |
 | `npcs.px.js` + `build_npcs.py` | `public/assets/characters/npc_*.png` (4-frame idle NPC strips, 128×48) | pxl (`.claude/skills/pxl-pixel-art`, vendored from crsolver/claude-pxl, MIT) |
+| `forest-stage.px.js` + `build_forest_stage.py` | `public/assets/environment/{tile_ground_forest,platform_forest,decor_forest_*}.png` and `public/assets/backgrounds/forest_{sky,clouds,hills,trees}.png` (1280x720, drawn at 640x360 and upscaled 2x; the three layers repeat sideways) | pxl + Pillow (`python tools/art/build_forest_stage.py`); which texture goes where is `public/data/scenery.json` |
 | `build_player.py` + `player-poses.js` + `source/` | `public/assets/characters/player-skin-*.png` (256×384 sheets) and `public/data/player-animations.json` | pxl + Pillow (`python tools/art/build_player.py`) |
 
 ## Rebuilding the held items
