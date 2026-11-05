@@ -89,9 +89,14 @@ export function placeTerrain (
     worldWidth: number
 ): TerrainBlock[]
 {
-    // Heights from the ground: a hill is one tile; a mound goes 1, 2, 1 tiles
+    // [tiles wide, tiles high] blocks left to right. A hill is one tile; a mound climbs 1, 2 (and 3) tiles and comes
+    // down again; a cliff climbs to a plateau and ends in a sheer wall. The tall ones are listed twice so they come up more
+    const mound3: readonly [number, number][] = [[1, 1], [1, 2], [2, 3], [1, 2], [1, 1]];
+    const mound3Wide: readonly [number, number][] = [[2, 1], [1, 2], [3, 3], [1, 2], [2, 1]];
+    const cliff: readonly [number, number][] = [[1, 1], [1, 2], [3, 3]];
     const shapes: readonly (readonly [number, number][])[] = [
         [[2, 1]], [[3, 1]], [[5, 1]], [[2, 1], [2, 2], [2, 1]], [[1, 1], [3, 2], [1, 1]], [[2, 1], [3, 2], [2, 1]],
+        mound3, mound3, mound3Wide, mound3Wide, cliff, cliff,
     ];
     const pieces: TerrainBlock[][] = [];
     const PLATFORM_CLEAR = 80 + 80;

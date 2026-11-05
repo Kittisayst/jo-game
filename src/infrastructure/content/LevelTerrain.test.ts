@@ -65,7 +65,7 @@ describe('generated raised ground', () =>
                 const { level, pits, terrain } = generateLevel(spec);
                 const label = `${biome} seed ${seed}`;
                 expect(terrainProblem(level.worldWidth, level.terrain, pits), label).toBeNull();
-                expect(terrain.length <= 3 * 3, label).toBe(true);
+                expect(terrain.length <= 3 * 5, label).toBe(true);
                 for (const block of terrain)
                 {
                     for (const platform of level.platforms)
