@@ -333,6 +333,7 @@ export const QuestBoardModal: React.FC<QuestBoardModalProps> = ({ isOpen, onClos
     return (
         <BookFrame
             isOpen={isOpen}
+            dataTestId="quest-board-modal"
             onClose={onClose}
             title="ກະດານພາລະກິດ (Quest Board)"
             icon="📜"

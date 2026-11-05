@@ -133,11 +133,11 @@ test.describe('Multi-System Expansion Playtest & Tour', () => {
       const { EventBus } = await import('/src/infrastructure/EventBus.ts');
       EventBus.emit('open-quest-board');
     });
-    const questModal = page.locator('.quest-board-modal');
+    const questModal = page.getByTestId('quest-board-modal');
     await expect(questModal).toBeVisible({ timeout: 10000 });
 
     // Switch to Daily Tab
-    const dailyTab = questModal.locator('button').filter({ hasText: 'Daily' });
+    const dailyTab = questModal.getByRole('tab', { name: /ປະຈຳວັນ/ });
     await dailyTab.click();
     await page.waitForTimeout(500);
     await page.screenshot({ path: path.join(outDir, '06_quest_board_daily_tab.png') });

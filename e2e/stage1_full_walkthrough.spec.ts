@@ -54,7 +54,7 @@ test.describe('Full Playthrough & All UI Systems (Stage 1 Completion)', () =>
             busModule.EventBus.emit('open-quest-board');
         });
         await page.waitForTimeout(600);
-        await expect(page.locator('text=ກະດານພາລະກິດແຫ່ງປັນຍາ')).toBeVisible();
+        await expect(page.getByTestId('quest-board-modal')).toBeVisible();
 
         await page.screenshot({
             path: path.join(outDir, '03-quest-board-modal.png'),
@@ -74,7 +74,7 @@ test.describe('Full Playthrough & All UI Systems (Stage 1 Completion)', () =>
             busModule.EventBus.emit('open-library', 'book-ch1');
         });
         await page.waitForTimeout(600);
-        await expect(page.locator('text=ຫໍສະໝຸດ')).toBeVisible();
+        await expect(page.getByTestId('library-modal')).toBeVisible();
 
         await page.screenshot({
             path: path.join(outDir, '04-library-store-modal.png'),
@@ -115,7 +115,7 @@ test.describe('Full Playthrough & All UI Systems (Stage 1 Completion)', () =>
             busModule.EventBus.emit('open-academy', 'book-ch1');
         });
         await page.waitForTimeout(600);
-        await expect(page.locator('text=ສະຖາບັນ')).toBeVisible();
+        await expect(page.getByTestId('academy-modal')).toBeVisible();
 
         await page.screenshot({
             path: path.join(outDir, '06-academy-modal.png'),
@@ -134,7 +134,7 @@ test.describe('Full Playthrough & All UI Systems (Stage 1 Completion)', () =>
             busModule.EventBus.emit('open-workshop');
         });
         await page.waitForTimeout(600);
-        await expect(page.locator('text=ໂຮງຊ່າງ')).toBeVisible();
+        await expect(page.getByTestId('smithy-modal')).toBeVisible();
 
         await page.screenshot({
             path: path.join(outDir, '07-workshop-crafting-modal.png'),
@@ -153,7 +153,7 @@ test.describe('Full Playthrough & All UI Systems (Stage 1 Completion)', () =>
             busModule.EventBus.emit('open-storage');
         });
         await page.waitForTimeout(600);
-        await expect(page.locator('text=ຫີບເກັບຂອງ')).toBeVisible();
+        await expect(page.getByTestId('storage-modal')).toBeVisible();
 
         await page.screenshot({
             path: path.join(outDir, '08-storage-chest-modal.png'),

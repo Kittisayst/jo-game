@@ -173,6 +173,7 @@ export const SmithyModal: React.FC<SmithyModalProps> = ({ isOpen, tab, onTabChan
     return (
         <BookFrame
             isOpen={isOpen}
+            dataTestId="smithy-modal"
             onClose={onClose}
             title="ໂຮງຊ່າງ & ໂຮງຕີເຫຼັກ (Smithy)"
             icon="⚒️"

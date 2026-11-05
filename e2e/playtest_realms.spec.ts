@@ -65,7 +65,7 @@ test.describe('Playtest Knowledge Quest with New Assets', () => {
 
     // 5. Open Backpack modal to inspect held items & icons
     await page.locator('#hud-backpack-btn').click();
-    await expect(page.locator('h2:has-text("ກະເປົາເດີນທາງ")')).toBeVisible();
+    await expect(page.getByTestId('backpack-modal')).toBeVisible();
     await page.waitForTimeout(500);
     await page.screenshot({ path: 'test-results/playtest/04-backpack-inventory.png' });
     await page.keyboard.press('Escape');

@@ -23,7 +23,7 @@ test.describe('The Smithy (Workshop and Forge in one building)', () => {
     // One E spot at x = 3100 opens the window on the tools
     expect(await bot.goTo(3100, { tolerance: 25, fight: false, timeoutMs: 60000 })).toBe('arrived');
     await page.keyboard.press('KeyE');
-    await expect(page.locator('h2:has-text("Smithy")')).toBeVisible();
+    await expect(page.getByTestId('smithy-modal')).toBeVisible();
     await expect(page.getByTestId('recipes-workshop')).toBeVisible();
 
     // A new player cannot use the Forge side yet, and is told why
@@ -46,13 +46,13 @@ test.describe('The Smithy (Workshop and Forge in one building)', () => {
     // The Forge tab lists Forge recipes, not the tools of the tab before it
     await expect(page.getByText('Wood Axe T1')).toHaveCount(0);
     await page.getByTestId('smithy-tab-tools').click();
-    await expect(page.getByText('Wood Axe T1')).toBeVisible();
+    await expect(page.getByTestId('recipes-workshop').getByText('Wood Axe T1')).toBeVisible();
     await page.getByTestId('smithy-tab-upgrade').click();
     await expect(page.getByTestId('weapon-upgrades')).toBeVisible();
 
     // Esc closes it
     await page.keyboard.press('Escape');
-    await expect(page.locator('h2:has-text("Smithy")')).toHaveCount(0);
+    await expect(page.getByTestId('smithy-modal')).toHaveCount(0);
 
     // The old events still open the right tab
     await page.evaluate(() => (window as any).__eventBus.emit('open-forge'));

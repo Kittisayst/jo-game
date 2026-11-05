@@ -22,6 +22,8 @@ export interface BotState
   x: number;
   y: number;
   onGround: boolean;
+  /** Hanging from a platform edge (the ledge grab holds the hero until Up/Jump or Down is pressed). */
+  ledgeHanging: boolean;
   facing: number;
   hearts: number;
   isDead: boolean;
@@ -36,7 +38,7 @@ export interface BotState
 }
 
 const EMPTY: BotState = {
-  ready: false, scene: '', x: -1, y: -1, onGround: false, facing: 1, hearts: 0, isDead: false,
+  ready: false, scene: '', x: -1, y: -1, onGround: false, ledgeHanging: false, facing: 1, hearts: 0, isDead: false,
   isPaused: false, dialogue: false, stageCleared: false, enemies: [], spikes: [], pits: [], boss: null,
 };
 
@@ -83,6 +85,7 @@ export async function readState (page: Page): Promise<BotState>
       x: Math.round(scene.player.x),
       y: Math.round(scene.player.y),
       onGround: !!(body.blocked.down || body.touching.down),
+      ledgeHanging: !!scene.player.isLedgeHanging,
       facing: scene.player.facingDir,
       hearts: scene.health.current,
       isDead: scene.health.isDead,
@@ -217,6 +220,14 @@ export class Bot
         if (Math.abs(s.x - targetX) <= tolerance) return 'arrived';
 
         const dir: -1 | 1 = targetX > s.x ? 1 : -1;
+
+        // The hero grabbed a platform edge in the air: press Jump to climb up, as a player would
+        if (s.ledgeHanging) {
+          await this.walk(0);
+          await this.tap('Space', 60);
+          await this.page.waitForTimeout(250);
+          continue;
+        }
 
         if (fight) {
           const blocker = s.enemies.find(e => (e.x - s.x) * dir > 0 && Math.abs(e.x - s.x) < 120 && Math.abs(e.y - s.y) < 80);

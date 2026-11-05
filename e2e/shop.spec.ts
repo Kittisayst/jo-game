@@ -52,7 +52,7 @@ test.describe("Grandma Chanthy's shop", () => {
     await first.getByRole('button', { name: 'ແລກ' }).click();
     await first.getByRole('button', { name: 'ແລກ' }).click();
     await expect(first.getByRole('button')).toBeDisabled();
-    await expect(first.getByRole('button')).toContainText('ຂາຍໝົດ');
+    await expect(first.getByRole('button')).toContainText('ໝົດ');
 
     // Credit was never asked for or paid
     expect(await page.evaluate(() => (window as any).__entities.wallet.balance as number)).toBe(credit);

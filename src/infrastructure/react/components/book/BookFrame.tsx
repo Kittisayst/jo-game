@@ -84,7 +84,7 @@ export const BookFrame: React.FC<BookFrameProps> = ({
         >
             <div
                 className={`gw-window book-window relative w-full ${maxWidth} flex flex-col max-h-[96vh] h-[92vh] ${className}`}
-                data-testid={windowTestId || dataTestId}
+                data-testid={windowTestId}
             >
                 {/* 4 Brass Corners */}
                 <BrassCorner className="book-corner-tl" rotate={0} />
